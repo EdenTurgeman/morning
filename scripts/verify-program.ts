@@ -7,6 +7,7 @@
 
 import { buildSteps, countSets, type Step } from "@/lib/steps";
 import { PROGRAM, SESSION_KEYS, nextSessionAfter } from "@/program";
+import { figureFor } from "@/lib/figures";
 
 let failures = 0;
 
@@ -128,6 +129,29 @@ console.log("\n\x1b[1mSession alternation\x1b[0m\n");
 check("fresh install proposes A", nextSessionAfter(null) === "A");
 check("after A comes B", nextSessionAfter("A") === "B");
 check("after B comes A", nextSessionAfter("B") === "A");
+
+console.log("\n\x1b[1mExercise artwork\x1b[0m\n");
+{
+  const exercises = new Set<string>();
+  for (const key of SESSION_KEYS) {
+    for (const s of buildSteps(key)) {
+      if (s.kind === "set") exercises.add(s.exercise);
+    }
+  }
+  const unmapped = [...exercises].filter((e) => figureFor(e) === null);
+  check(
+    "every exercise resolves to a figure",
+    unmapped.length === 0,
+    unmapped.length ? `no figure for: ${unmapped.join(", ")}` : "",
+  );
+  // The generic "curl" rule would swallow "Hammer curl" if ordered wrongly.
+  check(
+    "Hammer curl maps to its own figure, not the generic curl",
+    figureFor("Hammer curl") === "hammer-curl",
+    `got ${figureFor("Hammer curl")}`,
+  );
+  check("unknown exercises degrade to no artwork", figureFor("Zercher squat") === null);
+}
 
 console.log("\n\x1b[1mProgram data integrity\x1b[0m\n");
 for (const key of SESSION_KEYS) {

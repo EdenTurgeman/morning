@@ -6,6 +6,7 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { getSession, nextSessionAfter, type SessionKey } from "@/program";
 import { daysSince, localISODate, type AppData } from "@/lib/storage";
 import { weeklyProgress, weekNudge } from "@/lib/week";
+import { computeLedger } from "@/lib/ledger";
 import { relativeDay } from "@/lib/format";
 import type { View } from "@/App";
 
@@ -30,6 +31,7 @@ export function Home({ data, onStart, onNavigate }: Props) {
   const session = getSession(key);
 
   const week = useMemo(() => weeklyProgress(data.history), [data.history]);
+  const ledger = useMemo(() => computeLedger(data.history), [data.history]);
   const nudge = weekNudge(week);
 
   const sinceBackup = daysSince(data.lastBackup);
@@ -61,10 +63,35 @@ export function Home({ data, onStart, onNavigate }: Props) {
         <BlurFade delay={0.08} inView>
           <Card className="mt-4 py-4">
             <WeekMeter week={week} onPress={() => onNavigate("history")} />
+
             {nudge && (
               <>
                 <div className="rule my-3" />
                 <p className="text-[0.84rem] text-muted">{nudge}</p>
+              </>
+            )}
+
+            {/* The lifetime total is its own invitation — a number this big is
+                a better door into the Ledger than a nav button would be. */}
+            {ledger.tonnes >= 0.1 && (
+              <>
+                <div className="rule my-3" />
+                <button
+                  onClick={() => onNavigate("ledger")}
+                  className="flex w-full items-baseline justify-between gap-3 text-left"
+                >
+                  <span className="tnum text-[0.84rem] text-muted">
+                    <b className="font-semibold text-ink">
+                      {ledger.tonnes.toFixed(1)}
+                    </b>{" "}
+                    tonnes moved ·{" "}
+                    <b className="font-semibold text-ink">
+                      {ledger.reps.toLocaleString("en-US")}
+                    </b>{" "}
+                    reps
+                  </span>
+                  <span className="text-[0.9rem] text-[var(--accent)]">›</span>
+                </button>
               </>
             )}
           </Card>

@@ -6,6 +6,7 @@ import { Card } from "@/components/Card";
 import { Confirm } from "@/components/Confirm";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { WeekStrip } from "@/components/WeekMeter";
+import { YearGrid } from "@/components/YearGrid";
 import { weeklyProgress } from "@/lib/week";
 import { formatDate, plural } from "@/lib/format";
 import type { AppData, SessionRecord } from "@/lib/storage";
@@ -54,6 +55,15 @@ export function History({ data, onDelete, onNavigate }: Props) {
                 </span>
               </div>
               <WeekStrip week={week} />
+            </Card>
+          </BlurFade>
+
+          <BlurFade delay={0.05} inView>
+            <Card className="mb-3">
+              <div className="mb-3 text-[0.68rem] tracking-[0.14em] text-dim uppercase">
+                The year
+              </div>
+              <YearGrid history={data.history} />
             </Card>
           </BlurFade>
 

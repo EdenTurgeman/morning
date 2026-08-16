@@ -15,9 +15,11 @@ interface Props {
   value: number;
   className?: string;
   durationMs?: number;
+  /** Fixed decimal places — for the Ledger's tonnage. */
+  decimals?: number;
 }
 
-export function CountUp({ value, className, durationMs = 900 }: Props) {
+export function CountUp({ value, className, durationMs = 900, decimals = 0 }: Props) {
   const [shown, setShown] = useState(value);
 
   useEffect(() => {
@@ -38,7 +40,8 @@ export function CountUp({ value, className, durationMs = 900 }: Props) {
       const t = Math.min(1, (Date.now() - startedAt) / durationMs);
       // easeOutExpo, so it decelerates into the final number
       const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-      setShown(Math.round(value * eased));
+      const step = Math.pow(10, decimals);
+      setShown(Math.round(value * eased * step) / step);
       if (t >= 1) {
         clearInterval(id);
         setShown(value);
@@ -49,7 +52,13 @@ export function CountUp({ value, className, durationMs = 900 }: Props) {
       clearInterval(id);
       setShown(value);
     };
-  }, [value, durationMs]);
+  }, [value, durationMs, decimals]);
 
-  return <span className={cn("tnum", className)}>{shown}</span>;
+  return (
+    <span className={cn("tnum", className)}>
+      {decimals > 0
+        ? shown.toFixed(decimals)
+        : Math.round(shown).toLocaleString("en-US")}
+    </span>
+  );
 }

@@ -5,6 +5,7 @@ import { Home } from "@/screens/Home";
 import { Workout } from "@/screens/Workout";
 import { Summary } from "@/screens/Summary";
 import { History } from "@/screens/History";
+import { Ledger } from "@/screens/Ledger";
 import { Guide } from "@/screens/Guide";
 import { Backup } from "@/screens/Backup";
 import { useAppData } from "@/hooks/useAppData";
@@ -20,7 +21,13 @@ import {
 } from "@/lib/sunrise";
 import type { SessionKey } from "@/program";
 
-export type View = "home" | "history" | "guide" | "backup" | "summary";
+export type View =
+  | "home"
+  | "history"
+  | "ledger"
+  | "guide"
+  | "backup"
+  | "summary";
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -126,6 +133,8 @@ export default function App() {
           <Summary record={lastResult} data={data} onNavigate={navigate} />
         ) : view === "history" ? (
           <History data={data} onDelete={deleteSession} onNavigate={navigate} />
+        ) : view === "ledger" ? (
+          <Ledger data={data} onNavigate={navigate} />
         ) : view === "guide" ? (
           <Guide onNavigate={navigate} />
         ) : view === "backup" ? (

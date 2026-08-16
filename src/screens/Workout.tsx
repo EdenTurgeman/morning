@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Chrome } from "@/components/Chrome";
 import { Cues } from "@/components/Cues";
+import { Figure, figureFor } from "@/components/Figure";
 import { Ring } from "@/components/Ring";
 import { RepDial } from "@/components/RepDial";
 import { Button } from "@/components/Button";
@@ -88,8 +89,11 @@ function TimerStepView({
 
       <Cues cues={step.cues} />
 
-      <div className="my-auto py-4 text-center">
-        <div className="tnum text-[4.6rem] leading-none font-bold tracking-[-0.05em] text-ink">
+      <div className="my-auto py-2 text-center">
+        <div className="mx-auto h-[92px] w-full max-w-[220px] opacity-80">
+          <Figure kind="warmup" />
+        </div>
+        <div className="tnum mt-2 text-[4.4rem] leading-none font-bold tracking-[-0.05em] text-ink">
           {clock(remaining)}
         </div>
       </div>
@@ -141,6 +145,8 @@ function SetStepView({
     .slice(index + 1)
     .filter((s): s is SetStep => s.kind === "set").length;
 
+  const figure = figureFor(step.exercise);
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex items-start gap-2">
@@ -166,6 +172,12 @@ function SetStepView({
         <p className="mt-2 text-[0.82rem] text-[var(--accent)]">
           No rest after this — straight into the next one.
         </p>
+      )}
+
+      {figure && (
+        <div className="mt-3 h-[104px] w-full opacity-90">
+          <Figure kind={figure} />
+        </div>
       )}
 
       <Cues cues={step.cues} />

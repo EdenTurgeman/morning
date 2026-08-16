@@ -10,17 +10,22 @@
 /* ---------------------------------------------------------------------------
    MORNING — "Sunrise" design system
 
-   One idea drives the whole palette: the session is a sunrise. A single
-   variable (progress through the workout, 0 → 1) drives the accent hue from
-   pre-dawn indigo through magenta to sunrise amber, and everything tinted —
-   the timer ring, the progress bar, the primary button, the horizon glow —
-   samples that same live value. So you can read how far through the session
-   you are from across the room without parsing a step counter.
+   One idea drives the whole palette: the session is a dawn. A single variable
+   (progress through the workout, 0 → 1) walks the accent along the phases of
+   a real sunrise, and everything tinted — the timer ring, the progress bar,
+   the primary button, the sky itself — samples that same live value. So you
+   can read how far through the session you are from across the room without
+   parsing a step counter.
 
-   The ramp is deliberately linear in hue: 252° + t·140°, wrapped at 360.
-     t = 0.0  →  252°  indigo      (pre-dawn)
-     t = 0.5  →  322°  magenta     (first light)
-     t = 1.0  →   32°  amber       (sunrise)
+     t = 0.00   #6f80e0   astronomical twilight, deep indigo
+     t = 0.26   #a974e3   nautical, violet lifting off the horizon
+     t = 0.50   #ed6baf   civil, the rose band at peak chroma
+     t = 0.74   #ff8271   first light, coral
+     t = 1.00   #ffb440   sunrise, gold
+
+   The stops live in src/lib/sunrise.ts and are interpolated in OKLCH, which
+   is perceptually uniform — an HSL ramp visibly surges in brightness on the
+   way round the wheel and goes muddy through the magentas.
 --------------------------------------------------------------------------- */
 
 @theme {
@@ -167,7 +172,21 @@
     background-position: 0% 0%;
     }
   }
-}
+  --animate-meteor: meteor 5s linear infinite
+;
+  @keyframes meteor {
+  0% {
+    transform: rotate(var(--angle)) translateX(0);
+    opacity: 1;
+    }
+  70% {
+    opacity: 1;
+    }
+  100% {
+    transform: rotate(var(--angle)) translateX(-500px);
+    opacity: 0;
+    }
+  }}
 
 @layer base {
   * {
@@ -346,6 +365,172 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* --- exercise figure tempo -------------------------------------------------
+   Each cycle is timed to the cue it illustrates rather than being an even
+   loop. The push-up is the clearest case: 3s lowering, a 1s hold at the
+   bottom, then a fast concentric — you can read the tempo off the drawing
+   without reading the words. Percentages below are of a 5.2s cycle.        */
+
+.fig-pushup {
+  animation: figPushup 5.2s cubic-bezier(0.4, 0, 0.5, 1) infinite;
+}
+@keyframes figPushup {
+  0% {
+    transform: rotate(0deg) translateY(0);
+  }
+  58% {
+    transform: rotate(0deg) translateY(15px);
+  } /* 3s down */
+  77% {
+    transform: rotate(0deg) translateY(15px);
+  } /* 1s PAUSE */
+  87% {
+    transform: rotate(0deg) translateY(0);
+  } /* fast up */
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+}
+
+/* Press: up fast, lower under control. */
+.fig-press {
+  animation: figPress 4s ease-in-out infinite;
+}
+@keyframes figPress {
+  0%,
+  8% {
+    transform: rotate(0deg);
+  }
+  32% {
+    transform: rotate(-4deg) translateY(-16px);
+  }
+  46% {
+    transform: rotate(-4deg) translateY(-16px);
+  }
+  92%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Curl and row: 3s lowering, full extension held at the bottom. */
+.fig-curl {
+  animation: figCurl 4.6s cubic-bezier(0.4, 0, 0.5, 1) infinite;
+}
+@keyframes figCurl {
+  0%,
+  6% {
+    transform: rotate(0deg);
+  }
+  26% {
+    transform: rotate(-118deg);
+  }
+  38% {
+    transform: rotate(-118deg);
+  }
+  84% {
+    transform: rotate(0deg);
+  } /* the slow bit */
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.fig-row {
+  animation: figRow 3.8s ease-in-out infinite;
+}
+@keyframes figRow {
+  0%,
+  10% {
+    transform: rotate(0deg);
+  }
+  38% {
+    transform: rotate(52deg);
+  }
+  52% {
+    transform: rotate(52deg);
+  } /* squeeze */
+  92%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Raises open symmetrically, so the two sides are mirrored. */
+.fig-lateral-l {
+  animation: figLateralL 4.2s ease-in-out infinite;
+}
+.fig-lateral-r {
+  animation: figLateralR 4.2s ease-in-out infinite;
+}
+@keyframes figLateralL {
+  0%,
+  8% {
+    transform: rotate(48deg);
+  }
+  40%,
+  54% {
+    transform: rotate(0deg);
+  }
+  92%,
+  100% {
+    transform: rotate(48deg);
+  }
+}
+@keyframes figLateralR {
+  0%,
+  8% {
+    transform: rotate(-48deg);
+  }
+  40%,
+  54% {
+    transform: rotate(0deg);
+  }
+  92%,
+  100% {
+    transform: rotate(-48deg);
+  }
+}
+
+.fig-fly-l {
+  animation: figFlyL 4.4s ease-in-out infinite;
+}
+.fig-fly-r {
+  animation: figFlyR 4.4s ease-in-out infinite;
+}
+@keyframes figFlyL {
+  0%,
+  8% {
+    transform: rotate(0deg);
+  }
+  42%,
+  56% {
+    transform: rotate(58deg);
+  }
+  92%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes figFlyR {
+  0%,
+  8% {
+    transform: rotate(0deg);
+  }
+  42%,
+  56% {
+    transform: rotate(-58deg);
+  }
+  92%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.fig-warmup {
+  animation: spin 3.4s linear infinite;
 }
 
 @keyframes spin {

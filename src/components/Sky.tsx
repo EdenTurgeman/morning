@@ -1,4 +1,5 @@
 import { Particles } from "@/components/ui/particles";
+import { Meteors } from "@/components/ui/meteors";
 
 /* ---------------------------------------------------------------------------
  * The backdrop is a dawn, layered the way a real one is:
@@ -44,7 +45,10 @@ export function Sky({ progress }: { progress: number }) {
         }}
       />
 
-      {/* 2. stars, fading as the sun rises */}
+      {/* 2. stars and meteors, fading as the sun rises. Both live on the same
+             opacity layer, so the night sky empties out as one thing rather
+             than in pieces. Meteors are unmounted entirely past the halfway
+             point — they'd be invisible anyway, and this stops their timers. */}
       <div
         className="absolute inset-0 transition-opacity duration-[1400ms] ease-out"
         style={{ opacity: 0.9 * (1 - t) + 0.05 }}
@@ -57,6 +61,11 @@ export function Sky({ progress }: { progress: number }) {
           size={0.5}
           color="#ffffff"
         />
+        {t < 0.5 && (
+          <div className="absolute inset-0 overflow-hidden">
+            <Meteors number={7} minDelay={1.4} maxDelay={7} angle={228} />
+          </div>
+        )}
       </div>
 
       {/* 3. belt of Venus — the counter-hue band that precedes sunrise */}

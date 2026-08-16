@@ -1,6 +1,7 @@
 import type { SessionRecord } from "@/lib/storage";
 import { previousSameSession } from "@/lib/storage";
 import { weeklyProgress, type WeeklyProgress } from "@/lib/week";
+import { computeLedger, milestoneCrossed } from "@/lib/ledger";
 
 /* ---------------------------------------------------------------------------
  * What the summary screen celebrates, in priority order. Only one fires — the
@@ -13,6 +14,8 @@ import { weeklyProgress, type WeeklyProgress } from "@/lib/week";
  * ------------------------------------------------------------------------- */
 
 export type CelebrationTier =
+  | "lifetime-milestone"
+  | "clean-sweep"
   | "streak-milestone"
   | "week-complete"
   | "record"
@@ -88,6 +91,50 @@ export function celebrationFor(
     delta === 0 && lastTwo.length === 2 && lastTwo.every((h) => h.reps === record.reps);
 
   const base = { delta, week };
+
+  /* Lifetime thresholds outrank everything — crossing 10 tonnes or a
+   * hundredth session is far rarer than completing a week, and it should
+   * never be hidden behind one. Computed by diffing the ledger with and
+   * without this session, so a threshold fires exactly once. */
+  const withoutThis = history.filter((h) => h.ts !== record.ts);
+  const crossed = milestoneCrossed(
+    computeLedger(withoutThis),
+    computeLedger(history),
+  );
+  if (crossed) {
+    return {
+      ...base,
+      tier: "lifetime-milestone",
+      eyebrow: "All time",
+      headline: crossed.headline,
+      body: crossed.body,
+      confetti: true,
+      rays: true,
+    };
+  }
+
+  /* Beating every single set in a session. Rare, unambiguous, and entirely
+   * measured against your own past — the best thing in here. */
+  if (previous && sameLetter.length > 0) {
+    const slots = Object.keys(record.log);
+    const comparable = slots.filter((s) => typeof previous.log[s] === "number");
+    const beatEvery =
+      comparable.length >= 3 &&
+      comparable.length === slots.length &&
+      comparable.every((s) => record.log[s] > previous.log[s]);
+
+    if (beatEvery) {
+      return {
+        ...base,
+        tier: "clean-sweep",
+        eyebrow: `${slots.length} of ${slots.length} sets improved`,
+        headline: "Clean sweep.",
+        body: `Not one set matched last time — every single one went up. On a fixed load that is as good as this program gets.`,
+        confetti: true,
+        rays: true,
+      };
+    }
+  }
 
   // A week just completed AND that completion hit a milestone count.
   const milestone = MILESTONES[week.streak];
