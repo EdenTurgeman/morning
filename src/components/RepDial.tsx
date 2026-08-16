@@ -69,7 +69,7 @@ export function RepDial({ value, onStep, previous }: Props) {
               {value}
             </div>
           </div>
-          <div className="mt-1 text-[0.68rem] tracking-[0.16em] text-dim uppercase">
+          <div className="mt-1 text-[0.78rem] tracking-[0.16em] text-dim uppercase">
             reps
           </div>
         </div>
@@ -79,7 +79,7 @@ export function RepDial({ value, onStep, previous }: Props) {
         </HoldButton>
       </div>
 
-      <div className="mt-4 text-center text-[0.92rem]">
+      <div className="mt-4 text-center text-[1rem]">
         {previous !== null ? (
           <span className={beating ? "text-emerald" : "text-muted"}>
             {beating ? (

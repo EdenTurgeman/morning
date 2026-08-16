@@ -24,8 +24,10 @@ const base =
  * a knuckle. Secondary actions sit at 54 — still comfortably above the 44pt
  * Apple minimum, but visually subordinate. */
 const variants: Record<Variant, string> = {
+  /* Pinned in px, not rem: the root scale was raised to lift the app's small
+     text, and the primary buttons were already the right size. */
   primary:
-    "min-h-[68px] px-6 text-[1.12rem] tracking-[-0.01em] " +
+    "min-h-[68px] px-6 text-[18px] tracking-[-0.01em] " +
     "bg-[var(--accent)] text-[var(--accent-contrast)] " +
     "shadow-[0_10px_34px_-10px_var(--accent-glow),inset_0_1px_0_rgb(255_255_255/0.28)]",
   secondary:

@@ -25,18 +25,18 @@ export function Chrome({ index, total, steps, onBack, onEnd }: Props) {
         <button
           onClick={onBack}
           disabled={index === 0}
-          className="-ml-2 rounded-full px-3 py-2 text-[0.82rem] text-muted disabled:opacity-25"
+          className="-ml-2 rounded-full px-3 py-2 text-[0.9rem] text-muted disabled:opacity-25"
         >
           ‹ Back
         </button>
 
-        <div className="tnum text-[0.7rem] tracking-[0.14em] text-dim uppercase">
+        <div className="tnum text-[0.78rem] tracking-[0.14em] text-dim uppercase">
           step {index + 1} / {total}
         </div>
 
         <button
           onClick={onEnd}
-          className="-mr-2 rounded-full px-3 py-2 text-[0.82rem] text-muted"
+          className="-mr-2 rounded-full px-3 py-2 text-[0.9rem] text-muted"
         >
           End
         </button>

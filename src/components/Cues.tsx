@@ -15,7 +15,7 @@ export function Cues({ cues }: { cues: readonly string[] }) {
           <li
             key={cue}
             className={cn(
-              "relative pl-5 text-[0.95rem] leading-snug",
+              "relative pl-5 text-[1rem] leading-snug",
               key ? "font-medium text-ink" : "text-muted",
             )}
           >

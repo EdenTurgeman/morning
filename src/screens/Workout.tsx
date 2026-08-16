@@ -164,10 +164,10 @@ function SetStepView({
       </div>
 
       {step.sub && (
-        <p className="mt-1 text-[1rem] text-muted">{step.sub}</p>
+        <p className="mt-1 text-[1.06rem] text-muted">{step.sub}</p>
       )}
 
-      <p className="tnum mt-2.5 text-[0.9rem] text-dim">
+      <p className="tnum mt-2.5 text-[0.96rem] text-dim">
         {meta.join("  ·  ")}
       </p>
 
@@ -177,8 +177,11 @@ function SetStepView({
         </p>
       )}
 
+      {/* Height, not width, is what bounds this: a 200x130 viewBox in a short
+          box scales to fit the height and leaves most of the width empty, so
+          the figure came out far smaller than the space allowed. */}
       {figure && (
-        <div className="mt-3 h-[104px] w-full opacity-90">
+        <div className="mt-2 h-[136px] w-full opacity-90">
           <Figure kind={figure} />
         </div>
       )}
@@ -186,7 +189,7 @@ function SetStepView({
       <Cues cues={step.cues} />
 
       <div className="mt-auto">
-        <div className="mb-4 text-center text-[0.7rem] tracking-[0.14em] text-dim uppercase">
+        <div className="mb-4 text-center text-[0.8rem] tracking-[0.14em] text-dim uppercase">
           Target · <span className="text-muted">{step.target}</span>
         </div>
 
@@ -208,7 +211,7 @@ function SetStepView({
           Done
         </Button>
 
-        <p className="tnum mt-2.5 text-center text-[0.76rem] text-dim">
+        <p className="tnum mt-2.5 text-center text-[0.86rem] text-dim">
           {setsLeft === 0
             ? "Last set of the session."
             : `${setsLeft} ${setsLeft === 1 ? "set" : "sets"} to go`}
