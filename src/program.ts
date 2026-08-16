@@ -42,7 +42,6 @@ export const PROGRAM = {
     loadout: [
       { item: "Dumbbells", value: "10 kg each" },
       { item: "per handle", value: "4×1.25 + 2×2.5", indent: true },
-      { item: "Backpack", value: "empty" },
     ],
     blocks: [
       {
@@ -129,7 +128,6 @@ export const PROGRAM = {
     loadout: [
       { item: "Dumbbells", value: "5 kg each" },
       { item: "per handle", value: "2×2.5", indent: true },
-      { item: "Backpack", value: "10 kg (8×1.25)" },
     ],
     blocks: [
       {
@@ -140,21 +138,24 @@ export const PROGRAM = {
           "20 arm circles forward, 20 back",
           "10 half-effort push-ups",
           "10 towel dislocates",
-          "Load the pack and set the dumbbells while you do this",
+          "Set the dumbbells while you do this",
         ],
       },
       {
+        // Was a 10 kg backpack. Dropped — the backpack was this block's only
+        // progressive overload, so the deficit is now the escalation: hands on
+        // books, then feet elevated, then the ladder in the Guide.
         kind: "straight",
         exercise: "Push-up",
-        sub: "backpack, 10 kg",
+        sub: "deficit — hands on books",
         sets: 3,
         rest: 60,
-        load: 10,
+        bodyweight: true,
         target: "8–15 reps",
         cues: [
-          "Plates wrapped in a towel, straps tight",
+          "Hands on books or blocks, chest sinking below them",
           "3s down · 1s PAUSE at the bottom · fast up",
-          "Feet on the floor. Too easy → hands on books for a deficit",
+          "Too easy → elevate your feet as well. Go to failure",
         ],
       },
       {
@@ -244,6 +245,15 @@ export const GUIDE = [
     body: "① You don't go to failure, because 5 or 10 kg doesn't feel like it deserves that much effort.  ② You don't eat more.",
   },
 ];
+
+/* --- how often you're aiming to train ------------------------------------- */
+
+/** Sessions per week that count as a full week. The streak is built on this,
+ *  not on consecutive days — rest days shouldn't cost you anything. */
+export const WEEKLY_TARGET = 5;
+
+/** Which day a week starts on. 0 = Sunday, 1 = Monday. */
+export const WEEK_STARTS_ON = 0;
 
 /* --- the nudge on the summary screen -------------------------------------- */
 

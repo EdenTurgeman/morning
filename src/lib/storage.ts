@@ -218,10 +218,19 @@ export function localISODate(d = new Date()): string {
 /** Ask the browser to exempt us from storage eviction. WebKit's heuristics
  *  explicitly favour installed home-screen web apps, so this usually succeeds
  *  where it matters. */
+/** Structural type rather than the DOM's StorageManager: @types/node ships a
+ *  global `Navigator` that can shadow the DOM one, and this call shouldn't
+ *  depend on which definition wins. */
+interface StorageManagerLike {
+  persist?: () => Promise<boolean>;
+  persisted?: () => Promise<boolean>;
+}
+
 export async function requestPersistence(): Promise<void> {
   try {
-    if (navigator.storage?.persist && !(await navigator.storage.persisted())) {
-      await navigator.storage.persist();
+    const store = (navigator as unknown as { storage?: StorageManagerLike }).storage;
+    if (store?.persist && !(await store.persisted?.())) {
+      await store.persist();
     }
   } catch {
     /* not supported — the backup screen is the real safety net */

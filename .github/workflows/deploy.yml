@@ -28,9 +28,9 @@ jobs:
 
       - run: npm ci
 
-      # The superset / rest-placement rules are the easiest thing to break when
-      # editing src/program.ts, and the failure is silent. Block the deploy.
-      - run: npm run test:program
+      # The superset / rest-placement rules and the weekly-streak rules are the
+      # easiest things to break silently. Block the deploy on either.
+      - run: npm test
 
       - run: npm run build
 

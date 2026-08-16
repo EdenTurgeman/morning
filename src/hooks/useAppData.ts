@@ -53,6 +53,19 @@ export function useAppData() {
     [commit],
   );
 
+  /** Remove one session by timestamp. Deliberately identified by `ts` rather
+   *  than list index — the History screen renders a reversed, truncated view,
+   *  and deleting by position there would eventually delete the wrong row. */
+  const deleteSession = useCallback(
+    (ts: number) => {
+      commit({
+        ...latest.current,
+        history: latest.current.history.filter((h) => h.ts !== ts),
+      });
+    },
+    [commit],
+  );
+
   const markBackedUp = useCallback(() => {
     commit({ ...latest.current, lastBackup: new Date().toISOString() });
   }, [commit]);
@@ -61,5 +74,5 @@ export function useAppData() {
 
   const eraseAll = useCallback(() => commit(emptyData()), [commit]);
 
-  return { data, addSession, markBackedUp, replaceAll, eraseAll };
+  return { data, addSession, deleteSession, markBackedUp, replaceAll, eraseAll };
 }

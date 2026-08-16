@@ -9,11 +9,15 @@
     "preview": "vite preview",
     "check": "tsc -b --noEmit",
     "test:program": "node --import ./scripts/alias-hook.mjs scripts/verify-program.ts",
+    "test:week": "node --import ./scripts/alias-hook.mjs scripts/verify-week.ts",
+    "test": "npm run test:program && npm run test:week",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.1",
     "@radix-ui/react-alert-dialog": "^1.1.6",
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "motion": "^12.4.7",
     "react": "^19.0.0",

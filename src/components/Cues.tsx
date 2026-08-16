@@ -25,7 +25,7 @@ export function Cues({ cues }: { cues: readonly string[] }) {
                 "absolute top-[0.55em] left-0 h-[6px] w-[6px] rounded-full",
                 key
                   ? "bg-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)]"
-                  : "bg-white/22",
+                  : "bg-white/40",
               )}
             />
             {cue}

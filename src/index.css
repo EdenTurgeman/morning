@@ -27,10 +27,16 @@
   --font-sans: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif;
 
+  /* Three levels of text, all measured against --color-night. Read at 6am,
+     half awake, at arm's length — so even the tertiary level clears the 4.5:1
+     WCAG AA floor rather than sitting just under it.
+       ink    18.0:1   the thing you're doing
+       muted  10.3:1   supporting copy
+       dim     6.6:1   labels and asides                                     */
   --color-night: #07080f;
   --color-ink: #f0f2f8;
-  --color-muted: #a0a8bd;
-  --color-dim: #6b7488;
+  --color-muted: #b3bbcb;
+  --color-dim: #8b94a9;
   --color-hairline: rgb(255 255 255 / 0.09);
 
   /* Semantic colours. Deliberately kept off the sunrise ramp so they never
@@ -45,44 +51,61 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Registering the three accent channels as typed custom properties is what
-   lets the browser *interpolate* them. Without @property a hue change is a
-   hard swap; with it, advancing a step drifts the entire app's colour over
-   ~900ms. Supported in Safari 16.4+, which is the target. */
+/* Registering the accent channels as typed custom properties is what lets the
+   browser *interpolate* them. Without @property a colour change is a hard
+   swap; with it, advancing a step drifts the entire app's colour. And because
+   these are OKLCH channels, that drift is perceptually even — no brightness
+   surge as the hue crosses the reds. Safari 16.4+, which is the target. */
+@property --accent-l {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.63;
+}
+@property --accent-c {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.145;
+}
 @property --accent-h {
   syntax: "<number>";
   inherits: true;
-  initial-value: 252;
+  initial-value: 274;
 }
-@property --accent-s {
-  syntax: "<percentage>";
+/* 0 → 1 across the session. Drives how high the sun sits and how far the
+   stars have faded. */
+@property --sun {
+  syntax: "<number>";
   inherits: true;
-  initial-value: 83%;
-}
-@property --accent-l {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 68%;
+  initial-value: 0.1;
 }
 
-/* Live accent. JS writes --accent-h / --accent-s / --accent-l; everything else
-   derives from them, so a single write repaints the entire app. */
+/* Live accent. JS writes the four values above; everything else derives from
+   them, so a single write repaints the entire app. */
 :root {
-  --accent-h: 252;
-  --accent-s: 83%;
-  --accent-l: 68%;
-  transition:
-    --accent-h 900ms var(--ease-out-expo),
-    --accent-s 900ms var(--ease-out-expo),
-    --accent-l 900ms var(--ease-out-expo);
+  --accent-l: 0.63;
+  --accent-c: 0.145;
+  --accent-h: 274;
+  --sun: 0.1;
 
-  --accent: hsl(var(--accent-h) var(--accent-s) var(--accent-l));
-  --accent-soft: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.16);
-  --accent-line: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.42);
-  --accent-glow: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.55);
-  /* Text sitting on a filled accent button. Dark enough to read on every hue
-     the ramp passes through. */
-  --accent-contrast: hsl(var(--accent-h) 60% 12%);
+  /* Slow and eased — the colour should feel like light changing, not like a
+     theme toggle. */
+  transition:
+    --accent-l 1100ms var(--ease-out-expo),
+    --accent-c 1100ms var(--ease-out-expo),
+    --accent-h 1100ms var(--ease-out-expo),
+    --sun 1100ms var(--ease-out-expo);
+
+  --accent: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
+  --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.15);
+  --accent-line: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.4);
+  --accent-glow: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.5);
+  /* A deep, slightly-chromatic version of the live hue — reads as a shadow
+     cast by the accent rather than flat black, and stays dark enough for text
+     across the whole ramp. */
+  --accent-contrast: oklch(0.24 0.06 var(--accent-h));
+  /* The sky's darkest point, faintly tinted by the current hue so the whole
+     screen belongs to one light source. */
+  --night-tinted: oklch(0.145 0.028 var(--accent-h));
 
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
@@ -119,7 +142,12 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  /* NOTE: --color-muted is deliberately NOT aliased to shadcn's --muted here.
+     shadcn treats "muted" as a *surface* (5% white); this app has used it as a
+     *text* colour since the first commit, in ~30 places. Aliasing it made every
+     `text-muted` element paint at 5% opacity and effectively disappear.
+     If you later add a shadcn component that wants `bg-muted`, give it
+     `bg-[var(--muted)]` rather than reintroducing the alias. */
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent-bg);
   --color-accent-foreground: var(--foreground);
@@ -198,7 +226,7 @@
   background:
     linear-gradient(
       180deg,
-      hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.07),
+      oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.08),
       transparent 62%
     ),
     rgb(255 255 255 / 0.035);
@@ -317,6 +345,12 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

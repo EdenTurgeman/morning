@@ -11,7 +11,13 @@ import { useAppData } from "@/hooks/useAppData";
 import { useWorkout, type FinishedSession } from "@/hooks/useWorkout";
 import { unlockAudio } from "@/lib/audio";
 import { requestPersistence, type SessionRecord } from "@/lib/storage";
-import { applySunrise, DONE_PROGRESS, IDLE_PROGRESS } from "@/lib/sunrise";
+import {
+  applySunrise,
+  oklchToHex,
+  sunriseAt,
+  DONE_PROGRESS,
+  IDLE_PROGRESS,
+} from "@/lib/sunrise";
 import type { SessionKey } from "@/program";
 
 export type View = "home" | "history" | "guide" | "backup" | "summary";
@@ -19,7 +25,8 @@ export type View = "home" | "history" | "guide" | "backup" | "summary";
 export default function App() {
   const [view, setView] = useState<View>("home");
   const [lastResult, setLastResult] = useState<SessionRecord | null>(null);
-  const { data, addSession, markBackedUp, replaceAll, eraseAll } = useAppData();
+  const { data, addSession, deleteSession, markBackedUp, replaceAll, eraseAll } =
+    useAppData();
 
   const handleFinish = useCallback(
     (result: FinishedSession) => {
@@ -48,6 +55,16 @@ export default function App() {
 
   useEffect(() => {
     applySunrise(progress);
+  }, [progress]);
+
+  /* Keep the iOS status bar tinted to match the top of the sky. Without this
+     the notch area stays a fixed colour while the app warms underneath it,
+     and the seam is very visible in standalone mode. */
+  useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!meta) return;
+    const { l, c, h } = sunriseAt(progress);
+    meta.content = oklchToHex({ l: 0.09 + l * 0.045, c: c * 0.35, h });
   }, [progress]);
 
   /* iOS won't make a sound until the page has had a gesture, so arm the audio
@@ -108,7 +125,7 @@ export default function App() {
         ) : view === "summary" && lastResult ? (
           <Summary record={lastResult} data={data} onNavigate={navigate} />
         ) : view === "history" ? (
-          <History data={data} onNavigate={navigate} />
+          <History data={data} onDelete={deleteSession} onNavigate={navigate} />
         ) : view === "guide" ? (
           <Guide onNavigate={navigate} />
         ) : view === "backup" ? (

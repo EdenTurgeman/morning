@@ -1,15 +1,21 @@
-import { motion } from "motion/react";
+import { useMemo } from "react";
 import { Card, Row } from "@/components/Card";
 import { Button } from "@/components/Button";
+import { WeekMeter } from "@/components/WeekMeter";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { getSession, nextSessionAfter, type SessionKey } from "@/program";
-import { computeStreak, daysSince, type AppData } from "@/lib/storage";
-import { plural, relativeDay } from "@/lib/format";
-import { localISODate } from "@/lib/storage";
+import { daysSince, localISODate, type AppData } from "@/lib/storage";
+import { weeklyProgress, weekNudge } from "@/lib/week";
+import { relativeDay } from "@/lib/format";
 import type { View } from "@/App";
 
 /* Answers "what am I doing and what do I set up?" in under two seconds:
- * session letter, loadout, one button. Everything else is subordinate. */
+ * session letter, loadout, one button.
+ *
+ * Layout is a full-height flex column with a spacer above the CTA, so
+ * "Start Session" always lands in the bottom third of the screen — within
+ * thumb reach one-handed, on any phone size, regardless of how much the
+ * loadout card and nudges push down from above. */
 
 interface Props {
   data: AppData;
@@ -23,29 +29,26 @@ export function Home({ data, onStart, onNavigate }: Props) {
   const other = nextSessionAfter(key);
   const session = getSession(key);
 
-  const streak = computeStreak(data.history);
+  const week = useMemo(() => weeklyProgress(data.history), [data.history]);
+  const nudge = weekNudge(week);
+
   const sinceBackup = daysSince(data.lastBackup);
   const nagBackup =
     data.history.length >= 3 && (sinceBackup === null || sinceBackup > 14);
 
   return (
-    <div>
+    <div className="flex min-h-full flex-col">
       <BlurFade delay={0.04} inView>
-        <header className="mb-7 flex items-start justify-between gap-4">
+        <header className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-[1.6rem] font-bold tracking-[-0.03em] text-ink">
+            <h1 className="text-[1.6rem] leading-none font-bold tracking-[-0.03em] text-ink">
               Morning
             </h1>
-            <p className="mt-0.5 text-[0.88rem] text-muted">
-              {streak > 0 ? (
-                <>
-                  <span className="tnum">{streak}</span>-day streak
-                </>
-              ) : (
-                "Let's start."
-              )}
-              {last && <> · last {relativeDay(last.d, localISODate())}</>}
-            </p>
+            {last && (
+              <p className="mt-1.5 text-[0.84rem] text-dim">
+                last session {relativeDay(last.d, localISODate())}
+              </p>
+            )}
           </div>
 
           <div className="rounded-full border border-[var(--accent-line)] bg-[var(--accent-soft)] px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.1em] text-[var(--accent)] uppercase">
@@ -54,23 +57,35 @@ export function Home({ data, onStart, onNavigate }: Props) {
         </header>
       </BlurFade>
 
-      {nagBackup && (
+      {data.history.length > 0 && (
         <BlurFade delay={0.08} inView>
+          <Card className="mt-4 py-4">
+            <WeekMeter week={week} onPress={() => onNavigate("history")} />
+            {nudge && (
+              <>
+                <div className="rule my-3" />
+                <p className="text-[0.84rem] text-muted">{nudge}</p>
+              </>
+            )}
+          </Card>
+        </BlurFade>
+      )}
+
+      {nagBackup && (
+        <BlurFade delay={0.1} inView>
           <button
             onClick={() => onNavigate("backup")}
-            className="mb-4 flex w-full items-center gap-3 rounded-[var(--radius-control)] border border-hairline border-l-2 border-l-rose bg-white/[0.035] px-4 py-3 text-left"
+            className="mt-3 w-full rounded-[var(--radius-control)] border border-hairline border-l-2 border-l-rose bg-white/[0.035] px-4 py-3 text-left text-[0.86rem] text-muted"
           >
-            <span className="text-[0.88rem] text-muted">
-              You haven&apos;t backed up{" "}
-              {sinceBackup === null ? "yet" : `in ${sinceBackup} days`}. It takes
-              one tap.
-            </span>
+            You haven&apos;t backed up{" "}
+            {sinceBackup === null ? "yet" : `in ${sinceBackup} days`}. It takes one
+            tap.
           </button>
         </BlurFade>
       )}
 
-      <BlurFade delay={0.1} inView>
-        <Card beam className="mb-5">
+      <BlurFade delay={0.12} inView>
+        <Card beam className="mt-3">
           <div className="mb-3 flex items-end justify-between">
             <div>
               <div className="text-[0.68rem] tracking-[0.16em] text-[var(--accent)] uppercase">
@@ -95,21 +110,23 @@ export function Home({ data, onStart, onNavigate }: Props) {
         </Card>
       </BlurFade>
 
-      <BlurFade delay={0.16} inView>
+      {/* Pushes the CTA to the bottom of the viewport on tall screens without
+          stranding it below the fold on short ones. */}
+      <div className="min-h-4 flex-1" />
+
+      <BlurFade delay={0.18} inView>
         <Button variant="primary" shine onClick={() => onStart(key)}>
           Start Session {key}
         </Button>
 
         <button
           onClick={() => onStart(other)}
-          className="mt-3 w-full py-3 text-center text-[0.9rem] text-muted"
+          className="mt-2 w-full py-3 text-center text-[0.88rem] text-dim"
         >
           Do session {other} instead
         </button>
-      </BlurFade>
 
-      <BlurFade delay={0.22} inView>
-        <motion.nav className="mt-7 grid grid-cols-3 gap-2.5">
+        <nav className="mt-4 grid grid-cols-3 gap-2.5">
           {(
             [
               ["History", "history"],
@@ -121,15 +138,8 @@ export function Home({ data, onStart, onNavigate }: Props) {
               {label}
             </Button>
           ))}
-        </motion.nav>
+        </nav>
       </BlurFade>
-
-      {data.history.length > 0 && (
-        <p className="mt-6 text-center text-[0.76rem] text-dim">
-          {data.history.length}{" "}
-          {plural(data.history.length, "session")} logged
-        </p>
-      )}
     </div>
   );
 }

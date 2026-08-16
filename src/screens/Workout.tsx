@@ -105,6 +105,8 @@ function TimerStepView({
 
 function SetStepView({
   step,
+  steps,
+  index,
   sessionKey,
   data,
   log,
@@ -132,6 +134,12 @@ function SetStepView({
   else if (step.bodyweight) meta.push("bodyweight");
   meta.push(`set ${step.n} of ${step.of}`);
   if (step.superset) meta.push(`superset ${step.superset[0]} of ${step.superset[1]}`);
+
+  // "4 sets to go" orients you far better than "step 14 of 25" — rests aren't
+  // work, so they shouldn't count toward what's left.
+  const setsLeft = steps
+    .slice(index + 1)
+    .filter((s): s is SetStep => s.kind === "set").length;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -180,6 +188,12 @@ function SetStepView({
         >
           Done
         </Button>
+
+        <p className="tnum mt-2.5 text-center text-[0.76rem] text-dim">
+          {setsLeft === 0
+            ? "Last set of the session."
+            : `${setsLeft} ${setsLeft === 1 ? "set" : "sets"} to go`}
+        </p>
       </div>
     </div>
   );
@@ -235,6 +249,11 @@ function RestStepView({
           <div className="tnum mt-0.5 text-[0.86rem] text-dim">
             set {next.n} of {next.of}
             {next.load ? ` · ${next.load} kg` : ""}
+          </div>
+          {/* The target for what's coming, so you can set your intent during
+              the rest instead of reading it cold when the timer fires. */}
+          <div className="mt-1.5 text-[0.84rem] text-[var(--accent)]">
+            Target · {next.target}
           </div>
         </div>
       )}
