@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Toaster } from "sonner";
 import { Sky } from "@/components/Sky";
+import { Daybreak } from "@/components/Daybreak";
+import { weeklyProgress } from "@/lib/week";
+import { celebrationFor } from "@/lib/celebration";
+import { setWeekBadge } from "@/lib/badge";
 import { Home } from "@/screens/Home";
 import { Workout } from "@/screens/Workout";
 import { Summary } from "@/screens/Summary";
@@ -32,6 +36,7 @@ export type View =
 export default function App() {
   const [view, setView] = useState<View>("home");
   const [lastResult, setLastResult] = useState<SessionRecord | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
   const { data, addSession, deleteSession, markBackedUp, replaceAll, eraseAll } =
     useAppData();
 
@@ -45,6 +50,9 @@ export default function App() {
       });
       setLastResult(record);
       setView("summary");
+      // Daybreak plays over the summary, which is already mounted underneath,
+      // so dismissing it is instant rather than another screen transition.
+      setCelebrating(true);
     },
     [addSession],
   );
@@ -73,6 +81,14 @@ export default function App() {
     const { l, c, h } = sunriseAt(progress);
     meta.content = oklchToHex({ l: 0.09 + l * 0.045, c: c * 0.35, h });
   }, [progress]);
+
+  /* Sessions still owed this week, on the home-screen icon. Installed iOS web
+     apps support this from 16.4, so the badge answers "am I behind?" without
+     opening anything. */
+  const week = useMemo(() => weeklyProgress(data.history), [data.history]);
+  useEffect(() => {
+    setWeekBadge(week.remaining);
+  }, [week.remaining]);
 
   /* iOS won't make a sound until the page has had a gesture, so arm the audio
      context on the very first touch anywhere. */
@@ -149,6 +165,14 @@ export default function App() {
           <Home data={data} onStart={start} onNavigate={navigate} />
         )}
       </main>
+
+      {celebrating && lastResult && (
+        <Daybreak
+          week={week}
+          confetti={celebrationFor(lastResult, data.history).confetti}
+          onDone={() => setCelebrating(false)}
+        />
+      )}
 
       <Toaster
         theme="dark"

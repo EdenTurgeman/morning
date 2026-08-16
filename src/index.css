@@ -92,13 +92,16 @@
   --accent-h: 274;
   --sun: 0.1;
 
-  /* Slow and eased — the colour should feel like light changing, not like a
-     theme toggle. */
+  /* Slow, so the colour reads as light changing rather than a theme toggle —
+     and LINEAR on purpose. Progress advances whenever you tap Done, which can
+     easily interrupt a transition still in flight; an eased curve restarted
+     from its middle visibly surges, whereas a linear one just carries on at
+     the same rate. */
   transition:
-    --accent-l 1100ms var(--ease-out-expo),
-    --accent-c 1100ms var(--ease-out-expo),
-    --accent-h 1100ms var(--ease-out-expo),
-    --sun 1100ms var(--ease-out-expo);
+    --accent-l 1600ms linear,
+    --accent-c 1600ms linear,
+    --accent-h 1600ms linear,
+    --sun 1600ms linear;
 
   --accent: oklch(var(--accent-l) var(--accent-c) var(--accent-h));
   --accent-soft: oklch(var(--accent-l) var(--accent-c) var(--accent-h) / 0.15);
@@ -288,6 +291,95 @@
 
 /* --- motion --------------------------------------------------------------- */
 
+/* --- the sun ---------------------------------------------------------------
+   Every layer below derives its geometry from ONE value: --sun, registered as
+   an @property above and transitioned linearly.
+
+   That's the whole trick. Progress is a step function — it jumps each time you
+   tap Done — so animating layers independently meant several transitions of
+   different lengths all restarting at once and drifting apart, which is what
+   read as chopping. Deriving everything from a single interpolating custom
+   property means the browser interpolates once and every layer recomputes from
+   the same number on the same frame. They cannot desync.
+
+   Linear easing, because a tap can interrupt a transition still in flight and
+   a restarted ease-out visibly surges where a linear one just carries on.     */
+
+@utility sun-bloom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 56vh;
+  height: 56vh;
+  /* rises and grows together */
+  transform: translateX(-50%) translateY(calc((32 - var(--sun) * 26) * 1%))
+    scale(calc(0.84 + var(--sun) * 0.32));
+  opacity: calc(0.4 + var(--sun) * 0.45);
+}
+
+@utility sun-spread {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 70vh;
+  transform: scaleY(calc(0.86 + var(--sun) * 0.28));
+  transform-origin: 50% 100%;
+  opacity: calc(0.42 + var(--sun) * 0.38);
+}
+
+@utility sun-rays {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 80vh;
+  opacity: calc(max(0, var(--sun) - 0.2) * 0.32);
+}
+
+@utility sky-stars {
+  position: absolute;
+  inset: 0;
+  opacity: calc(0.94 - var(--sun) * 0.9);
+}
+
+@utility sky-haze {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 34vh;
+  opacity: calc(0.4 + var(--sun) * 0.3);
+}
+
+/* Cloud parallax. Two banks moving at different rates is what gives the sky
+   depth. Translating a baked texture, so the noise filter never re-runs. */
+@keyframes cloudFar {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-25%, 0, 0);
+  }
+}
+@keyframes cloudNear {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-33%, 0, 0);
+  }
+}
+/* Crepuscular rays, turning almost imperceptibly. */
+@keyframes rayDrift {
+  from {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+  to {
+    transform: rotate(-2.5deg);
+  }
+}
+
 @keyframes drift {
   0%,
   100% {
@@ -318,17 +410,22 @@
   }
 }
 
-/* Step-to-step transition on the workout screen. Compositor-driven so it can
-   never block the next step from mounting. */
+/* Step-to-step transition. Compositor-driven so it can never block the next
+   step from mounting.
+
+   Timing rule used throughout the app: anything you are waiting on is fast
+   (200–260ms), anything ambient is slow (1s+). This is a UI response to a tap,
+   so it's on the fast end — and the blur is small, because a heavy blur reads
+   as lag rather than as polish when you're mid-set. */
 .step-enter {
-  animation: stepEnter 300ms var(--ease-out-expo) both;
+  animation: stepEnter 220ms var(--ease-out-expo) both;
 }
 
 @keyframes stepEnter {
   from {
     opacity: 0;
-    transform: translate3d(0, 12px, 0);
-    filter: blur(5px);
+    transform: translate3d(0, 9px, 0);
+    filter: blur(3px);
   }
   to {
     opacity: 1;
@@ -539,6 +636,337 @@
   }
 }
 
+/* --- Daybreak, the completion moment --------------------------------------
+   See components/Daybreak.tsx for the full timeline. The short version: the
+   stages overlap, the sun overshoots and settles rather than sliding, the rays
+   bloom instead of rotating, and the exit drifts instead of cutting.          */
+
+@keyframes dbIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Drifts up slightly as it goes, so the screen feels like it's being left
+   behind rather than switched off. */
+@keyframes dbOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.04) translateY(-10px);
+  }
+}
+
+/* THE SUN. The overshoot at 72% is the point: it rises past where it settles
+   and eases back, which reads as mass. A linear slide reads as a sprite being
+   moved. */
+/* ONE shared centre for the sun, the rays, the flash and the horizon.
+   These drifted apart when positioned independently — the rays' conic origin
+   sat ~10% below the sun, so the fan wasn't concentric with it. Everything
+   anchored to the sun now reads --db-sun-y and cannot disagree.
+
+   It sits LOW. At 62% the sun was directly behind the copy: it blew out
+   "Week complete." and erased the middle progress pips. The content lives in
+   the upper third and the sun rises underneath it. */
+:root {
+  --db-sun-y: 82%;
+}
+
+/* Dawn light flooding up the frame. Without this the screen was pure black
+   above the glow, leaving a dead gap between the copy and the sun and making
+   the sun read as a floating lightbulb rather than a sunrise. Warm at the
+   horizon grading to violet further up — the same Rayleigh logic the main sky
+   uses, and it ties this screen to the app's palette. */
+.db-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    /* tight warm core at the horizon */
+    radial-gradient(
+      ellipse 150% 40% at 50% var(--db-sun-y),
+      color-mix(in oklab, var(--accent) 34%, transparent) 0%,
+      color-mix(in oklab, var(--accent) 14%, transparent) 30%,
+      transparent 62%
+    ),
+    /* broad lift reaching up toward the copy, so there's no dead band
+       between the message and the light */
+    radial-gradient(
+      ellipse 165% 78% at 50% var(--db-sun-y),
+      color-mix(in oklab, var(--accent) 16%, transparent) 0%,
+      color-mix(in oklab, oklch(0.5 0.13 330) 11%, transparent) 34%,
+      color-mix(in oklab, oklch(0.42 0.1 296) 7%, transparent) 56%,
+      transparent 82%
+    );
+  animation: dbFade 2400ms ease-out 300ms both;
+}
+
+/* Haze below the horizon. Dimming the lower half is what makes the line read
+   as a horizon at all — the sun's bottom half glows through it instead of
+   hanging in the same empty space as its top half. */
+.db-ground {
+  position: absolute;
+  top: var(--db-sun-y);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  /* Starts fully transparent: opening at 0.28 put a hard horizontal seam
+     right across the frame at the horizon. The dimming has to arrive
+     gradually or it reads as a UI divider rather than as haze. */
+  background: linear-gradient(
+    to bottom,
+    rgb(4 5 10 / 0) 0%,
+    rgb(4 5 10 / 0.18) 9%,
+    rgb(4 5 10 / 0.5) 34%,
+    rgb(4 5 10 / 0.74) 68%,
+    rgb(4 5 10 / 0.86) 100%
+  );
+}
+
+.db-sun {
+  position: absolute;
+  top: var(--db-sun-y);
+  left: 50%;
+  width: 58vh;
+  height: 58vh;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side at 50% 50%,
+    color-mix(in oklab, var(--accent) 26%, white) 0%,
+    color-mix(in oklab, var(--accent) 70%, white) 8%,
+    var(--accent) 17%,
+    color-mix(in oklab, var(--accent) 55%, transparent) 32%,
+    color-mix(in oklab, var(--accent) 24%, transparent) 48%,
+    color-mix(in oklab, var(--accent) 7%, transparent) 66%,
+    transparent 84%
+  );
+  animation:
+    dbSun 1700ms cubic-bezier(0.22, 1, 0.3, 1) 380ms both,
+    dbBreathe 6s ease-in-out 2100ms infinite;
+}
+
+/* translate / scale as standalone properties throughout, so the centring and
+   the motion compose instead of overwriting each other. Overshoots at 72% and
+   eases back — that's what gives it mass rather than reading as a sprite
+   being slid up the screen. */
+@keyframes dbSun {
+  from {
+    translate: -50% 34%;
+    scale: 0.55;
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  72% {
+    translate: -50% -58%;
+    scale: 1.05;
+  }
+  to {
+    translate: -50% -50%;
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+/* Once it has arrived it keeps breathing, so the screen is never frozen while
+   the rest of the copy is still coming in. */
+@keyframes dbBreathe {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.09);
+  }
+}
+
+/* RAYS. Masked conic gradient with feathered stops — blooms outward, and is
+   faded to nothing long before the screen edges, so nothing sweeps in and out
+   at the sides. */
+/* A square centred exactly on the sun, so the fan is concentric with it.
+   Centring uses the standalone `translate` property and the bloom animates
+   `scale` — separate properties compose, where a keyframe touching
+   `transform` would wipe out the centring (the same trap that put the
+   confirm dialog in the top-left corner). */
+.db-rays {
+  position: absolute;
+  top: var(--db-sun-y);
+  left: 50%;
+  /* Pulled in from 190vmax: rays that reach the screen edges read as an
+     explosion, not as a sunrise. */
+  width: 118vmax;
+  height: 118vmax;
+  translate: -50% -50%;
+  animation: dbBloom 2200ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+}
+
+.db-rays-spin {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    color-mix(in oklab, var(--accent) 7%, transparent) 1.6deg,
+    color-mix(in oklab, var(--accent) 30%, transparent) 3.4deg,
+    color-mix(in oklab, var(--accent) 7%, transparent) 5.2deg,
+    transparent 7deg,
+    transparent 11deg
+  );
+  -webkit-mask-image: radial-gradient(
+    circle closest-side at 50% 50%,
+    transparent 4%,
+    #000 14%,
+    rgb(0 0 0 / 0.4) 26%,
+    transparent 40%
+  );
+  mask-image: radial-gradient(
+    circle closest-side at 50% 50%,
+    transparent 4%,
+    #000 14%,
+    rgb(0 0 0 / 0.4) 26%,
+    transparent 40%
+  );
+  animation: dbSpin 90s linear infinite;
+}
+
+/* scale / rotate as standalone properties, so they compose with the
+   `translate` doing the centring instead of replacing it. */
+@keyframes dbBloom {
+  from {
+    opacity: 0;
+    scale: 0.62;
+  }
+  to {
+    opacity: 0.42;
+    scale: 1;
+  }
+}
+
+@keyframes dbSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* The moment it breaks the horizon. Brief, wide, and gone. */
+.db-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 120% 60% at 50% var(--db-sun-y),
+    color-mix(in oklab, var(--accent) 55%, white) 0%,
+    color-mix(in oklab, var(--accent) 22%, transparent) 34%,
+    transparent 68%
+  );
+  animation: dbFlash 900ms ease-out 900ms both;
+}
+
+@keyframes dbFlash {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.32;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ANTICIPATION — the first thing that moves, before the sun. */
+.db-horizon {
+  position: absolute;
+  right: 0;
+  /* On the sun's centre, so it reads as the sun cutting through it. */
+  top: var(--db-sun-y);
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent) 22%,
+    var(--accent) 78%,
+    transparent
+  );
+  box-shadow: 0 0 18px var(--accent-glow);
+  animation:
+    dbHorizon 620ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both,
+    dbHorizonFade 1200ms ease-out 1500ms forwards;
+}
+
+@keyframes dbHorizon {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Recedes once the sun is up — it has done its job and would otherwise sit
+   there cutting the screen in half. */
+@keyframes dbHorizonFade {
+  to {
+    opacity: 0.25;
+  }
+}
+
+@keyframes dbNumber {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbPip {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  60% {
+    transform: scale(1.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dbRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -548,14 +976,21 @@
   }
 }
 
+/* Animates `scale` — the standalone property — NOT `transform`.
+   Tailwind v4's -translate-x-1/2 / -translate-y-1/2 compile to the standalone
+   `translate` property, so a keyframe touching `transform` composes with it
+   rather than overriding: the dialog rendered at -100%/-96% (up in the
+   top-left corner) for the length of the animation, then snapped to centre
+   when the animation stopped applying. translate / scale / rotate are
+   independent properties and compose cleanly. */
 @keyframes popIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -46%) scale(0.94);
+    scale: 0.94;
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    scale: 1;
   }
 }
 

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Card, Row } from "@/components/Card";
+import { Card, Loadout } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { WeekMeter } from "@/components/WeekMeter";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -127,9 +127,7 @@ export function Home({ data, onStart, onNavigate }: Props) {
 
           <div className="rule mb-1" />
 
-          {session.loadout.map((l) => (
-            <Row key={l.item} label={l.item} value={l.value} indent={l.indent} />
-          ))}
+          <Loadout items={session.loadout} />
 
           <p className="mt-3 text-[0.78rem] leading-relaxed text-dim">
             Set it while you warm up. Nothing moves after that.

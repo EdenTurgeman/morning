@@ -46,16 +46,16 @@ export interface Celebration {
 /** Week counts that get their own headline. */
 const MILESTONES: Record<number, { headline: string; body: string }> = {
   2: {
-    headline: "Two weeks straight.",
-    body: "The first one is willpower. The second is the start of a habit.",
+    headline: "Past the first drop-off.",
+    body: "The first week is willpower. The second is where it starts becoming a habit — and where most people have already stopped.",
   },
   4: {
     headline: "A month of mornings.",
-    body: "Four full weeks. This is the point where most people have already stopped.",
+    body: "Four full weeks, every one of them hit. Go and look at what your first session's numbers were.",
   },
   8: {
-    headline: "Two months.",
-    body: "Long enough that the strength you've added is real tissue, not just practice.",
+    headline: "Long enough to be real.",
+    body: "Eight weeks is past the point where gains are just your nervous system learning the movement. This is tissue now.",
   },
   12: {
     headline: "A quarter of a year.",
@@ -142,7 +142,9 @@ export function celebrationFor(
     return {
       ...base,
       tier: "streak-milestone",
-      eyebrow: `${week.streak} weeks running`,
+      // The headline already names the count in words ("A month of mornings"),
+      // so the eyebrow must not print it again as a number.
+      eyebrow: "Streak milestone",
       headline: milestone.headline,
       body: milestone.body,
       confetti: true,
@@ -154,23 +156,26 @@ export function celebrationFor(
     return {
       ...base,
       tier: "week-complete",
-      eyebrow: `${week.target} of ${week.target} this week`,
+      // "5 of 5 this week" would restate the headline, and the week meter
+      // lower down the same screen shows the pips anyway.
+      eyebrow: week.streak > 1 ? `${week.streak} weeks running` : "Your first full week",
       headline: "Week complete.",
-      body:
-        week.streak > 1
-          ? `That's ${week.streak} weeks in a row. Rest properly — it's part of the program.`
-          : "Rest properly. The adaptation happens between sessions, not during them.",
+      body: "Rest properly. The adaptation happens between sessions, not during them.",
       confetti: true,
       rays: true,
     };
   }
 
+  /* NOTE on headlines: the summary renders the rep total as a large number
+   * directly above this, so a headline of "252 reps." just prints the same
+   * figure twice. Every headline below has to add something the number
+   * doesn't already say. */
   if (isRecord) {
     return {
       ...base,
       tier: "record",
       eyebrow: `Best ${record.s} yet`,
-      headline: `${record.reps} reps.`,
+      headline: "A personal best.",
       body: `Your previous best on ${record.s} was ${bestBefore}. That's the number to beat now.`,
       confetti: false,
       rays: true,
@@ -193,7 +198,7 @@ export function celebrationFor(
     return {
       ...base,
       tier: "plateau",
-      eyebrow: `Third ${record.s} at ${record.reps}`,
+      eyebrow: `Third ${record.s} at the same total`,
       headline: "Reps have stopped moving.",
       body: "Time for the next rung: slow the eccentric to 4–5s and add a 2s pause in the stretch. Same weight, more tension.",
       confetti: false,
@@ -206,8 +211,8 @@ export function celebrationFor(
       ...base,
       tier: "improved",
       eyebrow: `+${delta} on your last ${record.s}`,
-      headline: `${record.reps} reps.`,
-      body: "Load stayed the same and you did more work. That's the only progress signal this program has, and you moved it.",
+      headline: "You moved it.",
+      body: "Load stayed the same and you did more work. That's the only progress signal this program has, and it went up.",
       confetti: false,
       rays: false,
     };
@@ -218,7 +223,7 @@ export function celebrationFor(
       ...base,
       tier: "matched",
       eyebrow: `Same as your last ${record.s}`,
-      headline: `${record.reps} reps.`,
+      headline: "Dead level.",
       body: "Matched it exactly. One more identical session and it's time to move up the ladder.",
       confetti: false,
       rays: false,
@@ -229,11 +234,11 @@ export function celebrationFor(
     ...base,
     tier: "done",
     eyebrow: delta !== null ? `${delta} vs your last ${record.s}` : "Session logged",
-    headline: `${record.reps} reps.`,
+    headline: delta !== null && delta < 0 ? "Down on last time." : "Logged.",
     body:
       delta !== null && delta < 0
-        ? "Down on last time. Sleep, food and stress all show up here — one dip means nothing, three in a row means something."
-        : "Logged. Eat, shower, get on with the day.",
+        ? "Sleep, food and stress all show up here. One dip means nothing; three in a row means something."
+        : "Eat, shower, get on with the day.",
     confetti: false,
     rays: false,
   };

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { beatIt, buzz } from "@/lib/audio";
 
 /* The most-tapped control in the app. Two 78px targets — comfortably past the
  * spec's 64px floor, because this gets hit with a knuckle — and a digit that
@@ -24,6 +25,18 @@ export function RepDial({ value, onStep, previous }: Props) {
   const [direction, setDirection] = useState(1);
   const beating = previous !== null && value > previous;
 
+  /* Sound the moment you cross last time's number — while the weight is still
+   * in your hands, not later on the summary screen. Fires on the crossing
+   * only, never on every tap above it. */
+  const wasBeating = useRef(beating);
+  useEffect(() => {
+    if (beating && !wasBeating.current) {
+      beatIt();
+      buzz([10, 40, 16]);
+    }
+    wasBeating.current = beating;
+  }, [beating]);
+
   const step = (delta: number) => {
     setDirection(delta);
     onStep(delta);
@@ -46,9 +59,11 @@ export function RepDial({ value, onStep, previous }: Props) {
             <div
               key={value}
               className={cn(
-                "tnum absolute inset-0 text-[3.5rem] leading-[74px] font-bold tracking-[-0.04em]",
+                "tnum absolute inset-0 text-[3.5rem] leading-[74px] font-bold tracking-[-0.04em] transition-[text-shadow] duration-300",
                 direction > 0 ? "roll-up" : "roll-down",
-                beating ? "text-emerald" : "text-ink",
+                beating
+                  ? "text-emerald [text-shadow:0_0_22px_rgb(52_211_153/0.45)]"
+                  : "text-ink",
               )}
             >
               {value}

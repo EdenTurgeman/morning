@@ -21,7 +21,12 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icon-180.png", "icon-192.png", "icon-512.png"],
+      includeAssets: [
+        "icon-180.png",
+        "icon-192.png",
+        "icon-512.png",
+        "icon-maskable-512.png",
+      ],
       manifest: {
         name: "Morning",
         short_name: "Morning",
@@ -36,7 +41,9 @@ export default defineConfig({
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "icon-512.png", sizes: "512x512", type: "image/png" },
           {
-            src: "icon-512.png",
+            // Padded into the safe zone so Android's circular mask crops the
+            // sky, not the horizon.
+            src: "icon-maskable-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",

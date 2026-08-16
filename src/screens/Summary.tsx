@@ -60,7 +60,7 @@ export function Summary({ record, data, onNavigate }: Props) {
           </Button>
           <button
             onClick={() => onNavigate("backup")}
-            className="mt-2 w-full py-3 text-center text-[0.88rem] text-dim"
+            className="mt-2 w-full py-3 text-center text-[0.88rem] text-muted"
           >
             Back up now
           </button>

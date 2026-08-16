@@ -50,9 +50,20 @@ export function WeekMeter({
           )}
         </div>
 
+        {/* "13 of 5 this week" is nonsense. Once you're past target the
+            sentence has to change, not just the number. */}
         <div className="tnum mt-2 text-[0.82rem] text-muted">
-          <b className="font-semibold text-ink">{week.done}</b> of {week.target} this
-          week
+          {week.done > week.target ? (
+            <>
+              <b className="font-semibold text-ink">{week.done}</b> sessions this
+              week
+            </>
+          ) : (
+            <>
+              <b className="font-semibold text-ink">{week.done}</b> of {week.target}{" "}
+              this week
+            </>
+          )}
         </div>
       </div>
 

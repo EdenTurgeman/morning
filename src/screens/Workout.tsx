@@ -7,6 +7,7 @@ import { RepDial } from "@/components/RepDial";
 import { Button } from "@/components/Button";
 import { Confirm } from "@/components/Confirm";
 import { useCountdown } from "@/hooks/useCountdown";
+import { buzz, confirmTone } from "@/lib/audio";
 import { lastRepsFor, type AppData } from "@/lib/storage";
 import type { SetStep, Step } from "@/lib/steps";
 import type { SessionKey } from "@/program";
@@ -76,7 +77,9 @@ function TimerStepView({
   endsAt,
   onAdvance,
 }: Props & { step: Extract<Step, { kind: "timer" }> }) {
-  const remaining = useCountdown({ endsAt, onComplete: onAdvance });
+  // Count in the last three seconds here too — knowing the warm-up is about to
+  // end lets you be in position rather than reacting to the beep.
+  const remaining = useCountdown({ endsAt, onComplete: onAdvance, countIn: true });
 
   return (
     <div className="flex flex-1 flex-col">
@@ -196,7 +199,11 @@ function SetStepView({
         <Button
           variant="primary"
           className="mt-6"
-          onClick={() => onAdvance({ slot: step.slot, reps })}
+          onClick={() => {
+            confirmTone();
+            buzz(14);
+            onAdvance({ slot: step.slot, reps });
+          }}
         >
           Done
         </Button>
@@ -247,32 +254,43 @@ function RestStepView({
         )}
       </div>
 
-      {next?.kind === "set" && (
-        <div className="surface mb-4 rounded-[var(--radius-control)] px-4 py-3.5">
-          <div className="text-[0.66rem] tracking-[0.16em] text-dim uppercase">
-            Up next
+      {/* Preview and actions sit at the bottom, so the tap target is in the
+          same place it is on a set screen and the thumb never travels. */}
+      <div className="mt-auto">
+        {next?.kind === "set" && (
+          <div className="surface mb-3 rounded-[var(--radius-control)] px-4 py-3.5">
+            <div className="text-[0.66rem] tracking-[0.16em] text-dim uppercase">
+              Up next
+            </div>
+            <div className="mt-1 text-[1.05rem] font-semibold text-ink">
+              {next.exercise}
+              {next.sub && (
+                <span className="font-normal text-muted"> · {next.sub}</span>
+              )}
+            </div>
+            <div className="tnum mt-0.5 text-[0.86rem] text-dim">
+              set {next.n} of {next.of}
+              {next.load ? ` · ${next.load} kg` : ""}
+            </div>
+            {/* The target for what's coming, so you can set your intent during
+                the rest instead of reading it cold when the timer fires. */}
+            <div className="mt-1.5 text-[0.84rem] text-[var(--accent)]">
+              Target · {next.target}
+            </div>
           </div>
-          <div className="mt-1 text-[1.05rem] font-semibold text-ink">
-            {next.exercise}
-            {next.sub && (
-              <span className="font-normal text-muted"> · {next.sub}</span>
-            )}
-          </div>
-          <div className="tnum mt-0.5 text-[0.86rem] text-dim">
-            set {next.n} of {next.of}
-            {next.load ? ` · ${next.load} kg` : ""}
-          </div>
-          {/* The target for what's coming, so you can set your intent during
-              the rest instead of reading it cold when the timer fires. */}
-          <div className="mt-1.5 text-[0.84rem] text-[var(--accent)]">
-            Target · {next.target}
-          </div>
-        </div>
-      )}
+        )}
 
-      <div className="flex gap-2.5">
-        <Button onClick={() => onExtend(15)}>+15s</Button>
-        <Button onClick={() => onAdvance()}>Skip →</Button>
+        <div className="flex gap-2.5">
+          <Button onClick={() => onExtend(15)}>+15s</Button>
+          <Button
+            onClick={() => {
+              buzz(10);
+              onAdvance();
+            }}
+          >
+            Skip →
+          </Button>
+        </div>
       </div>
     </div>
   );

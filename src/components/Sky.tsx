@@ -2,26 +2,72 @@ import { Particles } from "@/components/ui/particles";
 import { Meteors } from "@/components/ui/meteors";
 
 /* ---------------------------------------------------------------------------
- * The backdrop is a dawn, layered the way a real one is:
+ * THE SKY
  *
- *   1. a vertical sky gradient — near-black at the zenith, warming toward the
- *      horizon, tinted by the live accent so the whole screen shares one
- *      light source
- *   2. stars, which fade out as the sun comes up
- *   3. the belt of Venus — the soft counter-coloured band that sits above the
- *      horizon before sunrise. It's the detail that makes a dawn read as a
- *      dawn rather than as a gradient
- *   4. the sun itself, climbing as the session progresses
- *   5. two slow cloud masses
- *   6. film grain, which stops the large soft gradients banding on OLED
+ * A dawn, layered the way a real one is. Earlier versions were all smooth
+ * radial gradients, which is why it read as flat — actual dawn skies have
+ * structure: haze banding near the horizon, wispy cloud catching the light
+ * from underneath, and rays fanning up from a sun that hasn't cleared the
+ * ground yet.
  *
- * Everything is a radial or linear gradient with its own falloff — there is
- * deliberately no `filter: blur()` on any of the large elements. Blurring a
- * viewport-sized layer every frame is expensive, and this screen is held
- * awake for twenty minutes on a phone. Gradients are effectively free.
+ * The cloud texture is fractal noise (feTurbulence) baked into a data URI and
+ * used as a *mask* over a coloured layer, so the cloud takes the sky's live
+ * colour instead of being painted on top of it. Baked rather than live: the
+ * filter is rasterised once by the browser, and after that the layer is just
+ * a bitmap being translated, which the compositor handles for free. Animating
+ * turbulence parameters directly would re-run the filter every frame — far
+ * too expensive for a screen held awake for twenty minutes.
  *
- * Motion is transform and opacity only, so nothing here triggers layout.
+ * Everything here animates on transform and opacity only. Nothing triggers
+ * layout, and there is no filter: blur() on any full-size layer.
  * ------------------------------------------------------------------------- */
+
+/** Wispy horizontal cloud. Low vertical frequency stretches the noise into
+ *  streaks; the colour matrix pushes most of it transparent so only the
+ *  denser parts survive as cloud. */
+const CLOUD =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='420'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.021' numOctaves='5' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.7 0 0 0 -0.66'/%3E%3C/filter%3E%3Crect width='900' height='420' filter='url(%23c)'/%3E%3C/svg%3E\")";
+
+/** Coarser, higher-contrast noise for the nearer cloud bank. */
+const CLOUD_NEAR =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='300'%3E%3Cfilter id='d' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011 0.032' numOctaves='4' seed='29' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2.1 0 0 0 -0.95'/%3E%3C/filter%3E%3Crect width='700' height='300' filter='url(%23d)'/%3E%3C/svg%3E\")";
+
+function CloudBand({
+  texture,
+  size,
+  top,
+  height,
+  tint,
+  opacity,
+  animation,
+}: {
+  texture: string;
+  size: string;
+  top: string;
+  height: string;
+  tint: string;
+  opacity: number;
+  animation: string;
+}) {
+  return (
+    <div
+      className="absolute -left-1/2 w-[200%] will-change-transform"
+      style={{
+        top,
+        height,
+        opacity,
+        animation,
+        background: tint,
+        WebkitMaskImage: texture,
+        maskImage: texture,
+        WebkitMaskSize: size,
+        maskSize: size,
+        WebkitMaskRepeat: "repeat-x",
+        maskRepeat: "repeat-x",
+      }}
+    />
+  );
+}
 
 export function Sky({ progress }: { progress: number }) {
   const t = Math.min(1, Math.max(0, progress));
@@ -32,27 +78,66 @@ export function Sky({ progress }: { progress: number }) {
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
       style={{ background: "#04050a" }}
     >
-      {/* 1. the sky */}
+      {/* 1. THE SKY PROPER — and the important thing here is what it does NOT
+             do: it doesn't take the accent hue.
+
+             Rayleigh scattering is wavelength-dependent, so the zenith stays
+             deep blue even at the height of a sunrise; only the light coming
+             through the thickest atmosphere, at the horizon, turns warm. An
+             earlier version tinted the whole sky with the live accent, which
+             is why it read as a coloured wash rather than as sky. The zenith
+             is now fixed blue and the warmth is confined to the bottom. */}
       <div
-        className="absolute inset-0 transition-[opacity] duration-1000"
+        className="absolute inset-0"
         style={{
           background: `linear-gradient(to bottom,
-            #04050a 0%,
-            color-mix(in oklab, var(--night-tinted) 55%, #04050a) 38%,
-            color-mix(in oklab, var(--accent) 9%, #05060c) 66%,
-            color-mix(in oklab, var(--accent) 20%, #06070e) 86%,
-            color-mix(in oklab, var(--accent) 34%, #07080f) 100%)`,
+            #04050c 0%,
+            oklch(0.19 0.055 268) 24%,
+            oklch(0.24 0.07 276) 46%,
+            oklch(0.27 0.075 288) 62%,
+            oklch(0.29 0.07 300) 78%,
+            oklch(0.30 0.06 312) 100%)`,
         }}
       />
 
-      {/* 2. stars and meteors, fading as the sun rises. Both live on the same
-             opacity layer, so the night sky empties out as one thing rather
-             than in pieces. Meteors are unmounted entirely past the halfway
-             point — they'd be invisible anyway, and this stops their timers. */}
+      {/* 2. the ozone band. Between the blue zenith and the warm horizon a
+             real twilight sky carries a distinct purple-pink band — ozone
+             absorption on top of Rayleigh. It's the layer most often missing
+             from a painted sky, and it peaks partway through twilight rather
+             than at either end, so its opacity follows a curve, not a ramp. */}
       <div
-        className="absolute inset-0 transition-opacity duration-[1400ms] ease-out"
-        style={{ opacity: 0.9 * (1 - t) + 0.05 }}
-      >
+        className="absolute inset-x-0"
+        style={{
+          bottom: "18vh",
+          height: "46vh",
+          /* Peaks mid-twilight rather than at either end, so this one is a
+             curve. sin() can't be expressed in calc(), so it stays in JS —
+             but it shares the same duration and easing as --sun so it still
+             moves in step with everything else. */
+          opacity: 0.16 + Math.sin(Math.PI * Math.min(1, t * 0.86 + 0.07)) * 0.42,
+          transition: "opacity 1600ms linear",
+          background: `linear-gradient(to top,
+            transparent 0%,
+            color-mix(in oklab, oklch(0.55 0.13 344) 55%, transparent) 34%,
+            color-mix(in oklab, oklch(0.5 0.11 330) 26%, transparent) 62%,
+            transparent 92%)`,
+        }}
+      />
+
+      {/* 3. haze. Atmosphere is denser near the ground, so the bottom of the
+             sky lifts everywhere — not only where the sun is. */}
+      <div
+        className="sky-haze"
+        style={{
+          background: `linear-gradient(to top,
+            color-mix(in oklab, oklch(0.62 0.05 calc(var(--accent-h) - 18)) 34%, transparent) 0%,
+            color-mix(in oklab, oklch(0.6 0.045 calc(var(--accent-h) - 18)) 10%, transparent) 44%,
+            transparent 82%)`,
+        }}
+      />
+
+      {/* 3. stars and meteors, emptying out as the sun comes up */}
+      <div className="sky-stars">
         <Particles
           className="absolute inset-0"
           quantity={46}
@@ -61,72 +146,140 @@ export function Sky({ progress }: { progress: number }) {
           size={0.5}
           color="#ffffff"
         />
-        {t < 0.5 && (
+        {/* Unmount only once the star layer is nearly transparent anyway.
+            Cutting these at t=0.5 meant they vanished mid-flight while still
+            at half opacity, which read as a glitch. */}
+        {t < 0.88 && (
           <div className="absolute inset-0 overflow-hidden">
             <Meteors number={7} minDelay={1.4} maxDelay={7} angle={228} />
           </div>
         )}
       </div>
 
-      {/* 3. belt of Venus — the counter-hue band that precedes sunrise */}
+      {/* 4. crepuscular rays. Feathered stops rather than hard edges — a
+             repeating-conic-gradient with abrupt stops reads as a pinwheel,
+             not as light. Anchored below the fold so the fan converges
+             off-screen. */}
       <div
-        className="absolute right-0 -left-[10%] w-[120%] transition-all duration-[1400ms] ease-out"
+        className="sun-rays"
         style={{
-          bottom: "18%",
-          height: "34vh",
-          opacity: 0.5 * Math.sin(Math.PI * Math.min(1, t * 0.9 + 0.05)),
-          background: `linear-gradient(to top,
-            transparent,
-            color-mix(in oklab, oklch(0.72 0.11 calc(var(--accent-h) + 34)) 40%, transparent) 45%,
-            transparent)`,
+          animation: "rayDrift 150s ease-in-out infinite",
+          background: `repeating-conic-gradient(from 184deg at 50% 112%,
+            transparent 0deg,
+            color-mix(in oklab, var(--accent) 6%, transparent) 1.4deg,
+            color-mix(in oklab, var(--accent) 26%, transparent) 3deg,
+            color-mix(in oklab, var(--accent) 6%, transparent) 4.6deg,
+            transparent 6deg,
+            transparent 9.5deg)`,
+          WebkitMaskImage:
+            "radial-gradient(ellipse 85% 78% at 50% 112%, #000 6%, rgb(0 0 0 / 0.5) 34%, transparent 66%)",
+          maskImage:
+            "radial-gradient(ellipse 85% 78% at 50% 112%, #000 6%, rgb(0 0 0 / 0.5) 34%, transparent 66%)",
         }}
       />
 
-      {/* 4. the sun. Translated rather than repositioned, so it never lays out. */}
+      {/* 5. THE SUN, in three parts — which is what stops it reading flat.
+             A single radial gradient has no sun in it, only a wash. */}
+
+      {/* 5a. RAYLEIGH SPREAD — broad, saturated, and falling off with angle
+              from the sun. Anchored to the bottom EDGE so its falloff runs
+              off-screen rather than terminating as a visible lobe: the earlier
+              version was a 190vw ellipse floating mid-screen, and its left and
+              right edges swept through the frame as it rose. */}
       <div
-        className="absolute bottom-0 left-1/2 h-[78vh] w-[190vw] rounded-[50%] will-change-transform"
+        className="sun-spread"
         style={{
-          transform: `translate(-50%, ${46 - t * 30}%)`,
-          opacity: 0.5 + t * 0.42,
-          transition:
-            "transform 1400ms var(--ease-out-expo), opacity 1400ms ease-out",
-          background: `radial-gradient(ellipse at 50% 50%,
-            var(--accent) 0%,
-            color-mix(in oklab, var(--accent) 52%, transparent) 26%,
-            color-mix(in oklab, var(--accent) 18%, transparent) 46%,
-            transparent 68%)`,
+          background: `radial-gradient(ellipse 118% 92% at 50% 100%,
+            color-mix(in oklab, var(--accent) 44%, transparent) 0%,
+            color-mix(in oklab, var(--accent) 27%, transparent) 18%,
+            color-mix(in oklab, var(--accent) 14%, transparent) 36%,
+            color-mix(in oklab, var(--accent) 6%, transparent) 55%,
+            color-mix(in oklab, var(--accent) 2%, transparent) 72%,
+            transparent 88%)`,
         }}
       />
 
-      {/* the horizon itself — a hairline of concentrated light */}
+      {/* 5b. MIE HALO — the tight glow immediately around the sun. Mie
+              scattering is essentially wavelength-independent, which is why
+              this halo washes toward white-gold rather than staying the
+              saturated colour of the sky. Keeping it coloured was a large part
+              of why the sun read as a flat disc of accent.
+
+              It rises and grows off --sun, like every other layer here — see
+              the sun-* utilities in index.css for why that's a single shared
+              custom property rather than per-layer transitions. */}
       <div
-        className="absolute right-0 left-0 h-px transition-all duration-[1400ms] ease-out"
+        className="sun-bloom"
         style={{
-          bottom: `${13 + t * 15}%`,
-          opacity: 0.25 + t * 0.45,
-          background: `linear-gradient(90deg, transparent,
-            var(--accent) 26%, var(--accent) 74%, transparent)`,
+          /* closest-side, NOT the default farthest-corner: with
+             farthest-corner the radius reaches 0.707× the box width, so a
+             stop at 88% lands at 0.62w — still opaque when the square element
+             box clips it. That clipping is what produced the hard-edged
+             "halos" that appeared and vanished as the sun moved. */
+          background: `radial-gradient(circle closest-side at 50% 50%,
+            color-mix(in oklab, var(--accent) 30%, white) 0%,
+            color-mix(in oklab, var(--accent) 62%, white) 6%,
+            color-mix(in oklab, var(--accent) 78%, transparent) 13%,
+            color-mix(in oklab, var(--accent) 46%, transparent) 24%,
+            color-mix(in oklab, var(--accent) 22%, transparent) 38%,
+            color-mix(in oklab, var(--accent) 8%, transparent) 56%,
+            color-mix(in oklab, var(--accent) 2%, transparent) 74%,
+            transparent 92%)`,
         }}
       />
 
-      {/* 5. cloud masses */}
-      <div
-        className="absolute -top-[16vh] -left-[24vw] h-[68vh] w-[92vw] [animation:drift_52s_ease-in-out_infinite]"
-        style={{
-          background: `radial-gradient(closest-side ellipse at 45% 45%,
-            color-mix(in oklab, var(--accent) 15%, transparent), transparent 72%)`,
-        }}
+      {/* There was a sun disc here that faded in over the last half of the
+          session. It sat behind the summary's content as a hard-edged bright
+          blob (the farthest-corner clipping above), and a literal sun disc
+          only makes sense if the sun is actually rising — which it now does
+          only on the Daybreak screen. Removed rather than patched. */}
+
+      {/* 6. cloud. Two banks at different scales and speeds — the parallax is
+             what gives the sky depth rather than looking like a backdrop. The
+             near bank is lit from below, so it's tinted warmer. */}
+      <CloudBand
+        texture={CLOUD}
+        size="900px 420px"
+        top="18vh"
+        height="52vh"
+        opacity={0.3}
+        tint={`linear-gradient(to top,
+          color-mix(in oklab, var(--accent) 46%, transparent),
+          color-mix(in oklab, var(--accent) 12%, transparent) 62%,
+          transparent)`}
+        animation="cloudFar 200s linear infinite"
       />
+      <CloudBand
+        texture={CLOUD_NEAR}
+        size="700px 300px"
+        top="46vh"
+        height="38vh"
+        opacity={0.26}
+        tint={`linear-gradient(to top,
+          color-mix(in oklab, oklch(0.8 0.13 calc(var(--accent-h) + 16)) 62%, transparent),
+          color-mix(in oklab, var(--accent) 14%, transparent) 58%,
+          transparent)`}
+        animation="cloudNear 128s linear infinite"
+      />
+
+      {/* 7. legibility scrim. The glow gets bright enough near the bottom at
+             full sunrise to swallow secondary text sitting over it — "Back up
+             now" on the summary was effectively unreadable. This holds the
+             sky back just enough that any text is legible at any progress,
+             while leaving the colour and structure intact. */}
       <div
-        className="absolute top-[26vh] -right-[28vw] h-[56vh] w-[84vw] [animation:drift-slow_67s_ease-in-out_infinite]"
+        className="absolute inset-0"
         style={{
-          background: `radial-gradient(closest-side ellipse at 55% 50%,
-            color-mix(in oklab, oklch(0.7 0.13 calc(var(--accent-h) + 26)) 13%, transparent),
-            transparent 74%)`,
+          background: `linear-gradient(to bottom,
+            rgb(4 5 10 / 0.15) 0%,
+            rgb(4 5 10 / 0.05) 34%,
+            rgb(4 5 10 / 0.22) 66%,
+            rgb(4 5 10 / 0.46) 88%,
+            rgb(4 5 10 / 0.6) 100%)`,
         }}
       />
 
-      {/* 6. grain */}
+      {/* 8. grain, over everything, so the gradients don't band on OLED */}
       <div className="grain" />
     </div>
   );
