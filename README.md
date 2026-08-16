@@ -162,6 +162,48 @@ stars that fade as the sun climbs, the belt of Venus, the sun, drifting cloud)
 using only gradients and transforms — no `filter: blur()` on any large layer,
 because this screen is held awake for twenty minutes on a phone.
 
+### The Ledger
+
+Lifetime tonnage is the headline number, because this program fixes the load
+and treats reps as the only signal — so `reps × load` is the one figure that
+turns that signal into something visibly compounding.
+
+Two honesty constraints on it, both deliberate:
+
+- Loaded movements here are two dumbbells and the program's `load` is per
+  handle, so a rep moves `2 × load`.
+- Bodyweight work contributes **0 kg** rather than a guessed multiplier.
+  Counting it would need your bodyweight and an invented coefficient, which
+  would make the headline number fiction. Those reps still count toward the
+  rep total.
+
+Milestones (tonnage, reps, sessions) are sparse on purpose — one you hit every
+fortnight is a chore. Each fires exactly once, detected by diffing the ledger
+with and without the session just logged.
+
+### The Year
+
+Fifty-two weeks of days, each painted from the sunrise ramp. Intensity is
+scaled to **your own** rep range rather than an arbitrary target, so your
+quietest session is pre-dawn indigo and your best is full gold — and a good
+month literally looks warmer than a bad one.
+
+### Exercise figures
+
+Original inline SVG in [`src/components/Figure.tsx`](src/components/Figure.tsx),
+drawn rather than sourced: the no-runtime-network rule forbids fetching, and
+stock fitness art is someone else's copyright. Drawing them also buys
+something a photo can't — limbs are `<g>` elements rotated about their joint,
+and each keyframe is timed to the cue it illustrates. The push-up spends 3s
+lowering, holds 1s at the bottom, then snaps up, so the tempo is *shown*
+rather than described.
+
+The name → figure mapping is split into
+[`src/lib/figures.ts`](src/lib/figures.ts) so CI can assert every exercise
+resolves to artwork, and that "Hammer curl" doesn't fall through to the
+generic "curl" rule. An unmapped exercise degrades to no artwork rather than
+breaking the set screen.
+
 ### Celebrations
 
 The summary screen picks **one** tier, the highest you actually earned — see
