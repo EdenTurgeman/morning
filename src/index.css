@@ -1,0 +1,360 @@
+@import "tailwindcss";
+/* Upright weights only — the app never renders italic, and the italic axis is
+   a second full set of files. The non-Latin subsets that come with this entry
+   point are excluded from the service worker precache in vite.config.ts; their
+   unicode-range means the browser never requests them anyway. */
+@import "@fontsource-variable/inter/wght.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   MORNING — "Sunrise" design system
+
+   One idea drives the whole palette: the session is a sunrise. A single
+   variable (progress through the workout, 0 → 1) drives the accent hue from
+   pre-dawn indigo through magenta to sunrise amber, and everything tinted —
+   the timer ring, the progress bar, the primary button, the horizon glow —
+   samples that same live value. So you can read how far through the session
+   you are from across the room without parsing a step counter.
+
+   The ramp is deliberately linear in hue: 252° + t·140°, wrapped at 360.
+     t = 0.0  →  252°  indigo      (pre-dawn)
+     t = 0.5  →  322°  magenta     (first light)
+     t = 1.0  →   32°  amber       (sunrise)
+--------------------------------------------------------------------------- */
+
+@theme {
+  --font-sans: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+
+  --color-night: #07080f;
+  --color-ink: #f0f2f8;
+  --color-muted: #a0a8bd;
+  --color-dim: #6b7488;
+  --color-hairline: rgb(255 255 255 / 0.09);
+
+  /* Semantic colours. Deliberately kept off the sunrise ramp so they never
+     collide with the live accent. */
+  --color-emerald: #34d399;
+  --color-rose: #fb7185;
+
+  --radius-card: 22px;
+  --radius-control: 18px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Registering the three accent channels as typed custom properties is what
+   lets the browser *interpolate* them. Without @property a hue change is a
+   hard swap; with it, advancing a step drifts the entire app's colour over
+   ~900ms. Supported in Safari 16.4+, which is the target. */
+@property --accent-h {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 252;
+}
+@property --accent-s {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 83%;
+}
+@property --accent-l {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 68%;
+}
+
+/* Live accent. JS writes --accent-h / --accent-s / --accent-l; everything else
+   derives from them, so a single write repaints the entire app. */
+:root {
+  --accent-h: 252;
+  --accent-s: 83%;
+  --accent-l: 68%;
+  transition:
+    --accent-h 900ms var(--ease-out-expo),
+    --accent-s 900ms var(--ease-out-expo),
+    --accent-l 900ms var(--ease-out-expo);
+
+  --accent: hsl(var(--accent-h) var(--accent-s) var(--accent-l));
+  --accent-soft: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.16);
+  --accent-line: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.42);
+  --accent-glow: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.55);
+  /* Text sitting on a filled accent button. Dark enough to read on every hue
+     the ramp passes through. */
+  --accent-contrast: hsl(var(--accent-h) 60% 12%);
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+
+  /* shadcn / Magic UI compatibility tokens */
+  --background: var(--color-night);
+  --foreground: var(--color-ink);
+  --card: rgb(255 255 255 / 0.04);
+  --card-foreground: var(--color-ink);
+  --popover: #12141f;
+  --popover-foreground: var(--color-ink);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-contrast);
+  --secondary: rgb(255 255 255 / 0.06);
+  --secondary-foreground: var(--color-ink);
+  --muted: rgb(255 255 255 / 0.05);
+  --muted-foreground: var(--color-muted);
+  --accent-bg: rgb(255 255 255 / 0.07);
+  --destructive: var(--color-rose);
+  --border: var(--color-hairline);
+  --input: var(--color-hairline);
+  --ring: var(--accent);
+  --radius: 0.9rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent-bg);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --animate-shine: shine var(--duration) infinite linear;
+  @keyframes shine {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    /* The app is used with sweaty hands and knuckles — text selection and the
+       iOS callout menu are pure noise here. Re-enabled per-element on the one
+       textarea that needs it. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Every number that changes in place gets tabular figures so it doesn't
+     jitter as digits swap. */
+  :where(.tnum, button, input, textarea) {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+}
+
+/* --- surfaces ------------------------------------------------------------ */
+
+@utility surface {
+  position: relative;
+  background:
+    linear-gradient(
+      180deg,
+      hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.07),
+      transparent 62%
+    ),
+    rgb(255 255 255 / 0.035);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--color-hairline);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 24px 48px -28px rgb(0 0 0 / 0.9);
+}
+
+/* A hairline that fades out at both ends — used to separate blocks without
+   drawing a hard line across the screen. */
+@utility rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-hairline) 18%,
+    var(--color-hairline) 82%,
+    transparent
+  );
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Fine film grain over the whole app. It's what stops large flat gradients
+   from banding on an OLED phone, and it gives the dark surfaces some tooth. */
+@utility grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.032;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- motion --------------------------------------------------------------- */
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -4%, 0) scale(1.12);
+  }
+}
+
+@keyframes drift-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(-7%, 5%, 0) scale(0.94);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Step-to-step transition on the workout screen. Compositor-driven so it can
+   never block the next step from mounting. */
+.step-enter {
+  animation: stepEnter 300ms var(--ease-out-expo) both;
+}
+
+@keyframes stepEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* Rep counter digit roll, in the direction the value moved. */
+.roll-up {
+  animation: rollUp 240ms var(--ease-out-expo) both;
+}
+.roll-down {
+  animation: rollDown 240ms var(--ease-out-expo) both;
+}
+
+@keyframes rollUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rollDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

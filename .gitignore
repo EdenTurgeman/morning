@@ -1,0 +1,9 @@
+# The product spec stays local — it describes the person this was built for.
+spec.md
+
+node_modules/
+dist/
+*.local
+.DS_Store
+Thumbs.db
+*.tsbuildinfo

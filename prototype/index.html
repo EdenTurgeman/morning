@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Morning">
+<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Morning</title>
+<style>
+:root{
+  --bg:#0f1115;--panel:#171a21;--panel2:#1d212a;--line:#2a2f3a;
+  --ink:#e8eaf0;--muted:#9aa3b2;--dim:#6f7889;
+  --a:#5eead4;--b:#a78bfa;--c:#fbbf24;--d:#f87171;--ok:#34d399;
+  --safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;
+  font:16px/1.55 -apple-system,ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;
+  overscroll-behavior-y:contain}
+#app{min-height:100%;padding:calc(var(--safeT) + 14px) 16px calc(var(--safeB) + 24px);max-width:620px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 2px;letter-spacing:-.02em}
+h2{font-size:1.05rem;margin:26px 0 8px;letter-spacing:-.01em}
+.muted{color:var(--muted)} .dim{color:var(--dim)}
+.sm{font-size:.85rem} .xs{font-size:.76rem}
+.up{text-transform:uppercase;letter-spacing:.07em}
+.center{text-align:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px 16px;margin:11px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rowb{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.93rem}
+.rowb:last-child{border-bottom:0}
+.rowb b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;
+  border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--panel2)}
+.pill.a{color:var(--a);border-color:color-mix(in srgb,var(--a) 45%,transparent)}
+.pill.b{color:var(--b);border-color:color-mix(in srgb,var(--b) 45%,transparent)}
+.pill.c{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.btn{display:block;width:100%;padding:17px;border-radius:15px;background:var(--panel2);
+  border:1px solid var(--line);font-weight:650;font-size:1rem;transition:transform .06s}
+.btn:active{transform:scale(.985)}
+.btn.pri{background:var(--a);color:#06231f;border-color:var(--a);font-size:1.1rem;padding:20px}
+.btn.gho{background:none}
+.btn.sm2{padding:12px;font-size:.9rem}
+.btnrow{display:flex;gap:10px;margin-top:10px}
+.btnrow .btn{flex:1}
+.tabs{display:flex;gap:8px;margin:18px 0 4px}
+.tabs .btn{padding:11px;font-size:.85rem;font-weight:600}
+.big{font-size:2.6rem;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.huge{font-size:4.6rem;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+
+/* workout screen */
+.wtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.prog{height:4px;background:var(--panel2);border-radius:9px;overflow:hidden;margin:8px 0 22px}
+.prog i{display:block;height:100%;background:var(--a);border-radius:9px;transition:width .3s}
+.exname{font-size:1.9rem;font-weight:700;letter-spacing:-.025em;line-height:1.1;margin:0 0 6px}
+.exmeta{color:var(--muted);font-size:.95rem;margin-bottom:16px}
+.exmeta b{color:var(--ink)}
+.cues{list-style:none;padding:0;margin:0 0 20px}
+.cues li{position:relative;padding-left:18px;color:var(--muted);font-size:.95rem;margin:7px 0}
+.cues li:before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;border-radius:9px;background:var(--a)}
+.cues li.warn{color:var(--c)} .cues li.warn:before{background:var(--c)}
+
+.stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin:6px 0 4px}
+.stepper button{width:66px;height:66px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);
+  font-size:1.9rem;font-weight:600;display:grid;place-items:center;line-height:1}
+.stepper button:active{background:var(--line)}
+.stepval{min-width:118px;text-align:center}
+.stepval .n{font-size:3.4rem;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+
+.ring{display:block;margin:8px auto 4px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-linecap:round}
+.ringbg{stroke:var(--panel2)} .ringfg{stroke:var(--a);transition:stroke-dashoffset .95s linear}
+.restwrap{position:relative;width:240px;margin:0 auto}
+.restnum{position:absolute;inset:0;display:grid;place-items:center;transform:none}
+
+.next{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:18px}
+.hist{font-size:.9rem}
+.hist .h{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line)}
+.hist .h:last-child{border-bottom:0}
+.banner{border-left:3px solid var(--c);background:var(--panel2);border-radius:0 12px 12px 0;padding:11px 14px;margin:11px 0;font-size:.88rem}
+.banner.ok{border-color:var(--ok)} .banner.d{border-color:var(--d)}
+textarea{width:100%;min-height:110px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+  border-radius:12px;padding:11px;font:13px/1.45 ui-monospace,Menlo,monospace;-webkit-user-select:text;user-select:text}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.9rem}
+.kv .k{color:var(--muted)}
+.fade{animation:f .22s ease}
+@keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.spacer{height:14px}
+a{color:var(--a)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+
+/* ---------------- program ---------------- */
+const PROGRAM = {
+  A: {
+    key:"A", name:"Heavy", cls:"a", mins:"~16 min",
+    loadout:[["Dumbbells","10 kg each"],["  per handle","4×1.25 + 2×2.5"],["Backpack","empty"]],
+    blocks:[
+      {t:"warmup",secs:90,title:"Warm-up",
+       cues:["20 arm circles forward, 20 back","10 half-effort push-ups","10 towel dislocates — grip a towel wide, sweep it overhead and behind you"]},
+      {t:"straight",ex:"Push-up",sub:"feet elevated",sets:3,rest:60,target:"8–15 reps",bw:true,
+       cues:["3s down · 1s PAUSE at the bottom · fast up","Elbows 45° from your torso, glutes squeezed","Go to failure, or one rep short"]},
+      {t:"super",sets:3,rest:45,items:[
+        {ex:"Overhead press",sub:"standing, strict",w:10,target:"8–15 reps",
+         cues:["Ribs down. No leg drive, no leaning back","Start at ear height, finish biceps by your ears"]},
+        {ex:"Curl",sub:"",w:10,target:"10–18 reps",
+         cues:["3 seconds lowering","FULL arm extension at the bottom of every rep","That bottom inch is the whole exercise"]}]},
+      {t:"super",sets:2,rest:45,items:[
+        {ex:"Bent-over row",sub:"",w:10,target:"15–20 reps",
+         cues:["Hinge to 45°, flat back","Pull to your hips and squeeze","Shoulder insurance — don't skip it"]},
+        {ex:"Hammer curl",sub:"",w:10,target:"12–20 reps",
+         cues:["Palms facing each other","Full stretch at the bottom"]}]}
+    ]
+  },
+  B: {
+    key:"B", name:"Light", cls:"b", mins:"~16 min",
+    loadout:[["Dumbbells","5 kg each"],["  per handle","2×2.5"],["Backpack","10 kg (8×1.25)"]],
+    blocks:[
+      {t:"warmup",secs:90,title:"Warm-up",
+       cues:["20 arm circles forward, 20 back","10 half-effort push-ups","10 towel dislocates","Load the pack and set the dumbbells while you do this"]},
+      {t:"straight",ex:"Push-up",sub:"backpack, 10 kg",sets:3,rest:60,target:"8–15 reps",w:10,
+       cues:["Plates wrapped in a towel, straps tight","3s down · 1s PAUSE at the bottom · fast up","Feet on the floor. Too easy → hands on books for a deficit"]},
+      {t:"super",sets:3,rest:45,items:[
+        {ex:"Lateral raise",sub:"",w:5,target:"15–25 reps",
+         cues:["Lead with your elbows, stop at shoulder height","No swinging","At failure → 5–8 partial reps in the bottom third",]},
+        {ex:"Rear-delt fly",sub:"",w:5,target:"15–25 reps",
+         cues:["Hinge until almost parallel to the floor","Open your arms wide like a curtain, squeeze the blades"]}]},
+      {t:"straight",ex:"Lateral raise",sub:"myo-reps",sets:5,rest:20,w:5,
+       targets:["all-out to failure","4–5 reps","4–5 reps","4–5 reps","4–5 reps"],
+       cues:["Set 1 is all-out. Then 20s rest, 4–5 reps, repeat","Stop when you can't get 4 clean reps","The 20-second rest IS the mechanism — don't stretch it"],
+       hard:true}
+    ]
+  }
+};
+
+const GUIDE = [
+ {h:"The one rule",p:"Every working set goes to failure or one rep short. Your load is fixed, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.) — light loads stopped short grow almost nothing (2.8%)."},
+ {h:"Beat reps, not weight",p:"The grey number next to each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the progression ladder."},
+ {h:"Progression ladder",p:"1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Change the loadout (B → 7.5 kg dumbbells, 5 kg pack).  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups."},
+ {h:"Protein — 120 g/day",p:"2.0 g/kg, roughly 30 g across four meals. Anywhere in 105–140 g is fine."},
+ {h:"Calories — +250/day",p:"You're lean and already burning through cycling and yoga. Target +150–250 g on the scale per week. If the weekly average is flat, eat more. This is the bottleneck, not the training."},
+ {h:"Creatine — 5 g/day",p:"Any time of day, no loading needed. The only supplement worth the money. Expect +1–1.5 kg in the first fortnight from intracellular water — that's fullness, not fat."},
+ {h:"Fasted is fine",p:"Total daily intake beats timing. Don't rebuild your morning around a pre-workout meal. A coffee 20 minutes before does more for this session than food will."},
+ {h:"The two ways this fails",p:"① You don't go to failure, because 5 or 10 kg doesn't feel like it deserves that much effort.  ② You don't eat more."}
+];
+
+/* ---------------- storage ---------------- */
+const KEY="mub_v1";
+let S = load();
+function load(){
+  try{ const r=localStorage.getItem(KEY); if(r) return JSON.parse(r); }catch(e){}
+  return {v:1,history:[],lastBackup:null};
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ toast("Couldn't save — storage full?"); } }
+async function askPersist(){
+  try{ if(navigator.storage&&navigator.storage.persist){ if(!(await navigator.storage.persisted())) await navigator.storage.persist(); } }catch(e){}
+}
+
+/* ---------------- audio + wakelock ---------------- */
+let AC=null, wake=null;
+function unlockAudio(){ if(AC) return; try{ AC=new (window.AudioContext||window.webkitAudioContext)();
+  const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource(); s.buffer=b; s.connect(AC.destination); s.start(0);}catch(e){} }
+function beep(n=3){
+  if(!AC) return;
+  for(let i=0;i<n;i++){
+    const o=AC.createOscillator(), g=AC.createGain(), t=AC.currentTime+i*0.19;
+    o.frequency.value = i===n-1?1180:840; o.type="sine";
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.35,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+0.18);
+  }
+}
+async function lockScreen(on){
+  try{
+    if(on){ if("wakeLock" in navigator && !wake) wake=await navigator.wakeLock.request("screen"); }
+    else if(wake){ await wake.release(); wake=null; }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&W.active) lockScreen(true); });
+
+/* ---------------- helpers ---------------- */
+const $=(h)=>{const d=document.createElement("div");d.innerHTML=h.trim();return d.firstChild;};
+const esc=(s)=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mmss=(s)=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+const today=()=>new Date().toISOString().slice(0,10);
+function daysAgo(iso){ if(!iso) return null; return Math.floor((Date.now()-new Date(iso).getTime())/864e5); }
+function fmtDate(iso){ const d=new Date(iso+"T12:00:00");
+  return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}); }
+function toast(msg){
+  const t=$(`<div style="position:fixed;left:50%;bottom:calc(var(--safeB) + 26px);transform:translateX(-50%);
+    background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:11px 17px;border-radius:12px;
+    font-size:.88rem;z-index:99;box-shadow:0 8px 26px rgba(0,0,0,.45);max-width:88vw;text-align:center">${esc(msg)}</div>`);
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2300);
+}
+
+/* which session next */
+function nextKey(){
+  for(let i=S.history.length-1;i>=0;i--){ const k=S.history[i].s; if(k==="A") return "B"; if(k==="B") return "A"; }
+  return "A";
+}
+/* last logged reps for a set slot */
+function lastFor(sk,slot){
+  for(let i=S.history.length-1;i>=0;i--){
+    const h=S.history[i]; if(h.s!==sk) continue;
+    if(h.log&&h.log[slot]!=null) return h.log[slot];
+  }
+  return null;
+}
+function streak(){
+  if(!S.history.length) return 0;
+  const days=new Set(S.history.map(h=>h.d)); let n=0;
+  for(let i=0;i<400;i++){
+    const d=new Date(Date.now()-i*864e5).toISOString().slice(0,10);
+    if(days.has(d)) n++; else if(i>0) break;
+  }
+  return n;
+}
+
+/* ---------------- build steps ---------------- */
+function buildSteps(sk){
+  const P=PROGRAM[sk], out=[];
+  P.blocks.forEach((b,bi)=>{
+    if(b.t==="warmup"){ out.push({k:"timer",secs:b.secs,title:b.title,cues:b.cues}); return; }
+    if(b.t==="straight"){
+      for(let i=0;i<b.sets;i++){
+        out.push({k:"set",ex:b.ex,sub:b.sub,w:b.w,bw:b.bw,
+          target:b.targets?b.targets[i]:b.target,cues:b.cues,hard:b.hard,
+          n:i+1,of:b.sets,slot:`${bi}.0.${i}`});
+        if(i<b.sets-1) out.push({k:"rest",secs:b.rest});
+      }
+      out.push({k:"rest",secs:b.rest,tail:true});
+    }
+    if(b.t==="super"){
+      for(let i=0;i<b.sets;i++){
+        b.items.forEach((it,j)=>{
+          out.push({k:"set",ex:it.ex,sub:it.sub,w:it.w,target:it.target,cues:it.cues,
+            n:i+1,of:b.sets,slot:`${bi}.${j}.${i}`,ss:j===0?"1 of 2":"2 of 2",
+            noRest:j<b.items.length-1});
+        });
+        out.push({k:"rest",secs:b.rest,tail:i===b.sets-1});
+      }
+    }
+  });
+  // drop trailing rest
+  while(out.length && out[out.length-1].k==="rest") out.pop();
+  // remove rests that follow a noRest set
+  return out.filter((s,i)=> !(s.k==="rest" && out[i-1] && out[i-1].noRest));
+}
+
+/* ---------------- workout runtime ---------------- */
+const W={active:false,sk:null,steps:[],i:0,log:{},started:0,timer:null,left:0,val:0};
+
+function startWorkout(sk){
+  unlockAudio(); askPersist();
+  W.active=true; W.sk=sk; W.steps=buildSteps(sk); W.i=0; W.log={}; W.started=Date.now();
+  lockScreen(true); render();
+}
+function clearTimer(){ if(W.timer){clearInterval(W.timer);W.timer=null;} }
+function advance(){ clearTimer(); W.i++; if(W.i>=W.steps.length) finish(); else render(); }
+function back(){ clearTimer(); if(W.i>0){W.i--; render();} }
+function finish(){
+  clearTimer(); lockScreen(false);
+  const mins=Math.max(1,Math.round((Date.now()-W.started)/60000));
+  const total=Object.values(W.log).reduce((a,b)=>a+(b||0),0);
+  S.history.push({d:today(),s:W.sk,log:W.log,min:mins,reps:total,ts:Date.now()});
+  save(); W.active=false; W.summary={sk:W.sk,mins,total}; go("summary");
+}
+function quit(){ clearTimer(); lockScreen(false); W.active=false; go("home"); }
+
+/* ---------------- screens ---------------- */
+let view="home";
+function go(v){ view=v; window.scrollTo(0,0); render(); }
+
+function render(){
+  const el=document.getElementById("app");
+  el.innerHTML="";
+  let node;
+  if(W.active) node=viewWorkout();
+  else if(view==="summary") node=viewSummary();
+  else if(view==="history") node=viewHistory();
+  else if(view==="guide") node=viewGuide();
+  else if(view==="backup") node=viewBackup();
+  else node=viewHome();
+  node.classList.add("fade");
+  el.appendChild(node);
+}
+
+/* ---- home ---- */
+function viewHome(){
+  const sk=nextKey(), P=PROGRAM[sk];
+  const w=document.createElement("div");
+  const st=streak(), last=S.history[S.history.length-1];
+  const bd=daysAgo(S.lastBackup);
+
+  w.appendChild($(`<div class="row" style="margin-bottom:14px">
+    <div><h1>Morning</h1><div class="muted sm">${st?`${st}-day streak`:"Let's start."}${last?` · last ${fmtDate(last.d)}`:""}</div></div>
+    <div class="pill ${P.cls}">Next: ${sk}</div></div>`));
+
+  if(S.history.length>=3 && (bd===null || bd>14)){
+    w.appendChild($(`<div class="banner">You haven't backed up ${bd===null?"yet":`in ${bd} days`}. It takes one tap.</div>`));
+  }
+
+  const lo=P.loadout.map(([k,v])=>`<div class="rowb"><span class="muted">${esc(k)}</span><b>${esc(v)}</b></div>`).join("");
+  w.appendChild($(`<div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <div><div class="lbl">Session ${sk}</div><div style="font-size:1.25rem;font-weight:650">${P.name}</div></div>
+      <div class="muted sm">${P.mins}</div></div>
+    ${lo}
+    <div class="xs dim" style="margin-top:10px">Set it while you warm up. Nothing moves after that.</div>
+  </div>`));
+
+  const go1=$(`<button class="btn pri" style="margin-top:6px">Start Session ${sk}</button>`);
+  go1.onclick=()=>startWorkout(sk);
+  w.appendChild(go1);
+
+  const other=sk==="A"?"B":"A";
+  const go2=$(`<button class="btn gho sm2" style="margin-top:9px">Do session ${other} instead</button>`);
+  go2.onclick=()=>startWorkout(other);
+  w.appendChild(go2);
+
+  const tabs=$(`<div class="tabs"></div>`);
+  [["History","history"],["Guide","guide"],["Backup","backup"]].forEach(([t,v])=>{
+    const b=$(`<button class="btn">${t}</button>`); b.onclick=()=>go(v); tabs.appendChild(b);
+  });
+  w.appendChild(tabs);
+  return w;
+}
+
+/* ---- workout ---- */
+function viewWorkout(){
+  const s=W.steps[W.i], w=document.createElement("div");
+  const pct=Math.round((W.i/W.steps.length)*100);
+
+  const top=$(`<div><div class="wtop">
+      <button class="pill" id="bk">‹ Back</button>
+      <div class="muted xs up">Session ${W.sk} · step ${W.i+1}/${W.steps.length}</div>
+      <button class="pill" id="qt">End</button>
+    </div><div class="prog"><i style="width:${pct}%"></i></div></div>`);
+  top.querySelector("#bk").onclick=back;
+  top.querySelector("#qt").onclick=()=>{ if(confirm("End this session? Nothing will be saved.")) quit(); };
+  w.appendChild(top);
+
+  if(s.k==="timer") w.appendChild(stepTimer(s));
+  else if(s.k==="set") w.appendChild(stepSet(s));
+  else w.appendChild(stepRest(s));
+  return w;
+}
+
+function stepTimer(s){
+  const w=document.createElement("div");
+  w.appendChild($(`<div class="exname">${esc(s.title)}</div>
+    <div class="exmeta">90 seconds. Don't skip it, don't extend it.</div>`));
+  w.appendChild($(`<ul class="cues">${s.cues.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>`));
+
+  const box=$(`<div class="center"><div class="huge" id="tv">${mmss(s.secs)}</div></div>`);
+  w.appendChild(box);
+  W.left=s.secs; clearTimer();
+  W.timer=setInterval(()=>{
+    W.left--; const tv=document.getElementById("tv"); if(tv) tv.textContent=mmss(Math.max(0,W.left));
+    if(W.left<=0){ beep(2); advance(); }
+  },1000);
+
+  const b=$(`<button class="btn pri" style="margin-top:20px">Done — start lifting</button>`);
+  b.onclick=advance; w.appendChild(b);
+  return w;
+}
+
+function stepSet(s){
+  const w=document.createElement("div");
+  const prev=lastFor(W.sk,s.slot);
+  W.val = prev!=null ? prev : (s.bw?10:12);
+
+  const meta=[];
+  if(s.w) meta.push(`<b>${s.w} kg</b>`); else if(s.bw) meta.push("<b>bodyweight</b>");
+  meta.push(`set <b>${s.n}</b> of ${s.of}`);
+  if(s.ss) meta.push(`superset ${s.ss}`);
+
+  w.appendChild($(`<div>
+    <div class="exname">${esc(s.ex)}${s.hard?' <span class="pill c">myo</span>':""}</div>
+    ${s.sub?`<div class="muted" style="margin:-2px 0 8px;font-size:1rem">${esc(s.sub)}</div>`:""}
+    <div class="exmeta">${meta.join(" &nbsp;·&nbsp; ")}</div>
+  </div>`));
+
+  w.appendChild($(`<ul class="cues">${s.cues.map(c=>
+    `<li class="${/failure|PAUSE|FULL|mechanism/.test(c)?"warn":""}">${esc(c)}</li>`).join("")}</ul>`));
+
+  w.appendChild($(`<div class="center"><div class="lbl">Target · ${esc(s.target||"to failure")}</div></div>`));
+
+  const st=$(`<div class="stepper">
+      <button id="mn">−</button>
+      <div class="stepval"><div class="n" id="rv">${W.val}</div><div class="lbl">reps</div></div>
+      <button id="pl">+</button></div>`);
+  st.querySelector("#mn").onclick=()=>{ W.val=Math.max(0,W.val-1); st.querySelector("#rv").textContent=W.val; };
+  st.querySelector("#pl").onclick=()=>{ W.val++; st.querySelector("#rv").textContent=W.val; };
+  w.appendChild(st);
+
+  w.appendChild($(`<div class="center muted sm" style="margin-bottom:16px">${
+    prev!=null ? `Last time: <b style="color:var(--ink)">${prev}</b> — beat it` : "First time — just go to failure"
+  }</div>`));
+
+  const b=$(`<button class="btn pri">Done</button>`);
+  b.onclick=()=>{ unlockAudio(); W.log[s.slot]=W.val; advance(); };
+  w.appendChild(b);
+  return w;
+}
+
+function stepRest(s){
+  const w=document.createElement("div");
+  const nx=W.steps[W.i+1];
+  const R=110, C=2*Math.PI*R;
+  w.appendChild($(`<div class="center"><div class="lbl">Rest</div></div>`));
+  const box=$(`<div class="restwrap">
+    <svg class="ring" width="240" height="240" viewBox="0 0 240 240">
+      <circle class="ringbg" cx="120" cy="120" r="${R}" stroke-width="9"></circle>
+      <circle class="ringfg" id="rg" cx="120" cy="120" r="${R}" stroke-width="9"
+        stroke-dasharray="${C}" stroke-dashoffset="0"></circle>
+    </svg>
+    <div class="restnum"><div class="huge" id="tv">${s.secs}</div></div></div>`);
+  w.appendChild(box);
+
+  if(nx&&nx.k==="set"){
+    w.appendChild($(`<div class="next"><div class="lbl">Up next</div>
+      <div style="font-weight:650;font-size:1.05rem">${esc(nx.ex)}${nx.sub?` <span class="muted" style="font-weight:400">· ${esc(nx.sub)}</span>`:""}</div>
+      <div class="muted sm">set ${nx.n} of ${nx.of}${nx.w?` · ${nx.w} kg`:""}</div></div>`));
+  }
+
+  W.left=s.secs; clearTimer();
+  const tick=()=>{
+    W.left--;
+    const tv=document.getElementById("tv"), rg=document.getElementById("rg");
+    if(tv) tv.textContent=Math.max(0,W.left);
+    if(rg) rg.style.strokeDashoffset = C*(1 - Math.max(0,W.left)/s.secs);
+    if(W.left<=0){ beep(3); advance(); }
+  };
+  W.timer=setInterval(tick,1000);
+
+  const row=$(`<div class="btnrow"></div>`);
+  const a1=$(`<button class="btn sm2">+15s</button>`); a1.onclick=()=>{ W.left+=15; };
+  const a2=$(`<button class="btn sm2">Skip →</button>`); a2.onclick=advance;
+  row.appendChild(a1); row.appendChild(a2); w.appendChild(row);
+  return w;
+}
+
+/* ---- summary ---- */
+function viewSummary(){
+  const w=document.createElement("div"), s=W.summary||{};
+  const prev=S.history.filter(h=>h.s===s.sk).slice(-2)[0];
+  const diff = prev && prev!==S.history[S.history.length-1] ? s.total-prev.reps : null;
+  w.appendChild($(`<div class="center" style="padding:22px 0 6px">
+    <div class="big" style="color:var(--ok)">Done</div>
+    <div class="muted" style="margin-top:6px">Session ${s.sk} · ${s.mins} min · ${s.total} total reps</div>
+    ${diff!==null?`<div class="sm" style="margin-top:10px;color:${diff>0?"var(--ok)":diff<0?"var(--c)":"var(--muted)"}">
+      ${diff>0?`+${diff} reps vs last ${s.sk}`:diff<0?`${diff} reps vs last ${s.sk}`:`same as last ${s.sk} — if this is the third time, move up the ladder`}</div>`:""}
+  </div>`));
+  w.appendChild($(`<div class="card sm muted">Eat within a couple of hours: ~30 g protein. Creatine 5 g whenever. Aim 120 g protein and +250 kcal on the day.</div>`));
+  const b=$(`<button class="btn pri" style="margin-top:8px">Home</button>`); b.onclick=()=>go("home"); w.appendChild(b);
+  const b2=$(`<button class="btn gho sm2" style="margin-top:9px">Back up now</button>`); b2.onclick=()=>go("backup"); w.appendChild(b2);
+  return w;
+}
+
+/* ---- history ---- */
+function viewHistory(){
+  const w=document.createElement("div");
+  w.appendChild(hdr("History"));
+  if(!S.history.length){ w.appendChild($(`<div class="card muted">Nothing yet.</div>`)); return w; }
+  const c=$(`<div class="card hist"></div>`);
+  S.history.slice().reverse().slice(0,60).forEach(h=>{
+    c.appendChild($(`<div class="h"><span>${fmtDate(h.d)} <span class="pill ${PROGRAM[h.s].cls}" style="margin-left:6px">${h.s}</span></span>
+      <span class="muted">${h.reps} reps · ${h.min} min</span></div>`));
+  });
+  w.appendChild(c);
+  const tot=S.history.length;
+  w.appendChild($(`<div class="center muted sm">${tot} session${tot===1?"":"s"} logged</div>`));
+  return w;
+}
+
+/* ---- guide ---- */
+function viewGuide(){
+  const w=document.createElement("div");
+  w.appendChild(hdr("Guide"));
+  GUIDE.forEach(g=>w.appendChild($(`<div class="card"><div style="font-weight:650;margin-bottom:3px">${esc(g.h)}</div>
+    <div class="muted sm">${esc(g.p)}</div></div>`)));
+  w.appendChild($(`<div class="xs dim center" style="margin-top:14px">Full detail, sources and the equipment ranking are in the PDF.</div>`));
+  return w;
+}
+
+/* ---- backup ---- */
+function viewBackup(){
+  const w=document.createElement("div");
+  w.appendChild(hdr("Backup"));
+  const bd=daysAgo(S.lastBackup);
+  w.appendChild($(`<div class="banner ${bd===null?"d":bd>14?"":"ok"}">
+    ${bd===null?"Never backed up.":bd===0?"Backed up today.":`Last backup ${bd} day${bd===1?"":"s"} ago.`}
+    &nbsp;${S.history.length} session${S.history.length===1?"":"s"} stored on this phone.</div>`));
+
+  w.appendChild($(`<div class="card sm muted">Your data lives in this app's storage on your phone. That survives restarts and updates — but not deleting the icon, not "Clear History and Website Data", and not a new phone. One tap here covers all three.</div>`));
+
+  const b1=$(`<button class="btn pri">Export &amp; share</button>`);
+  b1.onclick=async()=>{
+    const json=JSON.stringify(S,null,1);
+    const name=`morning-backup-${today()}.json`;
+    try{
+      const f=new File([json],name,{type:"application/json"});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){
+        await navigator.share({files:[f],title:"Morning backup"});
+        S.lastBackup=new Date().toISOString(); save(); render(); return;
+      }
+    }catch(e){ if(e&&e.name==="AbortError") return; }
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([json],{type:"application/json"}));
+    a.download=name; a.click(); URL.revokeObjectURL(a.href);
+    S.lastBackup=new Date().toISOString(); save(); render();
+  };
+  w.appendChild(b1);
+
+  const b2=$(`<button class="btn sm2" style="margin-top:9px">Copy as text</button>`);
+  b2.onclick=async()=>{
+    try{ await navigator.clipboard.writeText(JSON.stringify(S));
+      S.lastBackup=new Date().toISOString(); save(); toast("Copied — paste it into Notes"); render();
+    }catch(e){ toast("Couldn't copy"); }
+  };
+  w.appendChild(b2);
+
+  w.appendChild($(`<h2>Restore</h2>`));
+  const ta=$(`<textarea placeholder="Paste a backup here…"></textarea>`);
+  w.appendChild(ta);
+  const b3=$(`<button class="btn sm2" style="margin-top:8px">Restore from pasted text</button>`);
+  b3.onclick=()=>{
+    try{
+      const o=JSON.parse(ta.value);
+      if(!o||!Array.isArray(o.history)) throw 0;
+      if(!confirm(`Replace ${S.history.length} local sessions with ${o.history.length} from the backup?`)) return;
+      S=o; save(); toast("Restored"); go("home");
+    }catch(e){ toast("That doesn't look like a backup"); }
+  };
+  w.appendChild(b3);
+
+  const b4=$(`<button class="btn gho sm2" style="margin-top:22px;color:var(--d)">Erase everything</button>`);
+  b4.onclick=()=>{ if(confirm("Delete all history on this phone? This can't be undone."))
+    { S={v:1,history:[],lastBackup:null}; save(); go("home"); } };
+  w.appendChild(b4);
+  return w;
+}
+
+function hdr(t){
+  const h=$(`<div class="row" style="margin-bottom:10px"><h1>${esc(t)}</h1>
+    <button class="pill" id="hm">‹ Home</button></div>`);
+  h.querySelector("#hm").onclick=()=>go("home");
+  return h;
+}
+
+/* ---------------- boot ---------------- */
+document.addEventListener("touchstart",unlockAudio,{once:true,passive:true});
+document.addEventListener("click",unlockAudio,{once:true});
+window.addEventListener("beforeunload",e=>{ if(W.active){ e.preventDefault(); e.returnValue=""; } });
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+askPersist();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+/* ===========================================================================
+ *  THE PROGRAM
+ *  ---------------------------------------------------------------------------
+ *  This is the only file you need to touch to change the workout. Everything
+ *  is a literal — exercise names, set counts, rest seconds, loads, cues. No ID
+ *  lookups, no indirection, no second file to keep in sync.
+ *
+ *  Weights are PLATES ONLY. Add your handle weight mentally.
+ *
+ *  ── how to edit ──────────────────────────────────────────────────────────
+ *  Blocks run top to bottom. There are three kinds:
+ *
+ *    { kind: "warmup",   seconds, title, cues }
+ *        A countdown. Auto-advances at zero.
+ *
+ *    { kind: "straight", exercise, sub, sets, rest, load|bodyweight,
+ *                        target | targets[], cues }
+ *        N sets of one exercise with `rest` seconds between them. Pass
+ *        `targets` (one string per set) instead of `target` when the sets
+ *        differ — that's how the myo-rep block works.
+ *
+ *    { kind: "superset", sets, rest, items: [ {...}, {...} ] }
+ *        `sets` rounds of the listed exercises back to back. There is NO rest
+ *        between partners — rest comes only after the round.
+ *
+ *  ── after editing ────────────────────────────────────────────────────────
+ *  Run `npm run build`, then push. Nothing else to update.
+ *
+ *  ── one caveat ───────────────────────────────────────────────────────────
+ *  "What did I do last time on this exact set" is resolved by a slot id of the
+ *  form `blockIndex.itemIndex.setIndex`. If you reorder blocks or change set
+ *  counts, old slots stop matching and the rep counter quietly falls back to a
+ *  default. History totals are never lost — only the per-set prefill resets.
+ *  Adding or editing cues, names, loads and targets is always safe.
+ * ======================================================================== */
+
+export const PROGRAM = {
+  A: {
+    key: "A",
+    name: "Heavy",
+    minutes: "~16 min",
+    loadout: [
+      { item: "Dumbbells", value: "10 kg each" },
+      { item: "per handle", value: "4×1.25 + 2×2.5", indent: true },
+      { item: "Backpack", value: "empty" },
+    ],
+    blocks: [
+      {
+        kind: "warmup",
+        seconds: 90,
+        title: "Warm-up",
+        cues: [
+          "20 arm circles forward, 20 back",
+          "10 half-effort push-ups",
+          "10 towel dislocates — grip a towel wide, sweep it overhead and behind you",
+        ],
+      },
+      {
+        kind: "straight",
+        exercise: "Push-up",
+        sub: "feet elevated",
+        sets: 3,
+        rest: 60,
+        bodyweight: true,
+        target: "8–15 reps",
+        cues: [
+          "3s down · 1s PAUSE at the bottom · fast up",
+          "Elbows 45° from your torso, glutes squeezed",
+          "Go to failure, or one rep short",
+        ],
+      },
+      {
+        kind: "superset",
+        sets: 3,
+        rest: 45,
+        items: [
+          {
+            exercise: "Overhead press",
+            sub: "standing, strict",
+            load: 10,
+            target: "8–15 reps",
+            cues: [
+              "Ribs down. No leg drive, no leaning back",
+              "Start at ear height, finish biceps by your ears",
+            ],
+          },
+          {
+            exercise: "Curl",
+            load: 10,
+            target: "10–18 reps",
+            cues: [
+              "3 seconds lowering",
+              "FULL arm extension at the bottom of every rep",
+              "That bottom inch is the whole exercise",
+            ],
+          },
+        ],
+      },
+      {
+        kind: "superset",
+        sets: 2,
+        rest: 45,
+        items: [
+          {
+            exercise: "Bent-over row",
+            load: 10,
+            target: "15–20 reps",
+            cues: [
+              "Hinge to 45°, flat back",
+              "Pull to your hips and squeeze",
+              "Shoulder insurance — don't skip it",
+            ],
+          },
+          {
+            exercise: "Hammer curl",
+            load: 10,
+            target: "12–20 reps",
+            cues: ["Palms facing each other", "Full stretch at the bottom"],
+          },
+        ],
+      },
+    ],
+  },
+
+  B: {
+    key: "B",
+    name: "Light",
+    minutes: "~16 min",
+    loadout: [
+      { item: "Dumbbells", value: "5 kg each" },
+      { item: "per handle", value: "2×2.5", indent: true },
+      { item: "Backpack", value: "10 kg (8×1.25)" },
+    ],
+    blocks: [
+      {
+        kind: "warmup",
+        seconds: 90,
+        title: "Warm-up",
+        cues: [
+          "20 arm circles forward, 20 back",
+          "10 half-effort push-ups",
+          "10 towel dislocates",
+          "Load the pack and set the dumbbells while you do this",
+        ],
+      },
+      {
+        kind: "straight",
+        exercise: "Push-up",
+        sub: "backpack, 10 kg",
+        sets: 3,
+        rest: 60,
+        load: 10,
+        target: "8–15 reps",
+        cues: [
+          "Plates wrapped in a towel, straps tight",
+          "3s down · 1s PAUSE at the bottom · fast up",
+          "Feet on the floor. Too easy → hands on books for a deficit",
+        ],
+      },
+      {
+        kind: "superset",
+        sets: 3,
+        rest: 45,
+        items: [
+          {
+            exercise: "Lateral raise",
+            load: 5,
+            target: "15–25 reps",
+            cues: [
+              "Lead with your elbows, stop at shoulder height",
+              "No swinging",
+              "At failure → 5–8 partial reps in the bottom third",
+            ],
+          },
+          {
+            exercise: "Rear-delt fly",
+            load: 5,
+            target: "15–25 reps",
+            cues: [
+              "Hinge until almost parallel to the floor",
+              "Open your arms wide like a curtain, squeeze the blades",
+            ],
+          },
+        ],
+      },
+      {
+        kind: "straight",
+        exercise: "Lateral raise",
+        sub: "myo-reps",
+        sets: 5,
+        rest: 20,
+        load: 5,
+        intense: true,
+        targets: [
+          "all-out to failure",
+          "4–5 reps",
+          "4–5 reps",
+          "4–5 reps",
+          "4–5 reps",
+        ],
+        cues: [
+          "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+          "Stop when you can't get 4 clean reps",
+          "The 20-second rest IS the mechanism — don't stretch it",
+        ],
+      },
+    ],
+  },
+} as const satisfies Record<string, Session>;
+
+/* --- the reference content on the Guide screen ---------------------------- */
+
+export const GUIDE = [
+  {
+    heading: "The one rule",
+    body: "Every working set goes to failure or one rep short. Your load is fixed, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.) — light loads stopped short grow almost nothing (2.8%).",
+  },
+  {
+    heading: "Beat reps, not weight",
+    body: "The grey number next to each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the progression ladder.",
+  },
+  {
+    heading: "Progression ladder",
+    body: "1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Change the loadout (B → 7.5 kg dumbbells, 5 kg pack).  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups.",
+  },
+  {
+    heading: "Protein — 120 g/day",
+    body: "2.0 g/kg, roughly 30 g across four meals. Anywhere in 105–140 g is fine.",
+  },
+  {
+    heading: "Calories — +250/day",
+    body: "You're lean and already burning through cycling and yoga. Target +150–250 g on the scale per week. If the weekly average is flat, eat more. This is the bottleneck, not the training.",
+  },
+  {
+    heading: "Creatine — 5 g/day",
+    body: "Any time of day, no loading needed. The only supplement worth the money. Expect +1–1.5 kg in the first fortnight from intracellular water — that's fullness, not fat.",
+  },
+  {
+    heading: "Fasted is fine",
+    body: "Total daily intake beats timing. Don't rebuild your morning around a pre-workout meal. A coffee 20 minutes before does more for this session than food will.",
+  },
+  {
+    heading: "The two ways this fails",
+    body: "① You don't go to failure, because 5 or 10 kg doesn't feel like it deserves that much effort.  ② You don't eat more.",
+  },
+];
+
+/* --- the nudge on the summary screen -------------------------------------- */
+
+export const NUTRITION_REMINDER =
+  "Eat within a couple of hours: ~30 g protein. Creatine 5 g whenever. Aim 120 g protein and +250 kcal on the day.";
+
+/* ===========================================================================
+ *  Types. Nothing below here needs editing to change the workout.
+ * ======================================================================== */
+
+/** Cues containing these words carry the training effect, so they get
+ *  emphasised on the set screen rather than sitting in the grey list. */
+export const INTENSITY_WORDS = /failure|PAUSE|FULL|mechanism/;
+
+export interface Movement {
+  readonly exercise: string;
+  readonly sub?: string;
+  readonly load?: number;
+  readonly bodyweight?: boolean;
+  readonly target?: string;
+  readonly targets?: readonly string[];
+  readonly intense?: boolean;
+  readonly cues: readonly string[];
+}
+
+export interface WarmupBlock {
+  readonly kind: "warmup";
+  readonly seconds: number;
+  readonly title: string;
+  readonly cues: readonly string[];
+}
+
+export interface StraightBlock extends Movement {
+  readonly kind: "straight";
+  readonly sets: number;
+  readonly rest: number;
+}
+
+export interface SupersetBlock {
+  readonly kind: "superset";
+  readonly sets: number;
+  readonly rest: number;
+  readonly items: readonly Movement[];
+}
+
+export type Block = WarmupBlock | StraightBlock | SupersetBlock;
+
+export interface Session {
+  readonly key: string;
+  readonly name: string;
+  readonly minutes: string;
+  readonly loadout: readonly {
+    readonly item: string;
+    readonly value: string;
+    readonly indent?: boolean;
+  }[];
+  readonly blocks: readonly Block[];
+}
+
+export type SessionKey = keyof typeof PROGRAM;
+
+export const SESSION_KEYS = Object.keys(PROGRAM) as SessionKey[];
+
+/** Reads a session back as the plain `Session` interface.
+ *
+ *  PROGRAM is declared `as const` so the session keys ("A", "B", …) are
+ *  inferred — add a session and everything downstream picks it up with no
+ *  other edit. The cost is that each block narrows to its exact literal shape,
+ *  which drops the optional fields it happens not to use. Going through this
+ *  accessor widens blocks back to the `Block` union so `kind` narrowing works. */
+export function getSession(key: SessionKey): Session {
+  return PROGRAM[key];
+}
+
+export function isSessionKey(k: unknown): k is SessionKey {
+  return typeof k === "string" && k in PROGRAM;
+}
+
+/** The session the app proposes after `key` — A/B/A/B for a two-session
+ *  program, and it keeps working if you ever add a third. */
+export function nextSessionAfter(key: SessionKey | null): SessionKey {
+  if (key === null) return SESSION_KEYS[0];
+  const i = SESSION_KEYS.indexOf(key);
+  return SESSION_KEYS[(i + 1) % SESSION_KEYS.length];
+}
