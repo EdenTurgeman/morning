@@ -76,7 +76,17 @@ export function Sky({ progress }: { progress: number }) {
     <div
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-      style={{ background: "#04050a" }}
+      style={{
+        background: "#04050a",
+        /* Deliberately over-covers. lvh is the LARGEST viewport — chrome
+           hidden — so the sky is never shorter than the screen even when the
+           layout viewport and the visible viewport disagree. That mismatch is
+           what left a strip of page background showing at the bottom, and
+           since this is only a backdrop, painting past the edge costs
+           nothing. */
+        height: "100lvh",
+        minHeight: "100%",
+      }}
     >
       {/* 1. THE SKY PROPER — and the important thing here is what it does NOT
              do: it doesn't take the accent hue.

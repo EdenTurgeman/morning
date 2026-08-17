@@ -32,8 +32,12 @@ export function Workout(props: Props) {
   const { steps, step, index, onBack, onAbandon } = props;
   const [confirmEnd, setConfirmEnd] = useState(false);
 
+  /* h-full + overflow-hidden, not min-h-full: a workout screen must fit
+     exactly. "One screen, one action" stops being true the moment you have to
+     scroll to find the Done button mid-set. The figure below is the flexible
+     element that absorbs whatever slack is left. */
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       <Chrome
         index={index}
         total={steps.length}
@@ -50,7 +54,7 @@ export function Workout(props: Props) {
           step on the previous one finishing its exit, which means a stalled
           animation frame leaves you tapping Done and watching nothing happen.
           A CSS keyframe runs on the compositor and can't block the mount. */}
-      <div key={index} className="step-enter flex flex-1 flex-col">
+      <div key={index} className="step-enter flex min-h-0 flex-1 flex-col">
         {step.kind === "timer" && <TimerStepView {...props} step={step} />}
         {step.kind === "set" && <SetStepView {...props} step={step} />}
         {step.kind === "rest" && <RestStepView {...props} step={step} />}
@@ -82,7 +86,7 @@ function TimerStepView({
   const remaining = useCountdown({ endsAt, onComplete: onAdvance, countIn: true });
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <h2 className="text-[2rem] leading-[1.08] font-bold tracking-[-0.03em] text-ink">
         {step.title}
       </h2>
@@ -151,7 +155,7 @@ function SetStepView({
   const figure = figureFor(step.exercise);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-start gap-2">
         <h2 className="flex-1 text-[2rem] leading-[1.06] font-bold tracking-[-0.032em] text-ink">
           {step.exercise}
@@ -177,18 +181,19 @@ function SetStepView({
         </p>
       )}
 
-      {/* Height, not width, is what bounds this: a 200x130 viewBox in a short
-          box scales to fit the height and leaves most of the width empty, so
-          the figure came out far smaller than the space allowed. */}
+      {/* The flexible element. It takes whatever height is left after the
+          text and the controls, so the screen fits any phone without ever
+          scrolling — big on a Pro Max, modest on an SE. min-h-0 is required
+          or a flex child refuses to shrink below its content size. */}
       {figure && (
-        <div className="mt-2 h-[136px] w-full opacity-90">
+        <div className="min-h-0 w-full flex-1 py-2 opacity-90">
           <Figure kind={figure} />
         </div>
       )}
 
       <Cues cues={step.cues} />
 
-      <div className="mt-auto">
+      <div className="shrink-0">
         <div className="mb-4 text-center text-[0.8rem] tracking-[0.14em] text-dim uppercase">
           Target · <span className="text-muted">{step.target}</span>
         </div>
@@ -242,7 +247,7 @@ function RestStepView({
   const isMechanism = step.seconds <= 20;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <div className="text-center text-[0.7rem] tracking-[0.16em] text-dim uppercase">
         Rest
       </div>
