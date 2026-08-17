@@ -20,7 +20,7 @@ export function Chrome({ index, total, steps, onBack, onEnd }: Props) {
     .filter((i) => i >= 0);
 
   return (
-    <div className="mb-6">
+    <div className="mb-4 shrink-0">
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}

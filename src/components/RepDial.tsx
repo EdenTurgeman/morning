@@ -79,7 +79,7 @@ export function RepDial({ value, onStep, previous }: Props) {
         </HoldButton>
       </div>
 
-      <div className="mt-4 text-center text-[1rem]">
+      <div className="mt-3 text-center text-[1rem]">
         {previous !== null ? (
           <span className={beating ? "text-emerald" : "text-muted"}>
             {beating ? (

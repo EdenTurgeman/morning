@@ -35,8 +35,13 @@ export default defineConfig({
         scope: BASE,
         display: "standalone",
         orientation: "portrait",
-        background_color: "#07080f",
-        theme_color: "#07080f",
+        /* iOS deprecated apple-mobile-web-app-status-bar-style:black-translucent
+         * in 14.5. Without it honoured, iOS confines the web view to the safe
+         * area and paints the strips above and below with these colours. They
+         * can't be removed from the web side, so they're set to the sky's
+         * darkest point to blend rather than read as black bars. */
+        background_color: "#04050a",
+        theme_color: "#04050a",
         icons: [
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "icon-512.png", sizes: "512x512", type: "image/png" },

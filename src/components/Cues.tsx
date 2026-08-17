@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export function Cues({ cues }: { cues: readonly string[] }) {
   return (
-    <ul className="my-5 space-y-2.5">
+    <ul className="my-3 space-y-2">
       {cues.map((cue) => {
         const key = INTENSITY_WORDS.test(cue);
         return (

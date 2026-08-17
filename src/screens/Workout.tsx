@@ -154,47 +154,51 @@ function SetStepView({
 
   const figure = figureFor(step.exercise);
 
+  /* Three bands: a fixed header, a scrollable middle, and pinned controls.
+   *
+   * The controls must never move or clip — an earlier version sized the whole
+   * screen to the viewport and let the figure absorb the slack, which works
+   * right up until the viewport is shorter than the fixed content. On an
+   * iPhone in standalone mode the usable area is around 90pt less than the
+   * screen, and Done ended up cut off below the fold. Now only the figure and
+   * cues scroll, so the rep dial and Done are reachable at any height. */
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-start gap-2">
-        <h2 className="flex-1 text-[2rem] leading-[1.06] font-bold tracking-[-0.032em] text-ink">
-          {step.exercise}
-        </h2>
-        {step.intense && (
-          <span className="mt-1.5 rounded-full border border-[var(--accent-line)] bg-[var(--accent-soft)] px-2.5 py-1 text-[0.62rem] font-semibold tracking-[0.12em] text-[var(--accent)] uppercase">
-            myo
-          </span>
+      <div className="shrink-0">
+        <div className="flex items-start gap-2">
+          <h2 className="flex-1 text-[1.9rem] leading-[1.06] font-bold tracking-[-0.032em] text-ink">
+            {step.exercise}
+          </h2>
+          {step.intense && (
+            <span className="mt-1.5 rounded-full border border-[var(--accent-line)] bg-[var(--accent-soft)] px-2.5 py-1 text-[0.62rem] font-semibold tracking-[0.12em] text-[var(--accent)] uppercase">
+              myo
+            </span>
+          )}
+        </div>
+
+        {step.sub && <p className="mt-0.5 text-[1.02rem] text-muted">{step.sub}</p>}
+
+        <p className="tnum mt-1.5 text-[0.94rem] text-dim">{meta.join("  ·  ")}</p>
+
+        {step.straightIntoNext && (
+          <p className="mt-1.5 text-[0.86rem] text-[var(--accent)]">
+            No rest after this — straight into the next one.
+          </p>
         )}
       </div>
 
-      {step.sub && (
-        <p className="mt-1 text-[1.06rem] text-muted">{step.sub}</p>
-      )}
+      {/* The only part that may scroll. */}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {figure && (
+          <div className="h-[clamp(70px,16vh,130px)] w-full opacity-90">
+            <Figure kind={figure} />
+          </div>
+        )}
+        <Cues cues={step.cues} />
+      </div>
 
-      <p className="tnum mt-2.5 text-[0.96rem] text-dim">
-        {meta.join("  ·  ")}
-      </p>
-
-      {step.straightIntoNext && (
-        <p className="mt-2 text-[0.82rem] text-[var(--accent)]">
-          No rest after this — straight into the next one.
-        </p>
-      )}
-
-      {/* The flexible element. It takes whatever height is left after the
-          text and the controls, so the screen fits any phone without ever
-          scrolling — big on a Pro Max, modest on an SE. min-h-0 is required
-          or a flex child refuses to shrink below its content size. */}
-      {figure && (
-        <div className="min-h-0 w-full flex-1 py-2 opacity-90">
-          <Figure kind={figure} />
-        </div>
-      )}
-
-      <Cues cues={step.cues} />
-
-      <div className="shrink-0">
-        <div className="mb-4 text-center text-[0.8rem] tracking-[0.14em] text-dim uppercase">
+      <div className="shrink-0 pt-1">
+        <div className="mb-3 text-center text-[0.8rem] tracking-[0.14em] text-dim uppercase">
           Target · <span className="text-muted">{step.target}</span>
         </div>
 
@@ -206,7 +210,7 @@ function SetStepView({
 
         <Button
           variant="primary"
-          className="mt-6"
+          className="mt-4"
           onClick={() => {
             confirmTone();
             buzz(14);
