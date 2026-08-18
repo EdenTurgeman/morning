@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { beep, tick } from "@/lib/audio";
+import { beep, countdownTick } from "@/lib/audio";
 
 /* ---------------------------------------------------------------------------
  * A countdown driven by an absolute end time, not by counting setInterval
@@ -17,11 +17,12 @@ interface Options {
   /** Absolute wall-clock ms when this countdown ends. Null = not running. */
   endsAt: number | null;
   onComplete: () => void;
-  /** Play a soft tick on each of the final three seconds. */
-  countIn?: boolean;
 }
 
-export function useCountdown({ endsAt, onComplete, countIn = false }: Options) {
+/** Every timer counts the last five seconds aloud — see COUNTDOWN in
+ *  lib/audio.ts. It isn't optional: a rest that ends without warning is a rest
+ *  you have to watch, and the whole point of the beeps is that you don't. */
+export function useCountdown({ endsAt, onComplete }: Options) {
   // Fractional seconds remaining, for the ring.
   const [remaining, setRemaining] = useState(() =>
     endsAt === null ? 0 : Math.max(0, (endsAt - Date.now()) / 1000),
@@ -50,11 +51,13 @@ export function useCountdown({ endsAt, onComplete, countIn = false }: Options) {
       const left = (endsAt - Date.now()) / 1000;
       setRemaining(Math.max(0, left));
 
-      if (countIn && left > 0 && left <= 3) {
+      // 5 → 1, one note each, matching the window over which the ring's glow
+      // ramps up. Guarded on the whole second so a 60fps loop fires once.
+      if (left > 0 && left <= 5) {
         const whole = Math.ceil(left);
         if (whole !== lastTickRef.current) {
           lastTickRef.current = whole;
-          tick();
+          countdownTick(whole);
         }
       }
 
@@ -98,7 +101,7 @@ export function useCountdown({ endsAt, onComplete, countIn = false }: Options) {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [endsAt, countIn]);
+  }, [endsAt]);
 
   return remaining;
 }

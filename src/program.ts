@@ -212,15 +212,15 @@ export const PROGRAM = {
 export const GUIDE = [
   {
     heading: "The one rule",
-    body: "Every working set goes to failure or one rep short. Your load is fixed, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.) — light loads stopped short grow almost nothing (2.8%).",
+    body: "Every working set goes to failure or one rep short. Your load stays fixed for weeks at a time, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.) — light loads stopped short grow almost nothing (2.8%).",
   },
   {
     heading: "Beat reps, not weight",
-    body: "The grey number next to each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the progression ladder.",
+    body: "The number under each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the ladder. Set the weight to something you can genuinely take to failure — if the prescribed number isn't that, change it on the home screen. Reps at a weight you can't finish aren't a measurement of anything.",
   },
   {
     heading: "Progression ladder",
-    body: "1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Change the loadout (B → 7.5 kg dumbbells, 5 kg pack).  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups.",
+    body: "1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Go up a notch in weight — tap the loadout on the home screen; the smallest step is 1.25 kg a side, and reps restart from a fresh baseline.  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups.",
   },
   {
     heading: "Protein — 120 g/day",

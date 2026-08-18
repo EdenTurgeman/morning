@@ -81,9 +81,7 @@ function TimerStepView({
   endsAt,
   onAdvance,
 }: Props & { step: Extract<Step, { kind: "timer" }> }) {
-  // Count in the last three seconds here too — knowing the warm-up is about to
-  // end lets you be in position rather than reacting to the beep.
-  const remaining = useCountdown({ endsAt, onComplete: onAdvance, countIn: true });
+  const remaining = useCountdown({ endsAt, onComplete: onAdvance });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -252,11 +250,7 @@ function RestStepView({
   onAdvance,
   onExtend,
 }: Props & { step: Extract<Step, { kind: "rest" }> }) {
-  const remaining = useCountdown({
-    endsAt,
-    onComplete: onAdvance,
-    countIn: true,
-  });
+  const remaining = useCountdown({ endsAt, onComplete: onAdvance });
 
   const next = steps[index + 1];
   // The 20s myo rest is the mechanism of the technique, not a convenience.

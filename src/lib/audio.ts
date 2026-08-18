@@ -21,8 +21,7 @@
  *    we also resume on visibilitychange.
  *
  * Even with all of that, a phone in Silent mode on iOS below 16.4 cannot be
- * made to beep from a web app. isAudioBlocked() reports that so the UI can say
- * so rather than leaving you wondering.
+ * made to beep from a web app — there is no lever left to pull.
  * ------------------------------------------------------------------------- */
 
 let ctx: AudioContext | null = null;
@@ -126,21 +125,6 @@ function live(): AudioContext | null {
   return ac;
 }
 
-/** True when we have a context but iOS is refusing to run it — almost always
- *  the ring/silent switch on a version without the AudioSession API. */
-export function isAudioBlocked(): boolean {
-  return ctx !== null && ctx.state !== "running";
-}
-
-export function audioReady(): boolean {
-  return ctx !== null && ctx.state === "running";
-}
-
-/** True when the browser can opt out of the silent switch at all. */
-export function supportsPlaybackSession(): boolean {
-  return Boolean((navigator as unknown as AudioSessionNav).audioSession);
-}
-
 if (typeof document !== "undefined") {
   // iOS suspends the context whenever the page hides. Resume on the way back,
   // or every cue after the first backgrounding is silent.
@@ -153,31 +137,31 @@ if (typeof document !== "undefined") {
   });
 }
 
-/** Rising two- or three-note chime. The last note is pitched higher so "go"
- *  is distinguishable from "counting" without looking at the screen. */
-export function beep(notes = 3): void {
+/** Zero. The note the count-in has been climbing toward — C6, an octave above
+ *  where the run started, with C5 underneath for body. Longer and louder than
+ *  any tick, so "go" is unmistakable even if you missed the count. */
+export function beep(_notes = 3): void {
+  void _notes;
   const ac = live();
   if (!ac) return;
   try {
-    for (let i = 0; i < notes; i++) {
+    const at = ac.currentTime;
+    ([
+      { hz: 1046.5, gain: 0.34, len: 0.5, type: "triangle" as OscillatorType },
+      { hz: 523.25, gain: 0.16, len: 0.55, type: "sine" as OscillatorType },
+    ]).forEach(({ hz, gain: g, len, type }) => {
       const osc = ac.createOscillator();
       const gain = ac.createGain();
-      const at = ac.currentTime + i * 0.19;
-
-      osc.type = "sine";
-      osc.frequency.value = i === notes - 1 ? 1180 : 840;
-
-      // Exponential ramps rather than a hard start/stop, so it reads as a
-      // chime instead of a click.
+      osc.type = type;
+      osc.frequency.value = hz;
       gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.exponentialRampToValueAtTime(0.35, at + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
-
+      gain.gain.exponentialRampToValueAtTime(g, at + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + len);
       osc.connect(gain);
       gain.connect(ac.destination);
       osc.start(at);
-      osc.stop(at + 0.18);
-    }
+      osc.stop(at + len + 0.03);
+    });
   } catch {
     /* ignore */
   }
@@ -290,23 +274,47 @@ export function buzz(pattern: number | number[] = 12): void {
   }
 }
 
-/** Soft single tick, used for the last three seconds of a rest. */
-export function tick(): void {
+/* --- the countdown -------------------------------------------------------
+ * The last five seconds of every timer climb a C-major pentatonic run and
+ * resolve an octave up at zero:
+ *
+ *     5s  C5    4s  D5    3s  E5    2s  G5    1s  A5   →  0s  C6
+ *
+ * Ascending on purpose. A rising line reads as tension building toward "go";
+ * a falling one reads as winding down, which is the opposite of what you want
+ * in the two seconds before a set. Each step is also a little louder and a
+ * little longer than the last, so you can tell where you are in the count
+ * without listening for the pitch — useful when the phone is on the floor and
+ * you're face-down over it.
+ * ----------------------------------------------------------------------- */
+
+const COUNTDOWN: Record<number, { hz: number; gain: number; len: number }> = {
+  5: { hz: 523.25, gain: 0.1, len: 0.1 },
+  4: { hz: 587.33, gain: 0.12, len: 0.11 },
+  3: { hz: 659.25, gain: 0.15, len: 0.12 },
+  2: { hz: 783.99, gain: 0.19, len: 0.13 },
+  1: { hz: 880.0, gain: 0.24, len: 0.15 },
+};
+
+/** One step of the count-in. `secondsLeft` is 5 down to 1. */
+export function countdownTick(secondsLeft: number): void {
+  const note = COUNTDOWN[secondsLeft];
+  if (!note) return;
   const ac = live();
   if (!ac) return;
   try {
+    const at = ac.currentTime;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
-    const at = ac.currentTime;
-    osc.type = "sine";
-    osc.frequency.value = 620;
+    osc.type = "triangle";
+    osc.frequency.value = note.hz;
     gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.exponentialRampToValueAtTime(0.12, at + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.09);
+    gain.gain.exponentialRampToValueAtTime(note.gain, at + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + note.len);
     osc.connect(gain);
     gain.connect(ac.destination);
     osc.start(at);
-    osc.stop(at + 0.1);
+    osc.stop(at + note.len + 0.02);
   } catch {
     /* ignore */
   }

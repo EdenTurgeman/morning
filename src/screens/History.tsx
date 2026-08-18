@@ -82,8 +82,18 @@ export function History({ data, onDelete, onNavigate }: Props) {
           <BlurFade delay={0.06} inView>
             <Card className="py-1">
               {rows.map((h, i) => {
+                /* Only compare like with like. Reps at 7.5 kg and reps at
+                 * 10 kg are different measurements, so a delta across a weight
+                 * change would read as progress or regression that never
+                 * happened. Marked with the weight instead. */
                 const earlier = rows.slice(i + 1).find((r) => r.s === h.s);
-                const delta = earlier ? h.reps - earlier.reps : null;
+                const weightMoved =
+                  earlier !== undefined &&
+                  typeof h.kg === "number" &&
+                  typeof earlier.kg === "number" &&
+                  Math.abs(h.kg - earlier.kg) > 0.01;
+                const delta =
+                  earlier && !weightMoved ? h.reps - earlier.reps : null;
 
                 return (
                   <div
@@ -97,6 +107,11 @@ export function History({ data, onDelete, onNavigate }: Props) {
                       {formatDate(h.d)}
                     </span>
 
+                    {weightMoved && (
+                      <span className="tnum text-[0.74rem] text-[var(--accent)]">
+                        {h.kg} kg
+                      </span>
+                    )}
                     {delta !== null && (
                       <span
                         className={
