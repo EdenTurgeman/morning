@@ -1,6 +1,7 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Card } from "@/components/Card";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { SoundCheck } from "@/components/SoundCheck";
 import { GUIDE } from "@/program";
 import type { View } from "@/App";
 
@@ -11,6 +12,10 @@ export function Guide({ onNavigate }: { onNavigate: (view: View) => void }) {
   return (
     <div>
       <ScreenHeader title="Guide" onNavigate={onNavigate} />
+
+      <div className="mb-3">
+        <SoundCheck />
+      </div>
 
       <div className="space-y-3">
         {GUIDE.map((entry, i) => (

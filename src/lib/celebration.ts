@@ -15,6 +15,7 @@ import { computeLedger, milestoneCrossed } from "@/lib/ledger";
 
 export type CelebrationTier =
   | "lifetime-milestone"
+  | "weight-changed"
   | "clean-sweep"
   | "streak-milestone"
   | "week-complete"
@@ -77,12 +78,24 @@ export function celebrationFor(
 ): Celebration {
   const week = weeklyProgress(history);
   const previous = previousSameSession(history, record.s, record.ts);
-  const delta = previous ? record.reps - previous.reps : null;
+
+  /* Reps are only comparable at the same weight. If the working weight moved
+   * since the last session of this letter, every rep-delta below is
+   * meaningless — "+18 reps" for dropping 2.5 kg a side is not progress, and
+   * "dead level" at a heavier weight is not a plateau. */
+  const weightChanged =
+    previous !== undefined &&
+    previous !== null &&
+    typeof record.kg === "number" &&
+    typeof previous.kg === "number" &&
+    Math.abs(record.kg - previous.kg) > 0.01;
+
+  const delta = previous && !weightChanged ? record.reps - previous.reps : null;
 
   const sameLetter = history.filter((h) => h.s === record.s && h.ts !== record.ts);
   const isFirstEver = history.length <= 1;
   const bestBefore = sameLetter.reduce((max, h) => Math.max(max, h.reps), 0);
-  const isRecord = sameLetter.length > 0 && record.reps > bestBefore;
+  const isRecord = sameLetter.length > 0 && record.reps > bestBefore && !weightChanged;
 
   // Three same-letter sessions ending on the identical total is the signal the
   // program is built around — it means reps have stopped moving.
@@ -115,7 +128,7 @@ export function celebrationFor(
 
   /* Beating every single set in a session. Rare, unambiguous, and entirely
    * measured against your own past — the best thing in here. */
-  if (previous && sameLetter.length > 0) {
+  if (previous && sameLetter.length > 0 && !weightChanged) {
     const slots = Object.keys(record.log);
     const comparable = slots.filter((s) => typeof previous.log[s] === "number");
     const beatEvery =
@@ -134,6 +147,23 @@ export function celebrationFor(
         rays: true,
       };
     }
+  }
+
+  /* Weight moved: report that honestly instead of a comparison that isn't
+   * one. Placed below the week/streak tiers, which don't depend on reps. */
+  if (weightChanged && previous) {
+    const heavier = (record.kg ?? 0) > (previous.kg ?? 0);
+    return {
+      ...base,
+      tier: "weight-changed",
+      eyebrow: `Now at ${record.kg} kg`,
+      headline: heavier ? "Heavier than last time." : "Lighter than last time.",
+      body: heavier
+        ? `You were at ${previous.kg} kg. Reps aren't comparable across a weight change, so this session starts a fresh baseline — beat it next time.`
+        : `You were at ${previous.kg} kg. Dropping to a weight you can actually take to failure is the right call; reps start a fresh baseline here.`,
+      confetti: false,
+      rays: false,
+    };
   }
 
   // A week just completed AND that completion hit a milestone count.
