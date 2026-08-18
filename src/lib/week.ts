@@ -60,6 +60,15 @@ export interface WeeklyProgress {
   missed: boolean;
   /** Most recent weeks, oldest first — for the history sparkline. */
   recent: WeekSummary[];
+  /** Best run of complete weeks you have ever had. A missed week drops the
+   *  current streak to zero, which is exactly the moment people stop — so the
+   *  number you built stays on screen as something to chase back rather than
+   *  disappearing as if it never happened. */
+  longestRun: number;
+  /** You could skip today and still reach target on the days remaining. */
+  canRestToday: boolean;
+  /** Weekday names left after today, e.g. ["Thu","Fri","Sat"]. */
+  daysAhead: string[];
   /** True when the session just logged is the one that completed the week. */
   completedThisWeek: boolean;
 }
@@ -96,6 +105,33 @@ export function weeklyProgress(
   const daysLeft = 7 - dayInWeek;
   const remaining = Math.max(0, WEEKLY_TARGET - done);
 
+  /* Longest run ever: walk every week from the first one with a session up to
+   * the current week, so weeks with no sessions at all correctly break it. ISO
+   * date keys sort lexicographically, which is why the cursor comparison
+   * works. */
+  let longestRun = 0;
+  const keys = [...counts.keys()].sort();
+  if (keys.length) {
+    let cursor = keys[0];
+    let run = 0;
+    while (cursor <= current) {
+      if ((counts.get(cursor) ?? 0) >= WEEKLY_TARGET) {
+        run++;
+        longestRun = Math.max(longestRun, run);
+      } else {
+        run = 0;
+      }
+      cursor = shiftWeeks(cursor, 1);
+    }
+  }
+
+  const daysAhead: string[] = [];
+  for (let i = 1; i < daysLeft; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    daysAhead.push(d.toLocaleDateString(undefined, { weekday: "short" }));
+  }
+
   const recent: WeekSummary[] = [];
   for (let i = 11; i >= 0; i--) {
     const k = shiftWeeks(current, -i);
@@ -112,20 +148,46 @@ export function weeklyProgress(
     atRisk: remaining > 0 && remaining === daysLeft,
     missed: remaining > daysLeft,
     recent,
+    longestRun,
+    // Skipping today still leaves daysLeft - 1 chances.
+    canRestToday: remaining <= daysLeft - 1,
+    daysAhead,
     completedThisWeek: done === WEEKLY_TARGET,
   };
 }
 
-/** Plain-language nudge for the home screen. Null when there's nothing useful
- *  to say — silence beats filler at 6am. */
+/** Plain-language nudge for the home screen.
+ *
+ *  The question at 6am isn't "how am I doing" — it's "can I skip today?" So
+ *  that's what this answers, with the actual arithmetic rather than
+ *  encouragement. Null when there's nothing useful to say; silence beats
+ *  filler at that hour. */
 export function weekNudge(p: WeeklyProgress): string | null {
   if (p.missed) return "This week's out of reach. Next week starts clean.";
+
   if (p.done >= p.target)
     return p.done === p.target
-      ? "Week complete."
+      ? "Week complete. Rest is part of it."
       : `Week complete, +${p.done - p.target} over.`;
-  if (p.atRisk)
-    return `${p.remaining} left and ${p.daysLeft} ${p.daysLeft === 1 ? "day" : "days"} to do them. No slack.`;
-  if (p.remaining === 1) return "One more makes the week.";
-  return null;
+
+  if (p.remaining === 1 && p.daysLeft > 1) return "One more makes the week.";
+
+  // Nothing left but today — say so plainly.
+  if (!p.canRestToday)
+    return p.daysLeft === 1
+      ? "Last day. This one makes the week."
+      : `Train today or the week's gone — ${p.remaining} left, ${p.daysLeft} days.`;
+
+  // There is room to skip. Name the days it would cost you.
+  const needed = p.daysAhead.slice(-p.remaining);
+  if (needed.length === p.daysAhead.length && needed.length > 0)
+    return `Rest today and you still make ${p.target} — but you'd need ${listOf(needed)}.`;
+
+  const spare = p.daysAhead.length - p.remaining;
+  return `${p.remaining} to go, ${p.daysLeft - 1} days after today. ${spare} spare.`;
+}
+
+function listOf(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 }

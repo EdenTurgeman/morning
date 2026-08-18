@@ -67,7 +67,10 @@ export function WeekMeter({
         </div>
       </div>
 
-      {week.streak > 0 && (
+      {/* When the current streak is behind your best, show what you're
+          chasing. A missed week takes the count to zero, which is precisely
+          when people stop — the run you built shouldn't vanish with it. */}
+      {week.streak > 0 ? (
         <div className="text-right">
           <div className="tnum text-[1.5rem] leading-none font-bold tracking-[-0.03em] text-ink">
             {week.streak}
@@ -75,8 +78,22 @@ export function WeekMeter({
           <div className="mt-1 text-[0.66rem] tracking-[0.12em] text-dim uppercase">
             {plural(week.streak, "week")} running
           </div>
+          {week.longestRun > week.streak && (
+            <div className="tnum mt-1 text-[0.66rem] text-dim">
+              best {week.longestRun}
+            </div>
+          )}
         </div>
-      )}
+      ) : week.longestRun > 0 ? (
+        <div className="text-right">
+          <div className="tnum text-[1.5rem] leading-none font-bold tracking-[-0.03em] text-muted">
+            {week.longestRun}
+          </div>
+          <div className="mt-1 text-[0.66rem] tracking-[0.12em] text-dim uppercase">
+            best run
+          </div>
+        </div>
+      ) : null}
     </button>
   );
 }

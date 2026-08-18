@@ -150,15 +150,70 @@ function Floor({ uid }: { uid: string }) {
   );
 }
 
-/** Standing torso, head and legs — shared by every front-view movement. */
-function Standing({ headY = 40, torsoTop = 50, hip = 92 }) {
+/** Standing torso, head and legs — shared by every front-view movement.
+ *
+ *  Draws actual shoulder and hip bars rather than a single vertical line. A
+ *  bare line with a circle on top and a V underneath reads as a stick, not a
+ *  body, and it gave the arms nothing to visibly hang from. */
+function Standing({
+  headY = 38,
+  shoulderY = 58,
+  hip = 90,
+  shoulderHalf = 16,
+  hipHalf = 10,
+}) {
   return (
     <>
-      <circle cx={100} cy={headY} r={9} fill="none" stroke={ACCENT} strokeWidth={4} />
+      <circle cx={100} cy={headY} r={9.5} fill="none" stroke={ACCENT} strokeWidth={4} />
+      {/* neck */}
       <polyline
         points={pts([
-          [100, torsoTop],
+          [100, headY + 9.5],
+          [100, shoulderY],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
+      {/* shoulders */}
+      <polyline
+        points={pts([
+          [100 - shoulderHalf, shoulderY],
+          [100 + shoulderHalf, shoulderY],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+      {/* spine */}
+      <polyline
+        points={pts([
+          [100, shoulderY],
           [100, hip],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+      {/* hips */}
+      <polyline
+        points={pts([
+          [100 - hipHalf, hip],
+          [100 + hipHalf, hip],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+      {/* legs */}
+      <polyline
+        points={pts([
+          [100 - hipHalf, hip],
+          [100 - hipHalf - 2, 114],
         ])}
         fill="none"
         stroke={BODY}
@@ -167,18 +222,50 @@ function Standing({ headY = 40, torsoTop = 50, hip = 92 }) {
       />
       <polyline
         points={pts([
-          [88, 114],
-          [100, hip],
-          [112, 114],
+          [100 + hipHalf, hip],
+          [100 + hipHalf + 2, 114],
         ])}
         fill="none"
         stroke={BODY}
         strokeWidth={4.5}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </>
   );
+}
+
+/* --- dumbbells -------------------------------------------------------------
+ * Drawn as a short thick bar rather than a dot: a circle at the end of a limb
+ * reads as a ball or a fist, and it was impossible to tell a curl from a
+ * hammer curl. Derived from the arm pose rather than hand-placed, so the bar
+ * stays correctly oriented through the whole movement. */
+
+const r = (n: number) => Math.round(n * 100) / 100;
+
+/** Bar across the palm — the normal grip. Perpendicular to the forearm. */
+function barAcross(elbow: Pt, hand: Pt, half = 7.5): readonly Pt[] {
+  const dx = hand[0] - elbow[0];
+  const dy = hand[1] - elbow[1];
+  const len = Math.hypot(dx, dy) || 1;
+  const px = (-dy / len) * half;
+  const py = (dx / len) * half;
+  // Rounded: the raw values carry 15 decimal places into every keyframe of
+  // every <animate>, which bloats the markup for no visual difference.
+  return [
+    [r(hand[0] + px), r(hand[1] + py)],
+    [r(hand[0] - px), r(hand[1] - py)],
+  ];
+}
+
+/** Bar in line with the forearm — the neutral, hammer grip. */
+function barAlong(elbow: Pt, hand: Pt, half = 7.5): readonly Pt[] {
+  const dx = hand[0] - elbow[0];
+  const dy = hand[1] - elbow[1];
+  const len = Math.hypot(dx, dy) || 1;
+  return [
+    [r(hand[0] + (dx / len) * half), r(hand[1] + (dy / len) * half)],
+    [r(hand[0] - (dx / len) * half), r(hand[1] - (dy / len) * half)],
+  ];
 }
 
 interface Props {
@@ -236,15 +323,14 @@ function Pair({
       ))}
       {weights &&
         [0, 1].map((i) => {
-          const a = down[i][down[i].length - 1];
-          const b = up[i][up[i].length - 1];
+          const dBar = barAcross(down[i][down[i].length - 2], down[i][down[i].length - 1]);
+          const uBar = barAcross(up[i][up[i].length - 2], up[i][up[i].length - 1]);
           return (
-            <Dot
+            <Bone
               key={`w${i}`}
               still={still}
-              r={5}
-              fill={ACCENT}
-              path={[a, b, b, a, a]}
+              width={7}
+              poses={[dBar, uBar, uBar, dBar, dBar]}
               keyTimes={keyTimes}
               dur={dur}
             />
@@ -397,6 +483,7 @@ const DRAW: Record<FigureKind, Draw> = {
       <>
         <Floor uid={uid} />
         <Arc d="M86 104 Q 100 100 104 90" />
+        {/* hinged spine, hip to shoulder */}
         <polyline
           points={pts([
             [120, 88],
@@ -404,7 +491,29 @@ const DRAW: Record<FigureKind, Draw> = {
           ])}
           fill="none"
           stroke={BODY}
-          strokeWidth={4.5}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        {/* shoulder bar, across the hinge */}
+        <polyline
+          points={pts([
+            [72, 71],
+            [84, 58],
+          ])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        {/* hips */}
+        <polyline
+          points={pts([
+            [114, 94],
+            [126, 82],
+          ])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={5}
           strokeLinecap="round"
         />
         <polyline
@@ -419,27 +528,20 @@ const DRAW: Record<FigureKind, Draw> = {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx={64} cy={58} r={8} fill="none" stroke={ACCENT} strokeWidth={4} />
+        <circle cx={64} cy={57} r={9} fill="none" stroke={ACCENT} strokeWidth={4} />
         <Bone
           still={still}
           poses={[hang, pull, pull, hang, hang]}
           keyTimes={kt}
           dur={dur}
         />
-        <Dot
-          still={still}
-          r={5}
-          fill={ACCENT}
-          path={[
-            [86, 104],
-            [104, 90],
-            [104, 90],
-            [86, 104],
-            [86, 104],
-          ]}
-          keyTimes={kt}
-          dur={dur}
-        />
+        {(() => {
+          const d = barAcross(hang[1], hang[2]);
+          const u = barAcross(pull[1], pull[2]);
+          return (
+            <Bone still={still} width={7} poses={[d, u, u, d, d]} keyTimes={kt} dur={dur} />
+          );
+        })()}
       </>
     );
   },
@@ -453,7 +555,7 @@ const DRAW: Record<FigureKind, Draw> = {
         <Floor uid={uid} />
         <Arc d="M70 94 Q 54 84 48 62" />
         <Arc d="M130 94 Q 146 84 152 62" />
-        <Standing headY={38} torsoTop={48} />
+        <Standing />
         <Pair
           still={still}
           keyTimes={kt}
@@ -496,7 +598,7 @@ const DRAW: Record<FigureKind, Draw> = {
         <Floor uid={uid} />
         <Arc d="M92 104 Q 68 100 46 76" />
         <Arc d="M108 104 Q 132 100 154 76" />
-        <Standing headY={44} torsoTop={53} hip={84} />
+        <Standing headY={44} shoulderY={62} hip={86} shoulderHalf={14} />
         <Pair
           still={still}
           keyTimes={kt}
@@ -603,28 +705,61 @@ function curlLike(
     <>
       <Floor uid={uid} />
       <Arc d="M95 106 Q 112 96 113 66" />
-      <circle cx={96} cy={36} r={9} fill="none" stroke={ACCENT} strokeWidth={4} />
+      <circle cx={96} cy={34} r={9.5} fill="none" stroke={ACCENT} strokeWidth={4} />
+      {/* side view: a shorter shoulder bar, since you're seeing it edge-on */}
       <polyline
         points={pts([
-          [96, 45],
-          [96, 90],
+          [96, 43.5],
+          [96, 54],
         ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
+      <polyline
+        points={pts([
+          [89, 55],
+          [103, 53],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+      <polyline
+        points={pts([
+          [96, 54],
+          [97, 90],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+      <polyline
+        points={pts([
+          [90, 90],
+          [104, 90],
+        ])}
+        fill="none"
+        stroke={BODY}
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+      <polyline
+        points={pts([[90, 90], [88, 114]])}
         fill="none"
         stroke={BODY}
         strokeWidth={4.5}
         strokeLinecap="round"
       />
       <polyline
-        points={pts([
-          [86, 114],
-          [96, 90],
-          [106, 114],
-        ])}
+        points={pts([[104, 90], [106, 114]])}
         fill="none"
         stroke={BODY}
         strokeWidth={4.5}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
       <circle cx={92} cy={80} r={2.5} fill={JOINT} />
       <Bone
@@ -634,55 +769,24 @@ function curlLike(
         splines={sp}
         dur={dur}
       />
-      {grip === "across" ? (
-        <Dot
-          still={still}
-          r={5}
-          fill={ACCENT}
-          path={[
-            [95, 106],
-            [113, 66],
-            [113, 66],
-            [95, 106],
-            [95, 106],
-          ]}
-          keyTimes={kt}
-          splines={sp}
-          dur={dur}
-        />
-      ) : (
-        /* Neutral grip: the dumbbell lies along the forearm rather than across
-           it, which is the only visual difference between the two lifts. */
-        <Bone
-          still={still}
-          width={7}
-          poses={[
-            [
-              [95, 100],
-              [95, 112],
-            ],
-            [
-              [110, 60],
-              [116, 72],
-            ],
-            [
-              [110, 60],
-              [116, 72],
-            ],
-            [
-              [95, 100],
-              [95, 112],
-            ],
-            [
-              [95, 100],
-              [95, 112],
-            ],
-          ]}
-          keyTimes={kt}
-          splines={sp}
-          dur={dur}
-        />
-      )}
+      {/* Grip is the ONLY visual difference between these two lifts, so it has
+          to be unmistakable: across the palm for a curl, in line with the
+          forearm for a hammer curl. Both derived from the arm pose. */}
+      {(() => {
+        const bar = grip === "across" ? barAcross : barAlong;
+        const d = bar(down[1], down[2]);
+        const u = bar(up[1], up[2]);
+        return (
+          <Bone
+            still={still}
+            width={7}
+            poses={[d, u, u, d, d]}
+            keyTimes={kt}
+            splines={sp}
+            dur={dur}
+          />
+        );
+      })()}
     </>
   );
 }

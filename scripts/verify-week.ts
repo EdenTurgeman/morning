@@ -4,7 +4,7 @@
  * days, and the week currently in progress can never break a streak. Both are
  * easy to regress into a consecutive-day streak by accident. */
 
-import { weeklyProgress, weekKey, startOfWeek } from "@/lib/week";
+import { weeklyProgress, weekNudge, weekKey, startOfWeek } from "@/lib/week";
 import { WEEKLY_TARGET, WEEK_STARTS_ON } from "@/program";
 import type { SessionRecord } from "@/lib/storage";
 
@@ -143,6 +143,55 @@ console.log("\n\x1b[1mRisk signalling\x1b[0m\n");
     "completedThisWeek only fires on the session that hits target",
     p.completedThisWeek === false,
   );
+}
+
+console.log("\n\x1b[1mLongest run\x1b[0m\n");
+{
+  // three complete weeks, then a short one, then two complete
+  const h = [
+    ...[1, 2, 3, 4, 5].map((n) => session(SAT, n)),
+    ...[8, 9, 10, 11, 12].map((n) => session(SAT, n)),
+    ...[15, 16, 17].map((n) => session(SAT, n)), // 3 only — breaks the run
+    ...[22, 23, 24, 25, 26].map((n) => session(SAT, n)),
+    ...[29, 30, 31, 32, 33].map((n) => session(SAT, n)),
+    ...[36, 37, 38, 39, 40].map((n) => session(SAT, n)),
+  ];
+  const p = weeklyProgress(h, SAT);
+  check("current streak stops at the short week", p.streak === 2, `got ${p.streak}`);
+  check("longest run remembers the better stretch", p.longestRun === 3, `got ${p.longestRun}`);
+}
+check("no history means no best run", weeklyProgress([], SAT).longestRun === 0);
+{
+  // A week with NO sessions at all must break the run, not be skipped over.
+  const h = [
+    ...[1, 2, 3, 4, 5].map((n) => session(SAT, n)),
+    ...[15, 16, 17, 18, 19].map((n) => session(SAT, n)),
+  ];
+  check("an entirely empty week breaks the run", weeklyProgress(h, SAT).longestRun === 1);
+}
+
+console.log("\n\x1b[1mCan I skip today?\x1b[0m\n");
+{
+  // Wednesday, Sunday-start: today plus Thu/Fri/Sat.
+  const p = weeklyProgress([session(WED, 0)], WED);
+  check("1 done, 4 needed, 4 days left -> cannot rest", p.canRestToday === false);
+  check("three days named after today", p.daysAhead.length === 3, p.daysAhead.join(","));
+  check("nudge says today is mandatory", (weekNudge(p) ?? "").includes("Train today"), weekNudge(p) ?? "(null)");
+}
+{
+  // 2 done, 3 needed, 3 days after today — resting costs every one of them.
+  const p = weeklyProgress([session(WED, 0), session(WED, 1)], WED);
+  check("2 done -> can rest, but needs every remaining day", p.canRestToday === true);
+  check("nudge names the days it would cost", (weekNudge(p) ?? "").includes("you'd need"), weekNudge(p) ?? "(null)");
+}
+{
+  const p = weeklyProgress([0, 1, 2, 3].map((n) => session(WED, n)), WED);
+  check("4 done -> one more makes the week", (weekNudge(p) ?? "").includes("One more"), weekNudge(p) ?? "(null)");
+}
+{
+  // Saturday is the last day of a Sunday-start week: nothing comes after it.
+  const p = weeklyProgress([1, 2, 3, 4].map((n) => session(SAT, n)), SAT);
+  check("no days after today on the last day", p.daysAhead.length === 0);
 }
 
 console.log(

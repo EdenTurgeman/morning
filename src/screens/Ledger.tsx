@@ -124,11 +124,18 @@ export function Ledger({
         </Card>
       </BlurFade>
 
-      {week.streak > 0 && (
+      {week.longestRun > 0 && (
         <BlurFade delay={0.2} inView>
           <p className="mt-5 text-center text-[0.8rem] text-muted">
-            <b className="tnum font-semibold text-ink">{week.streak}</b>{" "}
-            {plural(week.streak, "week")} running, right now.
+            {week.streak > 0 ? (
+              <>
+                <b className="tnum font-semibold text-ink">{week.streak}</b>{" "}
+                {plural(week.streak, "week")} running.{" "}
+              </>
+            ) : null}
+            Longest run{" "}
+            <b className="tnum font-semibold text-ink">{week.longestRun}</b>{" "}
+            {plural(week.longestRun, "week")}.
           </p>
         </BlurFade>
       )}
