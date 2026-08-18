@@ -8,6 +8,7 @@ import {
   type AppData,
   type SessionRecord,
 } from "@/lib/storage";
+import type { SessionKey } from "@/program";
 
 /** The history, and the only writer of it. Every mutation goes through
  *  `commit` so a failed localStorage write can never pass silently — losing a
@@ -43,6 +44,7 @@ export function useAppData() {
         min: record.min,
         reps: record.reps,
         ts: Date.now(),
+        ...(typeof record.kg === "number" ? { kg: record.kg } : {}),
       };
       commit({
         ...latest.current,
@@ -66,6 +68,17 @@ export function useAppData() {
     [commit],
   );
 
+  /** Set the working weight for a session, in plates per handle. */
+  const setLoad = useCallback(
+    (key: SessionKey, kg: number) => {
+      commit({
+        ...latest.current,
+        loads: { ...latest.current.loads, [key]: kg },
+      });
+    },
+    [commit],
+  );
+
   const markBackedUp = useCallback(() => {
     commit({ ...latest.current, lastBackup: new Date().toISOString() });
   }, [commit]);
@@ -74,5 +87,13 @@ export function useAppData() {
 
   const eraseAll = useCallback(() => commit(emptyData()), [commit]);
 
-  return { data, addSession, deleteSession, markBackedUp, replaceAll, eraseAll };
+  return {
+    data,
+    addSession,
+    deleteSession,
+    setLoad,
+    markBackedUp,
+    replaceAll,
+    eraseAll,
+  };
 }

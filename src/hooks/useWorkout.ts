@@ -15,10 +15,14 @@ export interface FinishedSession {
   log: Record<string, number>;
   minutes: number;
   reps: number;
+  /** Working weight used, so history records what was actually lifted. */
+  kg?: number;
 }
 
 interface Options {
   onFinish: (result: FinishedSession) => void;
+  /** Working weight per handle for each session, from settings. */
+  loadFor: (key: SessionKey) => number | undefined;
 }
 
 /* ---------------------------------------------------------------------------
@@ -28,7 +32,13 @@ interface Options {
  * purely in memory and lost the session on reload.
  * ------------------------------------------------------------------------- */
 
-export function useWorkout({ onFinish }: Options) {
+export function useWorkout({ onFinish, loadFor }: Options) {
+  const loadForRef = useRef(loadFor);
+  loadForRef.current = loadFor;
+  const compile = useCallback(
+    (key: SessionKey) => buildSteps(key, loadForRef.current(key)),
+    [],
+  );
   const [live, setLive] = useState<LiveSession | null>(() => loadLiveSession());
 
   /* A synchronous mirror of `live`.
@@ -47,8 +57,8 @@ export function useWorkout({ onFinish }: Options) {
   }, []);
 
   const steps: Step[] = useMemo(
-    () => (live ? buildSteps(live.key) : []),
-    [live?.key],
+    () => (live ? compile(live.key) : []),
+    [live?.key, compile],
   );
 
   const step: Step | null = live ? (steps[live.i] ?? null) : null;
@@ -83,7 +93,7 @@ export function useWorkout({ onFinish }: Options) {
   const start = useCallback(
     (key: SessionKey) => {
       unlockAudio();
-      const compiled = buildSteps(key);
+      const compiled = compile(key);
       const now = Date.now();
       update({
         key,
@@ -108,7 +118,13 @@ export function useWorkout({ onFinish }: Options) {
       clearLiveSession();
       update(null);
       void setWakeLock(false);
-      onFinishRef.current({ key: session.key, log: session.log, minutes, reps });
+      onFinishRef.current({
+        key: session.key,
+        log: session.log,
+        minutes,
+        reps,
+        kg: loadForRef.current(session.key),
+      });
     },
     [update],
   );
@@ -119,7 +135,7 @@ export function useWorkout({ onFinish }: Options) {
       const prev = liveRef.current;
       if (!prev) return;
 
-      const compiled = buildSteps(prev.key);
+      const compiled = compile(prev.key);
       const log = loggedReps
         ? { ...prev.log, [loggedReps.slot]: loggedReps.reps }
         : prev.log;
@@ -142,7 +158,7 @@ export function useWorkout({ onFinish }: Options) {
   const back = useCallback(() => {
     const prev = liveRef.current;
     if (!prev || prev.i === 0) return;
-    const compiled = buildSteps(prev.key);
+    const compiled = compile(prev.key);
     const i = prev.i - 1;
     // Logged reps are deliberately kept — going back to fix a mistap
     // shouldn't wipe what you already recorded (spec §11).

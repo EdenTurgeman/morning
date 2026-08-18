@@ -8,7 +8,7 @@ import { Button } from "@/components/Button";
 import { Confirm } from "@/components/Confirm";
 import { useCountdown } from "@/hooks/useCountdown";
 import { buzz, confirmTone } from "@/lib/audio";
-import { lastRepsFor, type AppData } from "@/lib/storage";
+import { lastRepsFor, previousSameSession, type AppData } from "@/lib/storage";
 import type { SetStep, Step } from "@/lib/steps";
 import type { SessionKey } from "@/program";
 import { clock } from "@/lib/format";
@@ -125,6 +125,17 @@ function SetStepView({
 }: Props & { step: SetStep }) {
   const previous = lastRepsFor(data.history, sessionKey, step.slot);
 
+  /* If the working weight has changed since that number was set, reps aren't
+   * comparable — 12 at 7.5 kg is not 12 at 10 kg — so the dial says so
+   * instead of quietly implying a like-for-like target. */
+  const prevSession = previousSameSession(data.history, sessionKey, 0);
+  const previousKg = prevSession?.kg;
+  const weightChanged =
+    previous !== null &&
+    typeof previousKg === "number" &&
+    typeof step.load === "number" &&
+    Math.abs(previousKg - step.load) > 0.01;
+
   /* Priority order matters:
    *   1. what you already logged for this slot in THIS session — so tapping
    *      Back to fix a mistap shows the number you actually entered, not the
@@ -206,6 +217,7 @@ function SetStepView({
           value={reps}
           onStep={(delta) => setReps((r) => Math.max(0, r + delta))}
           previous={previous}
+          previousKg={weightChanged ? previousKg : undefined}
         />
 
         <Button

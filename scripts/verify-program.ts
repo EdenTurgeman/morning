@@ -6,7 +6,7 @@
  * rest step where there shouldn't be one, months into using the app. */
 
 import { buildSteps, countSets, type Step } from "@/lib/steps";
-import { PROGRAM, SESSION_KEYS, nextSessionAfter } from "@/program";
+import { PROGRAM, SESSION_KEYS, defaultLoadFor, nextSessionAfter } from "@/program";
 import { figureFor } from "@/lib/figures";
 
 let failures = 0;
@@ -164,7 +164,11 @@ for (const key of SESSION_KEYS) {
         : blk.cues.length > 0,
     ),
   );
-  check(`${key}: loadout is non-empty`, session.loadout.length > 0);
+  check(
+    `${key}: has a working weight, or is entirely bodyweight`,
+    defaultLoadFor(key) !== null ||
+      buildSteps(key).every((s) => s.kind !== "set" || s.bodyweight === true),
+  );
 }
 
 console.log(

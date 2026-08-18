@@ -40,8 +40,13 @@ export interface RestStep {
 
 export type Step = TimerStep | SetStep | RestStep;
 
-export function buildSteps(key: SessionKey): Step[] {
+/** @param kg Working weight per handle. Overrides every loaded movement in the
+ *  session — the program gives each session a single dumbbell weight, so one
+ *  number is the whole adjustment. Bodyweight movements are untouched. */
+export function buildSteps(key: SessionKey, kg?: number): Step[] {
   const steps: Step[] = [];
+  const load = (programmed: number | undefined) =>
+    programmed === undefined ? undefined : (kg ?? programmed);
 
   getSession(key).blocks.forEach((block, bi) => {
     if (block.kind === "warmup") {
@@ -60,7 +65,7 @@ export function buildSteps(key: SessionKey): Step[] {
           kind: "set",
           exercise: block.exercise,
           sub: block.sub,
-          load: block.load,
+          load: load(block.load),
           bodyweight: block.bodyweight,
           target: block.targets?.[i] ?? block.target ?? "to failure",
           cues: block.cues,
@@ -84,7 +89,7 @@ export function buildSteps(key: SessionKey): Step[] {
           kind: "set",
           exercise: item.exercise,
           sub: item.sub,
-          load: item.load,
+          load: load(item.load),
           bodyweight: item.bodyweight,
           target: item.targets?.[i] ?? item.target ?? "to failure",
           cues: item.cues,

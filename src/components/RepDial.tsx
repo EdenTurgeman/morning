@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { beatIt, buzz } from "@/lib/audio";
+import { formatKg } from "@/lib/plates";
 
 /* The most-tapped control in the app. Two 78px targets — comfortably past the
  * spec's 64px floor, because this gets hit with a knuckle — and a digit that
@@ -19,9 +20,12 @@ interface Props {
   onStep: (delta: number) => void;
   /** Reps logged on this exact set last time, or null on a first run. */
   previous: number | null;
+  /** Set only when last time's reps were done at a DIFFERENT working weight,
+   *  in which case they aren't a like-for-like target. */
+  previousKg?: number;
 }
 
-export function RepDial({ value, onStep, previous }: Props) {
+export function RepDial({ value, onStep, previous, previousKg }: Props) {
   const [direction, setDirection] = useState(1);
   const beating = previous !== null && value > previous;
 
@@ -80,7 +84,15 @@ export function RepDial({ value, onStep, previous }: Props) {
       </div>
 
       <div className="mt-3 text-center text-[1rem]">
-        {previous !== null ? (
+        {previous !== null && previousKg !== undefined ? (
+          <span className="text-muted">
+            Last time:{" "}
+            <b className="tnum font-semibold text-ink">{previous}</b>{" "}
+            <span className="text-dim">
+              at {formatKg(previousKg)} kg — different weight now
+            </span>
+          </span>
+        ) : previous !== null ? (
           <span className={beating ? "text-emerald" : "text-muted"}>
             {beating ? (
               <>Beating last time&apos;s {previous}</>

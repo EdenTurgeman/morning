@@ -1,9 +1,16 @@
-import { useMemo } from "react";
-import { Card, Loadout } from "@/components/Card";
+import { useMemo, useState } from "react";
+import { Card } from "@/components/Card";
+import { WeightPicker } from "@/components/WeightPicker";
+import { formatKg, platesFor } from "@/lib/plates";
 import { Button } from "@/components/Button";
 import { WeekMeter } from "@/components/WeekMeter";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { getSession, nextSessionAfter, type SessionKey } from "@/program";
+import {
+  defaultLoadFor,
+  getSession,
+  nextSessionAfter,
+  type SessionKey,
+} from "@/program";
 import { daysSince, localISODate, type AppData } from "@/lib/storage";
 import { weeklyProgress, weekNudge } from "@/lib/week";
 import { computeLedger } from "@/lib/ledger";
@@ -22,13 +29,18 @@ interface Props {
   data: AppData;
   onStart: (key: SessionKey) => void;
   onNavigate: (view: View) => void;
+  onSetLoad: (key: SessionKey, kg: number) => void;
 }
 
-export function Home({ data, onStart, onNavigate }: Props) {
+export function Home({ data, onStart, onNavigate, onSetLoad }: Props) {
+  const [editingLoad, setEditingLoad] = useState(false);
   const last = data.history.at(-1) ?? null;
   const key = nextSessionAfter(last?.s ?? null);
   const other = nextSessionAfter(key);
   const session = getSession(key);
+
+  const kg = data.loads?.[key] ?? defaultLoadFor(key) ?? 0;
+  const plates = platesFor(kg);
 
   const week = useMemo(() => weeklyProgress(data.history), [data.history]);
   const ledger = useMemo(() => computeLedger(data.history), [data.history]);
@@ -127,11 +139,43 @@ export function Home({ data, onStart, onNavigate }: Props) {
 
           <div className="rule mb-1" />
 
-          <Loadout items={session.loadout} />
+          {/* The weight is a setting, not a fixed instruction. The program's
+              number is a starting guess, and it is only useful if it matches
+              what you can actually lift for the prescribed reps. */}
+          <button
+            onClick={() => setEditingLoad((e) => !e)}
+            className="flex w-full items-baseline justify-between gap-4 py-2.5 text-left"
+          >
+            <span className="text-[0.92rem] text-muted">Dumbbells</span>
+            <span className="flex items-baseline gap-2">
+              <span className="tnum text-[0.96rem] font-semibold text-ink">
+                {formatKg(kg)} kg each
+              </span>
+              <span className="text-[0.86rem] text-[var(--accent)]">
+                {editingLoad ? "close" : "change"}
+              </span>
+            </span>
+          </button>
 
-          <p className="mt-3 text-[0.78rem] leading-relaxed text-dim">
-            Set it while you warm up. Nothing moves after that.
-          </p>
+          {editingLoad ? (
+            <WeightPicker
+              kg={kg}
+              onChange={(next) => onSetLoad(key, next)}
+              onClose={() => setEditingLoad(false)}
+            />
+          ) : (
+            <>
+              {plates && (
+                <div className="-mt-1 flex items-baseline justify-between gap-4">
+                  <span className="text-[0.76rem] text-dim">per handle</span>
+                  <span className="tnum text-[0.76rem] text-dim">{plates}</span>
+                </div>
+              )}
+              <p className="mt-3 text-[0.78rem] leading-relaxed text-dim">
+                Set it while you warm up. Nothing moves after that.
+              </p>
+            </>
+          )}
         </Card>
       </BlurFade>
 

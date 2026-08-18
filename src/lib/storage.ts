@@ -22,12 +22,21 @@ export interface SessionRecord {
   /** Sum of log values. */
   reps: number;
   ts: number;
+  /** Plates per handle actually used. Recorded per session because reps are
+   *  only comparable at the same weight — 12 at 7.5 kg is not 12 at 10 kg —
+   *  and because lifetime tonnage has to use what you really lifted. Absent on
+   *  sessions logged before the weight became adjustable. */
+  kg?: number;
 }
 
 export interface AppData {
   v: 1;
   history: SessionRecord[];
   lastBackup: string | null;
+  /** Your current working weight per session, plates per handle. Absent means
+   *  "use the program's default". Lives in data rather than program.ts so
+   *  changing it needs no rebuild. */
+  loads?: Partial<Record<SessionKey, number>>;
 }
 
 export const emptyData = (): AppData => ({ v: 1, history: [], lastBackup: null });
@@ -55,6 +64,7 @@ export function parseData(raw: unknown): AppData | null {
       d: e.d,
       s: e.s,
       log,
+      ...(typeof e.kg === "number" && e.kg >= 0 ? { kg: e.kg } : {}),
       min: typeof e.min === "number" ? e.min : 0,
       reps:
         typeof e.reps === "number"
@@ -64,10 +74,20 @@ export function parseData(raw: unknown): AppData | null {
     });
   }
 
+  const loads: Partial<Record<SessionKey, number>> = {};
+  if (typeof o.loads === "object" && o.loads !== null) {
+    for (const [key, kg] of Object.entries(o.loads)) {
+      if (isSessionKey(key) && typeof kg === "number" && Number.isFinite(kg) && kg >= 0) {
+        loads[key] = kg;
+      }
+    }
+  }
+
   return {
     v: 1,
     history,
     lastBackup: typeof o.lastBackup === "string" ? o.lastBackup : null,
+    ...(Object.keys(loads).length ? { loads } : {}),
   };
 }
 

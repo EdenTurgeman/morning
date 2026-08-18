@@ -23,7 +23,7 @@ import {
   DONE_PROGRESS,
   IDLE_PROGRESS,
 } from "@/lib/sunrise";
-import type { SessionKey } from "@/program";
+import { defaultLoadFor, type SessionKey } from "@/program";
 
 export type View =
   | "home"
@@ -37,8 +37,22 @@ export default function App() {
   const [view, setView] = useState<View>("home");
   const [lastResult, setLastResult] = useState<SessionRecord | null>(null);
   const [celebrating, setCelebrating] = useState(false);
-  const { data, addSession, deleteSession, markBackedUp, replaceAll, eraseAll } =
-    useAppData();
+  const {
+    data,
+    addSession,
+    deleteSession,
+    setLoad,
+    markBackedUp,
+    replaceAll,
+    eraseAll,
+  } = useAppData();
+
+  /* The working weight for a session: your setting if you've set one, else the
+   * weight the program was written for. */
+  const loadFor = useCallback(
+    (key: SessionKey) => data.loads?.[key] ?? defaultLoadFor(key) ?? undefined,
+    [data.loads],
+  );
 
   const handleFinish = useCallback(
     (result: FinishedSession) => {
@@ -47,6 +61,7 @@ export default function App() {
         log: result.log,
         min: result.minutes,
         reps: result.reps,
+        ...(typeof result.kg === "number" ? { kg: result.kg } : {}),
       });
       setLastResult(record);
       setView("summary");
@@ -57,7 +72,7 @@ export default function App() {
     [addSession],
   );
 
-  const workout = useWorkout({ onFinish: handleFinish });
+  const workout = useWorkout({ onFinish: handleFinish, loadFor });
 
   /* The sunrise. One number decides the app's entire colour: how far through
      the session you are. Outside a workout it sits just before dawn; the
@@ -162,7 +177,12 @@ export default function App() {
             onNavigate={navigate}
           />
         ) : (
-          <Home data={data} onStart={start} onNavigate={navigate} />
+          <Home
+            data={data}
+            onStart={start}
+            onNavigate={navigate}
+            onSetLoad={setLoad}
+          />
         )}
       </main>
 

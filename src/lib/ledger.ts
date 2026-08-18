@@ -41,10 +41,10 @@ export interface Ledger {
 /** slot id → kilos moved per rep, for the program as it currently stands.
  *  Slots that no longer resolve (because the program was edited) contribute
  *  reps but no tonnage — the alternative is inventing a load for them. */
-function loadBySlot(): Map<string, number> {
+function loadBySlot(kg?: number): Map<string, number> {
   const map = new Map<string, number>();
   for (const key of SESSION_KEYS) {
-    for (const step of buildSteps(key)) {
+    for (const step of buildSteps(key, kg)) {
       if (step.kind !== "set") continue;
       map.set(`${key}:${step.slot}`, (step.load ?? 0) * HANDS);
     }
@@ -53,7 +53,15 @@ function loadBySlot(): Map<string, number> {
 }
 
 export function computeLedger(history: readonly SessionRecord[]): Ledger {
-  const loads = loadBySlot();
+  // Sessions record the weight they were actually done at, so a change of
+  // working weight doesn't retroactively rewrite what you lifted last month.
+  const cache = new Map<string, Map<string, number>>();
+  const loadsFor = (kg?: number) => {
+    const id = kg === undefined ? "default" : String(kg);
+    let m = cache.get(id);
+    if (!m) { m = loadBySlot(kg); cache.set(id, m); }
+    return m;
+  };
 
   let kilos = 0;
   let reps = 0;
@@ -67,6 +75,7 @@ export function computeLedger(history: readonly SessionRecord[]): Ledger {
   for (const h of history) {
     minutes += h.min;
     perSession[h.s] = (perSession[h.s] ?? 0) + 1;
+    const loads = loadsFor(h.kg);
     for (const [slot, r] of Object.entries(h.log)) {
       reps += r;
       const perRep = loads.get(`${h.s}:${slot}`) ?? 0;

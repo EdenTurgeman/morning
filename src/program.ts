@@ -7,6 +7,12 @@
  *
  *  Weights are PLATES ONLY. Add your handle weight mentally.
  *
+ *  The `load` on each movement is the weight the session is WRITTEN for — a
+ *  starting point. Your actual working weight is set in the app (tap the
+ *  loadout on the home screen) and overrides every loaded movement in the
+ *  session. Sessions record the weight they were done at, so changing it never
+ *  rewrites history.
+ *
  *  ── how to edit ──────────────────────────────────────────────────────────
  *  Blocks run top to bottom. There are three kinds:
  *
@@ -39,10 +45,6 @@ export const PROGRAM = {
     key: "A",
     name: "Heavy",
     minutes: "~16 min",
-    loadout: [
-      { item: "Dumbbells", value: "10 kg each" },
-      { item: "per handle", value: "4×1.25 + 2×2.5", indent: true },
-    ],
     blocks: [
       {
         kind: "warmup",
@@ -125,10 +127,6 @@ export const PROGRAM = {
     key: "B",
     name: "Light",
     minutes: "~16 min",
-    loadout: [
-      { item: "Dumbbells", value: "5 kg each" },
-      { item: "per handle", value: "2×2.5", indent: true },
-    ],
     blocks: [
       {
         kind: "warmup",
@@ -305,11 +303,6 @@ export interface Session {
   readonly key: string;
   readonly name: string;
   readonly minutes: string;
-  readonly loadout: readonly {
-    readonly item: string;
-    readonly value: string;
-    readonly indent?: boolean;
-  }[];
   readonly blocks: readonly Block[];
 }
 
@@ -338,4 +331,28 @@ export function nextSessionAfter(key: SessionKey | null): SessionKey {
   if (key === null) return SESSION_KEYS[0];
   const i = SESSION_KEYS.indexOf(key);
   return SESSION_KEYS[(i + 1) % SESSION_KEYS.length];
+}
+
+/* --- equipment -------------------------------------------------------------
+ * What you own, PER HANDLE. The loadout card derives its plate breakdown from
+ * this, and it bounds how heavy a session can be set. Edit it if you buy more
+ * plates. */
+
+export const PLATE_INVENTORY = [
+  { kg: 2.5, count: 2 },
+  { kg: 1.25, count: 4 },
+] as const;
+
+/** The per-handle weight a session is written for — the default before any
+ *  in-app adjustment. Read off the first loaded movement, so it stays correct
+ *  if you edit the program. */
+export function defaultLoadFor(key: SessionKey): number | null {
+  for (const block of getSession(key).blocks) {
+    if (block.kind === "straight" && block.load) return block.load;
+    if (block.kind === "superset") {
+      const item = block.items.find((i) => i.load);
+      if (item?.load) return item.load;
+    }
+  }
+  return null;
 }
