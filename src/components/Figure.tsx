@@ -632,6 +632,109 @@ const DRAW: Record<FigureKind, Draw> = {
     );
   },
 
+  /* Floor fly, seen FROM ABOVE — you're on your back. Top-down is the only
+   * view that works: from the side a fly's arm just travels up and down and
+   * is indistinguishable from a press, whereas from above the opening and
+   * closing arc is the whole movement. The mat behind the figure is what
+   * signals "lying down" rather than standing. */
+  "floor-fly": (still, uid) => {
+    const dur = "4.6s";
+    // slow open into the stretch, 1s hold there, faster squeeze back
+    const kt = [0, 0.42, 0.6, 0.9, 1];
+    const open = [
+      [
+        [86, 46],
+        [64, 52],
+        [44, 57],
+      ],
+      [
+        [114, 46],
+        [136, 52],
+        [156, 57],
+      ],
+    ] as const;
+    const shut = [
+      [
+        [86, 46],
+        [80, 33],
+        [95, 27],
+      ],
+      [
+        [114, 46],
+        [120, 33],
+        [105, 27],
+      ],
+    ] as const;
+    return (
+      <>
+        <Floor uid={uid} />
+        {/* the mat — reads as "on your back" */}
+        <rect
+          x={72}
+          y={12}
+          width={56}
+          height={104}
+          rx={10}
+          fill="rgb(255 255 255 / 0.03)"
+          stroke={BODY}
+          strokeWidth={2}
+          opacity={0.4}
+        />
+        <Arc d="M44 57 Q 62 34 95 27" />
+        <Arc d="M156 57 Q 138 34 105 27" />
+
+        {/* head, shoulders, torso, hips, legs — from above */}
+        <circle cx={100} cy={26} r={9} fill="none" stroke={ACCENT} strokeWidth={4} />
+        <polyline
+          points={pts([
+            [86, 46],
+            [114, 46],
+          ])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        <polyline
+          points={pts([
+            [100, 40],
+            [100, 84],
+          ])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        <polyline
+          points={pts([
+            [91, 84],
+            [109, 84],
+          ])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        <polyline
+          points={pts([[91, 84], [89, 112]])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={4.5}
+          strokeLinecap="round"
+        />
+        <polyline
+          points={pts([[109, 84], [111, 112]])}
+          fill="none"
+          stroke={BODY}
+          strokeWidth={4.5}
+          strokeLinecap="round"
+        />
+
+        <Pair still={still} keyTimes={kt} dur={dur} down={open} up={shut} />
+      </>
+    );
+  },
+
   /* Warm-up: both arms sweeping full circles, one a half-turn behind. */
   warmup: (still, uid) => {
     const dur = "3.6s";

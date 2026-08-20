@@ -92,10 +92,9 @@ const a = buildSteps("A");
 const b = buildSteps("B");
 
 check("A: 21 steps", a.length === 21, `got ${a.length}`);
-// spec.md §11 claims B is also 21 steps. It isn't, and can't be: §3 gives B
-// 14 sets to A's 13, and the myo block contributes 5 sets + 4 interleaved
-// rests. 1 warm-up + 14 sets + 10 rests = 25. The checklist line predates the
-// myo block; the program data is the source of truth.
+// spec.md §11 claims B is 21 steps. It never was: B carries 14 sets to A's 13,
+// plus 10 rests. 1 + 14 + 10 = 25. The checklist line predates both the myo
+// block and the floor fly; the program data is the source of truth.
 check("B: 25 steps (spec §11 says 21 — see note)", b.length === 25, `got ${b.length}`);
 check(
   "A: push-up block is 3 sets at 60 s rest",
@@ -114,16 +113,59 @@ const myo = b.filter(
   (s) => s.kind === "set" && s.exercise === "Lateral raise" && s.sub === "myo-reps",
 ) as Extract<Step, { kind: "set" }>[];
 
-check("B: myo-rep block produces 5 sets", myo.length === 5, `got ${myo.length}`);
+check("B: myo-rep block produces 3 sets", myo.length === 3, `got ${myo.length}`);
 check(
-  "B: myo set 1 is all-out, sets 2–5 are 4–5 reps",
+  "B: myo set 1 is all-out, the rest are 4–5 reps",
   myo[0]?.target === "all-out to failure" &&
     myo.slice(1).every((s) => s.target === "4–5 reps"),
 );
 check(
   "B: myo rests are 20 s",
-  b.filter((s) => s.kind === "rest" && s.seconds === 20).length === 4,
+  b.filter((s) => s.kind === "rest" && s.seconds === 20).length === 3,
 );
+
+/* Volume balance. The point of trimming the myo block and adding the floor fly
+ * was that side delts were over-subscribed while pecs — a stated goal — had no
+ * isolation at all. Guard both ends of that so a future edit can't quietly
+ * undo it. */
+{
+  const bSets = b.filter((s): s is Extract<Step, { kind: "set" }> => s.kind === "set");
+  const lat = bSets.filter((s) => s.exercise === "Lateral raise").length;
+  check(
+    "B: lateral raise is under half the session",
+    lat / bSets.length < 0.5,
+    `${lat} of ${bSets.length} sets`,
+  );
+  check(
+    "B: chest has an isolation movement, not only push-ups",
+    bSets.some((s) => s.exercise === "Floor fly"),
+  );
+  check(
+    "B: slot ids of the pre-existing blocks are unchanged",
+    ["1.0.0", "2.0.0", "2.1.2", "3.0.0"].every((slot) =>
+      bSets.some((s) => s.slot === slot),
+    ),
+  );
+}
+
+console.log("\n\x1b[1mOne weight per session\x1b[0m\n");
+/* The program's premise is that load is fixed and reps are the only variable —
+ * and practically, nobody swaps plates mid-workout at 6am. A session may mix
+ * loaded and bodyweight movements, but every loaded movement in it must use
+ * the SAME weight. */
+for (const key of SESSION_KEYS) {
+  const loaded = buildSteps(key)
+    .filter((s): s is Extract<Step, { kind: "set" }> => s.kind === "set")
+    .filter((s) => typeof s.load === "number");
+  const weights = [...new Set(loaded.map((s) => s.load))];
+  check(
+    `${key}: every loaded movement uses one weight`,
+    weights.length <= 1,
+    weights.length > 1 ? `would need a plate change: ${weights.join(", ")} kg` : "",
+  );
+}
+check("A is written for 7.5 kg", defaultLoadFor("A") === 7.5, `got ${defaultLoadFor("A")}`);
+check("B is written for 5 kg", defaultLoadFor("B") === 5, `got ${defaultLoadFor("B")}`);
 
 console.log("\n\x1b[1mSession alternation\x1b[0m\n");
 check("fresh install proposes A", nextSessionAfter(null) === "A");

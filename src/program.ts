@@ -7,11 +7,18 @@
  *
  *  Weights are PLATES ONLY. Add your handle weight mentally.
  *
- *  The `load` on each movement is the weight the session is WRITTEN for — a
- *  starting point. Your actual working weight is set in the app (tap the
- *  loadout on the home screen) and overrides every loaded movement in the
- *  session. Sessions record the weight they were done at, so changing it never
- *  rewrites history.
+ *  The `load` on each movement is the weight the session is WRITTEN for. Your
+ *  actual working weight is set in the app (tap the loadout on the home
+ *  screen) and overrides every loaded movement in the session.
+ *
+ *  Keep ONE weight per session. The whole premise is that load is fixed and
+ *  reps are the only variable, and practically you should never be changing
+ *  plates mid-workout at 6am. scripts/verify-program.ts enforces it.
+ *
+ *  Careful when changing these numbers: sessions logged BEFORE the app started
+ *  recording weight have no weight of their own, so they fall back to this
+ *  default — editing it silently re-values their tonnage. Sessions logged since
+ *  carry their own figure and are unaffected.
  *
  *  ── how to edit ──────────────────────────────────────────────────────────
  *  Blocks run top to bottom. There are three kinds:
@@ -78,7 +85,7 @@ export const PROGRAM = {
           {
             exercise: "Overhead press",
             sub: "standing, strict",
-            load: 10,
+            load: 7.5,
             target: "8–15 reps",
             cues: [
               "Ribs down. No leg drive, no leaning back",
@@ -87,7 +94,7 @@ export const PROGRAM = {
           },
           {
             exercise: "Curl",
-            load: 10,
+            load: 7.5,
             target: "10–18 reps",
             cues: [
               "3 seconds lowering",
@@ -104,7 +111,7 @@ export const PROGRAM = {
         items: [
           {
             exercise: "Bent-over row",
-            load: 10,
+            load: 7.5,
             target: "15–20 reps",
             cues: [
               "Hinge to 45°, flat back",
@@ -114,7 +121,7 @@ export const PROGRAM = {
           },
           {
             exercise: "Hammer curl",
-            load: 10,
+            load: 7.5,
             target: "12–20 reps",
             cues: ["Palms facing each other", "Full stretch at the bottom"],
           },
@@ -126,7 +133,7 @@ export const PROGRAM = {
   B: {
     key: "B",
     name: "Light",
-    minutes: "~16 min",
+    minutes: "~19 min",
     blocks: [
       {
         kind: "warmup",
@@ -183,24 +190,51 @@ export const PROGRAM = {
         ],
       },
       {
+        // Trimmed from 5 sets to 3. Side delts were getting ~20 sets a week
+        // from lateral raises alone, plus more from pressing in A — past the
+        // point of useful return, and all from one movement. The freed volume
+        // goes to the floor fly below.
         kind: "straight",
         exercise: "Lateral raise",
         sub: "myo-reps",
-        sets: 5,
+        sets: 3,
         rest: 20,
         load: 5,
         intense: true,
-        targets: [
-          "all-out to failure",
-          "4–5 reps",
-          "4–5 reps",
-          "4–5 reps",
-          "4–5 reps",
-        ],
+        targets: ["all-out to failure", "4–5 reps", "4–5 reps"],
         cues: [
           "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
           "Stop when you can't get 4 clean reps",
           "The 20-second rest IS the mechanism — don't stretch it",
+        ],
+      },
+      {
+        /* Added deliberately, and appended rather than inserted: slot ids are
+         * blockIndex.itemIndex.setIndex, so putting this anywhere earlier
+         * would have shifted every later block's ids and handed this exercise
+         * the myo block's rep history as its starting target.
+         *
+         * Why it's here: pecs are a stated goal but had exactly one movement
+         * (push-ups) and no isolation — nothing loading the chest in a
+         * stretched position. On the floor with light dumbbells the fly is the
+         * movement that does that, and the floor itself caps the range safely. */
+        kind: "straight",
+        exercise: "Floor fly",
+        sub: "lying on your back",
+        // Two sets, not three: three pushed the session past the 20-minute cap,
+        // which is a hard constraint. Two also lands total chest volume at
+        // exactly 20 sets a week rather than overshooting.
+        sets: 2,
+        rest: 60,
+        load: 5,
+        // High reps on purpose. Pecs are far stronger than side delts, so the
+        // session's fixed light weight will never be heavy here — the tempo is
+        // what makes it hard, not the load.
+        target: "15–25 reps",
+        cues: [
+          "Elbows slightly bent and locked there — a fly, not a press",
+          "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
+          "Past 25 clean reps? Slow the lowering to 4s. Go to failure",
         ],
       },
     ],
@@ -217,6 +251,10 @@ export const GUIDE = [
   {
     heading: "Beat reps, not weight",
     body: "The number under each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the ladder. Set the weight to something you can genuinely take to failure — if the prescribed number isn't that, change it on the home screen. Reps at a weight you can't finish aren't a measurement of anything.",
+  },
+  {
+    heading: "Why B looks lopsided",
+    body: "With 5 kg in each hand there is almost nothing you can train hard except small muscles, so B is a delt and chest-isolation day while A carries the compounds. It used to be 57% lateral raises, which pushed side delts past ~20 sets a week — the point where extra volume stops paying — while your pecs had one movement and no isolation at all. The myo block came down to 3 sets and the floor fly took the difference.",
   },
   {
     heading: "Progression ladder",

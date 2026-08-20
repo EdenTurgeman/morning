@@ -10,6 +10,7 @@ export type FigureKind =
   | "hammer-curl"
   | "lateral-raise"
   | "rear-delt-fly"
+  | "floor-fly"
   | "warmup";
 
 export function figureFor(exercise: string): FigureKind | null {
@@ -21,6 +22,9 @@ export function figureFor(exercise: string): FigureKind | null {
   if (name.includes("curl")) return "curl";
   if (name.includes("row")) return "row";
   if (name.includes("lateral")) return "lateral-raise";
+  // "floor" must be tested before the generic "fly", or a floor fly silently
+  // renders the rear-delt figure.
+  if (name.includes("floor")) return "floor-fly";
   if (name.includes("rear-delt") || name.includes("fly")) return "rear-delt-fly";
   if (name.includes("warm")) return "warmup";
   return null;
@@ -34,5 +38,6 @@ export const FIGURE_LABELS: Record<FigureKind, string> = {
   "hammer-curl": "Hammer curl: palms facing each other, full stretch at the bottom",
   "lateral-raise": "Lateral raise: lead with the elbows to shoulder height",
   "rear-delt-fly": "Rear-delt fly: hinged forward, open the arms wide",
+  "floor-fly": "Floor fly: lying on your back, arms opening wide until the triceps touch the floor",
   warmup: "Warm-up: arm circles and shoulder dislocates",
 };
