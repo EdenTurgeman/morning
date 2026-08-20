@@ -2,139 +2,139 @@
  * SOUND
  *
  * Everything is synthesised with oscillators — no audio files, nothing to
- * load, works offline. Getting it to actually come out of an iPhone takes
- * three separate things, and missing any one of them means silence:
+ * load, works offline.
  *
- * 1. A user gesture. iOS won't start an AudioContext without one.
+ * ── the rule this file is built around ────────────────────────────────────
+ * This app makes six short noises in twenty minutes. It has no business
+ * taking your music away for the other nineteen. So it never claims the audio
+ * session for longer than a cue actually lasts:
  *
- * 2. The right audio session. Web Audio defaults to the "ambient" category on
- *    iOS, which the ring/silent switch mutes — HTML5 <audio> is exempt, Web
- *    Audio is not. iOS 16.4+ exposes navigator.audioSession, so we can ask for
- *    "playback" and be heard with the switch on. Older versions get the
- *    long-standing workaround: a looping near-silent <audio> element, which
- *    holds a non-ambient session for the page.
+ *   1. The context is created on your first tap and then handed straight back.
+ *      A running AudioContext holds an active audio session on iOS whether or
+ *      not it is making a sound, and an active session is what silences Music.
+ *   2. Every cue resumes it, plays, and releases it again. Overlapping cues
+ *      extend one shared hold rather than fighting over it — so the five
+ *      countdown ticks and the "go" beep are a single continuous hold, not six.
+ *   3. The session type is "transient", the platform's word for a short sound
+ *      that should DUCK other audio rather than interrupt it. Your music dips
+ *      under the count-in and comes back up after it, the way a navigation
+ *      prompt behaves.
  *
- * 3. Resuming after suspension. iOS suspends the context every time the page
- *    is hidden. An earlier version of this file simply returned when the
- *    context wasn't running, so the first screen lock or app switch killed
- *    every sound for the rest of the session. Now every cue resumes first, and
- *    we also resume on visibilitychange.
+ * The previous version asked for "playback" — the category meant for a music
+ * app — and additionally held a looping silent <audio> element open for the
+ * life of the page. Together those told iOS this was the thing you were
+ * listening to, so Music stopped and stayed stopped.
  *
- * Even with all of that, a phone in Silent mode on iOS below 16.4 cannot be
- * made to beep from a web app — there is no lever left to pull.
+ * ── the one thing that can't be fixed ─────────────────────────────────────
+ * "transient" follows the ring/silent switch. That is the trade: a category
+ * that ignores the switch is by definition one that takes the session away
+ * from whatever else is playing. If music is playing at all then the switch
+ * isn't the problem; a silent phone with nothing playing is the case where
+ * you'll hear nothing, and the countdown still runs visually.
  * ------------------------------------------------------------------------- */
 
 let ctx: AudioContext | null = null;
-let keepAlive: HTMLAudioElement | null = null;
 
 type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext };
 interface AudioSessionNav {
   audioSession?: { type: string };
 }
 
-/** Ask iOS to treat this page as playback rather than ambient, so the ring
- *  switch doesn't mute it. Safari-only and still an editor's draft, hence the
- *  feature test. */
-function claimPlaybackSession(): void {
+/* --- the session hold ------------------------------------------------------
+ * `releaseAt` is the wall-clock moment the app has no further use for the
+ * audio session. Cues push it forward; one timer chases it and suspends once
+ * it stops moving. That is what makes a countdown duck your music once rather
+ * than pumping it six times. */
+
+let releaseAt = 0;
+let releaseTimer: ReturnType<typeof setTimeout> | null = null;
+
+function setSessionType(type: "transient" | "auto"): void {
   try {
     const session = (navigator as unknown as AudioSessionNav).audioSession;
-    if (session) session.type = "playback";
+    if (session) session.type = type;
   } catch {
-    /* not supported */
+    /* Safari-only, and still an editor's draft */
   }
 }
 
-/** A near-silent looping element. On iOS versions without the AudioSession
- *  API this is the only lever available: media elements aren't governed by the
- *  ambient category, so holding one open keeps the page's session out of it.
- *  Volume is 0.001 rather than 0 — a genuinely silent stream gets optimised
- *  away and the trick stops working. */
-function startKeepAlive(): void {
-  if (keepAlive) return;
-  try {
-    const sampleRate = 8000;
-    const samples = sampleRate / 2;
-    const buf = new ArrayBuffer(44 + samples);
-    const view = new DataView(buf);
-    const ascii = (off: number, text: string) => {
-      for (let i = 0; i < text.length; i++) view.setUint8(off + i, text.charCodeAt(i));
-    };
-    ascii(0, "RIFF");
-    view.setUint32(4, 36 + samples, true);
-    ascii(8, "WAVEfmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, 1, true); // mono
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate, true);
-    view.setUint16(32, 1, true);
-    view.setUint16(34, 8, true); // 8-bit
-    ascii(36, "data");
-    view.setUint32(40, samples, true);
-    for (let i = 0; i < samples; i++) view.setUint8(44 + i, 128); // 8-bit silence
-
-    const el = document.createElement("audio");
-    el.setAttribute("playsinline", "");
-    el.loop = true;
-    el.volume = 0.001;
-    el.src = URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
-    void el.play().catch(() => {});
-    keepAlive = el;
-  } catch {
-    /* best effort */
-  }
+function scheduleRelease(): void {
+  if (releaseTimer) clearTimeout(releaseTimer);
+  releaseTimer = setTimeout(
+    () => {
+      releaseTimer = null;
+      // A cue landed while we were waiting — chase the new deadline instead.
+      if (Date.now() < releaseAt - 15) {
+        scheduleRelease();
+        return;
+      }
+      void ctx?.suspend().catch(() => {});
+      setSessionType("auto");
+    },
+    Math.max(0, releaseAt - Date.now()) + 30,
+  );
 }
 
+/** Keep the audio session for at least `ms` more, then give it back. */
+function hold(ms: number): void {
+  releaseAt = Math.max(releaseAt, Date.now() + ms);
+  scheduleRelease();
+}
+
+/**
+ * Play one cue.
+ *
+ * `holdMs` is how long the sound needs the session for, tail included. It is
+ * deliberately longer than the sound itself: releasing on the exact sample the
+ * last oscillator stops clips the release, and re-ducking 200ms later for the
+ * next tick would be audible.
+ */
+function cue(holdMs: number, play: (ac: AudioContext, at: number) => void): void {
+  const ac = ctx;
+  if (!ac) return;
+
+  hold(holdMs);
+  setSessionType("transient");
+
+  const go = () => {
+    try {
+      play(ac, ac.currentTime);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  // resume() is async. An earlier version called it and then checked the state
+  // synchronously — which is never "running" yet — so every cue after a
+  // suspension was silently dropped. Scheduling inside the promise costs a few
+  // milliseconds and never loses the sound.
+  if (ac.state === "running") go();
+  else void ac.resume().then(go).catch(() => {});
+}
+
+/** Called from the first touch anywhere, and again when a session starts. */
 export function unlockAudio(): void {
   try {
-    claimPlaybackSession();
     if (!ctx) {
       const Ctor =
         window.AudioContext ?? (window as WebkitWindow).webkitAudioContext;
       if (!Ctor) return;
       ctx = new Ctor();
       // A one-sample silent buffer is the canonical way to convince WebKit the
-      // context is genuinely gesture-initiated.
+      // context is genuinely gesture-initiated. Everything after this is then
+      // allowed to resume without a gesture of its own.
       const buffer = ctx.createBuffer(1, 1, 22050);
       const source = ctx.createBufferSource();
       source.buffer = buffer;
       source.connect(ctx.destination);
       source.start(0);
     }
-    startKeepAlive();
-    if (ctx.state === "suspended") void ctx.resume();
+    // Unlocked, then released: being armed must not cost you your music for
+    // the rest of the session.
+    hold(120);
   } catch {
     /* no audio — the countdown still advances visually */
   }
-}
-
-/** Called before every cue. Returns the context only if it can make sound,
- *  and kicks off a resume when it can't — which is what makes sound survive a
- *  screen lock mid-session. */
-function live(): AudioContext | null {
-  const ac = ctx;
-  if (!ac) return null;
-  if (ac.state !== "running") {
-    // resume() is async, so this cue is likely lost — but it restores sound
-    // for every cue after it, which is the difference between "silent after
-    // the first screen lock" and "silent for one beep".
-    void ac.resume().catch(() => {});
-    claimPlaybackSession();
-    return (ac.state as AudioContextState) === "running" ? ac : null;
-  }
-  return ac;
-}
-
-if (typeof document !== "undefined") {
-  // iOS suspends the context whenever the page hides. Resume on the way back,
-  // or every cue after the first backgrounding is silent.
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && ctx && ctx.state !== "running") {
-      void ctx.resume().catch(() => {});
-      claimPlaybackSession();
-      void keepAlive?.play().catch(() => {});
-    }
-  });
 }
 
 /** Zero. The note the count-in has been climbing toward — C6, an octave above
@@ -142,14 +142,13 @@ if (typeof document !== "undefined") {
  *  any tick, so "go" is unmistakable even if you missed the count. */
 export function beep(_notes = 3): void {
   void _notes;
-  const ac = live();
-  if (!ac) return;
-  try {
-    const at = ac.currentTime;
-    ([
-      { hz: 1046.5, gain: 0.34, len: 0.5, type: "triangle" as OscillatorType },
-      { hz: 523.25, gain: 0.16, len: 0.55, type: "sine" as OscillatorType },
-    ]).forEach(({ hz, gain: g, len, type }) => {
+  cue(1100, (ac, at) => {
+    (
+      [
+        { hz: 1046.5, gain: 0.34, len: 0.5, type: "triangle" as OscillatorType },
+        { hz: 523.25, gain: 0.16, len: 0.55, type: "sine" as OscillatorType },
+      ] as const
+    ).forEach(({ hz, gain: g, len, type }) => {
       const osc = ac.createOscillator();
       const gain = ac.createGain();
       osc.type = type;
@@ -162,23 +161,16 @@ export function beep(_notes = 3): void {
       osc.start(at);
       osc.stop(at + len + 0.03);
     });
-  } catch {
-    /* ignore */
-  }
+  });
 }
 
 /** The session-complete flourish: a rising major arpeggio with a soft pad
  *  under it. Only ever plays once a session, on the Daybreak screen — which is
  *  what lets it be four times longer than the rest beep without wearing out. */
 export function chime(): void {
-  const ac = live();
-  if (!ac) return;
-  try {
-    const now = ac.currentTime;
+  cue(2300, (ac, now) => {
     // A4 · C#5 · E5 · A5 — a plain A major triad resolving up the octave.
-    const notes = [440, 554.37, 659.25, 880];
-
-    notes.forEach((freq, i) => {
+    [440, 554.37, 659.25, 880].forEach((freq, i) => {
       const at = now + i * 0.15;
       const osc = ac.createOscillator();
       const gain = ac.createGain();
@@ -205,18 +197,13 @@ export function chime(): void {
     padGain.connect(ac.destination);
     pad.start(now);
     pad.stop(now + 1.7);
-  } catch {
-    /* ignore */
-  }
+  });
 }
 
 /** Short, dry confirmation that a set went into the log. Deliberately quiet
  *  and low — it's an acknowledgement, not an event. */
 export function confirmTone(): void {
-  const ac = live();
-  if (!ac) return;
-  try {
-    const at = ac.currentTime;
+  cue(500, (ac, at) => {
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.type = "sine";
@@ -229,9 +216,7 @@ export function confirmTone(): void {
     gain.connect(ac.destination);
     osc.start(at);
     osc.stop(at + 0.16);
-  } catch {
-    /* ignore */
-  }
+  });
 }
 
 /** Fires the instant the rep counter passes what you did last time. This is
@@ -239,10 +224,7 @@ export function confirmTone(): void {
  *  still holding the weight — so it gets its own sound rather than being
  *  discovered later on the summary screen. */
 export function beatIt(): void {
-  const ac = live();
-  if (!ac) return;
-  try {
-    const at = ac.currentTime;
+  cue(800, (ac, at) => {
     [784, 1046.5].forEach((freq, i) => {
       const t = at + i * 0.075;
       const osc = ac.createOscillator();
@@ -257,9 +239,7 @@ export function beatIt(): void {
       osc.start(t);
       osc.stop(t + 0.3);
     });
-  } catch {
-    /* ignore */
-  }
+  });
 }
 
 /** Best-effort haptic. iOS Safari still has no Vibration API, so this only
@@ -286,6 +266,10 @@ export function buzz(pattern: number | number[] = 12): void {
  * little longer than the last, so you can tell where you are in the count
  * without listening for the pitch — useful when the phone is on the floor and
  * you're face-down over it.
+ *
+ * Each tick holds the session for 1.4s, comfortably past the next tick, so the
+ * whole count-in and the "go" beep are one unbroken hold: your music dips once
+ * at five and comes back once after zero.
  * ----------------------------------------------------------------------- */
 
 const COUNTDOWN: Record<number, { hz: number; gain: number; len: number }> = {
@@ -300,10 +284,7 @@ const COUNTDOWN: Record<number, { hz: number; gain: number; len: number }> = {
 export function countdownTick(secondsLeft: number): void {
   const note = COUNTDOWN[secondsLeft];
   if (!note) return;
-  const ac = live();
-  if (!ac) return;
-  try {
-    const at = ac.currentTime;
+  cue(1400, (ac, at) => {
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.type = "triangle";
@@ -315,7 +296,5 @@ export function countdownTick(secondsLeft: number): void {
     gain.connect(ac.destination);
     osc.start(at);
     osc.stop(at + note.len + 0.02);
-  } catch {
-    /* ignore */
-  }
+  });
 }

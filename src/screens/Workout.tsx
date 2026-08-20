@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Chrome } from "@/components/Chrome";
 import { Cues } from "@/components/Cues";
 import { Figure, figureFor } from "@/components/Figure";
@@ -6,12 +6,15 @@ import { Ring } from "@/components/Ring";
 import { RepDial } from "@/components/RepDial";
 import { Button } from "@/components/Button";
 import { Confirm } from "@/components/Confirm";
+import { StudyCard } from "@/components/StudyCard";
 import { useCountdown } from "@/hooks/useCountdown";
 import { buzz, confirmTone } from "@/lib/audio";
 import { lastRepsFor, previousSameSession, type AppData } from "@/lib/storage";
 import type { SetStep, Step } from "@/lib/steps";
 import type { SessionKey } from "@/program";
 import { clock } from "@/lib/format";
+import { cardRestIndices, drawCard, revealDelayFor } from "@/lib/deck";
+import type { Card } from "@/lib/cards";
 
 interface Props {
   sessionKey: SessionKey;
@@ -31,6 +34,18 @@ interface Props {
 export function Workout(props: Props) {
   const { steps, step, index, onBack, onAbandon } = props;
   const [confirmEnd, setConfirmEnd] = useState(false);
+
+  /* Two cards a session, on rests picked up front so they land spread out.
+   * Drawn lazily and cached by step index, so tapping Back onto a rest you've
+   * already had returns the same question instead of burning a new one — and
+   * so a StrictMode double render doesn't quietly mark two cards seen. */
+  const cardSteps = useMemo(() => new Set(cardRestIndices(steps)), [steps]);
+  const drawn = useRef(new Map<number, Card | null>());
+  let card: Card | null = null;
+  if (cardSteps.has(index)) {
+    if (!drawn.current.has(index)) drawn.current.set(index, drawCard());
+    card = drawn.current.get(index) ?? null;
+  }
 
   /* h-full + overflow-hidden, not min-h-full: a workout screen must fit
      exactly. "One screen, one action" stops being true the moment you have to
@@ -57,7 +72,9 @@ export function Workout(props: Props) {
       <div key={index} className="step-enter flex min-h-0 flex-1 flex-col">
         {step.kind === "timer" && <TimerStepView {...props} step={step} />}
         {step.kind === "set" && <SetStepView {...props} step={step} />}
-        {step.kind === "rest" && <RestStepView {...props} step={step} />}
+        {step.kind === "rest" && (
+          <RestStepView {...props} step={step} card={card} />
+        )}
       </div>
 
       <Confirm
@@ -242,15 +259,25 @@ function SetStepView({
 
 /* --- rest ------------------------------------------------------------------ */
 
+/* Ring diameter. A plain rest has nothing to compete with, so the clock is
+ * as big as the column allows. A carded rest starts nearly as large and then
+ * halves when the answer lands — which is what makes even the longest card in
+ * the deck fit without scrolling on a 780pt screen. */
+const PLAIN_RING = 280;
+const CARD_RING = 230;
+const CARD_RING_SHRUNK = 130;
+
 function RestStepView({
   step,
   steps,
   index,
   endsAt,
+  card,
   onAdvance,
   onExtend,
-}: Props & { step: Extract<Step, { kind: "rest" }> }) {
+}: Props & { step: Extract<Step, { kind: "rest" }>; card: Card | null }) {
   const remaining = useCountdown({ endsAt, onComplete: onAdvance });
+  const [answered, setAnswered] = useState(false);
 
   const next = steps[index + 1];
   // The 20s myo rest is the mechanism of the technique, not a convenience.
@@ -258,42 +285,81 @@ function RestStepView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="text-center text-[0.7rem] tracking-[0.16em] text-dim uppercase">
+      <div className="shrink-0 text-center text-[0.7rem] tracking-[0.16em] text-dim uppercase">
         Rest
       </div>
 
-      <div className="my-auto py-2">
-        <Ring remaining={remaining} total={step.seconds} />
+      {card ? (
+        /* With a card the middle band scrolls instead of centring, and the ring
+           gives up some size. Answers vary by a couple of lines; an unusually
+           long one must never push Skip off the bottom of the screen, and the
+           ring only has to be readable, not enormous — you're looking at the
+           question. */
+        <div
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pt-1.5"
+          // `safe` so that a card long enough to overflow falls back to
+          // top-alignment instead of centring its overflow out of reach.
+          style={{ justifyContent: "safe center" }}
+        >
+          {/* The ring is only the hero while there's nothing else to look at.
+              The moment the answer lands it halves and gives its space to the
+              text — which is both the reason the answer always fits and, on a
+              screen you stare at for a minute, the nicest thing that happens
+              on it. Scaled rather than resized: a width/height transition on
+              an SVG relayouts every frame, a transform doesn't. */}
+          <div
+            className="mx-auto shrink-0 origin-top transition-[transform,margin-bottom] duration-[650ms] ease-[var(--ease-out-expo)]"
+            style={{
+              width: CARD_RING,
+              transform: `scale(${answered ? CARD_RING_SHRUNK / CARD_RING : 1})`,
+              marginBottom: answered ? `${CARD_RING_SHRUNK - CARD_RING}px` : 0,
+            }}
+          >
+            <Ring remaining={remaining} total={step.seconds} size={CARD_RING} />
+          </div>
 
-        {isMechanism && (
-          <p className="mx-auto mt-4 max-w-[17rem] text-center text-[0.84rem] leading-snug text-[var(--accent)]">
-            The 20-second rest IS the mechanism. Don&apos;t stretch it.
-          </p>
-        )}
-      </div>
+          <StudyCard
+            card={card}
+            autoRevealMs={revealDelayFor(step.seconds)}
+            onReveal={() => setAnswered(true)}
+            className="mt-4 shrink-0"
+          />
+        </div>
+      ) : (
+        <div className="my-auto py-2">
+          <Ring remaining={remaining} total={step.seconds} size={PLAIN_RING} />
+
+          {isMechanism && (
+            <p className="mx-auto mt-4 max-w-[17rem] text-center text-[0.84rem] leading-snug text-[var(--accent)]">
+              The 20-second rest IS the mechanism. Don&apos;t stretch it.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Preview and actions sit at the bottom, so the tap target is in the
           same place it is on a set screen and the thumb never travels. */}
-      <div className="mt-auto">
+      <div className="mt-auto shrink-0 pt-3">
+        {/* Two lines rather than a panel. It carries exactly what it did
+            before — what's coming, how heavy, and the target, so you can set
+            your intent during the rest instead of reading it cold when the
+            timer fires — but a bordered card for it was spending a third of
+            the screen on a preview. That space belongs to the clock and to
+            whatever you're reading. */}
         {next?.kind === "set" && (
-          <div className="surface mb-3 rounded-[var(--radius-control)] px-4 py-3.5">
-            <div className="text-[0.66rem] tracking-[0.16em] text-dim uppercase">
-              Up next
+          <div className="mb-3.5 text-center">
+            <div className="text-[0.95rem] leading-snug text-ink">
+              <span className="text-[0.64rem] tracking-[0.17em] text-dim uppercase">
+                Next{" · "}
+              </span>
+              <span className="font-semibold">{next.exercise}</span>
+              {next.sub && <span className="text-muted"> · {next.sub}</span>}
             </div>
-            <div className="mt-1 text-[1.05rem] font-semibold text-ink">
-              {next.exercise}
-              {next.sub && (
-                <span className="font-normal text-muted"> · {next.sub}</span>
-              )}
-            </div>
-            <div className="tnum mt-0.5 text-[0.86rem] text-dim">
+            <div className="tnum mt-1 text-[0.86rem] text-dim">
               set {next.n} of {next.of}
               {next.load ? ` · ${next.load} kg` : ""}
-            </div>
-            {/* The target for what's coming, so you can set your intent during
-                the rest instead of reading it cold when the timer fires. */}
-            <div className="mt-1.5 text-[0.84rem] text-[var(--accent)]">
-              Target · {next.target}
+              {" · "}
+              <span className="text-[var(--accent)]">{next.target}</span>
             </div>
           </div>
         )}

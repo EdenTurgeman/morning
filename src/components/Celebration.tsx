@@ -12,9 +12,14 @@ import type { Celebration as CelebrationData } from "@/lib/celebration";
 export function Celebration({
   data,
   reps,
+  yielded = false,
 }: {
   data: CelebrationData;
   reps: number;
+  /** Collapse the supporting copy. The summary sets this once the study card's
+   *  answer is showing: by then the sentence has done its job, and the space it
+   *  was holding is the difference between that screen fitting and not. */
+  yielded?: boolean;
 }) {
   useEffect(() => {
     if (!data.confetti) return;
@@ -27,7 +32,6 @@ export function Celebration({
 
   return (
     <div className="relative text-center">
-      {data.rays && <Rays />}
 
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -42,7 +46,7 @@ export function Celebration({
         initial={{ opacity: 0, y: 14, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative mt-4 flex items-baseline justify-center gap-2"
+        className="relative mt-3 flex items-baseline justify-center gap-2"
       >
         <CountUp
           value={reps}
@@ -55,26 +59,39 @@ export function Celebration({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.18, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative mt-5 text-[1.35rem] leading-tight font-bold tracking-[-0.025em] text-ink"
+        className="relative mt-4 text-[1.35rem] leading-tight font-bold tracking-[-0.025em] text-ink"
       >
         {data.headline}
       </motion.h2>
 
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.26, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative mx-auto mt-2.5 max-w-[21rem] text-[0.92rem] leading-relaxed text-muted"
+      <div
+        className="relative overflow-hidden transition-[max-height,opacity] duration-[550ms] ease-[var(--ease-out-expo)]"
+        style={{ maxHeight: yielded ? 0 : "12rem", opacity: yielded ? 0 : 1 }}
       >
-        {data.body}
-      </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto mt-2 max-w-[21rem] text-[0.92rem] leading-[1.5] text-muted"
+        >
+          {data.body}
+        </motion.p>
+      </div>
     </div>
   );
 }
 
-/** Slowly turning sunburst behind the number. Pure decoration, so it's the
- *  first thing to go under prefers-reduced-motion (handled globally in CSS). */
-function Rays() {
+/**
+ * Slowly turning sunburst behind the number. Pure decoration, so it's the
+ * first thing to go under prefers-reduced-motion (handled globally in CSS).
+ *
+ * Rendered by the summary rather than from in here, and deliberately: it is
+ * 420px tall behind a block half that size, and an absolutely positioned
+ * descendant still counts toward an ancestor scroller's overflow. Left inside
+ * the celebration it made the summary permanently scrollable by ~130px of
+ * empty space, which in turn stopped the screen centring itself.
+ */
+export function Rays() {
   const rays = Array.from({ length: 16 });
   return (
     <div

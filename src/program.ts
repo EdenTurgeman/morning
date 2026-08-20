@@ -262,7 +262,7 @@ export const GUIDE = [
   },
   {
     heading: "Protein — 120 g/day",
-    body: "2.0 g/kg, roughly 30 g across four meals. Anywhere in 105–140 g is fine.",
+    body: "2.0 g/kg, roughly 30 g across four meals — make one of them within a couple of hours of finishing. Anywhere in 105–140 g is fine.",
   },
   {
     heading: "Calories — +250/day",
@@ -290,11 +290,6 @@ export const WEEKLY_TARGET = 5;
 
 /** Which day a week starts on. 0 = Sunday, 1 = Monday. */
 export const WEEK_STARTS_ON = 0;
-
-/* --- the nudge on the summary screen -------------------------------------- */
-
-export const NUTRITION_REMINDER =
-  "Eat within a couple of hours: ~30 g protein. Creatine 5 g whenever. Aim 120 g protein and +250 kcal on the day.";
 
 /* ===========================================================================
  *  Types. Nothing below here needs editing to change the workout.

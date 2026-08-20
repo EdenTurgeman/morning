@@ -1049,3 +1049,75 @@
     transition-duration: 0.001ms !important;
   }
 }
+/* --- study cards -----------------------------------------------------------
+   The reveal is the whole interaction, so it gets a proper beat: the question
+   settles, a bar fills over the thinking time, then the answer resolves out of
+   a blur. Compositor-driven, and nothing here gates the countdown.          */
+
+.sc-q {
+  animation: scQ 420ms var(--ease-out-expo) both;
+}
+
+@keyframes scQ {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* Fills across the thinking time. Duration is set inline, because it has to
+   match however long this particular card is giving you. */
+.sc-think {
+  animation: scThink linear both;
+}
+
+@keyframes scThink {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* The answer resolves rather than appears — a short blur-out is what makes it
+   read as coming into focus instead of being swapped in. */
+.sc-a {
+  animation: scA 520ms var(--ease-out-expo) both;
+}
+
+@keyframes scA {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+    filter: blur(7px);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.sc-hint {
+  animation: scHint 2.6s ease-in-out 900ms infinite;
+}
+
+@keyframes scHint {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}

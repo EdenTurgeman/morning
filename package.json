@@ -10,7 +10,8 @@
     "check": "tsc -b --noEmit",
     "test:program": "node --import ./scripts/alias-hook.mjs scripts/verify-program.ts",
     "test:week": "node --import ./scripts/alias-hook.mjs scripts/verify-week.ts",
-    "test": "npm run test:program && npm run test:week",
+    "test:deck": "node --import ./scripts/alias-hook.mjs scripts/verify-deck.ts",
+    "test": "npm run test:program && npm run test:week && npm run test:deck",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {

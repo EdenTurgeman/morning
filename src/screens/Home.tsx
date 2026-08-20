@@ -11,7 +11,7 @@ import {
   nextSessionAfter,
   type SessionKey,
 } from "@/program";
-import { daysSince, localISODate, type AppData } from "@/lib/storage";
+import { localISODate, type AppData } from "@/lib/storage";
 import { weeklyProgress, weekNudge } from "@/lib/week";
 import { computeLedger } from "@/lib/ledger";
 import { relativeDay } from "@/lib/format";
@@ -45,10 +45,6 @@ export function Home({ data, onStart, onNavigate, onSetLoad }: Props) {
   const week = useMemo(() => weeklyProgress(data.history), [data.history]);
   const ledger = useMemo(() => computeLedger(data.history), [data.history]);
   const nudge = weekNudge(week);
-
-  const sinceBackup = daysSince(data.lastBackup);
-  const nagBackup =
-    data.history.length >= 3 && (sinceBackup === null || sinceBackup > 14);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -110,19 +106,6 @@ export function Home({ data, onStart, onNavigate, onSetLoad }: Props) {
         </BlurFade>
       )}
 
-      {nagBackup && (
-        <BlurFade delay={0.1} inView>
-          <button
-            onClick={() => onNavigate("backup")}
-            className="mt-3 w-full rounded-[var(--radius-control)] border border-hairline border-l-2 border-l-rose bg-white/[0.035] px-4 py-3 text-left text-[0.86rem] text-muted"
-          >
-            You haven&apos;t backed up{" "}
-            {sinceBackup === null ? "yet" : `in ${sinceBackup} days`}. It takes one
-            tap.
-          </button>
-        </BlurFade>
-      )}
-
       <BlurFade delay={0.12} inView>
         <Card beam className="mt-3">
           <div className="mb-3 flex items-end justify-between">
@@ -181,7 +164,7 @@ export function Home({ data, onStart, onNavigate, onSetLoad }: Props) {
 
       {/* Pushes the CTA to the bottom of the viewport on tall screens without
           stranding it below the fold on short ones. */}
-      <div className="min-h-4 flex-1" />
+      <div className="min-h-2 flex-1" />
 
       <BlurFade delay={0.18} inView>
         <Button variant="primary" shine onClick={() => onStart(key)}>
@@ -190,12 +173,12 @@ export function Home({ data, onStart, onNavigate, onSetLoad }: Props) {
 
         <button
           onClick={() => onStart(other)}
-          className="mt-2 w-full py-3 text-center text-[0.88rem] text-dim"
+          className="mt-1.5 w-full py-2.5 text-center text-[0.88rem] text-dim"
         >
           Do session {other} instead
         </button>
 
-        <nav className="mt-4 grid grid-cols-3 gap-2.5">
+        <nav className="mt-3 grid grid-cols-3 gap-2.5">
           {(
             [
               ["History", "history"],
