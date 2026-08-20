@@ -39,11 +39,15 @@ import type { WeeklyProgress } from "@/lib/week";
 
 interface Props {
   week: WeeklyProgress;
-  confetti: boolean;
+  /* Confetti fires on EVERY finished session — you did the work, you get the
+   * payoff. What's still held back is the SIZE of it: the milestone burst is
+   * reserved for completing a week or crossing a lifetime threshold, so the
+   * rare things still feel different from the ordinary ones. */
+  intensity: "burst" | "milestone";
   onDone: () => void;
 }
 
-export function Daybreak({ week, confetti, onDone }: Props) {
+export function Daybreak({ week, intensity, onDone }: Props) {
   const [leaving, setLeaving] = useState(false);
 
   const dismiss = () => {
@@ -56,9 +60,12 @@ export function Daybreak({ week, confetti, onDone }: Props) {
     chime();
     // Fires as the sun breaks the horizon, not on mount — the burst should
     // punctuate the peak of the animation, not precede it.
-    if (confetti) setTimeout(() => celebrate("milestone"), 1150);
+    const t0 = setTimeout(() => celebrate(intensity), 1150);
     const t = setTimeout(dismiss, 4400);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t0);
+      clearTimeout(t);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

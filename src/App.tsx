@@ -189,7 +189,11 @@ export default function App() {
       {celebrating && lastResult && (
         <Daybreak
           week={week}
-          confetti={celebrationFor(lastResult, data.history).confetti}
+          intensity={
+            celebrationFor(lastResult, data.history).confetti
+              ? "milestone"
+              : "burst"
+          }
           onDone={() => setCelebrating(false)}
         />
       )}
