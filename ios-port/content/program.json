@@ -1,0 +1,192 @@
+{
+  "_note": "Source of truth for the workout. Ported verbatim from src/program.ts. Weights are PLATES PER HANDLE, not total.",
+  "weeklyTarget": 5,
+  "weekStartsOn": 0,
+  "plateInventory": [
+    {
+      "kg": 2.5,
+      "count": 2
+    },
+    {
+      "kg": 1.25,
+      "count": 4
+    }
+  ],
+  "sessions": {
+    "A": {
+      "key": "A",
+      "name": "Heavy",
+      "minutes": "~16 min",
+      "blocks": [
+        {
+          "kind": "warmup",
+          "seconds": 90,
+          "title": "Warm-up",
+          "cues": [
+            "20 arm circles forward, 20 back",
+            "10 half-effort push-ups",
+            "10 towel dislocates — grip a towel wide, sweep it overhead and behind you"
+          ]
+        },
+        {
+          "kind": "straight",
+          "exercise": "Push-up",
+          "sub": "feet elevated",
+          "sets": 3,
+          "rest": 60,
+          "bodyweight": true,
+          "target": "8–15 reps",
+          "cues": [
+            "3s down · 1s PAUSE at the bottom · fast up",
+            "Elbows 45° from your torso, glutes squeezed",
+            "Go to failure, or one rep short"
+          ]
+        },
+        {
+          "kind": "superset",
+          "sets": 3,
+          "rest": 45,
+          "items": [
+            {
+              "exercise": "Overhead press",
+              "sub": "standing, strict",
+              "load": 7.5,
+              "target": "8–15 reps",
+              "cues": [
+                "Ribs down. No leg drive, no leaning back",
+                "Start at ear height, finish biceps by your ears"
+              ]
+            },
+            {
+              "exercise": "Curl",
+              "load": 7.5,
+              "target": "10–18 reps",
+              "cues": [
+                "3 seconds lowering",
+                "FULL arm extension at the bottom of every rep",
+                "That bottom inch is the whole exercise"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "superset",
+          "sets": 2,
+          "rest": 45,
+          "items": [
+            {
+              "exercise": "Bent-over row",
+              "load": 7.5,
+              "target": "15–20 reps",
+              "cues": [
+                "Hinge to 45°, flat back",
+                "Pull to your hips and squeeze",
+                "Shoulder insurance — don't skip it"
+              ]
+            },
+            {
+              "exercise": "Hammer curl",
+              "load": 7.5,
+              "target": "12–20 reps",
+              "cues": [
+                "Palms facing each other",
+                "Full stretch at the bottom"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "B": {
+      "key": "B",
+      "name": "Light",
+      "minutes": "~19 min",
+      "blocks": [
+        {
+          "kind": "warmup",
+          "seconds": 90,
+          "title": "Warm-up",
+          "cues": [
+            "20 arm circles forward, 20 back",
+            "10 half-effort push-ups",
+            "10 towel dislocates",
+            "Set the dumbbells while you do this"
+          ]
+        },
+        {
+          "kind": "straight",
+          "exercise": "Push-up",
+          "sub": "deficit — hands on books",
+          "sets": 3,
+          "rest": 60,
+          "bodyweight": true,
+          "target": "8–15 reps",
+          "cues": [
+            "Hands on books or blocks, chest sinking below them",
+            "3s down · 1s PAUSE at the bottom · fast up",
+            "Too easy → elevate your feet as well. Go to failure"
+          ]
+        },
+        {
+          "kind": "superset",
+          "sets": 3,
+          "rest": 45,
+          "items": [
+            {
+              "exercise": "Lateral raise",
+              "load": 5,
+              "target": "15–25 reps",
+              "cues": [
+                "Lead with your elbows, stop at shoulder height",
+                "No swinging",
+                "At failure → 5–8 partial reps in the bottom third"
+              ]
+            },
+            {
+              "exercise": "Rear-delt fly",
+              "load": 5,
+              "target": "15–25 reps",
+              "cues": [
+                "Hinge until almost parallel to the floor",
+                "Open your arms wide like a curtain, squeeze the blades"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "straight",
+          "exercise": "Lateral raise",
+          "sub": "myo-reps",
+          "sets": 3,
+          "rest": 20,
+          "load": 5,
+          "intense": true,
+          "targets": [
+            "all-out to failure",
+            "4–5 reps",
+            "4–5 reps"
+          ],
+          "cues": [
+            "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+            "Stop when you can't get 4 clean reps",
+            "The 20-second rest IS the mechanism — don't stretch it"
+          ]
+        },
+        {
+          "kind": "straight",
+          "exercise": "Floor fly",
+          "sub": "lying on your back",
+          "sets": 2,
+          "rest": 60,
+          "load": 5,
+          "target": "15–25 reps",
+          "cues": [
+            "Elbows slightly bent and locked there — a fly, not a press",
+            "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
+            "Past 25 clean reps? Slow the lowering to 4s. Go to failure"
+          ]
+        }
+      ]
+    }
+  }
+}
