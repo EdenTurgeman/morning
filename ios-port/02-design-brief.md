@@ -269,6 +269,24 @@ to make the last six months feel like they happened.
 **Backup.** Export to a file / share sheet, restore, erase. With iCloud in play
 this may become much quieter — see `05-platform.md`.
 
+### Day one has no data
+
+The app ships starting from zero; the existing history stays in the web app and
+is imported later. So the **empty and near-empty states are what the user
+actually sees first**, not an edge case to bolt on at the end.
+
+- No last session, no streak, no lifetime figures, and — for one session per slot
+  — no "last time" number, which is the app's whole emotional mechanic missing.
+- History, Ledger and The Year are genuinely empty. "0 tonnes" is a bad answer
+  and so is hiding the screen. Design something that reads as *the beginning of a
+  record*.
+- The `first` celebration tier — *"You started."* — fires exactly once, ever.
+  It deserves real attention for something that will be seen a single time.
+
+Build a debug seeder early (`06-data.md` §2) so you can also design these screens
+at six months and a year, where they have to look right eventually. Review every
+screen at **empty, one week and six months** before calling it done.
+
 ---
 
 ## 9. Motion and haptic doctrine
@@ -335,6 +353,7 @@ Artefacts of the web build. Recognise them in the source and leave them behind.
 - [ ] Does anything scroll that shouldn't?
 - [ ] Does the longest possible content still fit — longest exercise name,
       four cues, a three-line question with a seven-line answer?
+- [ ] Does it hold at **empty**, at one week, and at six months of data?
 - [ ] Does it hold at the largest Dynamic Type size it claims to support?
 - [ ] Does Reduce Motion produce a calmer version rather than a broken one?
 - [ ] Is there any copy that congratulates without saying something true?

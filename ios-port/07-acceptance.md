@@ -87,14 +87,30 @@ Golden fixture: `content/compiled-steps.json`.
 
 ## Data
 
-- [ ] Importing the user's real backup reproduces, exactly: total tonnage, total
-      reps, session count, current streak, longest run, and the year grid.
-      **Verify against the running web app on the actual device.**
+The app ships starting at zero — see `06-data.md`. Importing the web history is
+a follow-up, so the checks below are about the empty case and the schema, not
+about migration.
+
+- [ ] A fresh install works end to end: start, log a session, see the `first`
+      celebration tier, land on a Home screen with one session behind it.
+- [ ] Every screen is reviewed at **empty**, **one week** and **six months** of
+      seeded data. Empty states are designed screens with their own copy, not a
+      fallback label.
+- [ ] The set screen with no history shows the first-run message and a sensible
+      default, and does not look broken.
 - [ ] Local dates do not shift by a day under any device timezone.
 - [ ] Records without `kg` fall back to the program default and are not backfilled.
-- [ ] Malformed records are skipped; the rest of the import succeeds.
-- [ ] Export → wipe → import reproduces the history exactly.
+- [ ] Export → wipe → restore reproduces the history exactly.
 - [ ] A failed write surfaces an error and never silently drops a session.
+- [ ] Exported JSON is byte-compatible with the web app's format — open it in the
+      web app's Restore box and confirm it parses.
+
+### Phase 2 — when the web history is imported
+
+- [ ] Importing the real backup reproduces, exactly: total tonnage, total reps,
+      session count, current streak, longest run, and the year grid. **Verify
+      against the running web app on the actual device.**
+- [ ] Malformed records are skipped; the rest of the import succeeds.
 
 ## Device checks — do these on the phone, not the simulator
 

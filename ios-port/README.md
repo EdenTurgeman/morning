@@ -46,10 +46,13 @@ for problems iOS does not have — viewport-height hacks, safe-area arithmetic,
 scroll-lock, StrictMode guards. `04-rules.md` separates the intent from the scar
 tissue. When the source and this folder disagree about *why*, this folder wins.
 
-**3. The history is sacred.** There is real data — over a thousand reps and
-several months of mornings. The app must import it on first launch. An app that
-starts the Ledger at zero is a worse app than the one it replaces, no matter how
-it looks. See `06-data.md`.
+**3. Ship starting at zero, but keep the door open.** The existing history stays
+in the web app for now — porting it is a follow-up, not a launch requirement.
+What that costs you is the thing to watch: on day one every screen has no data,
+so **empty and near-empty states are the normal case, not an edge case**. Design
+them properly, and develop against seeded fixtures so you can also see the Ledger
+and the year grid full. Store data in the schema the web app already uses
+(`06-data.md`) so the later import is a file copy rather than a translation.
 
 **4. Ask rather than assume on training content.** Exercise names, cues, targets,
 rest seconds and the card deck are not yours to improve. Layout, hierarchy,
