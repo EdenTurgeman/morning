@@ -30,6 +30,7 @@
 		C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */; };
 		D6AFFD8EB7FD1564C8ABBBCC /* WeekAndStreakAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */; };
 		E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */; };
+		E5F60718293A4B5C6D7E8F90 /* PrototypeButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */; };
 		E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9EF34F789D4A17D31F0529 /* MorningApp.swift */; };
 		F4261B66A4478DA70FECAC8B /* LedgerAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B926210B4DC5C23339F7676B /* LedgerAcceptanceTests.swift */; };
 /* End PBXBuildFile section */
@@ -73,6 +74,7 @@
 		D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeSupport.swift; sourceTree = "<group>"; };
 		E6BE780D77850D65FE149EB0 /* Program.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Program.swift; sourceTree = "<group>"; };
 		EBD349C71D10ED7172AC1B85 /* CelebrationAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationAcceptanceTests.swift; sourceTree = "<group>"; };
+		F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeButtons.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -118,6 +120,7 @@
 				A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */,
 				D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */,
 				B1C2D3E4F5061728394A5B6C /* PrototypeVisuals.swift */,
+				F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */,
 			);
 			path = Morning;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 				E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */,
 				C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */,
 				A0B1C2D3E4F5061728394A5B /* PrototypeVisuals.swift in Sources */,
+				E5F60718293A4B5C6D7E8F90 /* PrototypeButtons.swift in Sources */,
 				625B26B51E50A993E82173D1 /* Schema.swift in Sources */,
 				B4C173916B1C25BF3CA377B1 /* Seeds.swift in Sources */,
 			);

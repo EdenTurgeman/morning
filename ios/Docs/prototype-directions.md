@@ -26,14 +26,19 @@ Launch arguments open deterministic states directly:
 -prototype atmospheric-rest
 -prototype atmospheric-rest-snapshot
 -prototype atmospheric-card
+-prototype atmospheric-card-snapshot
 -prototype precise-rest
 -prototype precise-rest-snapshot
+-prototype tactile-rest-snapshot
 -prototype tactile-myo-rest
+-prototype tactile-myo-rest-snapshot
+-prototype atmospheric-set-long-content
 ```
 
 Appending `snapshot` freezes a Rest at 45 seconds (5 seconds for myo) so
 treatments can be compared in the same state rather than at arbitrary capture
-times.
+times. Appending `autoplay` to a Set launch value advances it into Rest after
+1.2 seconds for transition review.
 
 ## Shared contract
 
@@ -60,8 +65,8 @@ Hypothesis: progress is fastest to understand when the environment itself gets
 lighter.
 
 - authored five-stop perceptual sunrise interpolation
-- MeshGradient sky and restrained breathing horizon light
-- unboxed counter, simple controls, strongest environmental glow
+- MeshGradient sky, a stable horizon, and one slowly breathing 22pt sun
+- unboxed counter and simple controls with no broad bloom behind content
 - ring remains supporting evidence around a dominant number
 
 Watch for atmosphere making text feel soft or visually noisy.
@@ -97,9 +102,14 @@ exercise.
 - Hold repeat accelerates from 380ms to a 60ms floor.
 - Ordinary rep, passing last time, logging, and card reveal have distinct Core
   Haptics patterns.
+- The manipulated work object uses matched geometry between Set and Rest:
+  an unboxed number becomes a ring, a calibrated number becomes timer ticks,
+  and the tactile counter becomes the tactile timer.
+- Atmospheric changes dissolve, Precise changes use a short 12pt calibrated
+  translation, and Tactile changes use a restrained spring.
 - Card reveal transfers space from the timer to text instead of flipping a card.
 - Reduce Motion freezes environmental breathing and preserves state through
-  shorter opacity/light changes.
+  short opacity changes, without matched-geometry travel.
 
 The simulator proves layout, timing, material, and compilation. Haptic quality
 still requires the physical iPhone 16 Pro.
@@ -158,3 +168,66 @@ screens:
   retries the triggering event once after recovery.
 - A live 20-second myo Rest was observed auto-advancing to the 4–5 rep Set with
   the exact program cue.
+
+## Third-pass contrast and restraint
+
+Eden rejected the remaining low-contrast areas and decorative halo vocabulary.
+The third pass treats light as state, not decoration:
+
+- All treatments now share a stable dark luminance veil behind the title, cues,
+  comparison, next-exercise copy, and controls.
+- Secondary text moved from 58–68% white to 68–78% white according to role.
+  A simulator PNG audit composited the declared text alpha over median 5×5
+  background samples at eight representative text zones. The measured range
+  was 7.79:1–11.38:1; the worst sampled zone was the Atmospheric footer.
+- The Atmospheric threshold bloom was removed. Crossing last time changes the
+  counter, badge, small sun, and 1pt horizon line to semantic mint.
+- Atmospheric light is now a small solid sun rather than a radial halo. The
+  timer ring shadow is 6pt and supporting, not a second light source.
+- Tactile removes the large Set ellipse entirely and limits background accent
+  to 10% in the MeshGradient. Its threshold is the counter rim and detent.
+- Tactile timer and counter accent shadows were reduced to 8pt and 7pt. Precise
+  remains essentially shadowless.
+- The duplicate `Rest` label below `Rest · 9 / 21` was removed. Set and Rest now
+  retain only content that changes the next action.
+- Liquid Glass is grouped with `GlassEffectContainer` and remains limited to
+  manipulated Tactile controls. The primary action is opaque.
+
+Controlled final captures in ignored `ios/build/` use one iPhone 16 Pro state:
+
+```text
+w1-final-atmospheric-set.png
+w1-final-precise-set.png
+w1-final-tactile-set.png
+w1-final-atmospheric-rest.png
+w1-final-precise-rest.png
+w1-final-tactile-rest.png
+w1-final-card-revealed.png
+w1-final-myo-rest.png
+w1-final-four-cue-set.png
+```
+
+The final matrix was checked for centering, distant hierarchy, overflow,
+overloaded labels, text backing luminance, and non-semantic glow. The longest
+revealed card, four-cue Set, and 5-second myo Rest keep controls visible without
+scrolling.
+
+## Animation dependency decision
+
+Native SwiftUI now demonstrates the required treatment-specific motion with
+`matchedGeometryEffect`, numeric text transitions, `MeshGradient`, `Canvas`,
+`GlassEffectContainer`, and interactive `glassEffect`.
+
+- Pow was reviewed, but its stock effects would add a generic delight
+  vocabulary without solving a current prototype problem.
+- Lottie requires authored After Effects assets; no such asset currently beats
+  the native sunrise.
+- Rive remains conditional on a future interactive exercise figure or state
+  machine that demonstrably outperforms native code.
+- Hero is view-controller oriented and is not a fit for this SwiftUI app.
+- Vortex could be reconsidered for a later completion moment, not for Set or
+  Rest.
+- `PhaseAnimator`, `KeyframeAnimator`, and shaders remain available natively,
+  but adding them without a state they clarify would only add motion.
+
+No third-party animation package was added.

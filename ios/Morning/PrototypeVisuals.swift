@@ -2,7 +2,9 @@ import SwiftUI
 
 struct DawnBackdrop: View {
     let treatment: DawnTreatment
+    let mode: PrototypeMode
     let progress: Double
+    let thresholdCrossed: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -10,6 +12,12 @@ struct DawnBackdrop: View {
 
     private var palette: DawnPalette {
         DawnPalette(progress: progress)
+    }
+
+    private var horizonFraction: Double {
+        mode == .set
+            ? 0.82 - progress * 0.04
+            : 0.79 - progress * 0.08
     }
 
     var body: some View {
@@ -39,50 +47,30 @@ struct DawnBackdrop: View {
 
                     Stars(progress: progress)
 
-                    Ellipse()
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    palette.accent.opacity(0.44),
-                                    palette.accent.opacity(0.12),
-                                    .clear,
-                                ],
-                                center: .center,
-                                startRadius: 3,
-                                endRadius: 170
-                            )
-                        )
-                        .frame(width: 360, height: 250)
-                        .scaleEffect(breathing && !reduceMotion ? 1.05 : 0.97)
-                        .position(
-                            x: proxy.size.width / 2,
-                            y: proxy.size.height * (0.79 - progress * 0.08)
-                        )
-                        .blendMode(.screen)
-
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [.white, palette.accent, palette.accent.opacity(0.1)],
-                                center: .center,
-                                startRadius: 1,
-                                endRadius: 28
-                            )
-                        )
-                        .frame(width: 54, height: 54)
-                        .position(
-                            x: proxy.size.width / 2,
-                            y: proxy.size.height * (0.79 - progress * 0.08)
-                        )
-                        .opacity(0.36 + progress * 0.42)
-                        .blendMode(.screen)
-
                     Rectangle()
-                        .fill(palette.accent.opacity(0.5))
+                        .fill(
+                            thresholdCrossed
+                                ? Color.morningSuccess.opacity(0.74)
+                                : palette.accent.opacity(0.46)
+                        )
                         .frame(height: 1)
                         .position(
                             x: proxy.size.width / 2,
-                            y: proxy.size.height * (0.79 - progress * 0.08)
+                            y: proxy.size.height * horizonFraction
+                        )
+
+                    Circle()
+                        .fill(thresholdCrossed ? Color.morningSuccess : palette.accent)
+                        .overlay(
+                            Circle()
+                                .fill(.white.opacity(0.5))
+                                .frame(width: 7, height: 7)
+                        )
+                        .frame(width: 22, height: 22)
+                        .scaleEffect(breathing && !reduceMotion ? 1.06 : 1)
+                        .position(
+                            x: proxy.size.width / 2,
+                            y: proxy.size.height * horizonFraction
                         )
 
                 case .precise:
@@ -110,37 +98,29 @@ struct DawnBackdrop: View {
                         colors: [
                             palette.zenith,
                             Color.black,
-                            palette.accent.opacity(reduceTransparency ? 0.08 : 0.22),
+                            palette.accent.opacity(reduceTransparency ? 0.04 : 0.1),
                             palette.zenith,
                         ]
                     )
-
-                    Ellipse()
-                        .fill(
-                            RadialGradient(
-                                colors: [palette.accent.opacity(reduceTransparency ? 0.16 : 0.5), .clear],
-                                center: .center,
-                                startRadius: 4,
-                                endRadius: 190
-                            )
-                        )
-                        .frame(width: 390, height: 310)
-                        .scaleEffect(breathing && !reduceMotion ? 1.025 : 0.99)
-                        .position(x: proxy.size.width / 2, y: proxy.size.height * 0.69)
-                        .blendMode(.screen)
                 }
 
                 Rectangle()
                     .fill(
                         LinearGradient(
-                            colors: [.clear, Color.black.opacity(0.08), Color.black.opacity(0.34)],
+                            stops: [
+                                .init(color: Color.black.opacity(0.36), location: 0),
+                                .init(color: Color.black.opacity(0.16), location: 0.42),
+                                .init(color: Color.black.opacity(0.06), location: 0.62),
+                                .init(color: Color.black.opacity(0.38), location: 1),
+                            ],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
             }
             .onAppear {
-                withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
+                guard treatment == .atmospheric, !reduceMotion else { return }
+                withAnimation(.easeInOut(duration: 5.5).repeatForever(autoreverses: true)) {
                     breathing = true
                 }
             }
@@ -220,7 +200,7 @@ struct PrototypeChrome: View {
 
                 Text(step)
                     .font(.caption.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(.white.opacity(0.72))
             }
 
             GeometryReader { proxy in
@@ -231,13 +211,34 @@ struct PrototypeChrome: View {
                         .fill(palette.accent)
                         .frame(width: proxy.size.width * progress)
                         .shadow(
-                            color: palette.accent.opacity(treatment == .precise ? 0.45 : 0.75),
-                            radius: treatment == .precise ? 2 : 6
+                            color: palette.accent.opacity(treatment == .precise ? 0.28 : 0.38),
+                            radius: treatment == .precise ? 1 : 3
                         )
                 }
             }
             .frame(height: treatment == .precise ? 2 : 3)
         }
         .frame(height: 72)
+    }
+}
+
+private struct WorkObjectContinuity: ViewModifier {
+    let id: String
+    let namespace: Namespace.ID
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            content
+        } else {
+            content.matchedGeometryEffect(id: id, in: namespace)
+        }
+    }
+}
+
+extension View {
+    func workObjectContinuity(id: String, in namespace: Namespace.ID) -> some View {
+        modifier(WorkObjectContinuity(id: id, namespace: namespace))
     }
 }

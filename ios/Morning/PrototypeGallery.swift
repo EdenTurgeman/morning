@@ -28,7 +28,7 @@ enum DawnTreatment: String, CaseIterable, Identifiable {
     }
 }
 
-private enum PrototypeMode: String, CaseIterable, Identifiable {
+enum PrototypeMode: String, CaseIterable, Identifiable {
     case set
     case rest
 
@@ -102,6 +102,7 @@ struct PrototypeLabView: View {
     @State private var restScenario = RestScenario.plain
     @State private var progress = 0.42
     @State private var isPresentingPrototype = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init() {
         let arguments = ProcessInfo.processInfo.arguments
@@ -139,12 +140,20 @@ struct PrototypeLabView: View {
                 restScenario: restScenario,
                 progress: progress,
                 onClose: { isPresentingPrototype = false },
+                onAdvanceFromSet: {
+                    withAnimation(stageAnimation) {
+                        restScenario = setScenario == .myo || setScenario == .myoSecond ? .myo : .plain
+                        mode = .rest
+                    }
+                },
                 onAdvanceFromRest: {
-                    setScenario = restScenario == .myo ? .myoSecond : .comparable
-                    mode = .set
+                    withAnimation(stageAnimation) {
+                        setScenario = restScenario == .myo ? .myoSecond : .comparable
+                        mode = .set
+                    }
                 }
             )
-            .id("\(treatment.rawValue)-\(mode.rawValue)-\(setScenario.rawValue)-\(restScenario.rawValue)")
+            .id(treatment.rawValue)
         } else {
             PrototypeMenu(
                 treatment: $treatment,
@@ -154,6 +163,17 @@ struct PrototypeLabView: View {
                 progress: $progress,
                 onOpen: { isPresentingPrototype = true }
             )
+        }
+    }
+
+    private var stageAnimation: Animation {
+        if reduceMotion {
+            return .linear(duration: 0.12)
+        }
+        switch treatment {
+        case .atmospheric: return .easeInOut(duration: 0.44)
+        case .precise: return .easeOut(duration: 0.22)
+        case .tactile: return .spring(duration: 0.36, bounce: 0.14)
         }
     }
 }
@@ -309,11 +329,20 @@ private struct PrototypeStage: View {
     let restScenario: RestScenario
     let progress: Double
     let onClose: () -> Void
+    let onAdvanceFromSet: () -> Void
     let onAdvanceFromRest: () -> Void
+    @Namespace private var workObjectNamespace
+    @State private var thresholdCrossed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
-            DawnBackdrop(treatment: treatment, progress: progress)
+            DawnBackdrop(
+                treatment: treatment,
+                mode: mode,
+                progress: progress,
+                thresholdCrossed: mode == .set && thresholdCrossed
+            )
 
             switch mode {
             case .set:
@@ -321,22 +350,47 @@ private struct PrototypeStage: View {
                     treatment: treatment,
                     scenario: setScenario,
                     progress: progress,
-                    onClose: onClose
+                    namespace: workObjectNamespace,
+                    onClose: onClose,
+                    onAdvance: onAdvanceFromSet,
+                    onThresholdChange: { thresholdCrossed = $0 }
                 )
+                .transition(stageTransition)
             case .rest:
                 RestPrototypeView(
                     treatment: treatment,
                     scenario: restScenario,
                     progress: progress,
+                    namespace: workObjectNamespace,
                     onClose: onClose,
                     onAdvance: onAdvanceFromRest
                 )
+                .transition(stageTransition)
             }
         }
         .dynamicTypeSize(.large)
         .preferredColorScheme(.dark)
         .onAppear {
             PrototypeHaptics.shared.prewarm()
+            thresholdCrossed = setScenario == .beating
+        }
+        .onChange(of: setScenario) { _, scenario in
+            thresholdCrossed = scenario == .beating
+        }
+    }
+
+    private var stageTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        switch treatment {
+        case .atmospheric:
+            return .opacity
+        case .precise:
+            return .asymmetric(
+                insertion: .offset(x: 12).combined(with: .opacity),
+                removal: .offset(x: -12).combined(with: .opacity)
+            )
+        case .tactile:
+            return .scale(scale: 0.98).combined(with: .opacity)
         }
     }
 }
@@ -345,7 +399,10 @@ private struct SetPrototypeView: View {
     let treatment: DawnTreatment
     let scenario: SetScenario
     let progress: Double
+    let namespace: Namespace.ID
     let onClose: () -> Void
+    let onAdvance: () -> Void
+    let onThresholdChange: (Bool) -> Void
 
     @State private var reps: Int
     @State private var direction = 1
@@ -358,12 +415,18 @@ private struct SetPrototypeView: View {
         treatment: DawnTreatment,
         scenario: SetScenario,
         progress: Double,
-        onClose: @escaping () -> Void
+        namespace: Namespace.ID,
+        onClose: @escaping () -> Void,
+        onAdvance: @escaping () -> Void,
+        onThresholdChange: @escaping (Bool) -> Void
     ) {
         self.treatment = treatment
         self.scenario = scenario
         self.progress = progress
+        self.namespace = namespace
         self.onClose = onClose
+        self.onAdvance = onAdvance
+        self.onThresholdChange = onThresholdChange
         fixture = SetFixture.fixture(for: scenario)
         _reps = State(initialValue: fixture.initialReps)
     }
@@ -411,12 +474,12 @@ private struct SetPrototypeView: View {
                 if let sub = fixture.sub {
                     Text(sub)
                         .font(.title3)
-                        .foregroundStyle(.white.opacity(0.68))
+                        .foregroundStyle(.white.opacity(0.78))
                 }
 
                 Text(fixture.meta)
                     .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(.white.opacity(0.72))
 
                 if fixture.straightIntoNext {
                     Text("No rest after this — straight into the next one.")
@@ -437,7 +500,7 @@ private struct SetPrototypeView: View {
             VStack(spacing: 5) {
                 Text("Target · \(fixture.target)")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.68))
+                    .foregroundStyle(.white.opacity(0.74))
 
                 RepObject(
                     treatment: treatment,
@@ -446,6 +509,7 @@ private struct SetPrototypeView: View {
                     previous: isComparable ? fixture.previous : nil,
                     isBeating: isBeating,
                     accent: palette.accent,
+                    namespace: namespace,
                     onStep: step
                 )
 
@@ -465,38 +529,31 @@ private struct SetPrototypeView: View {
                 withAnimation(reduceMotion ? .linear(duration: 0.01) : .spring(duration: 0.32, bounce: 0.24)) {
                     loggedPulse.toggle()
                 }
+                onAdvance()
             }
             .scaleEffect(loggedPulse && !reduceMotion ? 0.985 : 1)
 
             Text("6 sets to go")
                 .font(.caption.monospacedDigit())
-                .foregroundStyle(.white.opacity(0.58))
+                .foregroundStyle(.white.opacity(0.68))
                 .padding(.top, 8)
         }
         .padding(.horizontal, 22)
         .safeAreaPadding(.top, 4)
         .safeAreaPadding(.bottom, 6)
-        .background {
-            if treatment == .atmospheric, isBeating {
-                RadialGradient(
-                    colors: [Color.morningSuccess.opacity(0.2), .clear],
-                    center: .bottom,
-                    startRadius: 10,
-                    endRadius: 330
-                )
-                .ignoresSafeArea()
-                .blendMode(.screen)
-                .transition(.opacity)
-            }
+        .task {
+            guard (ProcessInfo.processInfo.arguments.last ?? "").contains("autoplay") else { return }
+            try? await Task.sleep(for: .milliseconds(1200))
+            guard !Task.isCancelled else { return }
+            onAdvance()
         }
-        .animation(.easeOut(duration: 0.3), value: isBeating)
     }
 
     @ViewBuilder
     private var comparisonCopy: some View {
         if let previous = fixture.previous, let previousKg = fixture.previousKg {
             Text("Last time: \(previous) at \(previousKg.formatted()) kg — different weight now")
-                .foregroundStyle(.white.opacity(0.64))
+                .foregroundStyle(.white.opacity(0.72))
         } else if let previous = fixture.previous {
             if isBeating {
                 Text("Beating last time's \(previous)")
@@ -518,6 +575,7 @@ private struct SetPrototypeView: View {
         withAnimation(stepAnimation) {
             reps = newValue
         }
+        onThresholdChange(isComparable && newValue > (fixture.previous ?? .max))
 
         if let previous = fixture.previous,
            fixture.previousKg == nil,
@@ -559,7 +617,7 @@ private struct CueList: View {
                         .foregroundStyle(
                             carriesTrainingEffect(cue)
                                 ? Color.white.opacity(0.94)
-                                : Color.white.opacity(0.68)
+                                : Color.white.opacity(0.76)
                         )
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -580,32 +638,39 @@ private struct RepObject: View {
     let previous: Int?
     let isBeating: Bool
     let accent: Color
+    let namespace: Namespace.ID
     let onStep: (Int) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: treatment == .tactile ? 14 : 20) {
-            RepStepButton(
-                symbol: "−",
-                accessibilityLabel: "One rep fewer",
-                treatment: treatment,
-                accent: accent,
-                action: { onStep(-1) }
-            )
+        GlassEffectContainer(spacing: 14) {
+            HStack(spacing: treatment == .tactile ? 14 : 20) {
+                RepStepButton(
+                    symbol: "−",
+                    accessibilityLabel: "One rep fewer",
+                    treatment: treatment,
+                    accent: accent,
+                    action: { onStep(-1) }
+                )
 
-            readout
-                .frame(maxWidth: treatment == .tactile ? 180 : 150)
+                readout
+                    .frame(maxWidth: treatment == .tactile ? 180 : 150)
+                    .workObjectContinuity(
+                        id: "work-object-\(treatment.rawValue)",
+                        in: namespace
+                    )
 
-            RepStepButton(
-                symbol: "+",
-                accessibilityLabel: "One rep more",
-                treatment: treatment,
-                accent: accent,
-                action: { onStep(1) }
-            )
+                RepStepButton(
+                    symbol: "+",
+                    accessibilityLabel: "One rep more",
+                    treatment: treatment,
+                    accent: accent,
+                    action: { onStep(1) }
+                )
+            }
+            .frame(height: treatment == .tactile ? 174 : 142)
         }
-        .frame(height: treatment == .tactile ? 174 : 142)
     }
 
     @ViewBuilder
@@ -620,12 +685,12 @@ private struct RepObject: View {
                         .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
                         .foregroundStyle(isBeating ? Color.morningSuccess : .white)
                         .shadow(
-                            color: isBeating ? Color.morningSuccess.opacity(0.72) : .clear,
-                            radius: 18
+                            color: isBeating ? Color.morningSuccess.opacity(0.38) : .clear,
+                            radius: 8
                         )
                     Text("Reps")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.62))
+                        .foregroundStyle(.white.opacity(0.72))
                 }
 
                 if let previous {
@@ -675,7 +740,7 @@ private struct RepObject: View {
 
                 Text(previous.map { "Last \($0)" } ?? "First set")
                     .font(.caption.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.64))
+                    .foregroundStyle(.white.opacity(0.72))
             }
         case .tactile:
             ZStack {
@@ -698,14 +763,14 @@ private struct RepObject: View {
                             )
                     }
                     .shadow(color: .black.opacity(0.36), radius: 16, y: 10)
-                    .shadow(color: isBeating ? Color.morningSuccess.opacity(0.4) : .clear, radius: 14)
+                    .shadow(color: isBeating ? Color.morningSuccess.opacity(0.18) : .clear, radius: 7)
 
                 VStack(spacing: 2) {
                     if let previous {
                         Text("LAST \(previous)")
                             .font(.caption2.weight(.bold).monospacedDigit())
                             .tracking(1)
-                            .foregroundStyle(isBeating ? Color.morningSuccess : .white.opacity(0.52))
+                            .foregroundStyle(isBeating ? Color.morningSuccess : .white.opacity(0.66))
                     }
 
                     Text(reps, format: .number)
@@ -714,7 +779,7 @@ private struct RepObject: View {
                         .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
                     Text("Reps")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.62))
+                        .foregroundStyle(.white.opacity(0.72))
                 }
 
                 Capsule()
@@ -843,6 +908,7 @@ private struct RestPrototypeView: View {
     let treatment: DawnTreatment
     let scenario: RestScenario
     let progress: Double
+    let namespace: Namespace.ID
     let onClose: () -> Void
     let onAdvance: () -> Void
 
@@ -858,12 +924,14 @@ private struct RestPrototypeView: View {
         treatment: DawnTreatment,
         scenario: RestScenario,
         progress: Double,
+        namespace: Namespace.ID,
         onClose: @escaping () -> Void,
         onAdvance: @escaping () -> Void
     ) {
         self.treatment = treatment
         self.scenario = scenario
         self.progress = progress
+        self.namespace = namespace
         self.onClose = onClose
         self.onAdvance = onAdvance
         fixture = RestFixture.fixture(for: scenario)
@@ -886,12 +954,7 @@ private struct RestPrototypeView: View {
                 onBack: onClose
             )
 
-            Text("Rest")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.64))
-                .padding(.top, 8)
-
-            Spacer(minLength: 8)
+            Spacer(minLength: 24)
 
             TimelineView(.animation) { context in
                 let remaining = frozenRemaining ?? max(0, endDate.timeIntervalSince(context.date))
@@ -900,7 +963,8 @@ private struct RestPrototypeView: View {
                     remaining: remaining,
                     total: Double(fixture.seconds),
                     compact: fixture.question != nil && answerRevealed,
-                    accent: palette.accent
+                    accent: palette.accent,
+                    namespace: namespace
                 )
             }
 
@@ -933,7 +997,7 @@ private struct RestPrototypeView: View {
             VStack(spacing: 3) {
                 Text("Next")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(.white.opacity(0.72))
 
                 HStack(spacing: 5) {
                     Text(fixture.nextExercise)
@@ -941,7 +1005,7 @@ private struct RestPrototypeView: View {
                     if let sub = fixture.nextSub {
                         Text("· \(sub)")
                             .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.62))
+                            .foregroundStyle(.white.opacity(0.72))
                     }
                 }
                 .lineLimit(1)
@@ -949,28 +1013,30 @@ private struct RestPrototypeView: View {
 
                 Text(fixture.nextMeta)
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(.white.opacity(0.72))
             }
 
-            HStack(spacing: 10) {
-                DawnSecondaryButton(
-                    title: "+15s",
-                    treatment: treatment,
-                    accent: palette.accent,
-                    quiet: scenario == .myo
-                ) {
-                    endDate = max(endDate, Date()).addingTimeInterval(15)
-                    hasFinished = false
-                    PrototypeHaptics.shared.rep(treatment: treatment)
-                }
+            GlassEffectContainer(spacing: 10) {
+                HStack(spacing: 10) {
+                    DawnSecondaryButton(
+                        title: "+15s",
+                        treatment: treatment,
+                        accent: palette.accent,
+                        quiet: scenario == .myo
+                    ) {
+                        endDate = max(endDate, Date()).addingTimeInterval(15)
+                        hasFinished = false
+                        PrototypeHaptics.shared.rep(treatment: treatment)
+                    }
 
-                DawnSecondaryButton(
-                    title: "Skip →",
-                    treatment: treatment,
-                    accent: palette.accent
-                ) {
-                    PrototypeHaptics.shared.confirm(treatment: treatment)
-                    finishRest(signalsZero: false)
+                    DawnSecondaryButton(
+                        title: "Skip →",
+                        treatment: treatment,
+                        accent: palette.accent
+                    ) {
+                        PrototypeHaptics.shared.confirm(treatment: treatment)
+                        finishRest(signalsZero: false)
+                    }
                 }
             }
             .padding(.top, 12)
@@ -1027,6 +1093,7 @@ private struct RestTimerObject: View {
     let total: Double
     let compact: Bool
     let accent: Color
+    let namespace: Namespace.ID
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -1050,7 +1117,7 @@ private struct RestTimerObject: View {
                         style: StrokeStyle(lineWidth: 7, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: accent.opacity(0.65), radius: 12)
+                    .shadow(color: accent.opacity(0.3), radius: 6)
             } else if treatment == .precise {
                 PreciseTimerTicks(
                     segments: max(1, Int(total)),
@@ -1076,7 +1143,7 @@ private struct RestTimerObject: View {
                             .rotationEffect(.degrees(-90))
                     }
                     .shadow(color: .black.opacity(0.45), radius: 24, y: 14)
-                    .shadow(color: accent.opacity(0.34), radius: 16)
+                    .shadow(color: accent.opacity(0.14), radius: 8)
             }
 
             VStack(spacing: -2) {
@@ -1087,10 +1154,14 @@ private struct RestTimerObject: View {
                 Text("SEC")
                     .font(.caption.weight(.semibold))
                     .tracking(1.2)
-                    .foregroundStyle(.white.opacity(0.64))
+                    .foregroundStyle(.white.opacity(0.72))
             }
         }
         .frame(width: size, height: size)
+        .workObjectContinuity(
+            id: "work-object-\(treatment.rawValue)",
+            in: namespace
+        )
         .animation(
             reduceMotion
                 ? .easeOut(duration: 0.18)
@@ -1171,14 +1242,14 @@ private struct StudyCardPrototype: View {
                 if revealed {
                     Text(answer)
                         .font(.system(size: 14.5))
-                        .foregroundStyle(.white.opacity(0.68))
+                        .foregroundStyle(.white.opacity(0.78))
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .transition(.opacity)
                 } else {
                     Text("Tap if you have it")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1197,115 +1268,5 @@ private struct StudyCardPrototype: View {
             in: RoundedRectangle(cornerRadius: 20)
         )
         .accessibilityLabel(revealed ? "\(question) \(answer)" : "\(question). Reveal answer.")
-    }
-}
-
-private struct DawnPrimaryButton: View {
-    let title: String
-    let treatment: DawnTreatment
-    let accent: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .frame(height: 68)
-                .foregroundStyle(treatment == .tactile ? Color.white : Color.black.opacity(0.78))
-                .background {
-                    if treatment == .tactile {
-                        RoundedRectangle(cornerRadius: 22)
-                            .fill(
-                                LinearGradient(
-                                    colors: [accent.opacity(0.78), accent.opacity(0.48)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 22)
-                                    .stroke(.white.opacity(0.16), lineWidth: 1)
-                            }
-                    } else {
-                        RoundedRectangle(cornerRadius: treatment == .precise ? 16 : 22)
-                            .fill(accent)
-                            .shadow(
-                                color: accent.opacity(treatment == .atmospheric ? 0.42 : 0.18),
-                                radius: 13,
-                                y: 6
-                            )
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-private struct DawnSecondaryButton: View {
-    let title: String
-    let treatment: DawnTreatment
-    let accent: Color
-    var quiet = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .frame(height: 64)
-                .foregroundStyle(.white)
-                .background {
-                    if treatment != .tactile {
-                        RoundedRectangle(cornerRadius: treatment == .precise ? 15 : 20)
-                            .fill(Color.black.opacity(quiet ? 0.2 : (treatment == .precise ? 0.32 : 0.16)))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: treatment == .precise ? 15 : 20)
-                                    .stroke(
-                                        quiet
-                                            ? Color.white.opacity(0.12)
-                                            : treatment == .precise
-                                            ? accent.opacity(0.4)
-                                            : Color.white.opacity(0.12),
-                                        lineWidth: 1
-                                    )
-                            }
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-        .modifier(TactileGlassButton(treatment: treatment, accent: accent, quiet: quiet))
-    }
-}
-
-private struct TactileGlassButton: ViewModifier {
-    let treatment: DawnTreatment
-    let accent: Color
-    let quiet: Bool
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    func body(content: Content) -> some View {
-        if treatment == .tactile {
-            if reduceTransparency {
-                content
-                    .background(
-                        Color.white.opacity(quiet ? 0.1 : 0.18),
-                        in: RoundedRectangle(cornerRadius: 22)
-                    )
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(.white.opacity(0.24), lineWidth: 1)
-                    }
-            } else {
-                content
-                    .glassEffect(
-                        .regular.tint(accent.opacity(quiet ? 0.08 : 0.2)).interactive(),
-                        in: .rect(cornerRadius: 22)
-                    )
-            }
-        } else {
-            content
-        }
     }
 }

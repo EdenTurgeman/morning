@@ -8,6 +8,52 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · W1 contrast and motion pass · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Reworked all three Set/Rest treatments after Eden rejected low contrast and
+  decorative halo effects.
+- Added stable dark luminance zones, raised secondary text to role-based
+  68–78% white, and measured eight representative simulator text zones at
+  7.79:1–11.38:1.
+- Removed the Atmospheric radial threshold bloom and large Tactile Set ellipse.
+  Atmospheric now has one small sun and horizon; Tactile state lives in its rim
+  and detent; Precise remains shadowless.
+- Reduced timer, counter, and primary-button accent shadows; removed the
+  duplicate Rest label; kept all hard-case fixtures visible without scrolling.
+- Added Set-to-Rest work-object continuity with `matchedGeometryEffect`,
+  treatment-specific screen transitions, grouped Liquid Glass controls, and
+  opacity-only Reduced Motion transitions.
+- Captured identical 13 → 14 Sets, frozen 45-second Rests, the longest revealed
+  card, a frozen 5-second myo Rest, and the four-cue Set in `ios/build/`.
+- Evaluated native animation APIs and popular packages, documented the gates,
+  and added no dependency.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Light must communicate progress or state. Background atmosphere may establish
+  Morning's identity, but it cannot become a second focal object behind copy.
+- Native SwiftUI already covers the demonstrated motion: matched geometry,
+  numeric transitions, MeshGradient, Canvas, and Liquid Glass. Pow, Lottie,
+  Rive, Hero, and Vortex do not currently solve a proven prototype problem.
+- W1 remains a three-direction comparison. This pass does not choose for Eden
+  and does not start W2.
+
+**Landmines**
+- PNG contrast sampling validates the rendered simulator composition, not
+  physical-device 1.5m dark-room legibility.
+- Frame pacing and haptic quality still require a signed build on Eden's
+  physical iPhone; no signing identity or device is connected.
+- Final review captures are intentionally under ignored `ios/build/`, not source
+  control.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Show Eden the restrained controlled matrix, then tune on the physical
+phone and wait for his W1 direction decision. Do not begin W2 beforehand.
+
 ## 2026-08-22 · W1 interaction audit · GPT-5.6 Sol
 
 **Workstream:** W1 — Research pass and directions (in progress)
