@@ -8,6 +8,42 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · W1 interaction audit · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Applied a severity-ranked interaction audit after the second visual pass.
+- Added an explicit app Info.plist and verified
+  `CADisableMinimumFrameDurationOnPhone = true` in the built bundle.
+- Made Rest zero and Skip advance to the next Set, fixed extension after expiry,
+  and added a distinct zero haptic.
+- Added loaded-first-run, superset-partner-two, myo-set-two, four-cue, longest
+  answer, and deterministic launch fixtures.
+- Added VoiceOver activation, 64pt Back/End hit areas, fixed workout Dynamic
+  Type, Reduce Transparency fallbacks, and fuller Reduce Motion behavior.
+- Parameterized hold acceleration, numeric motion, and haptic shape by treatment.
+- Added Core Haptics stop/reset recovery, prepared-player reuse, and one retry of
+  the triggering event.
+- Observed a real 20-second myo Rest automatically advance to the 4–5 rep Set.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Workout screens deliberately clamp Dynamic Type to `.large`; reading screens
+  later support accessibility sizes.
+- Skip confirms but does not play the zero pattern. Automatic expiry does.
+- ProMotion support is a committed product setting, not a profiler-only tweak.
+
+**Landmines**
+- Physical-device frame pacing and haptics remain unverified because no signing
+  identity or physical iPhone is connected.
+- Four-cue Set content is a stress harness assembled from fixed program copy,
+  not a new product exercise.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Physical-device comparison and Eden's direction decision.
+
 ## 2026-08-22 · W1 second visual pass · GPT-5.6 Sol
 
 **Workstream:** W1 — Research pass and directions (in progress)

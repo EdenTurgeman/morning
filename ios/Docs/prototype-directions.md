@@ -134,3 +134,27 @@ skins. The second pass changed the concepts rather than polishing that result:
   visually subordinate.
 - Reduced Motion now freezes environmental breathing, removes object tilt and
   numeric travel, and shortens timer/card geometry changes.
+
+## Interaction-audit corrections
+
+A separate code audit then exercised the prototypes as controls rather than
+screens:
+
+- The app explicitly opts into ProMotion through
+  `CADisableMinimumFrameDurationOnPhone`; the built Info.plist is checked.
+- Rest zero and Skip now advance into the next Set. Zero plays a shaped
+  transient-plus-decay pattern; Skip confirms without impersonating zero.
+- `+15s` extends from the later of the saved end date or now, so an expired
+  timer never remains stuck at zero.
+- Loaded first run, superset partner two, myo set two, four-cue stress content,
+  and the longest card answer have deterministic fixtures and launch arguments.
+- Rep controls expose VoiceOver activation; Back and End have 64pt hit regions;
+  workout typography is intentionally clamped at the fixed `.large` size.
+- Reduce Transparency replaces interactive glass with opaque, bordered control
+  surfaces.
+- Haptic sharpness, timing, hold acceleration, and numeric motion differ by
+  treatment while retaining the same product semantics.
+- Core Haptics now prewarms, handles stop/reset, caches prepared players, and
+  retries the triggering event once after recovery.
+- A live 20-second myo Rest was observed auto-advancing to the 4–5 rep Set with
+  the exact program cue.

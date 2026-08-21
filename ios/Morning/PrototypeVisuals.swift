@@ -5,6 +5,7 @@ struct DawnBackdrop: View {
     let progress: Double
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @State private var breathing = false
 
     private var palette: DawnPalette {
@@ -109,7 +110,7 @@ struct DawnBackdrop: View {
                         colors: [
                             palette.zenith,
                             Color.black,
-                            palette.accent.opacity(0.22),
+                            palette.accent.opacity(reduceTransparency ? 0.08 : 0.22),
                             palette.zenith,
                         ]
                     )
@@ -117,7 +118,7 @@ struct DawnBackdrop: View {
                     Ellipse()
                         .fill(
                             RadialGradient(
-                                colors: [palette.accent.opacity(0.5), .clear],
+                                colors: [palette.accent.opacity(reduceTransparency ? 0.16 : 0.5), .clear],
                                 center: .center,
                                 startRadius: 4,
                                 endRadius: 190
@@ -206,12 +207,14 @@ struct PrototypeChrome: View {
                         Label("Back", systemImage: "chevron.left")
                             .labelStyle(.titleAndIcon)
                             .font(.caption.weight(.medium))
+                            .frame(minWidth: 64, minHeight: 64, alignment: .leading)
                     }
 
                     Spacer()
 
                     Button("End", action: onBack)
                         .font(.caption.weight(.medium))
+                        .frame(minWidth: 64, minHeight: 64, alignment: .trailing)
                 }
                 .foregroundStyle(.white.opacity(0.78))
 
@@ -235,6 +238,6 @@ struct PrototypeChrome: View {
             }
             .frame(height: treatment == .precise ? 2 : 3)
         }
-        .frame(height: 44)
+        .frame(height: 72)
     }
 }

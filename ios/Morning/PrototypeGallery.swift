@@ -39,15 +39,49 @@ private enum PrototypeMode: String, CaseIterable, Identifiable {
 
 enum SetScenario: String, CaseIterable, Identifiable {
     case firstRun = "First run"
+    case loadedFirstRun = "Loaded first run"
     case comparable = "Comparable"
     case beating = "13 → 14"
     case changedWeight = "Changed weight"
     case superset = "Superset"
+    case supersetSecond = "Superset 2 of 2"
     case myo = "Myo"
+    case myoSecond = "Myo set 2"
     case longContent = "Longest content"
 
     var id: Self {
         self
+    }
+
+    static func scenario(for launchValue: String) -> SetScenario {
+        if launchValue.contains("loaded-first") {
+            return .loadedFirstRun
+        }
+        if launchValue.contains("superset-second") {
+            return .supersetSecond
+        }
+        if launchValue.contains("myo-second") {
+            return .myoSecond
+        }
+        if launchValue.contains("changed-weight") {
+            return .changedWeight
+        }
+        if launchValue.contains("long-content") {
+            return .longContent
+        }
+        if launchValue.contains("first-run") {
+            return .firstRun
+        }
+        if launchValue.contains("beating") {
+            return .beating
+        }
+        if launchValue.contains("superset") {
+            return .superset
+        }
+        if launchValue.contains("myo") {
+            return .myo
+        }
+        return .comparable
     }
 }
 
@@ -90,7 +124,7 @@ struct PrototypeLabView: View {
 
         _treatment = State(initialValue: selectedTreatment)
         _mode = State(initialValue: selectedMode)
-        _setScenario = State(initialValue: value.contains("beating") ? .beating : .comparable)
+        _setScenario = State(initialValue: SetScenario.scenario(for: value))
         _restScenario = State(initialValue: selectedRestScenario)
         _progress = State(initialValue: selectedRestScenario == .myo ? 0.74 : 0.42)
         _isPresentingPrototype = State(initialValue: true)
@@ -104,7 +138,11 @@ struct PrototypeLabView: View {
                 setScenario: setScenario,
                 restScenario: restScenario,
                 progress: progress,
-                onClose: { isPresentingPrototype = false }
+                onClose: { isPresentingPrototype = false },
+                onAdvanceFromRest: {
+                    setScenario = restScenario == .myo ? .myoSecond : .comparable
+                    mode = .set
+                }
             )
             .id("\(treatment.rawValue)-\(mode.rawValue)-\(setScenario.rawValue)-\(restScenario.rawValue)")
         } else {
@@ -258,6 +296,9 @@ private struct PrototypeMenu: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            PrototypeHaptics.shared.prewarm()
+        }
     }
 }
 
@@ -268,6 +309,7 @@ private struct PrototypeStage: View {
     let restScenario: RestScenario
     let progress: Double
     let onClose: () -> Void
+    let onAdvanceFromRest: () -> Void
 
     var body: some View {
         ZStack {
@@ -286,11 +328,16 @@ private struct PrototypeStage: View {
                     treatment: treatment,
                     scenario: restScenario,
                     progress: progress,
-                    onClose: onClose
+                    onClose: onClose,
+                    onAdvance: onAdvanceFromRest
                 )
             }
         }
+        .dynamicTypeSize(.large)
         .preferredColorScheme(.dark)
+        .onAppear {
+            PrototypeHaptics.shared.prewarm()
+        }
     }
 }
 
@@ -303,6 +350,7 @@ private struct SetPrototypeView: View {
     @State private var reps: Int
     @State private var direction = 1
     @State private var loggedPulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let fixture: SetFixture
 
@@ -403,7 +451,7 @@ private struct SetPrototypeView: View {
 
                 comparisonCopy
                     .font(.subheadline)
-                    .frame(height: 22)
+                    .frame(minHeight: 22)
             }
 
             Spacer(minLength: 8)
@@ -413,12 +461,12 @@ private struct SetPrototypeView: View {
                 treatment: treatment,
                 accent: palette.accent
             ) {
-                PrototypeHaptics.shared.confirm()
-                withAnimation(.spring(duration: 0.32, bounce: 0.24)) {
+                PrototypeHaptics.shared.confirm(treatment: treatment)
+                withAnimation(reduceMotion ? .linear(duration: 0.01) : .spring(duration: 0.32, bounce: 0.24)) {
                     loggedPulse.toggle()
                 }
             }
-            .scaleEffect(loggedPulse ? 0.985 : 1)
+            .scaleEffect(loggedPulse && !reduceMotion ? 0.985 : 1)
 
             Text("6 sets to go")
                 .font(.caption.monospacedDigit())
@@ -465,17 +513,31 @@ private struct SetPrototypeView: View {
 
     private func step(_ delta: Int) {
         let oldValue = reps
+        let newValue = max(0, reps + delta)
         direction = delta
-        reps = max(0, reps + delta)
+        withAnimation(stepAnimation) {
+            reps = newValue
+        }
 
         if let previous = fixture.previous,
            fixture.previousKg == nil,
            oldValue <= previous,
-           reps > previous
+           newValue > previous
         {
-            PrototypeHaptics.shared.threshold()
+            PrototypeHaptics.shared.threshold(treatment: treatment)
         } else {
-            PrototypeHaptics.shared.rep()
+            PrototypeHaptics.shared.rep(treatment: treatment)
+        }
+    }
+
+    private var stepAnimation: Animation {
+        if reduceMotion {
+            return .linear(duration: 0.08)
+        }
+        switch treatment {
+        case .atmospheric: return .easeOut(duration: 0.18)
+        case .precise: return .linear(duration: 0.12)
+        case .tactile: return .spring(duration: 0.28, bounce: 0.22)
         }
     }
 }
@@ -679,12 +741,22 @@ private struct RepStepButton: View {
     let action: () -> Void
 
     @State private var repeatTask: Task<Void, Never>?
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
         Group {
             if treatment == .tactile {
-                label
-                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
+                if reduceTransparency {
+                    label
+                        .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 24))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 24)
+                                .stroke(.white.opacity(0.26), lineWidth: 1)
+                        }
+                } else {
+                    label
+                        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
+                }
             } else {
                 label
                     .background(
@@ -713,6 +785,7 @@ private struct RepStepButton: View {
         .onDisappear(perform: stopRepeating)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityAddTraits(.isButton)
+        .accessibilityAction(named: Text(accessibilityLabel), action)
     }
 
     private var label: some View {
@@ -726,12 +799,12 @@ private struct RepStepButton: View {
         guard repeatTask == nil else { return }
         action()
         repeatTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(380))
-            var delay = 210
+            try? await Task.sleep(for: .milliseconds(initialRepeatDelay))
+            var delay = repeatDelay
             while !Task.isCancelled {
                 action()
                 try? await Task.sleep(for: .milliseconds(delay))
-                delay = max(60, Int(Double(delay) * 0.78))
+                delay = max(60, Int(Double(delay) * repeatAcceleration))
             }
         }
     }
@@ -740,6 +813,30 @@ private struct RepStepButton: View {
         repeatTask?.cancel()
         repeatTask = nil
     }
+
+    private var initialRepeatDelay: Int {
+        switch treatment {
+        case .atmospheric: 410
+        case .precise: 340
+        case .tactile: 380
+        }
+    }
+
+    private var repeatDelay: Int {
+        switch treatment {
+        case .atmospheric: 230
+        case .precise: 170
+        case .tactile: 210
+        }
+    }
+
+    private var repeatAcceleration: Double {
+        switch treatment {
+        case .atmospheric: 0.8
+        case .precise: 0.72
+        case .tactile: 0.78
+        }
+    }
 }
 
 private struct RestPrototypeView: View {
@@ -747,9 +844,11 @@ private struct RestPrototypeView: View {
     let scenario: RestScenario
     let progress: Double
     let onClose: () -> Void
+    let onAdvance: () -> Void
 
     @State private var endDate = Date()
     @State private var answerRevealed = false
+    @State private var hasFinished = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let fixture: RestFixture
@@ -759,12 +858,14 @@ private struct RestPrototypeView: View {
         treatment: DawnTreatment,
         scenario: RestScenario,
         progress: Double,
-        onClose: @escaping () -> Void
+        onClose: @escaping () -> Void,
+        onAdvance: @escaping () -> Void
     ) {
         self.treatment = treatment
         self.scenario = scenario
         self.progress = progress
         self.onClose = onClose
+        self.onAdvance = onAdvance
         fixture = RestFixture.fixture(for: scenario)
         let prototypeArgument = ProcessInfo.processInfo.arguments.last ?? ""
         frozenRemaining = prototypeArgument.contains("snapshot")
@@ -804,7 +905,7 @@ private struct RestPrototypeView: View {
             }
 
             if scenario == .myo {
-                Text("The 20-second rest IS the mechanism. Don't stretch it.")
+                Text("The 20-second rest IS the mechanism — don't stretch it")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color(red: 1, green: 0.76, blue: 0.34))
                     .multilineTextAlignment(.center)
@@ -858,8 +959,9 @@ private struct RestPrototypeView: View {
                     accent: palette.accent,
                     quiet: scenario == .myo
                 ) {
-                    endDate = endDate.addingTimeInterval(15)
-                    PrototypeHaptics.shared.rep()
+                    endDate = max(endDate, Date()).addingTimeInterval(15)
+                    hasFinished = false
+                    PrototypeHaptics.shared.rep(treatment: treatment)
                 }
 
                 DawnSecondaryButton(
@@ -867,8 +969,8 @@ private struct RestPrototypeView: View {
                     treatment: treatment,
                     accent: palette.accent
                 ) {
-                    PrototypeHaptics.shared.confirm()
-                    resetTimer()
+                    PrototypeHaptics.shared.confirm(treatment: treatment)
+                    finishRest(signalsZero: false)
                 }
             }
             .padding(.top, 12)
@@ -883,22 +985,39 @@ private struct RestPrototypeView: View {
             guard !Task.isCancelled else { return }
             revealAnswer()
         }
+        .task(id: endDate) {
+            guard frozenRemaining == nil else { return }
+            let milliseconds = max(0, Int(endDate.timeIntervalSinceNow * 1000))
+            try? await Task.sleep(for: .milliseconds(milliseconds))
+            guard !Task.isCancelled else { return }
+            finishRest()
+        }
     }
 
     private func resetTimer() {
         endDate = Date().addingTimeInterval(Double(fixture.seconds))
         answerRevealed = false
+        hasFinished = false
     }
 
     private func revealAnswer() {
         guard !answerRevealed else { return }
-        PrototypeHaptics.shared.reveal()
+        PrototypeHaptics.shared.reveal(treatment: treatment)
         let animation: Animation = reduceMotion
             ? .easeOut(duration: 0.18)
             : .spring(duration: 0.5, bounce: 0.12)
         withAnimation(animation) {
             answerRevealed = true
         }
+    }
+
+    private func finishRest(signalsZero: Bool = true) {
+        guard !hasFinished else { return }
+        hasFinished = true
+        if signalsZero {
+            PrototypeHaptics.shared.zero(treatment: treatment)
+        }
+        onAdvance()
     }
 }
 
@@ -1164,14 +1283,27 @@ private struct TactileGlassButton: ViewModifier {
     let treatment: DawnTreatment
     let accent: Color
     let quiet: Bool
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
         if treatment == .tactile {
-            content
-                .glassEffect(
-                    .regular.tint(accent.opacity(quiet ? 0.08 : 0.2)).interactive(),
-                    in: .rect(cornerRadius: 22)
-                )
+            if reduceTransparency {
+                content
+                    .background(
+                        Color.white.opacity(quiet ? 0.1 : 0.18),
+                        in: RoundedRectangle(cornerRadius: 22)
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 22)
+                            .stroke(.white.opacity(0.24), lineWidth: 1)
+                    }
+            } else {
+                content
+                    .glassEffect(
+                        .regular.tint(accent.opacity(quiet ? 0.08 : 0.2)).interactive(),
+                        in: .rect(cornerRadius: 22)
+                    )
+            }
         } else {
             content
         }

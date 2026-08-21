@@ -36,6 +36,22 @@ struct SetFixture {
                 straightIntoNext: false,
                 intense: false
             )
+        case .loadedFirstRun:
+            SetFixture(
+                exercise: "Overhead press",
+                sub: "standing, strict",
+                meta: "7.5 kg · set 1 of 3",
+                target: "8–15 reps",
+                cues: [
+                    "Ribs down. No leg drive, no leaning back",
+                    "Start at ear height, finish biceps by your ears",
+                ],
+                initialReps: 12,
+                previous: nil,
+                previousKg: nil,
+                straightIntoNext: false,
+                intense: false
+            )
         case .comparable:
             SetFixture(
                 exercise: "Overhead press",
@@ -102,6 +118,23 @@ struct SetFixture {
                 straightIntoNext: true,
                 intense: false
             )
+        case .supersetSecond:
+            SetFixture(
+                exercise: "Curl",
+                sub: nil,
+                meta: "7.5 kg · set 1 of 3 · superset 2 of 2",
+                target: "10–18 reps",
+                cues: [
+                    "3 seconds lowering",
+                    "FULL arm extension at the bottom of every rep",
+                    "That bottom inch is the whole exercise",
+                ],
+                initialReps: 14,
+                previous: 14,
+                previousKg: nil,
+                straightIntoNext: false,
+                intense: false
+            )
         case .myo:
             SetFixture(
                 exercise: "Lateral raise",
@@ -119,6 +152,23 @@ struct SetFixture {
                 straightIntoNext: false,
                 intense: true
             )
+        case .myoSecond:
+            SetFixture(
+                exercise: "Lateral raise",
+                sub: "myo-reps",
+                meta: "5 kg · set 2 of 3",
+                target: "4–5 reps",
+                cues: [
+                    "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+                    "Stop when you can't get 4 clean reps",
+                    "The 20-second rest IS the mechanism — don't stretch it",
+                ],
+                initialReps: 5,
+                previous: 5,
+                previousKg: nil,
+                straightIntoNext: false,
+                intense: true
+            )
         case .longContent:
             SetFixture(
                 exercise: "Push-up",
@@ -129,6 +179,7 @@ struct SetFixture {
                     "Hands on books or blocks, chest sinking below them",
                     "3s down · 1s PAUSE at the bottom · fast up",
                     "Too easy → elevate your feet as well. Go to failure",
+                    "Set the dumbbells while you do this",
                 ],
                 initialReps: 15,
                 previous: 15,
@@ -167,12 +218,12 @@ struct RestFixture {
                 nextExercise: "Overhead press",
                 nextSub: "standing, strict",
                 nextMeta: "set 1 of 3 · 7.5 kg · 8–15 reps",
-                question: "Malolactic conversion always softens acidity. So why does it not always taste buttery?",
-                answer: "It converts sharp malic acid into softer lactic acid, raising pH. "
-                    + "Diacetyl — the buttery compound — is only a by-product: the bacteria can metabolise it further, "
-                    + "lees stirring disperses it, and blending dilutes it. "
-                    + "Chablis routinely goes through MLF without tasting of butter.",
-                topic: "WINEMAKING"
+                question: "Where does the biscuit and brioche character in Champagne come from?",
+                answer: "Autolysis. The second fermentation happens inside the bottle, "
+                    + "and the dead yeast cells then break down in contact with the wine under pressure. "
+                    + "Tank-method wines finish their second fermentation in a pressurised tank "
+                    + "with little lees contact, so they keep primary fruit and florals instead.",
+                topic: "SPARKLING"
             )
         case .myo:
             RestFixture(
@@ -234,72 +285,112 @@ struct DawnPalette {
     }
 }
 
+private struct ThresholdHapticProfile {
+    let firstIntensity: Float
+    let firstSharpness: Float
+    let secondIntensity: Float
+    let secondSharpness: Float
+    let delay: TimeInterval
+}
+
 @MainActor
 final class PrototypeHaptics {
     static let shared = PrototypeHaptics()
 
     private var engine: CHHapticEngine?
+    private var players: [String: any CHHapticPatternPlayer] = [:]
 
     private init() {
         prepare()
     }
 
-    func rep() {
-        play([
+    func prewarm() {
+        try? engine?.start()
+    }
+
+    func rep(treatment: DawnTreatment) {
+        let profile = repProfile(for: treatment)
+        play(key: "rep-\(treatment.rawValue)", events: [
             CHHapticEvent(
                 eventType: .hapticTransient,
                 parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.32),
-                    .init(parameterID: .hapticSharpness, value: 0.68),
+                    .init(parameterID: .hapticIntensity, value: profile.intensity),
+                    .init(parameterID: .hapticSharpness, value: profile.sharpness),
                 ],
                 relativeTime: 0
             ),
         ])
     }
 
-    func threshold() {
-        play([
+    func threshold(treatment: DawnTreatment) {
+        let profile = thresholdProfile(for: treatment)
+        play(key: "threshold-\(treatment.rawValue)", events: [
             CHHapticEvent(
                 eventType: .hapticTransient,
                 parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.48),
-                    .init(parameterID: .hapticSharpness, value: 0.72),
+                    .init(parameterID: .hapticIntensity, value: profile.firstIntensity),
+                    .init(parameterID: .hapticSharpness, value: profile.firstSharpness),
                 ],
                 relativeTime: 0
             ),
             CHHapticEvent(
                 eventType: .hapticTransient,
                 parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.78),
-                    .init(parameterID: .hapticSharpness, value: 0.88),
+                    .init(parameterID: .hapticIntensity, value: profile.secondIntensity),
+                    .init(parameterID: .hapticSharpness, value: profile.secondSharpness),
                 ],
-                relativeTime: 0.055
+                relativeTime: profile.delay
             ),
         ])
     }
 
-    func confirm() {
-        play([
+    func confirm(treatment: DawnTreatment) {
+        let sharpness: Float = treatment == .precise ? 0.66 : 0.42
+        play(key: "confirm-\(treatment.rawValue)", events: [
             CHHapticEvent(
                 eventType: .hapticTransient,
                 parameters: [
                     .init(parameterID: .hapticIntensity, value: 0.62),
-                    .init(parameterID: .hapticSharpness, value: 0.42),
+                    .init(parameterID: .hapticSharpness, value: sharpness),
                 ],
                 relativeTime: 0
             ),
         ])
     }
 
-    func reveal() {
-        play([
+    func reveal(treatment: DawnTreatment) {
+        let sharpness: Float = treatment == .tactile ? 0.18 : 0.26
+        play(key: "reveal-\(treatment.rawValue)", events: [
             CHHapticEvent(
                 eventType: .hapticTransient,
                 parameters: [
                     .init(parameterID: .hapticIntensity, value: 0.2),
-                    .init(parameterID: .hapticSharpness, value: 0.24),
+                    .init(parameterID: .hapticSharpness, value: sharpness),
                 ],
                 relativeTime: 0
+            ),
+        ])
+    }
+
+    func zero(treatment: DawnTreatment) {
+        let sharpness: Float = treatment == .precise ? 0.86 : 0.62
+        play(key: "zero-\(treatment.rawValue)", events: [
+            CHHapticEvent(
+                eventType: .hapticTransient,
+                parameters: [
+                    .init(parameterID: .hapticIntensity, value: 0.9),
+                    .init(parameterID: .hapticSharpness, value: sharpness),
+                ],
+                relativeTime: 0
+            ),
+            CHHapticEvent(
+                eventType: .hapticContinuous,
+                parameters: [
+                    .init(parameterID: .hapticIntensity, value: 0.38),
+                    .init(parameterID: .hapticSharpness, value: 0.24),
+                ],
+                relativeTime: 0.025,
+                duration: 0.18
             ),
         ])
     }
@@ -312,26 +403,86 @@ final class PrototypeHaptics {
             engine.isAutoShutdownEnabled = true
             engine.resetHandler = { [weak self] in
                 Task { @MainActor in
-                    try? self?.engine?.start()
+                    self?.prepare()
+                }
+            }
+            engine.stoppedHandler = { [weak self] _ in
+                Task { @MainActor in
+                    self?.engine = nil
+                    self?.players.removeAll()
                 }
             }
             try engine.start()
             self.engine = engine
+            players.removeAll()
         } catch {
             engine = nil
+            players.removeAll()
         }
     }
 
-    private func play(_ events: [CHHapticEvent]) {
-        guard let engine else { return }
+    private func play(key: String, events: [CHHapticEvent], retry: Bool = true) {
+        guard let engine else {
+            prepare()
+            if retry {
+                play(key: key, events: events, retry: false)
+            }
+            return
+        }
 
         do {
             try engine.start()
-            let pattern = try CHHapticPattern(events: events, parameters: [])
-            let player = try engine.makePlayer(with: pattern)
+            let player: any CHHapticPatternPlayer
+            if let prepared = players[key] {
+                player = prepared
+            } else {
+                let pattern = try CHHapticPattern(events: events, parameters: [])
+                let prepared = try engine.makePlayer(with: pattern)
+                players[key] = prepared
+                player = prepared
+            }
             try player.start(atTime: CHHapticTimeImmediate)
         } catch {
             prepare()
+            if retry {
+                play(key: key, events: events, retry: false)
+            }
+        }
+    }
+
+    private func repProfile(for treatment: DawnTreatment) -> (intensity: Float, sharpness: Float) {
+        switch treatment {
+        case .atmospheric: (0.28, 0.46)
+        case .precise: (0.3, 0.88)
+        case .tactile: (0.38, 0.58)
+        }
+    }
+
+    private func thresholdProfile(
+        for treatment: DawnTreatment
+    ) -> ThresholdHapticProfile {
+        switch treatment {
+        case .atmospheric: ThresholdHapticProfile(
+                firstIntensity: 0.44,
+                firstSharpness: 0.5,
+                secondIntensity: 0.72,
+                secondSharpness: 0.62,
+                delay: 0.075
+            )
+        case .precise: ThresholdHapticProfile(
+                firstIntensity: 0.46,
+                firstSharpness: 0.86,
+                secondIntensity: 0.82,
+                secondSharpness: 0.96,
+                delay: 0.045
+            )
+        case .tactile: ThresholdHapticProfile(
+                firstIntensity: 0.52,
+                firstSharpness: 0.58,
+                secondIntensity: 0.8,
+                secondSharpness: 0.7,
+                delay: 0.06
+            )
         }
     }
 }
