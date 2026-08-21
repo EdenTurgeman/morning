@@ -15,8 +15,9 @@
 //    Xcode scheme -> Run -> Arguments -> "-seed six-months"
 //    or call Seed.sixMonths.load() from a debug menu.
 //
-//  The files are in the app bundle in DEBUG only — ios/project.yml excludes
-//  *.seed.json from Release.
+//  The files ship in the bundle in every configuration — ~150KB, and the code
+//  that reads them is behind #if DEBUG. Excluding them from Release needed an
+//  off-label build setting for a saving that does not matter on a personal app.
 //
 //  Regenerate or re-anchor them to a different "today" with:
 //    node ios/Tools/gen-seeds.mjs 2027-01-15

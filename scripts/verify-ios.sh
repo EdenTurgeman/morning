@@ -79,7 +79,7 @@ run "swiftformat"      bash -c 'cd ios && swiftformat --lint --config .swiftform
 run "generators"       bash -c 'node ios/Tools/gen-seeds.mjs 2026-08-21 >/dev/null && git diff --quiet -- ios/Morning/Resources/Seeds && echo "seed generator is reproducible"'
 
 rule "Acceptance suite"
-say "assertions:       $(grep -rho 'func test_' ios/MorningTests/Acceptance/ | wc -l | tr -d ' ')"
+say "assertions:       $(grep -rho 'func test[A-Z]' ios/MorningTests/Acceptance/ | wc -l | tr -d ' ')"
 say "still skipped:    $(grep -rho '^        throw XCTSkip' ios/MorningTests/Acceptance/ | wc -l | tr -d ' ')"
 
 rule "Summary"

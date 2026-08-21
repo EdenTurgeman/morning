@@ -22,7 +22,10 @@ agent loses an hour to a stray comma.
 
 **Scope**
 
-- `./scripts/bootstrap.sh`, then `⌘B`, then `⌘U`.
+- `./scripts/adopt-xcode-project.sh` if `ios/project.yml` still exists — it
+  turns the XcodeGen spec into a plain committed project and deletes itself.
+- `./scripts/verify-ios.sh`, which does bootstrap, build, test, lint and format
+  in one pass and writes every error to `ios/build/verify-report.txt`.
 - Fix syntax and type errors in `Program.swift`, `Schema.swift`, `Seeds.swift`,
   `MorningApp.swift`, `GoldenSteps.swift` and the seven acceptance suites.
 - Confirm `GoldenSteps.load()` actually finds `compiled-steps.json` in the test
@@ -41,9 +44,10 @@ agent loses an hour to a stray comma.
 > before writing anything.
 >
 > You are doing workstream **W0 — Make it compile**, in `ios/Agents/workstreams.md`.
-> None of the Swift in this repo has ever been compiled. Run
-> `./scripts/bootstrap.sh`, build, run the tests, and fix only what is actually
-> broken: syntax, types, bundle-resource wiring. Change no content, no field
+> None of the Swift in this repo has ever been compiled. If `ios/project.yml`
+> still exists, run `./scripts/adopt-xcode-project.sh` first. Then run
+> `./scripts/verify-ios.sh`, read `ios/build/verify-report.txt`, and fix only
+> what is actually broken: syntax, types, bundle-resource wiring. Change no content, no field
 > names and no numbers — if something looks wrong rather than broken, write it in
 > the handoff log as a landmine instead of fixing it. Finish by appending your
 > handoff entry and flipping W0 to `done`.
@@ -526,7 +530,7 @@ built**. They were non-goals on the web only because they were impossible there.
   plausibly the best affordance available on this hardware for a 20-minute daily
   habit.
 
-Target stubs are at the bottom of `ios/project.yml`.
+Each of these is a new target, added in Xcode once it is agreed.
 
 ---
 

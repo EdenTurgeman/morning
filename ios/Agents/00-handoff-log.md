@@ -127,6 +127,47 @@ Also added `scripts/verify-ios.sh`. Expect `swiftformat --lint` to be the one
 phase that fails first time — the fix is `swiftformat --config ios/.swiftformat
 ios`, not an edit.
 
+### Amended again, same day — XcodeGen dropped
+
+Eden asked whether any of this was a workaround rather than a standard setup. It
+was, in one place, and it has been reversed.
+
+**XcodeGen is out.** The reason given for it was pbxproj merge conflicts, but
+Xcode 16 buildable folders largely solve those, and with one developer running
+agents *sequentially* the argument barely applied at all. The unstated reason was
+that the scaffolding agent could not produce a valid `.xcodeproj` from Linux and a
+hand-written pbxproj would have been far riskier than YAML — which is a fact about
+that agent, not about this project.
+
+`scripts/adopt-xcode-project.sh` performs the swap in one command: generates the
+project once, commits it, strips the generator out of `.gitignore`, `bootstrap.sh`,
+`verify-ios.sh` and CI, deletes `project.yml` and the `Local.xcconfig` pair, and
+then deletes itself. **Nothing about the generator survives.** Signing moves to
+the target's Signing & Capabilities tab, which is where it normally lives.
+
+Two optional things in Xcode afterwards, both in the script's closing output:
+convert the `Morning` and `MorningTests` groups to folders (30 seconds, and it is
+the one thing XcodeGen was actually buying), and set the team if you want to
+install on the phone.
+
+Also cleaned out of `project.yml` before generating, so none of it reaches the
+committed project: `ENABLE_USER_SCRIPT_SANDBOXING` and `DEAD_CODE_STRIPPING`
+(already Xcode defaults), `SWIFT_STRICT_CONCURRENCY` (redundant under Swift 5
+mode), and `EXCLUDED_SOURCE_FILE_NAMES: "*.seed.json"` — that setting is for
+sources, not resources, and 150KB of DEBUG-gated fixtures is not worth an
+off-label trick. `ios/Tools/gen-program-swift.mjs` was deleted too: one-shot
+transcription tool, dead weight now that `Program.swift` is the source of truth.
+
+**One real bug found in the process:** `verify-ios.sh` counted assertions with
+`grep 'func test_'`, which stopped matching when the tests were renamed earlier
+the same day. It would have reported 0 assertions and nobody would have noticed.
+
+**Still deliberately non-default, and worth revisiting once we know the Xcode
+version:** Swift 5 language mode. On Xcode 26 with `SWIFT_DEFAULT_ACTOR_ISOLATION
+= MainActor` and approachable concurrency, Swift 6 is much less painful than it
+was, and a new 2026 project would default to it. Decide from what
+`verify-ios.sh` reports.
+
 ---
 
 ## Template

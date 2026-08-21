@@ -32,15 +32,17 @@ without loading the rules:
 
 ## The rules of the road
 
-**Run `./scripts/bootstrap.sh` first, every session.** It is idempotent and it
-regenerates the Xcode project, which is gitignored.
+**Run `./scripts/bootstrap.sh` first, every session.** It is idempotent — it
+checks Xcode and the simulator, installs SwiftLint and SwiftFormat if missing,
+runs `npm install`, and wires the git hooks.
 
 **Commit on a branch per workstream**, named `ios-port/w<N>-<slug>` — e.g.
 `ios-port/w3-foundations`. Merge to `main` when the workstream is done and CI is
 green. Sequential agents, but still one reviewable unit of work per branch.
 
-**Never commit `ios/Morning.xcodeproj`.** It is generated. If you need a project
-change, edit `ios/project.yml`.
+**`ios/Morning.xcodeproj` is committed.** Changes to it are reviewable like any
+other file, so keep them small and intentional — do not let Xcode drag unrelated
+churn into a commit.
 
 **Progress is measured in un-skipped assertions.** There are 53 in
 `ios/MorningTests/Acceptance/`, every one of them a bug that already happened

@@ -67,7 +67,6 @@ finishing is being told exactly what you did, well.
 ./scripts/bootstrap.sh          # idempotent; run it first, every machine
 ./scripts/verify-ios.sh         # build + test + lint + format, all errors in one report
 npm run dev                     # the web app — the behaviour spec
-cd ios && xcodegen generate     # after editing ios/project.yml
 open ios/Morning.xcodeproj      # ⌘U runs the acceptance suite
 ```
 
@@ -75,10 +74,10 @@ open ios/Morning.xcodeproj      # ⌘U runs the acceptance suite
 each one's errors to `ios/build/verify-report.txt`. Use it instead of chasing
 `xcodebuild` output; hand the report to whoever is fixing things.
 
-`ios/Morning.xcodeproj` is **generated and gitignored**. Never add a file through
-the Xcode UI and expect it to stick — sources are declared by directory in
-`ios/project.yml`, so adding a Swift file usually needs no edit there at all.
-Just re-run `xcodegen generate`.
+`ios/Morning.xcodeproj` is an ordinary committed Xcode project. There is no
+project-generation tooling in this repo — open it and work in it. If the Morning
+and MorningTests groups have been converted to folders (see the handoff log),
+adding a file on disk needs no project edit at all.
 
 **Before you write any Swift, run the web app and do a full session of A and a
 full session of B.** `ios-port/README.md` puts this in the first-session
@@ -89,7 +88,7 @@ not used.
 
 | Path | What it is | Trust level |
 |---|---|---|
-| `ios/project.yml` | XcodeGen spec. App + unit test target. | Never run through XcodeGen. |
+| `ios/Morning.xcodeproj` | The Xcode project. App + unit test target, iOS 18, iPhone, portrait. | Committed. |
 | `ios/Morning/Program.swift` | The program, transcribed to Swift literals per `03-program.md`. **This is now the source of truth**, not the JSON. | Machine-transcribed, never compiled. |
 | `ios/Morning/Model/Schema.swift` | The v1 storage contract from `06-data.md §3`, terse keys and all. | Hand-written, never compiled. |
 | `ios/Morning/Debug/Seeds.swift` | Debug seeder: `-seed six-months`. | Hand-written, never compiled. |
@@ -115,7 +114,7 @@ Not oversights. Do not "fix" these without asking:
   fill *after* a direction is agreed. A palette is not a design system and it is
   not a direction either.
 - **No widget, Live Activity or HealthKit target.** `05-platform.md §7`: propose,
-  don't assume. Commented stubs are at the bottom of `ios/project.yml`.
+  don't assume. Adding them is two targets in Xcode when they are agreed.
 - **No history import.** `06-data.md`: v1 ships starting at zero. The web app
   keeps the real history for now. What that costs you is that **empty and
   near-empty states are the normal case on day one, not an edge case.**

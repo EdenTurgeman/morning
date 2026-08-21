@@ -37,12 +37,6 @@ options:
   groupSortPosition: top
   generateEmptyDirectories: true
 
-# Team id and any other machine-local setting live in ios/Local.xcconfig, which
-# is gitignored. `scripts/bootstrap.sh` creates it from Local.xcconfig.example.
-configFiles:
-  Debug: Local.xcconfig
-  Release: Local.xcconfig
-
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -50,8 +44,6 @@ settings:
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_EMIT_LOC_STRINGS: NO
-    ENABLE_USER_SCRIPT_SANDBOXING: YES
-    DEAD_CODE_STRIPPING: YES
 
 targets:
   Morning:
@@ -70,15 +62,9 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        SWIFT_STRICT_CONCURRENCY: minimal
       configs:
         Debug:
           ENABLE_TESTABILITY: YES
-        Release:
-          # The debug seeder's fixtures are ~150KB of fake history. They exist
-          # so screens can be designed at six months and a year — they have no
-          # business in a build that goes on the phone.
-          EXCLUDED_SOURCE_FILE_NAMES: "*.seed.json"
 
   MorningTests:
     type: bundle.unit-test
