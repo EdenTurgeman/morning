@@ -54,7 +54,7 @@ agent loses an hour to a stray comma.
 
 ---
 
-## W1 · Research pass and directions — `todo`
+## W1 · Research pass and directions — `in progress`
 
 **Gate:** W0 done. **And you have run the web app and done a full session of A
 and a full session of B.** Non-negotiable — `ios-port/README.md` first-session
@@ -65,13 +65,12 @@ skipped. `02-design-brief.md §4` and `§5`.
 
 **Scope**
 
-- The screen research pass in `§4`, using the **screensdesign MCP**
-  (<https://screensdesign.com>). **Eden has connected it** — but not in every
-  client. Run this workstream in the client where it is configured, and start by
-  listing its tools and reading their parameters; the brief says the surface may
-  have changed since it was written. If you cannot see the tools, say so rather
-  than improvising the research pass from memory. The table in `§4` says what to
-  search for and what question each search answers.
+- The screen research pass in `§4`, using publicly inspectable evidence from
+  shipped apps: official product/help pages, App Store listing creatives, public
+  demos and walkthroughs, Apple design profiles, and platform documentation.
+  Eden explicitly chose this method after the available screen-library MCPs
+  required paid plans. The table in `§4` says what to search for and what
+  question each search answers. Separate observed evidence from interpretation.
 - Write `ios-port/research-notes.md` (a skeleton exists). Mechanics, not skins.
   For each screen studied: the mechanic, what they left out, how they handle the
   hard case, one thing you'd steal and one you wouldn't.
@@ -101,8 +100,8 @@ without that. Extract patterns, never ship someone's brand.
 > `ios-port/02-design-brief.md` end to end first; it is the main document and
 > this workstream is its §4 and §5. Before you design anything: run the web app
 > with `npm run dev` and do a full session of A and a full session of B while
-> reading `ios-port/04-rules.md`. Then do the screensdesign research pass, write
-> `ios-port/research-notes.md`, and build two or three running direction
+> reading `ios-port/04-rules.md`. Then do the public-evidence research pass,
+> write `ios-port/research-notes.md`, and build two or three running direction
 > prototypes of the Set and Rest screens with real motion and haptics. Come back
 > to Eden with directions to choose between — do not pick one yourself, and do
 > not start building the app. Append your handoff entry when you stop.

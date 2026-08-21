@@ -80,17 +80,20 @@ that gives the finish a place to arrive at. A palette is not an idea.
 
 ## 4. The research pass — do this before designing anything
 
-The user has connected the **screensdesign MCP** (<https://screensdesign.com>),
-a searchable library of real iOS app screens and flows. Use it. This is not
-optional garnish; it is the step that separates a competent redesign from a
-generic one.
+Study real, shipped iOS interfaces before designing. Use evidence that can be
+inspected publicly: official product pages and help documentation, App Store
+listing creatives, public demos and walkthroughs, Apple design profiles, and
+platform documentation. The user explicitly chose this method after the
+available screen-library MCPs required paid plans. This is not optional garnish;
+it is the step that separates a competent redesign from a generic one.
 
 ### How to work with it
 
-Start by listing its tools and reading their parameters — the surface may have
-changed since this brief was written. Then run searches, pull screens, and
-**write down what you learn in `research-notes.md` in this folder** before you
-open Xcode. You are looking for *mechanics and patterns*, not pictures to copy.
+Use only what the public evidence actually establishes. App Store marketing
+screenshots prove composition and visible hierarchy, not interaction; demos and
+documentation are required for behavioural claims. **Write down what you learn
+in `research-notes.md` in this folder** before you open Xcode. You are looking
+for *mechanics and patterns*, not pictures to copy.
 
 ### What to search for, and what question each answers
 

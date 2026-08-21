@@ -109,11 +109,10 @@ else
   ok "core.hooksPath = .githooks (format + lint on commit)"
 fi
 
-head_ "MCP"
-warn "ios-port/02-design-brief.md §4 requires the screensdesign MCP"
-warn "(https://screensdesign.com) for the research pass. It is not in the"
-warn "public connector registry — connect it in your client before starting"
-warn "workstream W1, or that workstream cannot be done as specified."
+head_ "Design research"
+warn "ios-port/02-design-brief.md §4 requires a public-evidence research pass"
+warn "before visual work: shipped app mechanics, official documentation, and"
+warn "inspectable demos recorded in ios-port/research-notes.md."
 
 head_ "Next"
 cat <<'TXT'

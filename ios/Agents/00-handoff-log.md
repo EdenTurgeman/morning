@@ -8,6 +8,47 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-21 · W1 research milestone · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Completed full web sessions A and B, including Back correction, both study
+  card placements, myo rests, Daybreak, and Summary.
+- Replaced the unavailable paid screen-library requirement, by Eden's explicit
+  decision, with public shipped-app evidence: official documentation, App Store
+  creatives, public demos, Apple profiles, and platform guidance.
+- Wrote `ios-port/research-notes.md` with observed mechanics, rejected patterns,
+  hard cases, sources, and the implications for every question in the brief.
+- Wrote `ios/Docs/technical-decisions.md`: native Observation, atomic Codable
+  JSON, Core Haptics, one ducked playback audio session, native rendering and
+  motion, and zero baseline runtime dependencies.
+
+**Decisions taken**
+- The sunrise remains Morning's identity. W1 compares Atmospheric Dawn, Precise
+  Dawn, and Tactile Dawn as native executions of one idea rather than unrelated
+  app brands.
+- SmartGym contributes only the focus mechanic — one set and one action. Its
+  generic dashboard, editable-program clutter, prediction, tables, and messaging
+  are explicitly rejected.
+- Liquid Glass is reserved for sparse interactive controls above the content
+  layer. It is not the sky, timer face, cue card, or app identity.
+- Countdown audio uses `.playback + .duckOthers`, always audible, with one duck
+  from five through zero. Eden chose this over silent-switch compliance.
+
+**Landmines**
+- Public App Store creatives establish visible composition, not interaction.
+  Behavioural claims in the notes rely on public demos or documentation.
+- The web Summary starts animations and its 14-second card reveal while hidden
+  under Daybreak. Native timing begins only when Summary is perceptible.
+- A physical-device signing team still needs selecting before haptic direction
+  testing; simulator work can continue.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Build a shared hardcoded Set/Rest state harness, then three running
+native Dawn treatments with real motion and Core Haptics.
+
 ## 2026-08-21 · W0 compile baseline · GPT-5.6 Sol
 
 **Workstream:** W0 — Make it compile
