@@ -181,6 +181,16 @@ locally. Both bumps were overdue.
 - `.swiftformat` moved to `--swiftversion 6.0` so it stops rewriting valid
   Swift 6 syntax, and CI moved from `macos-15` to `macos-latest`.
 
+**Eden's phone is on an iOS 27 beta.** This does not affect the deployment
+target — an app built for iOS 26 runs on 27 — and it does not affect the
+simulator, the test suite or CI at all. It affects exactly one thing: installing
+on the device needs an Xcode that ships iOS 27 device support, i.e. the Xcode 27
+beta. Xcode 26 stable will refuse the device with "may not be supported by this
+version of Xcode", which is a tooling mismatch and not a bug. Written up at the
+top of `ios/Docs/device-checklist.md` so W11 does not lose an hour to it. The
+target stays at 26.0 on purpose: pinning to 27 would chain the project to a beta
+SDK and break on a rollback.
+
 **Predicted friction, so W0 is not surprised.** Under
 `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` every global in `Program.swift`
 becomes main-actor isolated. That is harmless today because nothing runs off the

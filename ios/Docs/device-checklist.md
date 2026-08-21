@@ -36,6 +36,27 @@ out under 4% brightness" is worth something; a tick is not.
       remaining time.
 - [ ] Let a rest timer expire while the app is backgrounded.
 
+## Before any of this works: Xcode has to match the phone
+
+Eden's iPhone runs an **iOS 27 beta**. Xcode can only install and debug on a
+device whose OS it ships device support for, so:
+
+- **Xcode 26 stable cannot deploy to it.** You will get "this iPhone is running
+  iOS 27.0, which may not be supported by this version of Xcode". That is a
+  tooling mismatch, not a bug in the app.
+- Installing on the phone therefore needs the **Xcode 27 beta** (or whichever
+  Xcode ships iOS 27 device support). Everything else — building, the whole
+  acceptance suite, the simulator, CI — works on Xcode 26 stable and does not
+  care what the phone is running.
+- **The deployment target stays iOS 26.0 deliberately.** An app built for 26
+  runs on 27 perfectly well, and pinning it to 27 would chain the project to a
+  beta SDK and break if the phone is ever rolled back. Raise it only if
+  something actually needs an iOS-27-only API.
+
+So: if you are an agent and cannot get onto the device, check the Xcode version
+before you debug anything else. And if the device pass has to wait for the right
+Xcode, say so and stop — do not tick these boxes from the simulator.
+
 ## Notes
 
 <!-- date · device · iOS version · what you saw -->
