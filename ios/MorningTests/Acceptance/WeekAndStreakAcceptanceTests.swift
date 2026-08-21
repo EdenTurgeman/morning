@@ -17,45 +17,45 @@ import XCTest
 
 final class WeekAndStreakAcceptanceTests: XCTestCase {
     /// The week starts on Sunday.
-    func test_theWeekStartsOnSunday() throws {
+    func testTheWeekStartsOnSunday() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Five sessions on any days completes a week; five consecutive days is not
     /// required and six days with four sessions does not count.
-    func test_fiveSessionsOnAnyDaysCompletesAWeek() throws {
+    func testFiveSessionsOnAnyDaysCompletesAWeek() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// An incomplete week in progress never breaks a streak.
-    func test_incompleteWeekInProgressNeverBreaksAStreak() throws {
+    func testIncompleteWeekInProgressNeverBreaksAStreak() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// A complete week in progress extends it.
-    func test_completeWeekInProgressExtendsTheStreak() throws {
+    func testCompleteWeekInProgressExtendsTheStreak() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Longest run survives the current streak dropping to zero.
-    func test_longestRunSurvivesTheCurrentStreakDroppingToZero() throws {
+    func testLongestRunSurvivesTheCurrentStreakDroppingToZero() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// canRestToday is false when the remaining days exactly equal the remaining
     /// sessions.
-    func test_canRestTodayIsFalseWhenDaysLeftEqualSessionsLeft() throws {
+    func testCanRestTodayIsFalseWhenDaysLeftEqualSessionsLeft() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// The nudge names the correct weekdays.
-    func test_theNudgeNamesTheCorrectWeekdays() throws {
+    func testTheNudgeNamesTheCorrectWeekdays() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// completedThisWeek fires only on the session that reaches target, not on
     /// the ones after it.
-    func test_completedThisWeekFiresOnlyOnTheSessionThatReachesTarget() throws {
+    func testCompletedThisWeekFiresOnlyOnTheSessionThatReachesTarget() throws {
         throw XCTSkip("Not implemented yet.")
     }
 }

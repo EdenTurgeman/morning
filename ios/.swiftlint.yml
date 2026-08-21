@@ -55,7 +55,7 @@ cyclomatic_complexity:
 
 identifier_name:
   min_length: 2
-  excluded: [i, n, x, y, t, d, s, kg, id, of, up]
+  excluded: [i, n, v, x, y, t, d, s, kg, id, of, up] # v/d/s/ts are the web schema's field names
 
 nesting:
   type_level: 3

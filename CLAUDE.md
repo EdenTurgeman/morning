@@ -65,10 +65,15 @@ finishing is being told exactly what you did, well.
 
 ```bash
 ./scripts/bootstrap.sh          # idempotent; run it first, every machine
+./scripts/verify-ios.sh         # build + test + lint + format, all errors in one report
 npm run dev                     # the web app — the behaviour spec
 cd ios && xcodegen generate     # after editing ios/project.yml
 open ios/Morning.xcodeproj      # ⌘U runs the acceptance suite
 ```
+
+`verify-ios.sh` never stops at the first failure — it runs every phase and writes
+each one's errors to `ios/build/verify-report.txt`. Use it instead of chasing
+`xcodebuild` output; hand the report to whoever is fixing things.
 
 `ios/Morning.xcodeproj` is **generated and gitignored**. Never add a file through
 the Xcode UI and expect it to stick — sources are declared by directory in
@@ -94,11 +99,12 @@ not used.
 | `ios/MorningTests/Fixtures/` | `compiled-steps.json` golden fixture + `program.json`. | Copied. |
 | `ios/Docs/device-checklist.md` | The 10 device checks that cannot be automated. | — |
 
-**The Swift in this repo has never been through a compiler.** It was written
-from the spec on Linux, where no Swift toolchain was available. Assume syntax
-slips. The first agent's first job after `bootstrap.sh` is `⌘B`, then `⌘U`, then
-fixing whatever it finds — and logging that it did, in
-`ios/Agents/00-handoff-log.md`.
+**The Swift in this repo has never been through a compiler.** It was written from
+the spec on Linux, behind an egress allowlist that refuses `swift.org` — and a
+Linux `swiftc` would not have proved much anyway, with no SwiftUI and no iOS SDK.
+Assume syntax slips. The first agent's first job is `./scripts/verify-ios.sh`,
+then fixing everything in `ios/build/verify-report.txt` — and logging that it
+did, in `ios/Agents/00-handoff-log.md`.
 
 ## What is deliberately absent
 

@@ -112,8 +112,8 @@ const suites = [
       ["exportWipeRestoreReproducesTheHistoryExactly", "Export → wipe → restore reproduces the history exactly."],
       ["aFailedWriteSurfacesAnErrorAndNeverDropsASession", "A failed write surfaces an error and never silently drops a session."],
       ["exportedJsonIsByteCompatibleWithTheWebAppFormat", "Exported JSON is byte-compatible with the web app's format — open it in the web app's Restore box and confirm it parses."],
-      ["phase2_importingTheRealBackupReproducesEveryDerivedNumber", "PHASE 2, not v1: importing the real backup reproduces, exactly: total tonnage, total reps, session count, current streak, longest run, and the year grid."],
-      ["phase2_malformedRecordsAreSkippedAndTheRestSucceeds", "PHASE 2, not v1: malformed records are skipped; the rest of the import succeeds."],
+      ["phase2ImportingTheRealBackupReproducesEveryDerivedNumber", "PHASE 2, not v1: importing the real backup reproduces, exactly: total tonnage, total reps, session count, current streak, longest run, and the year grid."],
+      ["phase2MalformedRecordsAreSkippedAndTheRestSucceeds", "PHASE 2, not v1: malformed records are skipped; the rest of the import succeeds."],
     ],
   },
 ];
@@ -131,10 +131,18 @@ for (const suite of suites) {
     continue;
   }
 
+  for (const [name] of suite.tests) {
+    // SwiftLint's identifier_name rejects anything non-alphanumeric, and
+    // --strict is off but the error severity is not worth relying on.
+    if (!/^[a-z][A-Za-z0-9]*$/.test(name)) {
+      throw new Error(`test name must be lowerCamelCase alphanumeric: ${name}`);
+    }
+  }
+
   const body = suite.tests
     .map(([name, text]) => {
       const doc = text.replace(/(.{1,74})(\s|$)/g, "$1\n").trim().split("\n").map((l) => `    /// ${l}`).join("\n");
-      return `${doc}\n    func test_${name}() throws {\n        throw XCTSkip("Not implemented yet.")\n    }`;
+      return `${doc}\n    func test${name[0].toUpperCase()}${name.slice(1)}() throws {\n        throw XCTSkip("Not implemented yet.")\n    }`;
     })
     .join("\n\n");
 

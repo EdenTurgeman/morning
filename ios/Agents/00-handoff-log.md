@@ -65,15 +65,22 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Landmines**
 
-1. **None of the Swift has ever been compiled.** No Swift toolchain was available
-   where this was written — `download.swift.org` is blocked from that
-   environment. `Program.swift`, `Schema.swift`, `Seeds.swift`,
+1. **None of the Swift has ever been compiled.** The environment it was written
+   in has an egress allowlist that permits `archive.ubuntu.com`, `pypi.org`,
+   `registry.npmjs.org` and `github.com`, and refuses `swift.org`,
+   `download.swift.org`, `apt.llvm.org` and `codeload.github.com` with
+   `X-Proxy-Error: blocked-by-allowlist`. Ubuntu's repos carry OpenStack Swift,
+   not the language. A Linux `swiftc` would not have helped much anyway — no
+   SwiftUI, no iOS SDK, no `XCTest` bundle loading — so `xcodebuild` on the Mac
+   is the only real check. `Program.swift`, `Schema.swift`, `Seeds.swift`,
    `MorningApp.swift`, `GoldenSteps.swift` and the seven test suites are all
-   unverified. Expect syntax slips. This is why **W0 exists and comes first.**
-2. **The screensdesign MCP is not connected**, and it is not in the public
-   connector registry either. `02-design-brief.md §4` requires it for the
-   research pass. **W1 cannot be done as specified until Eden connects it** —
-   that is a blocker to raise, not a step to improvise around.
+   unverified. **This is why W0 exists and comes first**, and why
+   `scripts/verify-ios.sh` exists: it collects every error from every phase in
+   one pass into `ios/build/verify-report.txt`.
+2. **The screensdesign MCP is connected on Eden's side, but not in every
+   client** — it is not in the public connector registry, so it will not appear
+   automatically. Run W1 wherever it is configured, and check you can see its
+   tools before starting. Do not improvise the research pass from memory.
 3. **The app icon is a 2× upscale** of `public/icon-512.png` to 1024. It will
    look soft. Fine for the simulator, replace before installing on the phone.
 4. **`DEVELOPMENT_TEAM` is empty** in `ios/Local.xcconfig` (gitignored, created
@@ -94,7 +101,31 @@ The **Landmines** field is worth more than the summary of what you built.
    163 in `06-data.md`'s example — with a saturating progression, roughly +14% by
    six months. Good enough to design against; not Eden's actual numbers.
 
-**Next:** W0 — `./scripts/bootstrap.sh`, then make it compile.
+**Next:** W0 — `./scripts/verify-ios.sh`, then fix what the report lists.
+
+### Amended, same day
+
+Four things found by static review before the first real build, all fixed here
+so W0 does not waste a cycle on them:
+
+- **Test names lost their underscore.** `func test_fooBar` trips SwiftLint's
+  `identifier_name` (underscores are not alphanumeric); Xcode only needs the
+  `test` prefix. Now `func testFooBar`, and `gen-acceptance-tests.mjs` throws if
+  a name is ever not lowerCamelCase alphanumeric.
+- **`--strict` removed from SwiftLint** in the hook, CI and the verify script.
+  It promotes every warning — `line_length` at 120, `force_unwrapping` — into an
+  error, which would block commits on cosmetics through exactly the phase of work
+  where long view bodies are normal. Rules with `error` severity still fail.
+- **`v` added to `identifier_name.excluded`**, because `AppData.v` is one
+  character and the web schema's field name is not ours to rename.
+- **`AppData.CodingKeys` declared explicitly.** Swift only synthesises
+  `CodingKeys` while it is synthesising `init(from:)` or `encode(to:)`; this type
+  hand-writes `init(from:)`, so the day someone hand-writes `encode(to:)` too,
+  the synthesised enum vanishes and the decoder stops compiling.
+
+Also added `scripts/verify-ios.sh`. Expect `swiftformat --lint` to be the one
+phase that fails first time — the fix is `swiftformat --config ios/.swiftformat
+ios`, not an edit.
 
 ---
 

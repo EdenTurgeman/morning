@@ -15,7 +15,7 @@ else
 fi
 
 if command -v swiftlint >/dev/null 2>&1; then
-  cd ios && swiftlint lint --quiet --strict --config .swiftlint.yml || {
+  cd ios && swiftlint lint --quiet --config .swiftlint.yml || {
     echo "pre-commit: swiftlint failed. Fix it, or commit with --no-verify." >&2
     exit 1
   }

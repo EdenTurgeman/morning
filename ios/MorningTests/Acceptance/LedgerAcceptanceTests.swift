@@ -17,23 +17,23 @@ import XCTest
 
 final class LedgerAcceptanceTests: XCTestCase {
     /// Tonnage counts 2 × load per rep (two dumbbells, load is per handle).
-    func test_tonnageCountsTwiceLoadPerRep() throws {
+    func testTonnageCountsTwiceLoadPerRep() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Bodyweight reps contribute 0 kg but do count toward total reps.
-    func test_bodyweightRepsContributeZeroKgButCountAsReps() throws {
+    func testBodyweightRepsContributeZeroKgButCountAsReps() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Each session is valued at its own recorded kg; changing the working weight
     /// does not re-value past sessions.
-    func test_eachSessionIsValuedAtItsOwnRecordedKg() throws {
+    func testEachSessionIsValuedAtItsOwnRecordedKg() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Each milestone fires exactly once, on the session that crossed it.
-    func test_eachMilestoneFiresExactlyOnce() throws {
+    func testEachMilestoneFiresExactlyOnce() throws {
         throw XCTSkip("Not implemented yet.")
     }
 }

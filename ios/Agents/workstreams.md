@@ -62,9 +62,12 @@ skipped. `02-design-brief.md §4` and `§5`.
 **Scope**
 
 - The screen research pass in `§4`, using the **screensdesign MCP**
-  (<https://screensdesign.com>). If it is not connected to your client, stop and
-  tell Eden — this workstream cannot be done as specified without it. The table
-  in `§4` says what to search for and what question each search answers.
+  (<https://screensdesign.com>). **Eden has connected it** — but not in every
+  client. Run this workstream in the client where it is configured, and start by
+  listing its tools and reading their parameters; the brief says the surface may
+  have changed since it was written. If you cannot see the tools, say so rather
+  than improvising the research pass from memory. The table in `§4` says what to
+  search for and what question each search answers.
 - Write `ios-port/research-notes.md` (a skeleton exists). Mechanics, not skins.
   For each screen studied: the mechanic, what they left out, how they handle the
   hard case, one thing you'd steal and one you wouldn't.
@@ -160,7 +163,7 @@ as a wrong number six weeks from now."*
   the one unacceptable failure mode in the app.
 - Wire up the debug seeder so `-seed six-months` works.
 - **Un-skip and implement: `ProgramCompilerAcceptanceTests` (10) and
-  `DataAcceptanceTests` (8 of 10 — the two `phase2_` tests stay skipped, import
+  `DataAcceptanceTests` (8 of 10 — the two `testPhase2` tests stay skipped, import
   is not v1).**
 
 **Done when:** 18 of 53 assertions pass, `-seed` works for all five fixtures, and
@@ -176,7 +179,7 @@ an export from the app parses in the web app's Restore box.
 > Build the step compiler, the inventory-bounded plate breakdown, and
 > persistence per `ios-port/06-data.md`, then implement
 > `ProgramCompilerAcceptanceTests` and `DataAcceptanceTests` (leave the two
-> `phase2_` tests skipped). Read `src/lib/steps.ts` and `src/lib/plates.ts` for
+> `testPhase2` tests skipped). Read `src/lib/steps.ts` and `src/lib/plates.ts` for
 > *what*, and `ios-port/04-rules.md` for *why* — where they disagree about why,
 > the doc wins. Assert against `compiled-steps.json` as a whole list, not just
 > the counts. Append your handoff entry when you stop.
@@ -422,7 +425,7 @@ data, and the grid fits at every size.
 - Empty is the hardest state on this screen. Design it.
 - **Un-skip and implement: `LedgerAcceptanceTests` (4).**
 
-**Done when:** 51 of 53 pass — everything except the two `phase2_` import tests.
+**Done when:** 51 of 53 pass — everything except the two `testPhase2` import tests.
 
 **Kickoff prompt**
 
@@ -534,4 +537,4 @@ zero and the two apps run side by side for a couple of weeks while Eden decides
 whether the native one wins. The acceptance test when it lands is that five
 derived numbers match the web app's Ledger on the same device: tonnage, total
 reps, session count, current streak, longest run, and the year grid. The two
-`phase2_` tests in `DataAcceptanceTests` are that workstream's entry point.
+`testPhase2` tests in `DataAcceptanceTests` are that workstream's entry point.

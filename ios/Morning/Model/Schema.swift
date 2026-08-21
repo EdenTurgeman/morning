@@ -82,6 +82,18 @@ struct AppData: Codable, Equatable {
 
     static let empty = AppData(v: 1, history: [], lastBackup: nil, loads: nil)
 
+    // Declared explicitly rather than relying on synthesis. Swift only
+    // synthesises CodingKeys while it is synthesising at least one of
+    // init(from:)/encode(to:) — this type hand-writes init(from:), so the day
+    // someone hand-writes encode(to:) as well the synthesised enum silently
+    // disappears and init(from:) stops compiling. Cheap insurance.
+    enum CodingKeys: String, CodingKey {
+        case v
+        case history
+        case lastBackup
+        case loads
+    }
+
     init(v: Int = 1, history: [SessionRecord] = [], lastBackup: String? = nil, loads: [String: Double]? = nil) {
         self.v = v
         self.history = history

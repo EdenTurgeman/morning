@@ -17,35 +17,35 @@ import XCTest
 
 final class CelebrationAcceptanceTests: XCTestCase {
     /// Exactly one tier fires, in the documented priority order.
-    func test_exactlyOneTierFiresInPriorityOrder() throws {
+    func testExactlyOneTierFiresInPriorityOrder() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Rep deltas are suppressed entirely when the working weight changed.
-    func test_repDeltasAreSuppressedWhenTheWorkingWeightChanged() throws {
+    func testRepDeltasAreSuppressedWhenTheWorkingWeightChanged() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// plateau requires three same-letter sessions on an identical total.
-    func test_plateauRequiresThreeSameLetterSessionsOnAnIdenticalTotal() throws {
+    func testPlateauRequiresThreeSameLetterSessionsOnAnIdenticalTotal() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// clean-sweep requires every comparable set to improve, at least three of
     /// them, at the same weight.
-    func test_cleanSweepRequiresEveryComparableSetToImprove() throws {
+    func testCleanSweepRequiresEveryComparableSetToImprove() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// No headline restates the rep total that is rendered directly above it, and
     /// no eyebrow restates its headline.
-    func test_noHeadlineOrEyebrowRestatesWhatIsRenderedAboveIt() throws {
+    func testNoHeadlineOrEyebrowRestatesWhatIsRenderedAboveIt() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Ordinary confetti fires on every finished session; the milestone burst
     /// only on week completions and lifetime thresholds.
-    func test_ordinaryConfettiFiresOnEveryFinishedSession() throws {
+    func testOrdinaryConfettiFiresOnEveryFinishedSession() throws {
         throw XCTSkip("Not implemented yet.")
     }
 }

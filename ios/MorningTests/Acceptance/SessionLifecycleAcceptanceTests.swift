@@ -17,46 +17,46 @@ import XCTest
 
 final class SessionLifecycleAcceptanceTests: XCTestCase {
     /// A fresh install proposes A; completing A proposes B, and vice versa.
-    func test_freshInstallProposesAThenAlternates() throws {
+    func testFreshInstallProposesAThenAlternates() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Rep counter pre-fills from the most recent same-session, same-slot value.
-    func test_repCounterPrefillsFromMostRecentSameSessionSameSlot() throws {
+    func testRepCounterPrefillsFromMostRecentSameSessionSameSlot() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Back returns to the previous step without losing logged reps, and shows
     /// the number actually entered this session rather than last week's.
-    func test_backReturnsWithoutLosingLoggedReps() throws {
+    func testBackReturnsWithoutLosingLoggedReps() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Rapid taps on the rep control never collapse into a single increment.
-    func test_rapidTapsNeverCollapseIntoASingleIncrement() throws {
+    func testRapidTapsNeverCollapseIntoASingleIncrement() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// End mid-session discards everything after a confirm, including sets
     /// already logged.
-    func test_endMidSessionDiscardsEverythingAfterAConfirm() throws {
+    func testEndMidSessionDiscardsEverythingAfterAConfirm() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Force-quitting mid-session and relaunching restores the same step, the
     /// same logged reps, and a correct remaining time.
-    func test_forceQuitMidSessionRestoresStepRepsAndRemainingTime() throws {
+    func testForceQuitMidSessionRestoresStepRepsAndRemainingTime() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// A phone call mid-rest leaves the timer correct on return.
-    func test_aPhoneCallMidRestLeavesTheTimerCorrect() throws {
+    func testAPhoneCallMidRestLeavesTheTimerCorrect() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Finishing a session writes exactly ONE history record. The web build
     /// briefly wrote two — this is a real failure mode.
-    func test_finishingASessionWritesExactlyOneHistoryRecord() throws {
+    func testFinishingASessionWritesExactlyOneHistoryRecord() throws {
         throw XCTSkip("Not implemented yet.")
     }
 }

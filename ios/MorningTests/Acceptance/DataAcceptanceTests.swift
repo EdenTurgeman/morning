@@ -18,60 +18,60 @@ import XCTest
 final class DataAcceptanceTests: XCTestCase {
     /// A fresh install works end to end: start, log a session, see the first
     /// celebration tier, land on a Home screen with one session behind it.
-    func test_freshInstallWorksEndToEndAndFiresTheFirstTier() throws {
+    func testFreshInstallWorksEndToEndAndFiresTheFirstTier() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Every screen is reviewed at empty, one week and six months of seeded data.
     /// Empty states are designed screens with their own copy, not a fallback
     /// label.
-    func test_everyScreenIsReviewedAtEmptyOneWeekAndSixMonths() throws {
+    func testEveryScreenIsReviewedAtEmptyOneWeekAndSixMonths() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// The set screen with no history shows the first-run message and a sensible
     /// default, and does not look broken.
-    func test_setScreenWithNoHistoryShowsTheFirstRunMessage() throws {
+    func testSetScreenWithNoHistoryShowsTheFirstRunMessage() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Local dates do not shift by a day under any device timezone.
-    func test_localDatesDoNotShiftUnderAnyDeviceTimezone() throws {
+    func testLocalDatesDoNotShiftUnderAnyDeviceTimezone() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Records without kg fall back to the program default and are not
     /// backfilled.
-    func test_recordsWithoutKgFallBackToTheProgramDefaultAndAreNotBackfilled() throws {
+    func testRecordsWithoutKgFallBackToTheProgramDefaultAndAreNotBackfilled() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Export → wipe → restore reproduces the history exactly.
-    func test_exportWipeRestoreReproducesTheHistoryExactly() throws {
+    func testExportWipeRestoreReproducesTheHistoryExactly() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// A failed write surfaces an error and never silently drops a session.
-    func test_aFailedWriteSurfacesAnErrorAndNeverDropsASession() throws {
+    func testAFailedWriteSurfacesAnErrorAndNeverDropsASession() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// Exported JSON is byte-compatible with the web app's format — open it in
     /// the web app's Restore box and confirm it parses.
-    func test_exportedJsonIsByteCompatibleWithTheWebAppFormat() throws {
+    func testExportedJsonIsByteCompatibleWithTheWebAppFormat() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// PHASE 2, not v1: importing the real backup reproduces, exactly: total
     /// tonnage, total reps, session count, current streak, longest run, and the
     /// year grid.
-    func test_phase2_importingTheRealBackupReproducesEveryDerivedNumber() throws {
+    func testPhase2ImportingTheRealBackupReproducesEveryDerivedNumber() throws {
         throw XCTSkip("Not implemented yet.")
     }
 
     /// PHASE 2, not v1: malformed records are skipped; the rest of the import
     /// succeeds.
-    func test_phase2_malformedRecordsAreSkippedAndTheRestSucceeds() throws {
+    func testPhase2MalformedRecordsAreSkippedAndTheRestSucceeds() throws {
         throw XCTSkip("Not implemented yet.")
     }
 }
