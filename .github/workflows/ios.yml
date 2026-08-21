@@ -27,6 +27,19 @@ jobs:
       - name: Format check
         run: cd ios && swiftformat --lint --config .swiftformat .
 
+      - name: Prepare iPhone 16 Pro simulator
+        run: |
+          if ! xcrun simctl list devices available | grep -q 'iPhone 16 Pro'; then
+            runtime="$(
+              xcrun simctl list runtimes --json |
+                jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable)] | sort_by(.version) | last | .identifier'
+            )"
+            xcrun simctl create \
+              'iPhone 16 Pro' \
+              'com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro' \
+              "$runtime"
+          fi
+
       - name: Build and test
         # The acceptance suite is the executable specification. Every assertion
         # in it was once a real bug — see ios-port/07-acceptance.md.
