@@ -44,14 +44,14 @@ The **Landmines** field is worth more than the summary of what you built.
   Capabilities.
 - Xcode 27 is beta tooling because Eden's phone runs iOS 27 beta. The app target
   intentionally remains iOS 26.
-- Local verification is green. CI still needs a committed/pushed branch before
-  W0 can be marked fully done.
+- GitHub Actions initially lacked a pre-created iPhone 16 Pro, so CI now creates
+  that device against the runner's newest installed iOS runtime. PR #1 passed.
 
 **Assertions:** 0 of 53 passing (53 skipped)
 
-**Next:** Commit/push W0 and confirm CI, then W1 research notes and native Dawn
-Set/Rest prototypes. Eden has explicitly chosen to keep Morning's sunrise
-identity while rethinking its execution rather than copying the web layout.
+**Next:** W1 research notes and native Dawn Set/Rest prototypes. Eden has
+explicitly chosen to keep Morning's sunrise identity while rethinking its
+execution rather than copying the web layout.
 
 ## 2026-08-21 · Environment scaffold · Claude (Cowork)
 

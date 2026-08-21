@@ -40,6 +40,10 @@ runs `npm install`, and wires the git hooks.
 `ios-port/w3-foundations`. Merge to `main` when the workstream is done and CI is
 green. Sequential agents, but still one reviewable unit of work per branch.
 
+**Persist every stable milestone.** Update the handoff notes, commit, and push
+when a workstream reaches a green reviewable checkpoint so progress remains
+traceable from the repository rather than only from an agent conversation.
+
 **`ios/Morning.xcodeproj` is committed.** Changes to it are reviewable like any
 other file, so keep them small and intentional — do not let Xcode drag unrelated
 churn into a commit.
