@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Format and lint staged Swift, so several agents produce one codebase.
+# Activated by scripts/bootstrap.sh (git config core.hooksPath .githooks).
+# Skip once with: git commit --no-verify
+set -euo pipefail
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.swift$' || true)
+[[ -z "$STAGED" ]] && exit 0
+
+if command -v swiftformat >/dev/null 2>&1; then
+  echo "$STAGED" | tr '\n' '\0' | xargs -0 swiftformat --config ios/.swiftformat --quiet
+  echo "$STAGED" | tr '\n' '\0' | xargs -0 git add
+else
+  echo "pre-commit: swiftformat not installed, skipping format (run scripts/bootstrap.sh)" >&2
+fi
+
+if command -v swiftlint >/dev/null 2>&1; then
+  cd ios && swiftlint lint --quiet --config .swiftlint.yml || {
+    echo "pre-commit: swiftlint failed. Fix it, or commit with --no-verify." >&2
+    exit 1
+  }
+else
+  echo "pre-commit: swiftlint not installed, skipping lint (run scripts/bootstrap.sh)" >&2
+fi

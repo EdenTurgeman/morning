@@ -1,0 +1,67 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths: ["ios/**", "ios-port/**", ".github/workflows/ios.yml"]
+  pull_request:
+    paths: ["ios/**", "ios-port/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install swiftlint swiftformat
+
+      - name: Lint
+        run: cd ios && swiftlint lint --config .swiftlint.yml
+
+      - name: Format check
+        run: cd ios && swiftformat --lint --config .swiftformat .
+
+      - name: Prepare iPhone 16 Pro simulator
+        run: |
+          if ! xcrun simctl list devices available | grep -q 'iPhone 16 Pro'; then
+            runtime="$(
+              xcrun simctl list runtimes --json |
+                jq -r '[.runtimes[] | select(.platform == "iOS" and .isAvailable)] | sort_by(.version) | last | .identifier'
+            )"
+            xcrun simctl create \
+              'iPhone 16 Pro' \
+              'com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro' \
+              "$runtime"
+          fi
+
+      - name: Build and test
+        # The acceptance suite is the executable specification. Every assertion
+        # in it was once a real bug — see ios-port/07-acceptance.md.
+        run: |
+          xcodebuild test \
+            -project ios/Morning.xcodeproj \
+            -scheme Morning \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -resultBundlePath ios/build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Report skipped assertions
+        # Skipped count going down is the port's real progress bar.
+        if: always()
+        run: |
+          echo "Acceptance assertions still skipped:"
+          grep -rho '^        throw XCTSkip' ios/MorningTests/Acceptance/ \
+            | wc -l \
+            | tr -d ' '
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: xcresult
+          path: ios/build/TestResults.xcresult

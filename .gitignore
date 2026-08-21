@@ -7,3 +7,15 @@ dist/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# --- iOS port -----------------------------------------------------------------
+# The Xcode project is a normal committed .xcodeproj. Only per-user state
+# inside it is ignored.
+ios/Morning.xcodeproj/project.xcworkspace/
+ios/*.xcworkspace/
+ios/Local.xcconfig
+ios/build/
+ios/DerivedData/
+**/xcuserdata/
+*.xcuserstate
+.DS_Store
