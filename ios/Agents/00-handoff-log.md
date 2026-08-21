@@ -8,6 +8,49 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-21 · W1 simulator prototypes · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Replaced `ScaffoldView` as the active root with a running direction lab.
+- Built Atmospheric Dawn, Precise Dawn, and Tactile Dawn Set/Rest treatments
+  over one shared hardcoded state harness.
+- Added first-run, comparable, changed-weight, superset, myo, longest-content,
+  plain Rest, carded Rest, and myo Rest scenarios.
+- Added accelerated hold-to-repeat, directional numeric transitions, interactive
+  Liquid Glass controls, perceptual five-stop sunrise interpolation, absolute
+  countdowns, automatic card reveal, and distinct Core Haptics patterns.
+- Added deterministic `-prototype` launch arguments and documented the
+  comparison in `ios/Docs/prototype-directions.md`.
+- Captured and inspected all three Set treatments plus plain, carded, and myo
+  Rest states on the iPhone 16 Pro simulator. Nothing scrolls.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- All three treatments retain the dawn. Precision and physicality are execution
+  layers, not replacement identities.
+- The native palette uses SwiftUI's perceptual `Color.mix`; direct RGB
+  interpolation was rejected before the milestone.
+- Tactile glass is limited to buttons. The rep/timer object remains an opaque,
+  high-contrast content object.
+- Study cards use stable question → rule → answer geometry, not a 3D flip.
+
+**Landmines**
+- Simulator review cannot judge Core Haptics. W1 remains open until physical
+  iPhone testing and Eden's direction choice.
+- The prototype lab is intentionally hardcoded and is not W3/W4 application
+  architecture.
+- `PrototypeGallery.swift` is long but below the configured error threshold;
+  split it when the chosen treatment becomes product code rather than spending
+  W1 on throwaway structure.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Select the development team, run the three treatments on the physical
+iPhone 16 Pro, tune haptics/legibility, and put the direction choice in front of
+Eden.
+
 ## 2026-08-21 · W1 research milestone · GPT-5.6 Sol
 
 **Workstream:** W1 — Research pass and directions (in progress)

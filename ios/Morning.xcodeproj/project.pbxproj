@@ -26,7 +26,9 @@
 		B6A8E30AAADDAC6FCFE3FAE7 /* one-week.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = 5930A5EA3F4D9E0310E0D17B /* one-week.seed.json */; };
 		BBBB05F50B3030723E1682D0 /* one-session.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = B4AD829D49F6D2CCE3B6B2D7 /* one-session.seed.json */; };
 		CD741167DFB072CD6816DF26 /* six-months.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = CAA8DF1E4C4C59523EC54435 /* six-months.seed.json */; };
+		C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */; };
 		D6AFFD8EB7FD1564C8ABBBCC /* WeekAndStreakAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */; };
+		E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */; };
 		E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9EF34F789D4A17D31F0529 /* MorningApp.swift */; };
 		F4261B66A4478DA70FECAC8B /* LedgerAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B926210B4DC5C23339F7676B /* LedgerAcceptanceTests.swift */; };
 /* End PBXBuildFile section */
@@ -57,6 +59,7 @@
 		91D2A8214FBACBBE29DA6BC0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B99F4D0685122FC0B3DE761 /* cards.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cards.json; sourceTree = "<group>"; };
 		A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekAndStreakAcceptanceTests.swift; sourceTree = "<group>"; };
+		A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeGallery.swift; sourceTree = "<group>"; };
 		A9E09AB74F9D6BB9ADD2B984 /* DataAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataAcceptanceTests.swift; sourceTree = "<group>"; };
 		ADCB96C50583BBED894BFA01 /* Seeds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Seeds.swift; sourceTree = "<group>"; };
 		B4AD829D49F6D2CCE3B6B2D7 /* one-session.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "one-session.seed.json"; sourceTree = "<group>"; };
@@ -64,6 +67,7 @@
 		CAA8DF1E4C4C59523EC54435 /* six-months.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "six-months.seed.json"; sourceTree = "<group>"; };
 		DB729A2E1D11FEE4A5E626A1 /* GoldenSteps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenSteps.swift; sourceTree = "<group>"; };
 		DBECFE938E10A87FF09083D0 /* ProgramCompilerAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramCompilerAcceptanceTests.swift; sourceTree = "<group>"; };
+		D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeSupport.swift; sourceTree = "<group>"; };
 		E6BE780D77850D65FE149EB0 /* Program.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Program.swift; sourceTree = "<group>"; };
 		EBD349C71D10ED7172AC1B85 /* CelebrationAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationAcceptanceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -107,6 +111,8 @@
 				1C864FA44DDA41CB014530FA /* Resources */,
 				6B9EF34F789D4A17D31F0529 /* MorningApp.swift */,
 				E6BE780D77850D65FE149EB0 /* Program.swift */,
+				A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */,
+				D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */,
 			);
 			path = Morning;
 			sourceTree = "<group>";
@@ -298,6 +304,8 @@
 			files = (
 				E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */,
 				8B39848510BCA22B6E31BDD9 /* Program.swift in Sources */,
+				E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */,
+				C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */,
 				625B26B51E50A993E82173D1 /* Schema.swift in Sources */,
 				B4C173916B1C25BF3CA377B1 /* Seeds.swift in Sources */,
 			);

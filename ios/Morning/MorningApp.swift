@@ -1,7 +1,7 @@
 //
 //  MorningApp.swift
 //
-//  Scaffold entry point. Deliberately almost empty.
+//  W1 direction-prototype entry point.
 //
 //  Do NOT build screens from here yet. ios-port/02-design-brief.md §11 sets the
 //  order of deliverables and the first one is research, not code:
@@ -22,14 +22,14 @@ import SwiftUI
 struct MorningApp: App {
     var body: some Scene {
         WindowGroup {
-            ScaffoldView()
+            PrototypeLabView()
                 .preferredColorScheme(.dark) // used before sunrise; dark by default
         }
     }
 }
 
-/// Placeholder. The first agent to reach deliverable 2 replaces this with the
-/// direction prototypes. Nothing here is a design decision.
+/// The original placeholder remains useful for confirming a minimal project
+/// launch while the W1 prototype lab is the active root.
 struct ScaffoldView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
