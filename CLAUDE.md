@@ -10,8 +10,8 @@ Two things:
    <https://edenturgeman.github.io/morning/>). An offline-first PWA that runs one
    20-minute morning workout step by step. It works. It is **the behaviour
    specification for the port, and it is not the design ceiling.**
-2. **A native iOS port in progress** (`ios/`). SwiftUI, iOS 18+, iPhone only,
-   portrait only. This is the work.
+2. **A native iOS port in progress** (`ios/`). SwiftUI, iOS 26, Swift 6 mode,
+   iPhone only, portrait only. This is the work.
 
 The full brief for the port is `ios-port/`. It is 8 documents and they are
 binding. `ios-port/02-design-brief.md` is the main one.
@@ -88,7 +88,7 @@ not used.
 
 | Path | What it is | Trust level |
 |---|---|---|
-| `ios/Morning.xcodeproj` | The Xcode project. App + unit test target, iOS 18, iPhone, portrait. | Committed. |
+| `ios/Morning.xcodeproj` | The Xcode project. App + unit test target, iOS 26, Swift 6, iPhone, portrait. | Committed. |
 | `ios/Morning/Program.swift` | The program, transcribed to Swift literals per `03-program.md`. **This is now the source of truth**, not the JSON. | Machine-transcribed, never compiled. |
 | `ios/Morning/Model/Schema.swift` | The v1 storage contract from `06-data.md §3`, terse keys and all. | Hand-written, never compiled. |
 | `ios/Morning/Debug/Seeds.swift` | Debug seeder: `-seed six-months`. | Hand-written, never compiled. |
@@ -118,8 +118,11 @@ Not oversights. Do not "fix" these without asking:
 - **No history import.** `06-data.md`: v1 ships starting at zero. The web app
   keeps the real history for now. What that costs you is that **empty and
   near-empty states are the normal case on day one, not an edge case.**
-- **Swift 5 language mode**, not Swift 6. A deliberate call to keep strict
-  concurrency out of the way while the app gets built. Revisit in one pass later.
+- **No concurrency annotations anywhere.** Not an omission — with
+  `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` the whole module is main-actor
+  isolated by default, which is correct for a single-user app with no background
+  work. Add `nonisolated` only where the compiler actually asks for it, and never
+  reach for `@unchecked Sendable` or `nonisolated(unsafe)` to silence it.
 
 ## Traps
 

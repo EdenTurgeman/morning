@@ -1,5 +1,5 @@
 # SwiftFormat. Runs on commit via .githooks/pre-commit and is checked in CI.
---swiftversion 5.0
+--swiftversion 6.0
 --indent 4
 --maxwidth 120
 --wraparguments before-first

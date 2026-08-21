@@ -45,8 +45,9 @@ The **Landmines** field is worth more than the summary of what you built.
 - **XcodeGen over a checked-in project.** A `.pbxproj` cannot be reviewed or
   merged; sources are declared by directory, so adding a Swift file needs no spec
   edit at all.
-- **Swift 5 language mode, not Swift 6.** Strict concurrency is a wall to walk
-  into on day one of a UI-heavy port. Revisit as one deliberate migration later.
+- ~~**Swift 5 language mode, not Swift 6.**~~ **Reversed** — see the third
+  amendment below. Swift 6 mode with approachable concurrency, which is what
+  Xcode 26 gives a new project.
 - **`weekStartsOn` translated from 0 to 1.** The web build uses the JS convention
   (0 = Sunday); `Program.swift` uses Foundation's (1 = Sunday). Same day,
   different number, documented at both ends. Do not "fix" either to match.
@@ -83,12 +84,12 @@ The **Landmines** field is worth more than the summary of what you built.
    tools before starting. Do not improvise the research pass from memory.
 3. **The app icon is a 2× upscale** of `public/icon-512.png` to 1024. It will
    look soft. Fine for the simulator, replace before installing on the phone.
-4. **`DEVELOPMENT_TEAM` is empty** in `ios/Local.xcconfig` (gitignored, created
-   by bootstrap). Simulator builds work; installing on the phone needs the team
-   id filling in.
-5. **CI pins `macos-15` and an `iPhone 16 Pro` simulator by name.** If GitHub's
-   runner image stops shipping that device the workflow fails on the destination,
-   not on the code.
+4. **No development team is set.** Simulator builds work; installing on the
+   phone needs Morning target -> Signing & Capabilities -> Team.
+5. **CI pins an `iPhone 16 Pro` simulator by name** — deliberately, because that
+   is the actual device this app is for. If GitHub's runner image stops shipping
+   that device the workflow fails on the destination, not on the code. Override
+   locally with `IOS_DEST=... ./scripts/verify-ios.sh`.
 6. **`spec.md` is gitignored** — "it describes the person this was built for" —
    so the `ios-port/` docs reference a document no agent can read. Everything
    binding appears to have been carried into `ios-port/`, but I could not verify
@@ -162,11 +163,39 @@ transcription tool, dead weight now that `Program.swift` is the source of truth.
 `grep 'func test_'`, which stopped matching when the tests were renamed earlier
 the same day. It would have reported 0 assertions and nobody would have noticed.
 
-**Still deliberately non-default, and worth revisiting once we know the Xcode
-version:** Swift 5 language mode. On Xcode 26 with `SWIFT_DEFAULT_ACTOR_ISOLATION
-= MainActor` and approachable concurrency, Swift 6 is much less painful than it
-was, and a new 2026 project would default to it. Decide from what
-`verify-ios.sh` reports.
+### Amended a third time, same day — current versions
+
+Eden asked why the scaffold was not on current versions, and installed Swift 6.3
+locally. Both bumps were overdue.
+
+- **iOS 18.0 -> iOS 26.0.** `05-platform.md` says "iOS 18+" and one device, an
+  iPhone 16 Pro. 26 satisfies "18+", the phone runs it, and there is no
+  back-compatibility burden — aiming at a two-year-old floor was giving up APIs
+  for nothing, in a port whose entire justification is that the phone can do
+  more. **Consequence: the phone must be on iOS 26 to install.**
+- **Swift 5 mode -> Swift 6 mode**, with `SWIFT_APPROACHABLE_CONCURRENCY = YES`
+  and `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`. All three together are what
+  Xcode 26 gives a new project, and the combination is the whole point: Swift 6
+  *without* them is the wall people complain about; with them, a single-user app
+  with no background work needs almost no annotations.
+- `.swiftformat` moved to `--swiftversion 6.0` so it stops rewriting valid
+  Swift 6 syntax, and CI moved from `macos-15` to `macos-latest`.
+
+**Predicted friction, so W0 is not surprised.** Under
+`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` every global in `Program.swift`
+becomes main-actor isolated. That is harmless today because nothing runs off the
+main actor, but the moment something does — a background write, a
+`Task.detached`, a `nonisolated` helper — reading `program` from it is an error.
+The right fix then is `nonisolated` on those globals, since they are immutable
+Sendable data with no UI dependency. **Do not** reach for `@unchecked Sendable`
+or `nonisolated(unsafe)`. I left the annotations off deliberately rather than
+guessing at them without a compiler.
+
+The other thing to watch: an `XCTestCase` subclass in a MainActor-by-default
+module is itself MainActor-isolated, and a MainActor override of `XCTestCase`'s
+`nonisolated` `setUp`/`tearDown` is an error. The generated suites override
+nothing, so this is clean now — it will bite the first agent that adds a
+`setUp`.
 
 ---
 
