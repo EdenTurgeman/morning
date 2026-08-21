@@ -1,0 +1,14 @@
+# SwiftFormat. Runs on commit via .githooks/pre-commit and is checked in CI.
+--swiftversion 5.0
+--indent 4
+--maxwidth 120
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections preserve
+--closingparen balanced
+--trimwhitespace always
+--stripunusedargs closure-only
+--self remove
+--importgrouping testable-bottom
+--commas always
+--exclude Morning/Program.swift

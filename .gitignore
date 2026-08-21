@@ -7,3 +7,15 @@ dist/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# --- iOS port -----------------------------------------------------------------
+# The Xcode project is generated from ios/project.yml by XcodeGen. It is not
+# checked in on purpose: a .pbxproj cannot be reviewed or merged.
+ios/Morning.xcodeproj/
+ios/*.xcworkspace/
+ios/Local.xcconfig
+ios/build/
+ios/DerivedData/
+**/xcuserdata/
+*.xcuserstate
+.DS_Store

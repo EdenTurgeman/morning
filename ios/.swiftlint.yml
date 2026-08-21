@@ -1,0 +1,64 @@
+# SwiftLint for the iOS port.
+#
+# The point of this file is that several agents working through the same port
+# produce code that reads as one codebase, without the user reviewing style.
+# It is deliberately not maximal — rules that would fight the design work
+# (long view bodies, big literal arrays of cues) are off.
+
+included:
+  - Morning
+  - MorningTests
+
+excluded:
+  - Morning/Program.swift # one big literal object, on purpose. See its header.
+
+disabled_rules:
+  - todo # TODO/FIXME are how workstreams hand off here
+  - trailing_comma # trailing commas in literals are wanted, they diff better
+
+opt_in_rules:
+  - closure_spacing
+  - empty_count
+  - explicit_init
+  - first_where
+  - force_unwrapping
+  - implicit_return
+  - last_where
+  - modifier_order
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+  - vertical_whitespace_closing_braces
+
+line_length:
+  warning: 120
+  error: 200
+  ignores_comments: true
+
+# SwiftUI view bodies are legitimately long. Nesting is what a view hierarchy is.
+type_body_length:
+  warning: 400
+  error: 800
+
+function_body_length:
+  warning: 80
+  error: 200
+
+file_length:
+  warning: 600
+  error: 1200
+  ignore_comment_only_lines: true
+
+cyclomatic_complexity:
+  warning: 15
+
+identifier_name:
+  min_length: 2
+  excluded: [i, n, x, y, t, d, s, kg, id, of, up]
+
+nesting:
+  type_level: 3
+
+force_unwrapping:
+  severity: warning

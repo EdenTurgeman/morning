@@ -1,0 +1,65 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths: ["ios/**", "ios-port/**", ".github/workflows/ios.yml"]
+  pull_request:
+    paths: ["ios/**", "ios-port/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install xcodegen swiftlint swiftformat
+
+      - name: Signing stub
+        # CI builds for the simulator, which needs no team and no certificate.
+        run: cp ios/Local.xcconfig.example ios/Local.xcconfig
+
+      - name: Generate project
+        run: cd ios && xcodegen generate
+
+      - name: Lint
+        run: cd ios && swiftlint lint --strict --config .swiftlint.yml
+
+      - name: Format check
+        run: cd ios && swiftformat --lint --config .swiftformat .
+
+      - name: Build and test
+        # The acceptance suite is the executable specification. Every assertion
+        # in it was once a real bug — see ios-port/07-acceptance.md.
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project ios/Morning.xcodeproj \
+            -scheme Morning \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -resultBundlePath ios/build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty || xcodebuild test \
+              -project ios/Morning.xcodeproj \
+              -scheme Morning \
+              -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+              CODE_SIGNING_ALLOWED=NO
+
+      - name: Report skipped assertions
+        # Skipped count going down is the port's real progress bar.
+        if: always()
+        run: |
+          echo "Acceptance assertions still skipped:"
+          grep -rc 'throw XCTSkip' ios/MorningTests/Acceptance/ || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: xcresult
+          path: ios/build/TestResults.xcresult
