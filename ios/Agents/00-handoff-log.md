@@ -8,6 +8,51 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-21 · W0 compile baseline · GPT-5.6 Sol
+
+**Workstream:** W0 — Make it compile
+
+**What I did**
+- Replaced the XcodeGen spec with a normal committed-project layout at
+  `ios/Morning.xcodeproj`; removed `project.yml`, the inert xcconfig pair, and
+  generation steps from bootstrap, verification, and CI.
+- Installed and selected Xcode 27 beta 5, installed the iOS 27 simulator
+  runtime, and created the target iPhone 16 Pro simulator.
+- Kept the app module MainActor-isolated while overriding the XCTest target to
+  `nonisolated`, fixing Swift 6's inherited `XCTestCase` initializer mismatch.
+- Confirmed app/test source membership and resource phases. A temporary smoke
+  test loaded `compiled-steps.json` as A=21/B=25 and decoded the six-month seed
+  to 125 records through the real test/app bundles, then was removed.
+- Fixed CI's missing-`xcpretty` double test run and its overcounted skip report.
+- Excluded ignored DerivedData from SwiftFormat and formatted the two scaffold
+  files the checked-in rules required.
+- Ran `./scripts/verify-ios.sh`: build, 53 tests/53 skipped/0 failed, SwiftLint,
+  SwiftFormat, and deterministic seed generation all pass.
+- Installed and launched `ScaffoldView` on the iPhone 16 Pro simulator.
+
+**Decisions taken**
+- The application remains `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`; only the
+  XCTest target defaults to `nonisolated`, matching XCTest's base classes
+  without unsafe annotations.
+- Both targets explicitly remain iPhone-only and disable Mac/Catalyst support.
+- Generated build products stay under `ios/build` and are excluded from
+  formatting; generated Swift is never rewritten.
+
+**Landmines**
+- No development team is set in the project yet. Simulator builds are clean;
+  physical-device W1 prototypes need Eden's team selected in Signing &
+  Capabilities.
+- Xcode 27 is beta tooling because Eden's phone runs iOS 27 beta. The app target
+  intentionally remains iOS 26.
+- Local verification is green. CI still needs a committed/pushed branch before
+  W0 can be marked fully done.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Commit/push W0 and confirm CI, then W1 research notes and native Dawn
+Set/Rest prototypes. Eden has explicitly chosen to keep Morning's sunrise
+identity while rethinking its execution rather than copying the web layout.
+
 ## 2026-08-21 · Environment scaffold · Claude (Cowork)
 
 **Workstream:** pre-W0 — environment setup only. No app code, by design.

@@ -64,7 +64,7 @@ enum GoldenSteps {
             XCTFail(
                 "compiled-steps.json is not in the test bundle. Check that "
                     + "ios/MorningTests/Fixtures is listed under the MorningTests "
-                    + "target's sources in ios/project.yml.",
+                    + "target's Resources build phase in Morning.xcodeproj.",
                 file: file,
                 line: line
             )

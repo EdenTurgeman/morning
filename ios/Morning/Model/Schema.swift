@@ -55,7 +55,9 @@ struct SessionRecord: Codable, Identifiable, Equatable {
     /// recorded" — fall back to the program default, and never backfill.
     var kg: Double?
 
-    var id: Int { timestamp }
+    var id: Int {
+        timestamp
+    }
 
     enum CodingKeys: String, CodingKey {
         case date = "d"
@@ -109,7 +111,7 @@ struct AppData: Codable, Equatable {
         lastBackup = try container.decodeIfPresent(String.self, forKey: .lastBackup)
         loads = try container.decodeIfPresent([String: Double].self, forKey: .loads)
         let lenient = try container.decodeIfPresent([LenientRecord].self, forKey: .history) ?? []
-        history = lenient.compactMap { $0.record }
+        history = lenient.compactMap(\.record)
     }
 }
 

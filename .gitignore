@@ -9,9 +9,9 @@ Thumbs.db
 *.tsbuildinfo
 
 # --- iOS port -----------------------------------------------------------------
-# The Xcode project is generated from ios/project.yml by XcodeGen. It is not
-# checked in on purpose: a .pbxproj cannot be reviewed or merged.
-ios/Morning.xcodeproj/
+# The Xcode project is a normal committed .xcodeproj. Only per-user state
+# inside it is ignored.
+ios/Morning.xcodeproj/project.xcworkspace/
 ios/*.xcworkspace/
 ios/Local.xcconfig
 ios/build/

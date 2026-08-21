@@ -12,7 +12,7 @@ Every kickoff prompt below is meant to be pasted verbatim.
 
 ---
 
-## W0 · Make it compile — `todo`
+## W0 · Make it compile — `in progress`
 
 **Gate:** none. This is the first thing anyone does.
 

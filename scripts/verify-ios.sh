@@ -4,7 +4,7 @@
 #
 #    ./scripts/verify-ios.sh
 #
-#  Runs bootstrap, generates the project, builds, tests, lints and format-checks,
+#  Runs bootstrap, builds, tests, lints and format-checks,
 #  then writes everything an agent needs to fix it to:
 #
 #    ios/build/verify-report.txt
@@ -62,7 +62,6 @@ rule "Environment"
   say "xcode-select    $(xcode-select -p 2>&1)"
   say "xcodebuild      $(xcodebuild -version 2>&1 | tr '\n' ' ')"
   say "swift           $(swift --version 2>&1 | head -1)"
-  say "xcodegen        $(xcodegen --version 2>&1 | head -1)"
   say "swiftlint       $(swiftlint --version 2>&1 | head -1)"
   say "swiftformat     $(swiftformat --version 2>&1 | head -1)"
   say "node            $(node -v 2>&1)"
@@ -71,7 +70,6 @@ rule "Environment"
 } 2>/dev/null
 
 run "bootstrap"        ./scripts/bootstrap.sh
-run "xcodegen"         bash -c 'cd ios && xcodegen generate'
 run "build"            xcodebuild build -project ios/Morning.xcodeproj -scheme Morning -destination "$DEST" -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO
 run "test"             xcodebuild test  -project ios/Morning.xcodeproj -scheme Morning -destination "$DEST" -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO
 run "swiftlint"        bash -c 'cd ios && swiftlint lint --config .swiftlint.yml'

@@ -5,7 +5,7 @@
 #  Idempotent — run it as often as you like. Run it first, every time you pick
 #  this repo up on a new machine or in a new agent session.
 #
-#    ./scripts/bootstrap.sh            install what's missing, generate, report
+#    ./scripts/bootstrap.sh            install what's missing and report
 #    ./scripts/bootstrap.sh --check    report only, install nothing
 # =============================================================================
 set -euo pipefail
@@ -64,7 +64,6 @@ brew_install() {
   echo "  installing $tool..."
   brew install "$tool" >/dev/null && ok "$tool installed"
 }
-brew_install xcodegen
 brew_install swiftlint
 brew_install swiftformat
 
@@ -76,30 +75,18 @@ else
 fi
 
 head_ "Signing"
-if [[ -f ios/Local.xcconfig ]]; then
-  if grep -qE '^DEVELOPMENT_TEAM = *$' ios/Local.xcconfig; then
-    warn "ios/Local.xcconfig has no DEVELOPMENT_TEAM — fine for the simulator,"
-    warn "required to install on the phone."
-  else
-    ok "ios/Local.xcconfig configured"
-  fi
+if grep -qE 'DEVELOPMENT_TEAM = [A-Z0-9]+' ios/Morning.xcodeproj/project.pbxproj 2>/dev/null; then
+  ok "signing team set in the project"
 else
-  if $CHECK_ONLY; then
-    bad "ios/Local.xcconfig missing"
-    FAILED=1
-  else
-    cp ios/Local.xcconfig.example ios/Local.xcconfig
-    ok "created ios/Local.xcconfig (gitignored) — add your team id to install on device"
-  fi
+  warn "No development team set. Fine for the simulator; to install on the phone,"
+  warn "open the project -> Morning target -> Signing & Capabilities -> Team."
 fi
 
 head_ "Xcode project"
-if $CHECK_ONLY; then
-  [[ -d ios/Morning.xcodeproj ]] && ok "Morning.xcodeproj present" || warn "not generated yet"
-elif command -v xcodegen >/dev/null 2>&1; then
-  (cd ios && xcodegen generate --quiet) && ok "generated ios/Morning.xcodeproj from project.yml"
+if [[ -f ios/Morning.xcodeproj/project.pbxproj ]]; then
+  ok "ios/Morning.xcodeproj present (committed — open it directly)"
 else
-  bad "xcodegen missing, cannot generate the project"
+  bad "ios/Morning.xcodeproj is missing from the repo"
   FAILED=1
 fi
 

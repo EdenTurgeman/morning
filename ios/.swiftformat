@@ -11,4 +11,5 @@
 --self remove
 --importgrouping testable-bottom
 --commas always
+--exclude build
 --exclude Morning/Program.swift
