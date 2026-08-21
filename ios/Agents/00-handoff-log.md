@@ -8,6 +8,47 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · W1 second visual pass · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Submitted the first running prototypes to a strict visual review. The review
+  correctly rejected them as one Dawn composition with three component skins.
+- Rebuilt the backgrounds and threshold mechanics so the concepts now diverge:
+  Atmospheric has authored horizon/sun light, Precise has a functional grid and
+  real-value instrumentation with no sky, and Tactile has one transforming
+  object with a restrained glass control layer.
+- Added a deterministic 13 → 14 state. Previous reps now live inside every
+  counter and crossing changes environment, marker, or physical rim.
+- Added semantic mint for threshold success and amber for myo urgency, both off
+  the Dawn progress ramp.
+- Increased compact Rest time to 64pt, raised low-contrast labels, removed faux
+  calibration language, added real timer tick segments, and made `+15s`
+  subordinate during myo Rest.
+- Added reduced-motion forms for numeric changes, object tilt, card reveal,
+  timer resizing, and environmental breathing.
+- Split visual background/chrome code into `PrototypeVisuals.swift` and added
+  frozen-time launch states for controlled comparisons.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Product hierarchy can stay consistent while the concepts differ in what
+  carries meaning: environment, measurement, or object.
+- The 13 → 14 moment is the comparison state; equality screenshots do not
+  evaluate the product's emotional centre.
+- Success remains a semantic state rather than borrowing the current Dawn hue.
+
+**Landmines**
+- Still awaiting physical-device haptic tuning and Eden's direction choice.
+- The simulator screenshots prove composition, not 1.5m dark-room legibility.
+- The app has no signing identity configured on this Mac yet.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Run identical Set/Rest states on the physical phone, tune haptics and
+distance contrast, then ask Eden to choose the execution to formalize in W2.
+
 ## 2026-08-21 · W1 simulator prototypes · GPT-5.6 Sol
 
 **Workstream:** W1 — Research pass and directions (in progress)

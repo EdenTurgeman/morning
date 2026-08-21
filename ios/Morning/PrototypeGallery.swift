@@ -40,6 +40,7 @@ private enum PrototypeMode: String, CaseIterable, Identifiable {
 enum SetScenario: String, CaseIterable, Identifiable {
     case firstRun = "First run"
     case comparable = "Comparable"
+    case beating = "13 → 14"
     case changedWeight = "Changed weight"
     case superset = "Superset"
     case myo = "Myo"
@@ -89,6 +90,7 @@ struct PrototypeLabView: View {
 
         _treatment = State(initialValue: selectedTreatment)
         _mode = State(initialValue: selectedMode)
+        _setScenario = State(initialValue: value.contains("beating") ? .beating : .comparable)
         _restScenario = State(initialValue: selectedRestScenario)
         _progress = State(initialValue: selectedRestScenario == .myo ? 0.74 : 0.42)
         _isPresentingPrototype = State(initialValue: true)
@@ -292,164 +294,6 @@ private struct PrototypeStage: View {
     }
 }
 
-private struct DawnBackdrop: View {
-    let treatment: DawnTreatment
-    let progress: Double
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var breathing = false
-
-    private var palette: DawnPalette {
-        DawnPalette(progress: progress)
-    }
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack {
-                Color(red: 0.015, green: 0.02, blue: 0.045)
-
-                MeshGradient(
-                    width: 3,
-                    height: 3,
-                    points: [
-                        .init(0, 0), .init(0.5, 0), .init(1, 0),
-                        .init(0, 0.52), .init(0.5, 0.48), .init(1, 0.52),
-                        .init(0, 1), .init(0.5, 1), .init(1, 1),
-                    ],
-                    colors: [
-                        palette.zenith, palette.zenith, palette.zenith,
-                        palette.middle.opacity(0.72), palette.middle, palette.middle.opacity(0.72),
-                        palette.horizon.opacity(0.45), palette.horizon.opacity(0.7), palette.horizon.opacity(0.45),
-                    ],
-                    smoothsColors: true
-                )
-                .opacity(treatment == .precise ? 0.72 : 1)
-
-                Stars(progress: progress)
-
-                if treatment != .precise {
-                    Ellipse()
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    palette.accent.opacity(treatment == .tactile ? 0.68 : 0.54),
-                                    palette.accent.opacity(0.16),
-                                    .clear,
-                                ],
-                                center: .center,
-                                startRadius: 3,
-                                endRadius: 170
-                            )
-                        )
-                        .frame(width: 360, height: 250)
-                        .scaleEffect(breathing && !reduceMotion ? 1.05 : 0.97)
-                        .position(
-                            x: proxy.size.width / 2,
-                            y: proxy.size.height * (0.79 - progress * 0.14)
-                        )
-                        .blendMode(.screen)
-                }
-
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            colors: [.clear, Color.black.opacity(0.12), Color.black.opacity(0.42)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-
-                if treatment == .precise {
-                    VStack {
-                        Spacer()
-                        Rectangle()
-                            .fill(palette.accent.opacity(0.55))
-                            .frame(height: 1)
-                            .shadow(color: palette.accent.opacity(0.8), radius: 5)
-                            .padding(.bottom, proxy.size.height * 0.19)
-                    }
-                }
-            }
-            .onAppear {
-                withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
-                    breathing = true
-                }
-            }
-        }
-        .ignoresSafeArea()
-    }
-}
-
-private struct Stars: View {
-    let progress: Double
-
-    var body: some View {
-        Canvas { context, size in
-            for i in 0 ..< 34 {
-                let x = (Double((i * 83) % 97) / 97) * size.width
-                let y = (Double((i * 47) % 61) / 61) * size.height * 0.66
-                let diameter = i.isMultiple(of: 7) ? 1.7 : 1.05
-                let rect = CGRect(x: x, y: y, width: diameter, height: diameter)
-                context.fill(Path(ellipseIn: rect), with: .color(.white.opacity(0.42)))
-            }
-        }
-        .opacity(max(0.08, 0.72 - progress * 0.58))
-        .allowsHitTesting(false)
-    }
-}
-
-private struct PrototypeChrome: View {
-    let progress: Double
-    let treatment: DawnTreatment
-    let step: String
-    let onBack: () -> Void
-
-    private var palette: DawnPalette {
-        DawnPalette(progress: progress)
-    }
-
-    var body: some View {
-        VStack(spacing: 9) {
-            HStack {
-                Button(action: onBack) {
-                    Label("Back", systemImage: "chevron.left")
-                        .labelStyle(.titleAndIcon)
-                        .font(.caption.weight(.medium))
-                }
-
-                Spacer()
-
-                Text(step.uppercased())
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.8)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                Button("End", action: onBack)
-                    .font(.caption.weight(.medium))
-            }
-            .foregroundStyle(.white.opacity(0.78))
-
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(.white.opacity(0.1))
-                    Capsule()
-                        .fill(palette.accent)
-                        .frame(width: proxy.size.width * progress)
-                        .shadow(
-                            color: palette.accent.opacity(treatment == .precise ? 0.45 : 0.75),
-                            radius: treatment == .precise ? 2 : 6
-                        )
-                }
-            }
-            .frame(height: treatment == .precise ? 2 : 3)
-        }
-        .frame(height: 44)
-    }
-}
-
 private struct SetPrototypeView: View {
     let treatment: DawnTreatment
     let scenario: SetScenario
@@ -524,7 +368,7 @@ private struct SetPrototypeView: View {
 
                 Text(fixture.meta)
                     .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.white.opacity(0.62))
 
                 if fixture.straightIntoNext {
                     Text("No rest after this — straight into the next one.")
@@ -543,10 +387,9 @@ private struct SetPrototypeView: View {
             Spacer(minLength: 8)
 
             VStack(spacing: 5) {
-                Text("TARGET · \(fixture.target.uppercased())")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.6)
-                    .foregroundStyle(.white.opacity(0.48))
+                Text("Target · \(fixture.target)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.68))
 
                 RepObject(
                     treatment: treatment,
@@ -579,12 +422,26 @@ private struct SetPrototypeView: View {
 
             Text("6 sets to go")
                 .font(.caption.monospacedDigit())
-                .foregroundStyle(.white.opacity(0.38))
+                .foregroundStyle(.white.opacity(0.58))
                 .padding(.top, 8)
         }
         .padding(.horizontal, 22)
         .safeAreaPadding(.top, 4)
         .safeAreaPadding(.bottom, 6)
+        .background {
+            if treatment == .atmospheric, isBeating {
+                RadialGradient(
+                    colors: [Color.morningSuccess.opacity(0.2), .clear],
+                    center: .bottom,
+                    startRadius: 10,
+                    endRadius: 330
+                )
+                .ignoresSafeArea()
+                .blendMode(.screen)
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.3), value: isBeating)
     }
 
     @ViewBuilder
@@ -595,7 +452,7 @@ private struct SetPrototypeView: View {
         } else if let previous = fixture.previous {
             if isBeating {
                 Text("Beating last time's \(previous)")
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(Color.morningSuccess)
             } else {
                 Text("Last time: \(previous) — beat it")
                     .foregroundStyle(.white.opacity(0.7))
@@ -663,6 +520,8 @@ private struct RepObject: View {
     let accent: Color
     let onStep: (Int) -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         HStack(spacing: treatment == .tactile ? 14 : 20) {
             RepStepButton(
@@ -691,25 +550,45 @@ private struct RepObject: View {
     private var readout: some View {
         switch treatment {
         case .atmospheric:
-            VStack(spacing: 0) {
-                Text(reps, format: .number)
-                    .font(.system(size: 92, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText(countsDown: direction < 0))
-                    .foregroundStyle(isBeating ? accent : .white)
-                    .shadow(color: isBeating ? accent.opacity(0.72) : .clear, radius: 18)
-                Text("REPS")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(2)
-                    .foregroundStyle(.white.opacity(0.45))
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 0) {
+                    Text(reps, format: .number)
+                        .font(.system(size: 92, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
+                        .foregroundStyle(isBeating ? Color.morningSuccess : .white)
+                        .shadow(
+                            color: isBeating ? Color.morningSuccess.opacity(0.72) : .clear,
+                            radius: 18
+                        )
+                    Text("Reps")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.62))
+                }
+
+                if let previous {
+                    Text("Last \(previous)")
+                        .font(.caption2.weight(.bold).monospacedDigit())
+                        .foregroundStyle(isBeating ? Color.black.opacity(0.72) : .white.opacity(0.76))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(
+                            isBeating ? Color.morningSuccess : Color.white.opacity(0.1),
+                            in: Capsule()
+                        )
+                        .offset(x: 11, y: 5)
+                }
             }
         case .precise:
+            let previousValue = previous ?? reps
+            let delta = min(2, max(-2, reps - previousValue))
+
             VStack(spacing: 10) {
                 Text(reps, format: .number)
                     .font(.system(size: 88, weight: .bold, design: .rounded))
                     .monospacedDigit()
-                    .contentTransition(.numericText(countsDown: direction < 0))
-                    .foregroundStyle(isBeating ? accent : .white)
+                    .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
+                    .foregroundStyle(isBeating ? Color.morningSuccess : .white)
 
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {
@@ -719,23 +598,22 @@ private struct RepObject: View {
 
                         if previous != nil {
                             Rectangle()
-                                .fill(isBeating ? accent : .white.opacity(0.56))
+                                .fill(isBeating ? Color.morningSuccess : .white.opacity(0.56))
                                 .frame(width: 2, height: 13)
-                                .offset(x: proxy.size.width * 0.52)
+                                .offset(x: proxy.size.width * 0.5)
                         }
 
                         Circle()
-                            .fill(isBeating ? accent : .white)
+                            .fill(isBeating ? Color.morningSuccess : .white)
                             .frame(width: 8, height: 8)
-                            .offset(x: proxy.size.width * min(0.86, 0.1 + Double(reps) / 25))
+                            .offset(x: proxy.size.width * (0.5 + Double(delta) * 0.17) - 4)
                     }
                 }
                 .frame(height: 13)
 
-                Text("REPS · CALIBRATED")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.7)
-                    .foregroundStyle(.white.opacity(0.42))
+                Text(previous.map { "Last \($0)" } ?? "First set")
+                    .font(.caption.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.64))
             }
         case .tactile:
             ZStack {
@@ -753,25 +631,42 @@ private struct RepObject: View {
                     .overlay {
                         Circle()
                             .stroke(
-                                isBeating ? accent : Color.white.opacity(0.18),
-                                lineWidth: isBeating ? 3 : 1
+                                isBeating ? Color.morningSuccess : Color.white.opacity(0.18),
+                                lineWidth: isBeating ? 4 : 1
                             )
                     }
-                    .shadow(color: .black.opacity(0.42), radius: 22, y: 14)
-                    .shadow(color: isBeating ? accent.opacity(0.48) : .clear, radius: 18)
+                    .shadow(color: .black.opacity(0.36), radius: 16, y: 10)
+                    .shadow(color: isBeating ? Color.morningSuccess.opacity(0.4) : .clear, radius: 14)
 
-                VStack(spacing: 0) {
+                VStack(spacing: 2) {
+                    if let previous {
+                        Text("LAST \(previous)")
+                            .font(.caption2.weight(.bold).monospacedDigit())
+                            .tracking(1)
+                            .foregroundStyle(isBeating ? Color.morningSuccess : .white.opacity(0.52))
+                    }
+
                     Text(reps, format: .number)
                         .font(.system(size: 76, weight: .bold, design: .rounded))
                         .monospacedDigit()
-                        .contentTransition(.numericText(countsDown: direction < 0))
-                    Text("REPS")
-                        .font(.caption2.weight(.semibold))
-                        .tracking(1.8)
-                        .foregroundStyle(.white.opacity(0.48))
+                        .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
+                    Text("Reps")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.62))
                 }
+
+                Capsule()
+                    .fill(isBeating ? Color.morningSuccess : .white.opacity(0.34))
+                    .frame(width: isBeating ? 32 : 20, height: 4)
+                    .offset(y: -70)
             }
             .frame(width: 164, height: 164)
+            .scaleEffect(isBeating ? 1.035 : 1)
+            .rotation3DEffect(
+                .degrees(reduceMotion ? 0 : Double(direction) * (isBeating ? 0.8 : 1.4)),
+                axis: (x: 1, y: 0, z: 0)
+            )
+            .animation(.spring(duration: 0.28, bounce: 0.22), value: reps)
         }
     }
 }
@@ -855,8 +750,10 @@ private struct RestPrototypeView: View {
 
     @State private var endDate = Date()
     @State private var answerRevealed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let fixture: RestFixture
+    private let frozenRemaining: TimeInterval?
 
     init(
         treatment: DawnTreatment,
@@ -869,6 +766,10 @@ private struct RestPrototypeView: View {
         self.progress = progress
         self.onClose = onClose
         fixture = RestFixture.fixture(for: scenario)
+        let prototypeArgument = ProcessInfo.processInfo.arguments.last ?? ""
+        frozenRemaining = prototypeArgument.contains("snapshot")
+            ? TimeInterval(scenario == .myo ? 5 : 45)
+            : nil
     }
 
     private var palette: DawnPalette {
@@ -884,16 +785,15 @@ private struct RestPrototypeView: View {
                 onBack: onClose
             )
 
-            Text("REST")
-                .font(.caption2.weight(.semibold))
-                .tracking(2.2)
-                .foregroundStyle(.white.opacity(0.42))
+            Text("Rest")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.64))
                 .padding(.top, 8)
 
             Spacer(minLength: 8)
 
             TimelineView(.animation) { context in
-                let remaining = max(0, endDate.timeIntervalSince(context.date))
+                let remaining = frozenRemaining ?? max(0, endDate.timeIntervalSince(context.date))
                 RestTimerObject(
                     treatment: treatment,
                     remaining: remaining,
@@ -906,7 +806,7 @@ private struct RestPrototypeView: View {
             if scenario == .myo {
                 Text("The 20-second rest IS the mechanism. Don't stretch it.")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(palette.accent)
+                    .foregroundStyle(Color(red: 1, green: 0.76, blue: 0.34))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
                     .padding(.top, 12)
@@ -930,10 +830,9 @@ private struct RestPrototypeView: View {
             Spacer(minLength: 10)
 
             VStack(spacing: 3) {
-                Text("NEXT")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.8)
-                    .foregroundStyle(.white.opacity(0.4))
+                Text("Next")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.62))
 
                 HStack(spacing: 5) {
                     Text(fixture.nextExercise)
@@ -949,14 +848,15 @@ private struct RestPrototypeView: View {
 
                 Text(fixture.nextMeta)
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.white.opacity(0.62))
             }
 
             HStack(spacing: 10) {
                 DawnSecondaryButton(
                     title: "+15s",
                     treatment: treatment,
-                    accent: palette.accent
+                    accent: palette.accent,
+                    quiet: scenario == .myo
                 ) {
                     endDate = endDate.addingTimeInterval(15)
                     PrototypeHaptics.shared.rep()
@@ -993,7 +893,10 @@ private struct RestPrototypeView: View {
     private func revealAnswer() {
         guard !answerRevealed else { return }
         PrototypeHaptics.shared.reveal()
-        withAnimation(.spring(duration: 0.5, bounce: 0.12)) {
+        let animation: Animation = reduceMotion
+            ? .easeOut(duration: 0.18)
+            : .spring(duration: 0.5, bounce: 0.12)
+        withAnimation(animation) {
             answerRevealed = true
         }
     }
@@ -1006,12 +909,14 @@ private struct RestTimerObject: View {
     let compact: Bool
     let accent: Color
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var fraction: Double {
         total > 0 ? min(1, max(0, remaining / total)) : 0
     }
 
     private var size: Double {
-        compact ? 104 : (treatment == .tactile ? 216 : 204)
+        compact ? 136 : (treatment == .tactile ? 216 : 204)
     }
 
     var body: some View {
@@ -1028,15 +933,11 @@ private struct RestTimerObject: View {
                     .rotationEffect(.degrees(-90))
                     .shadow(color: accent.opacity(0.65), radius: 12)
             } else if treatment == .precise {
-                Circle()
-                    .stroke(.white.opacity(0.12), lineWidth: 1)
-                Circle()
-                    .trim(from: 0, to: fraction)
-                    .stroke(
-                        accent,
-                        style: StrokeStyle(lineWidth: 3, lineCap: .square, dash: [2, 5])
-                    )
-                    .rotationEffect(.degrees(-90))
+                PreciseTimerTicks(
+                    segments: max(1, Int(total)),
+                    fraction: fraction,
+                    accent: accent
+                )
             } else {
                 Circle()
                     .fill(
@@ -1061,19 +962,59 @@ private struct RestTimerObject: View {
 
             VStack(spacing: -2) {
                 Text(Int(ceil(remaining)), format: .number)
-                    .font(.system(size: compact ? 46 : 82, weight: .bold, design: .rounded))
+                    .font(.system(size: compact ? 64 : 82, weight: .bold, design: .rounded))
                     .monospacedDigit()
-                    .contentTransition(.numericText(countsDown: true))
+                    .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: true))
                 Text("SEC")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(2)
-                    .foregroundStyle(.white.opacity(0.42))
+                    .font(.caption.weight(.semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(.white.opacity(0.64))
             }
         }
         .frame(width: size, height: size)
-        .animation(.spring(duration: 0.55, bounce: 0.1), value: compact)
+        .animation(
+            reduceMotion
+                ? .easeOut(duration: 0.18)
+                : .spring(duration: 0.55, bounce: 0.1),
+            value: compact
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(Int(ceil(remaining))) seconds remaining")
+    }
+}
+
+private struct PreciseTimerTicks: View {
+    let segments: Int
+    let fraction: Double
+    let accent: Color
+
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let outerRadius = min(size.width, size.height) / 2
+            let activeSegments = Int(ceil(Double(segments) * fraction))
+
+            for index in 0 ..< segments {
+                let angle = Double(index) / Double(segments) * .pi * 2 - .pi / 2
+                let innerRadius = outerRadius - (index.isMultiple(of: 5) ? 11 : 7)
+                let start = CGPoint(
+                    x: center.x + cos(angle) * innerRadius,
+                    y: center.y + sin(angle) * innerRadius
+                )
+                let finish = CGPoint(
+                    x: center.x + cos(angle) * outerRadius,
+                    y: center.y + sin(angle) * outerRadius
+                )
+                var path = Path()
+                path.move(to: start)
+                path.addLine(to: finish)
+                context.stroke(
+                    path,
+                    with: .color(index < activeSegments ? accent : .white.opacity(0.14)),
+                    lineWidth: index.isMultiple(of: 5) ? 2 : 1
+                )
+            }
+        }
     }
 }
 
@@ -1114,11 +1055,11 @@ private struct StudyCardPrototype: View {
                         .foregroundStyle(.white.opacity(0.68))
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
-                        .transition(.blurReplace.combined(with: .opacity))
+                        .transition(.opacity)
                 } else {
                     Text("Tap if you have it")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.42))
+                        .foregroundStyle(.white.opacity(0.6))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1154,7 +1095,20 @@ private struct DawnPrimaryButton: View {
                 .frame(height: 68)
                 .foregroundStyle(treatment == .tactile ? Color.white : Color.black.opacity(0.78))
                 .background {
-                    if treatment != .tactile {
+                    if treatment == .tactile {
+                        RoundedRectangle(cornerRadius: 22)
+                            .fill(
+                                LinearGradient(
+                                    colors: [accent.opacity(0.78), accent.opacity(0.48)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 22)
+                                    .stroke(.white.opacity(0.16), lineWidth: 1)
+                            }
+                    } else {
                         RoundedRectangle(cornerRadius: treatment == .precise ? 16 : 22)
                             .fill(accent)
                             .shadow(
@@ -1166,7 +1120,6 @@ private struct DawnPrimaryButton: View {
                 }
         }
         .buttonStyle(.plain)
-        .modifier(TactileGlassButton(treatment: treatment, accent: accent))
     }
 }
 
@@ -1174,6 +1127,7 @@ private struct DawnSecondaryButton: View {
     let title: String
     let treatment: DawnTreatment
     let accent: Color
+    var quiet = false
     let action: () -> Void
 
     var body: some View {
@@ -1186,11 +1140,13 @@ private struct DawnSecondaryButton: View {
                 .background {
                     if treatment != .tactile {
                         RoundedRectangle(cornerRadius: treatment == .precise ? 15 : 20)
-                            .fill(Color.black.opacity(treatment == .precise ? 0.32 : 0.16))
+                            .fill(Color.black.opacity(quiet ? 0.2 : (treatment == .precise ? 0.32 : 0.16)))
                             .overlay {
                                 RoundedRectangle(cornerRadius: treatment == .precise ? 15 : 20)
                                     .stroke(
-                                        treatment == .precise
+                                        quiet
+                                            ? Color.white.opacity(0.12)
+                                            : treatment == .precise
                                             ? accent.opacity(0.4)
                                             : Color.white.opacity(0.12),
                                         lineWidth: 1
@@ -1200,19 +1156,20 @@ private struct DawnSecondaryButton: View {
                 }
         }
         .buttonStyle(.plain)
-        .modifier(TactileGlassButton(treatment: treatment, accent: accent))
+        .modifier(TactileGlassButton(treatment: treatment, accent: accent, quiet: quiet))
     }
 }
 
 private struct TactileGlassButton: ViewModifier {
     let treatment: DawnTreatment
     let accent: Color
+    let quiet: Bool
 
     func body(content: Content) -> some View {
         if treatment == .tactile {
             content
                 .glassEffect(
-                    .regular.tint(accent.opacity(0.22)).interactive(),
+                    .regular.tint(accent.opacity(quiet ? 0.08 : 0.2)).interactive(),
                     in: .rect(cornerRadius: 22)
                 )
         } else {

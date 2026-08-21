@@ -1,6 +1,10 @@
 import CoreHaptics
 import SwiftUI
 
+extension Color {
+    static let morningSuccess = Color(red: 0.2, green: 0.83, blue: 0.6)
+}
+
 struct SetFixture {
     let exercise: String
     let sub: String?
@@ -43,6 +47,22 @@ struct SetFixture {
                     "Start at ear height, finish biceps by your ears",
                 ],
                 initialReps: 13,
+                previous: 13,
+                previousKg: nil,
+                straightIntoNext: true,
+                intense: false
+            )
+        case .beating:
+            SetFixture(
+                exercise: "Overhead press",
+                sub: "standing, strict",
+                meta: "7.5 kg · set 2 of 3 · superset 1 of 2",
+                target: "8–15 reps",
+                cues: [
+                    "Ribs down. No leg drive, no leaning back",
+                    "Start at ear height, finish biceps by your ears",
+                ],
+                initialReps: 14,
                 previous: 13,
                 previousKg: nil,
                 straightIntoNext: true,
