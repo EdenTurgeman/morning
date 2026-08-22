@@ -622,6 +622,8 @@ the only test that actually counts.
 
 ## W12 · Propose the system integrations — `todo`, ask first
 
+**Runs after W14.** Eden asked for the UI/UX review before the Live Activity.
+
 **Gate:** W11 done, and **Eden has said yes to each item individually.**
 
 `05-platform.md §4` and `§7` are explicit that these are to be **proposed, not
@@ -683,6 +685,8 @@ reps, session count, current streak, longest run, and the year grid. The two
 
 ## W13 · Daybreak in Metal — `todo`, Eden's own piece
 
+**Runs after W14.**
+
 **Gate:** none from a rules point of view — `02-design-brief.md §7` already
 anticipates it ("Material and light. Metal shaders through SwiftUI's
 `.colorEffect`"). The real gate is that **Eden wants to work on this one
@@ -725,3 +729,45 @@ Metal `[[stitchable]]` function and need no separate render pass. The 120Hz
 target and the "no dropped frames while a timer runs" acceptance item apply here
 too, and Daybreak is already listed in the device checklist as one of the three
 most likely places to drop frames.
+
+---
+
+## W14 · UI/UX review of the whole app — `todo`, **runs before W12 and W13**
+
+Asked for on 2026-08-23, and the ordering is his:
+
+> After ur done with the base alignments, before moving on to the live activity
+> and other things, i want you to run through a ui/ux review on the entire app,
+> review the screens, buttons empty spaces, crampted spaces, undersized texts
+> and general Best practice UX.
+
+So the sequence is **completeness pass → W14 → W12 / W13**, not the numeric
+order. Do not start the Live Activity or the Metal Daybreak before this.
+
+**Scope, in his words plus what they imply:**
+
+- **Every screen.** Home, Warm-up, Set, Rest, Summary, Daybreak, History,
+  Ledger, Guide, Backup — including their empty, one-week and six-month states.
+- **Buttons.** Size, placement, reachability, hit targets, what is primary
+  versus quiet, and whether anything reads as tappable that is not.
+- **Empty space.** Home has a large gap between the week meter and Start;
+  Warm-up has one between the cues and the clock. Both are currently defended as
+  "the sky is the point" — that defence should be tested rather than assumed.
+- **Cramped space.** The Set screen is the one that has to hold the most and
+  never scroll; the four-cue stress case is where it gets tight.
+- **Undersized text.** Half the type scale is fixed points rather than text
+  styles (`counter`, `title`, `question`, `answer`). Sizes were chosen against
+  the 1.5 m reading distance, but `answer` at 14.5pt and `microLabel` at caption2
+  are the two most likely to be too small in practice.
+- **General best practice.** Ordinary iOS conventions the port may have skipped
+  because it was ported from a web layout.
+
+**Method that worked for the motion pass**, and should be reused: render the
+real screen with `-screen …`, measure it, and only then judge it. Do not review
+from the code. `ios/Tools/measure-contrast.py` and `ios/Tools/frames.swift` are
+both set up for it, and every state is reachable by launch argument.
+
+**Do not fold fixes into the completeness pass.** Eden asked for these as two
+separate passes, and the reason is sound: a completeness gap is "the app does
+not do this", a UI issue is "it does it badly", and mixing them makes both
+harder to review.
