@@ -4,7 +4,23 @@ Append-only, newest at the top. One agent works this clone at a time; this file
 is the only thing standing between the next agent and re-deciding what you
 already decided.
 
-The **Landmines** field is worth more than the summary of what you built.
+The - **The threshold delay had to clear the digit ROLL, not visual fusion.** The
+  counter recolours over 0.18s but `contentTransition(.numericText)` is not
+  finished until ~0.24s. A 0.09s delay — chosen from the perceptual fusion
+  threshold — still put the sentence first. It is 0.22s.
+- **Two `matchedGeometryEffect` sources is a silent conflict.** Both the counter
+  and the ring declared the default `isSource: true`. SwiftUI does not warn —
+  the device log is clean — it just picks one, and it picked the counter, which
+  is why exactly one direction morphed. The counter is now the source
+  permanently and the ring follows. Verified that a settled Rest screen with no
+  source in the tree renders correctly.
+- **Daybreak was reviewed frame by frame and needs nothing.** It runs its
+  documented choreography exactly: the horizon draws outward from the centre
+  with nothing else on screen, then the sun rises and overshoots, the rays
+  bloom, the flash lands, the number springs in, the pips stagger, the copy
+  follows. The anticipation beat the web version lacked is real and it works.
+
+**Landmines** field is worth more than the summary of what you built.
 
 ---
 
@@ -29,8 +45,24 @@ The **Landmines** field is worth more than the summary of what you built.
   silent. Moved to `sessionEnded`. This is exactly the bug the device checklist
   lists as "the screen never sleeps mid-session" — it would have failed, on the
   phone, at 6am, and nothing in the simulator would ever have shown it.
-- **Added `ios/Tools/frames.swift`** and `-autoplay`.
+- **Added `ios/Tools/frames.swift`**, `-autoplay` and `-autorep`.
 - **Verified Reduce Motion for the first time.**
+- **Made crossing last time's number two beats instead of one.** The threshold
+  haptic is two events 45ms apart; the screen was firing one. Worse, it fired in
+  the wrong order — the sentence underneath the counter was fully legible 0.12s
+  BEFORE the digit began to move.
+- **Made the work object travel in both directions.** Set→Rest morphed;
+  Rest→Set only cross-faded.
+- **Stopped the study card's answer landing on top of the question.** Three
+  layers of legible text for ~150ms on every card reveal.
+
+**The one bug behind three of those:** `@ViewBuilder` branch swaps do not
+animate here. `.transition(.opacity)` on a branch, with or without a delayed
+`.animation(_:value:)`, had no effect in either the rep comparison line or the
+study card — the new content just appeared, instantly, at full opacity. Both are
+now opacity on a view that never leaves the tree, which is the primitive that
+honours a delay. **If you add a third conditional that needs to animate, assume
+it will not, and measure it.**
 
 **Decisions taken**
 - **Motion is now reviewed off video, not screenshots.** Backgrounded
@@ -69,6 +101,16 @@ The **Landmines** field is worth more than the summary of what you built.
   collapses from ~0.45s to ~0.2s, and the sky honours it in three places
   (`PrototypeSky.swift`). Daybreak, the rep control and the celebration
   choreography under Reduce Motion are still unlooked-at.
+- **`-autorep` originally wrapped the change in `withAnimation`, which a tap
+  does not.** It was measuring a timing the product never runs. Any harness that
+  drives the app has to take the same path a finger would or it measures itself.
+- **My first two threshold measurements had both sample bands inside the
+  counter**, so "the sentence" I was timing was the digits. Band positions now
+  come from a row scan of the actual frame. If a measurement says something
+  surprising, check what it is pointing at before believing it.
+- Daybreak's first ~100ms is a grey wash when reached by launch argument. That
+  is the white launch screen fading out, not Daybreak — arriving from a workout
+  the app is already dark. Do not "fix" it.
 - The luminance dip is 50 → 22. I believe that reads as a breath rather than a
   flicker, but nobody has seen it on a real display in a dark room. It is on the
   device checklist now.

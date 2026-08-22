@@ -158,6 +158,19 @@ Reduce Motion can be toggled headlessly, and the app picks it up on next launch:
 xcrun simctl spawn <udid> defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
 ```
 
+### The two beats of crossing last time's number
+
+`01-product.md` calls this the emotional centre of the app, and the design is
+that the hand and the eye both get **two** beats: the number changes, then the
+fact lands. Face down it is two haptic events 45ms apart. Looking at it, the
+counter goes mint and finishes rolling, and 0.22s later "Beating last time's N"
+arrives underneath.
+
+What to check on the phone is whether those two read as one gesture or as a lag.
+The number responds within 0.04s of the tap — that is the part the finger is
+waiting on — and the sentence is deliberately behind it. If the sentence feels
+late rather than consequent, `Motion.threshold`'s delay is the dial.
+
 ### 120Hz
 
 The app opts into ProMotion (`CADisableMinimumFrameDurationOnPhone` in the built
