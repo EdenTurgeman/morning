@@ -55,6 +55,49 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W4 the Set screen · Claude Opus 5
+
+**Workstream:** W4 — The Set screen (done). W3 merged.
+
+**What I did**
+- Built `WorkoutSession`, the session state machine, and implemented all eight
+  `SessionLifecycleAcceptanceTests` against it. All eight are about the machine
+  rather than SwiftUI, which is why it is a plain observable object.
+- Built the real screen: `Screens/SetScreen.swift`, `Screens/RepControl.swift`,
+  `Screens/WorkoutHost.swift`, on the W2 tokens and on real persisted history.
+- Promoted the haptic engine out of prototype code into `Model/Haptics.swift`.
+  `PrototypeHaptics` is now a per-treatment sharpness tilt over the one engine.
+- Added `-screen set`, `-slot` and `-session` so any state can be reviewed.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Bodyweight sets are ALWAYS comparable. A push-up has no load, so the session's
+  dumbbell weight has nothing to do with it. Locked in with a test.
+- The step label counts sets, not steps. "Set 2 / 25" included the warm-up and
+  every rest.
+- Cue emphasis uses `intensityWords`, already transcribed in `Program.swift`.
+  My first version guessed at "contains a shouted word" and silently missed
+  "Go to failure" and "mechanism" — the two that matter most.
+
+**Landmines**
+- **A token can record a number it does not deliver.** `Ink.tertiary` was
+  written down as 0.62 from measurements of a prototype that was using 0.72 in
+  the places that mattered. Rebuilding the prototypes on the tokens was supposed
+  to catch that and did not, because the prototype kept its literals. Measure
+  the REAL screen, not the thing the token was derived from.
+- `measure-contrast.py` snapped onto the primary button's edge and reported
+  4.96:1 for a footer that holds 8:1. It now anchors bottom-pinned zones from
+  the bottom of the frame and warns when the ink it found touches the window
+  edge. Read the warning; do not silence it by narrowing the window.
+- `WorkoutHost` walks past rests because Rest is W5. The moment W5 lands, that
+  skip must go or rests will be silently invisible.
+- The warm-up timer step has no screen. `WorkoutHost` jumps past it.
+
+**Assertions:** 27 of 54 passing (27 skipped, 0 failures)
+
+**Next:** W5 — Rest and the study deck. Its gate (W4) is now met. Delete the
+rest-skipping in `WorkoutHost` as the first thing it does.
+
 ## 2026-08-22 · W3 foundations and the acceptance suite · Claude Opus 5
 
 **Workstream:** W3 — Foundations and the acceptance suite (done). W1 and W2 merged.
