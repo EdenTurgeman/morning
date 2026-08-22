@@ -234,11 +234,15 @@ private struct PrototypeMenu: View {
                                             Text(item.title)
                                                 .font(.headline)
                                             if item == .atmospheric {
-                                                Text("LEADING")
+                                                // W1 is closed and this is the
+                                                // agreed direction. The other
+                                                // two stay runnable as frozen
+                                                // comparison artifacts.
+                                                Text("CHOSEN")
                                                     .font(.caption2.weight(.bold))
                                                     .tracking(1)
                                                     .foregroundStyle(
-                                                        DawnPalette(progress: progress).accent
+                                                        DawnPalette(progress: progress).accentText
                                                     )
                                             }
                                         }
@@ -337,6 +341,7 @@ private struct PrototypeMenu: View {
             .buttonStyle(.plain)
             .padding(.horizontal, 20)
             .padding(.top, 10)
+            .padding(.bottom, 6)
             .background(Surface.labChrome.opacity(0.94))
         }
         .preferredColorScheme(.dark)
