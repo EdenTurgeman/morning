@@ -49,7 +49,18 @@ enum Motion {
     /// events read as one — so this could not have been the haptic's 45ms
     /// either. Both constraints point the same way.
     static func threshold(reduceMotion: Bool) -> Animation {
-        reduceMotion ? .linear(duration: 0.12) : .easeOut(duration: 0.20).delay(0.22)
+        // The reduced form keeps the delay, shortened. Reduce Motion asks for
+        // calmer, not for less information, and the two beats ARE the
+        // information here — the number, then what it means. Collapsing them
+        // into one frame would be the same mistake this token exists to fix,
+        // just for the people who asked for less movement.
+        //
+        // 0.10s rather than 0.22 because there is no digit roll to clear: the
+        // reduced `Motion.numeric` is a plain opacity change. It only has to
+        // beat the ~80ms at which two visual events fuse into one.
+        reduceMotion
+            ? .linear(duration: 0.12).delay(0.10)
+            : .easeOut(duration: 0.20).delay(0.22)
     }
 
     /// Logging a set. A little weight, because something was committed.

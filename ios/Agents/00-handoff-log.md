@@ -154,7 +154,13 @@ it will not, and measure it.**
 - **Reduce Motion is now verified for the swap and for Daybreak**, frame by
   frame — it keeps every beat and drops the travel, as its header claims. The
   sky honours it in three places (`PrototypeSky.swift`). The rep control under
-  Reduce Motion is still unlooked-at.
+  Reduce Motion has one too now, and it needed fixing: the reduced
+  `Motion.threshold` had **no delay at all**, so the two beats collapsed back
+  into one for exactly the people who had asked for calmer. Reduce Motion means
+  less movement, not less information, and the two beats are the information.
+  It is 0.10s now — no digit roll to clear, so it only has to beat the ~80ms at
+  which two visual events fuse. Measured: 0.12s apart, against 0.26s at full
+  motion.
 - **`-autorep` originally wrapped the change in `withAnimation`, which a tap
   does not.** It was measuring a timing the product never runs. Any harness that
   drives the app has to take the same path a finger would or it measures itself.
