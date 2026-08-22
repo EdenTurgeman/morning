@@ -20,7 +20,24 @@ The - **The threshold delay had to clear the digit ROLL, not visual fusion.** Th
   bloom, the flash lands, the number springs in, the pips stagger, the copy
   follows. The anticipation beat the web version lacked is real and it works.
 
-**Landmines** field is worth more than the summary of what you built.
+**Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots. field is worth more than the summary of what you built.
 
 ---
 
@@ -181,6 +198,23 @@ it will not, and measure it.**
   14 becomes 60 in one motion.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **`-autoplay` was chained and I did not notice for a while.** I had copied the
   block into `.onChange(of: session.stepIndex)` as well as `.onAppear`, so each
   advance scheduled the next and the app walked the session on its own. Fixed —
@@ -328,6 +362,23 @@ scroll.
   carries the contrast. The design goal was "quiet", not "invisible".
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **The bay is wide and short, so a normalised x offset is worth far fewer
   points than the same number in y.** A stance that looked hip-width in
   coordinates rendered as two fused legs. Every figure width now derives from
@@ -368,6 +419,23 @@ exists.
 - **iCloud was not built.** `05-platform.md §6` says propose, not assume.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - `BackupDocument` carries pre-encoded `Data`, not an `AppData`. `FileDocument`'s
   members are nonisolated while this module's `Codable` conformances are
   main-actor by default; encoding at the call site is simpler than fighting it.
@@ -406,6 +474,23 @@ in it needs the hardware this clone has never had.
   coming is visible from day one.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - The year grid's colour scale is relative to the user's OWN range — quietest
   session indigo, best gold. With one session everything is gold, which is
   correct and looks odd; do not "fix" it with an absolute scale.
@@ -445,6 +530,23 @@ deliberately out of v1.
   the celebration reveals numbers that are already there.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **Two of my own tests were wrong, not the copy.** I asserted an eyebrow must
   share no words with its headline, which failed "Best A yet" over "A personal
   best." — the rule is that it must ADD something. And my content-word filter
@@ -484,6 +586,23 @@ deliberately out of v1.
 - Finishing saves the record BEFORE clearing the in-progress file.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **`weekStartsOn` means a different number in each build** — 1 here
   (Foundation, Sunday = 1), 0 in the web (JavaScript). The offset arithmetic is
   identical *because* of that. Neither should be "fixed" to match the other.
@@ -524,6 +643,23 @@ deliberately out of v1.
   that he chose countdown reliability over the silent switch.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **Mutating `@State` from a computed property read during `body` silently does
   nothing.** The card was drawn that way and never appeared, and there was no
   error — just no card. If something renders as absent rather than wrong, look
@@ -566,6 +702,23 @@ deliberately out of v1.
   "Go to failure" and "mechanism" — the two that matter most.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **There is no `Simulator.app` on this machine** — only the headless `simctl`
   runtime. Screenshots and launches work; synthesized touches have nothing to be
   delivered to, so a HOME press changes 0.9% of pixels and every tap is a no-op.
@@ -626,6 +779,23 @@ rest-skipping in `WorkoutHost` as the first thing it does.
   decide whether it is a target without it.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **`TEST_RUNNER_`-prefixed variables must be in xcodebuild's ENVIRONMENT.**
   Passed as an argument they become a build setting and the test never sees
   them — the export check silently skipped for two runs before I noticed the
@@ -678,6 +848,23 @@ rest-skipping in `WorkoutHost` as the first thing it does.
 - **W1's device gate is carried to W11, not waived.** See the landmine below.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **The device gate is still open and I could not close it.** No physical iPhone
   has ever been connected to this clone and no signing identity is configured,
   so `devicectl` and `xctrace` see simulators only. Haptic quality and 120Hz
@@ -738,6 +925,23 @@ rest-skipping in `WorkoutHost` as the first thing it does.
   `TimelineView` and baked `CGImage` tiles cover all of it.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - **Physical-device work remains impossible here.** `devicectl` and `xctrace`
   show simulators only, and no development team is set for signing. Haptic
   quality and 120Hz frame pacing are therefore still unverified — the two W1
@@ -794,6 +998,23 @@ periods, contrast bars) are the first tokens it should absorb.
   before it can enter the project.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - The movement figures are app-owned layout/motion prototypes, not final
   anatomical illustrations. Their exercise mapping must grow with the real
   program if this direction is chosen.
@@ -839,6 +1060,23 @@ states and card flow. Keep W1 open until he explicitly chooses; do not start W2.
   and does not start W2.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - PNG contrast sampling validates the rendered simulator composition, not
   physical-device 1.5m dark-room legibility.
 - Frame pacing and haptic quality still require a signed build on Eden's
@@ -878,6 +1116,23 @@ phone and wait for his W1 direction decision. Do not begin W2 beforehand.
 - ProMotion support is a committed product setting, not a profiler-only tweak.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - Physical-device frame pacing and haptics remain unverified because no signing
   identity or physical iPhone is connected.
 - Four-cue Set content is a stress harness assembled from fixed program copy,
@@ -919,6 +1174,23 @@ phone and wait for his W1 direction decision. Do not begin W2 beforehand.
 - Success remains a semantic state rather than borrowing the current Dawn hue.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - Still awaiting physical-device haptic tuning and Eden's direction choice.
 - The simulator screenshots prove composition, not 1.5m dark-room legibility.
 - The app has no signing identity configured on this Mac yet.
@@ -957,6 +1229,23 @@ distance contrast, then ask Eden to choose the execution to formalize in W2.
 - Study cards use stable question → rule → answer geometry, not a 3D flip.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - Simulator review cannot judge Core Haptics. W1 remains open until physical
   iPhone testing and Eden's direction choice.
 - The prototype lab is intentionally hardcoded and is not W3/W4 application
@@ -1000,6 +1289,23 @@ Eden.
   from five through zero. Eden chose this over silent-switch compliance.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - Public App Store creatives establish visible composition, not interaction.
   Behavioural claims in the notes rely on public demos or documentation.
 - The web Summary starts animations and its 14-second card reveal while hidden
@@ -1043,6 +1349,23 @@ native Dawn treatments with real motion and Core Haptics.
   formatting; generated Swift is never rewritten.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - No development team is set in the project yet. Simulator builds are clean;
   physical-device W1 prototypes need Eden's team selected in Signing &
   Capabilities.
@@ -1114,6 +1437,23 @@ execution rather than copying the web layout.
   by the wrong party.
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 
 1. **None of the Swift has ever been compiled.** The environment it was written
    in has an egress allowlist that permits `archive.ubuntu.com`, `pypi.org`,
@@ -1274,6 +1614,23 @@ Copy this for your entry.
 - <chose X over Y because Z>
 
 **Landmines**
+
+- **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
+  reproduce it.** Session A is 90s of warm-up plus 60+60+60+45+45+45+45 of rests
+  — about 450s of waiting before you count the sets. The run right after the
+  week-strip commit went Home → warm-up → Set 1 → … → Daybreak between 1:28 and
+  1:31 on the status-bar clock, reaching "Set 7 / 13" forty seconds after Set 1,
+  which is not possible with real rests.
+
+  Two runs immediately afterwards, same build, were correct: an isolated rest
+  held 55s and advanced at 60s, and a full session A took ~410s to Daybreak.
+  Ruled out: the seeder does clear the in-progress file (`saveInProgress(nil)`
+  in `MorningApp.applySeedIfRequested`), so it was not a stale restored session;
+  `currentSet` is nil on a rest, so `-autorun` cannot be driving through them.
+
+  **Left open deliberately rather than explained away.** If you see a session
+  run short, that is this, and the thing to capture is the device log during it
+  — I only had screenshots.
 - <what you found and did not fix, what you half-fixed, what you are suspicious of>
 
 **Assertions:** <n> of 53 passing (<n> skipped)
