@@ -177,13 +177,13 @@ private struct LegibilityScrim: View {
             // does. Measured on rendered frames, a fixed scrim that cleared the
             // bar at twilight let the cue text, the Reps label and the footer
             // fall to 6.2-6.5:1 by the time the palette reached gold.
-            let p = min(1, max(0, progress))
+            let ramp = min(1, max(0, progress))
             return [
                 .init(color: Self.ink.opacity(0.30), location: 0),
-                .init(color: Self.ink.opacity(0.14 + 0.04 * p), location: 0.38),
-                .init(color: Self.ink.opacity(0.20 + 0.08 * p), location: 0.58),
-                .init(color: Self.ink.opacity(0.48 + 0.08 * p), location: 0.78),
-                .init(color: Self.ink.opacity(0.64 + 0.07 * p), location: 1),
+                .init(color: Self.ink.opacity(0.14 + 0.04 * ramp), location: 0.38),
+                .init(color: Self.ink.opacity(0.20 + 0.08 * ramp), location: 0.58),
+                .init(color: Self.ink.opacity(0.48 + 0.08 * ramp), location: 0.78),
+                .init(color: Self.ink.opacity(0.64 + 0.07 * ramp), location: 1),
             ]
         case .precise, .tactile:
             // These backdrops carry far less light, so they keep the gentler

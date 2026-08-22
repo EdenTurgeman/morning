@@ -43,40 +43,52 @@ import SwiftUI
 /// "0.006 0.021". Getting it the other way round produces vertical streaks,
 /// which read as screen noise.
 enum CloudTexture {
+    /// One field's shape. Grouping these keeps the generator's signature honest
+    /// — six loose numeric parameters at a call site say nothing about which is
+    /// which.
+    struct Recipe {
+        let seed: UInt32
+        /// Lattice periods across the tile. `x` wraps so tiles meet seamlessly;
+        /// `y` is a plain frequency because the band never repeats vertically.
+        let xPeriod: Int
+        let yFrequency: Int
+        let octaves: Int
+        /// Reproduces the web build's feColorMatrix: together these push most of
+        /// the field transparent so only the denser parts survive as cloud.
+        let contrast: Double
+        let bias: Double
+    }
+
     /// Wispy, far bank.
-    static let far = make(seed: 11, xPeriod: 3, yFrequency: 11, octaves: 5, contrast: 2.30, bias: -1.15)
+    static let far = make(Recipe(seed: 11, xPeriod: 3, yFrequency: 11, octaves: 5, contrast: 2.30, bias: -1.15))
     /// Coarser, higher-contrast noise for the nearer bank.
-    static let near = make(seed: 29, xPeriod: 5, yFrequency: 16, octaves: 4, contrast: 2.90, bias: -1.30)
+    static let near = make(Recipe(seed: 29, xPeriod: 5, yFrequency: 16, octaves: 4, contrast: 2.90, bias: -1.30))
     /// Fine monochrome grain that stops the gradients banding on OLED.
-    static let grain = make(seed: 7, xPeriod: 128, yFrequency: 128, octaves: 1, contrast: 1.0, bias: -0.44)
+    static let grain = make(Recipe(seed: 7, xPeriod: 128, yFrequency: 128, octaves: 1, contrast: 1.0, bias: -0.44))
 
     static let width = 1024
     static let height = 256
 
-    /// `contrast` and `bias` reproduce the web build's feColorMatrix: they push
-    /// most of the field transparent so only the denser parts survive as cloud.
-    static func make(
-        seed: UInt32,
-        xPeriod: Int,
-        yFrequency: Int,
-        octaves: Int,
-        contrast: Double,
-        bias: Double
-    ) -> CGImage? {
+    static func make(_ recipe: Recipe) -> CGImage? {
         var pixels = [UInt8](repeating: 0, count: width * height * 4)
 
-        for y in 0 ..< height {
-            for x in 0 ..< width {
+        for row in 0 ..< height {
+            for column in 0 ..< width {
                 var amplitude = 1.0
                 var total = 0.0
                 var range = 0.0
-                var period = xPeriod
-                var frequency = Double(yFrequency)
+                var period = recipe.xPeriod
+                var frequency = Double(recipe.yFrequency)
 
-                for octave in 0 ..< octaves {
-                    let u = Double(x) / Double(width) * Double(period)
-                    let v = Double(y) / Double(height) * frequency
-                    total += amplitude * value(u: u, v: v, period: period, seed: seed &+ UInt32(octave))
+                for octave in 0 ..< recipe.octaves {
+                    let sampleX = Double(column) / Double(width) * Double(period)
+                    let sampleY = Double(row) / Double(height) * frequency
+                    total += amplitude * value(
+                        sampleX: sampleX,
+                        sampleY: sampleY,
+                        period: period,
+                        seed: recipe.seed &+ UInt32(octave)
+                    )
                     range += amplitude
                     amplitude *= 0.55
                     period *= 2
@@ -84,8 +96,8 @@ enum CloudTexture {
                 }
 
                 let noise = range > 0 ? total / range : 0
-                let alpha = min(1, max(0, contrast * noise + bias))
-                let index = (y * width + x) * 4
+                let alpha = min(1, max(0, recipe.contrast * noise + recipe.bias))
+                let index = (row * width + column) * 4
                 let level = UInt8(alpha * 255)
                 pixels[index] = level // premultiplied white
                 pixels[index + 1] = level
@@ -116,34 +128,33 @@ enum CloudTexture {
         )
     }
 
-    /// Smoothstep-interpolated value noise. The lattice wraps at `period` in x
-    /// so neighbouring tiles meet without a seam; y needs no wrap because the
-    /// band never repeats vertically.
-    private static func value(u: Double, v: Double, period: Int, seed: UInt32) -> Double {
-        let x0 = Int(floor(u)), y0 = Int(floor(v))
-        let fx = u - Double(x0), fy = v - Double(y0)
-        let sx = fx * fx * (3 - 2 * fx)
-        let sy = fy * fy * (3 - 2 * fy)
+    /// Smoothstep-interpolated value noise on a lattice that wraps at `period`
+    /// in x, so neighbouring tiles meet without a seam.
+    private static func value(sampleX: Double, sampleY: Double, period: Int, seed: UInt32) -> Double {
+        let cellX = Int(floor(sampleX)), cellY = Int(floor(sampleY))
+        let fractionX = sampleX - Double(cellX), fractionY = sampleY - Double(cellY)
+        let easedX = fractionX * fractionX * (3 - 2 * fractionX)
+        let easedY = fractionY * fractionY * (3 - 2 * fractionY)
 
-        let a = hash(x0, y0, period, seed)
-        let b = hash(x0 + 1, y0, period, seed)
-        let c = hash(x0, y0 + 1, period, seed)
-        let d = hash(x0 + 1, y0 + 1, period, seed)
+        let topLeft = corner(cellX, cellY, period, seed)
+        let topRight = corner(cellX + 1, cellY, period, seed)
+        let bottomLeft = corner(cellX, cellY + 1, period, seed)
+        let bottomRight = corner(cellX + 1, cellY + 1, period, seed)
 
-        let top = a + (b - a) * sx
-        let bottom = c + (d - c) * sx
-        return top + (bottom - top) * sy
+        let top = topLeft + (topRight - topLeft) * easedX
+        let bottom = bottomLeft + (bottomRight - bottomLeft) * easedX
+        return top + (bottom - top) * easedY
     }
 
-    private static func hash(_ x: Int, _ y: Int, _ period: Int, _ seed: UInt32) -> Double {
+    private static func corner(_ x: Int, _ y: Int, _ period: Int, _ seed: UInt32) -> Double {
         let wrapped = period > 0 ? ((x % period) + period) % period : x
-        var h = UInt32(truncatingIfNeeded: wrapped &* 374_761_393)
-        h = h &+ UInt32(truncatingIfNeeded: y &* 668_265_263)
-        h = h &+ seed &* 2_246_822_519
-        h ^= h >> 13
-        h = h &* 1_274_126_177
-        h ^= h >> 16
-        return Double(h) / Double(UInt32.max)
+        var bits = UInt32(truncatingIfNeeded: wrapped &* 374_761_393)
+        bits = bits &+ UInt32(truncatingIfNeeded: y &* 668_265_263)
+        bits = bits &+ seed &* 2_246_822_519
+        bits ^= bits >> 13
+        bits = bits &* 1_274_126_177
+        bits ^= bits >> 16
+        return Double(bits) / Double(UInt32.max)
     }
 }
 
