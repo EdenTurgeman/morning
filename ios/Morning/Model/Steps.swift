@@ -78,6 +78,15 @@ enum Step: Equatable {
         }
         return nil
     }
+
+    /// Seconds this step counts down for, if it counts down at all.
+    var restSeconds: Int? {
+        switch self {
+        case let .rest(rest): rest.seconds
+        case let .timer(timer): timer.seconds
+        case .set: nil
+        }
+    }
 }
 
 // MARK: - The compiler
