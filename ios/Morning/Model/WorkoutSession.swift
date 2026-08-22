@@ -106,6 +106,13 @@ final class WorkoutSession {
         currentStep?.asSet
     }
 
+    /// Jumps to an arbitrary step index. Lands on rests and timers too, which
+    /// `go(toSlot:)` cannot — and without a Simulator UI on this machine, a
+    /// launch argument is the only way to reach a rest at all.
+    func go(toStep index: Int, now: Date = Date()) {
+        move(to: index, now: now)
+    }
+
     /// Jumps to the step logging `slot`. For tests and for anything that needs
     /// to land on a specific set rather than walk to it.
     func go(toSlot slot: String, now: Date = Date()) {
@@ -149,6 +156,11 @@ final class WorkoutSession {
     var isBeatingPrevious: Bool {
         guard previousIsComparable, let previous else { return false }
         return draftReps > previous.reps
+    }
+
+    /// The next set after here — what a rest is counting down towards.
+    var upcomingSet: SetStep? {
+        steps[(stepIndex + 1)...].compactMap(\.asSet).first
     }
 
     /// Which set this is, and how many the session has. "Set 2 / 25" counting

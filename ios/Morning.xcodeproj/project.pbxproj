@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		88E70088BB8FFC282137A2FD /* RestScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */; };
+		21C8E85EF7883D0892480846 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56359319D3EF2A90354C8A3 /* Audio.swift */; };
+		E872A9E953257A1010305C73 /* DuckWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */; };
+		F931E872C9CD5A79F428A21F /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB45F7318157028E123837CC /* Deck.swift */; };
+		61246B97184D35D802FC0D9E /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 896971FECE671753F440F58F /* Cards.swift */; };
 		2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */; };
 		B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */; };
 		5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3024DEC7857A680871BEEA49 /* RepControl.swift */; };
@@ -61,6 +66,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestScreen.swift; sourceTree = "<group>"; };
+		B56359319D3EF2A90354C8A3 /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
+		E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckWindowTests.swift; sourceTree = "<group>"; };
+		AB45F7318157028E123837CC /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		896971FECE671753F440F58F /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
 		7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHost.swift; sourceTree = "<group>"; };
 		8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetScreen.swift; sourceTree = "<group>"; };
 		3024DEC7857A680871BEEA49 /* RepControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepControl.swift; sourceTree = "<group>"; };
@@ -111,6 +121,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */,
 				7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */,
 				8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */,
 				3024DEC7857A680871BEEA49 /* RepControl.swift */,
@@ -121,6 +132,9 @@
 		00B7138305DB7E908846968E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				B56359319D3EF2A90354C8A3 /* Audio.swift */,
+				AB45F7318157028E123837CC /* Deck.swift */,
+				896971FECE671753F440F58F /* Cards.swift */,
 				C9F4A6E3E6711B5CDB4486F1 /* Haptics.swift */,
 				27CD28D350DC22D16F2B0A42 /* WorkoutSession.swift */,
 				737FCE27438C9AA2B24A980F /* History.swift */,
@@ -190,6 +204,7 @@
 		700C5D5653C9430A5CEB2639 /* MorningTests */ = {
 			isa = PBXGroup;
 			children = (
+				E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */,
 				89D71EDE641A6F0A47E51CC1 /* Acceptance */,
 				8A1CF54A97E2376043A0519E /* Fixtures */,
 				D1080058719588931D5EC886 /* Support */,
@@ -363,6 +378,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88E70088BB8FFC282137A2FD /* RestScreen.swift in Sources */,
+				21C8E85EF7883D0892480846 /* Audio.swift in Sources */,
+				F931E872C9CD5A79F428A21F /* Deck.swift in Sources */,
+				61246B97184D35D802FC0D9E /* Cards.swift in Sources */,
 				2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */,
 				B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */,
 				5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */,
@@ -393,6 +412,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E872A9E953257A1010305C73 /* DuckWindowTests.swift in Sources */,
 				8CF93CAE58C61E7A2851AA9B /* CelebrationAcceptanceTests.swift in Sources */,
 				46EFBD6F3C41E0C542DAB648 /* DataAcceptanceTests.swift in Sources */,
 				7577405680D7386411BCF700 /* GoldenSteps.swift in Sources */,

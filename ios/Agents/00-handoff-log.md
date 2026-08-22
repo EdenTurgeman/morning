@@ -55,6 +55,47 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W5 Rest and the study deck · Claude Opus 5
+
+**Workstream:** W5 — Rest screen and study deck (done). W4 merged.
+
+**What I did**
+- `Model/Cards.swift`, `Model/Deck.swift` — the 26 cards and the rotation.
+  All seven `StudyDeckAcceptanceTests` pass.
+- `Model/Audio.swift` — the six cues, synthesised, and the audio session.
+- `Screens/RestScreen.swift` — countdown, next exercise, `+15s` / `Skip`, and
+  the study card whose reveal halves the timer and takes its space.
+- Wired Rest into `WorkoutHost` and **removed the rest-skipping** the previous
+  handoff flagged. Added `-step` so any step can be reached.
+- `isIdleTimerDisabled` held for the session and released on end, abandon and
+  completion.
+
+**Decisions taken**
+- The audio session is activated around cues and deactivated after, never held
+  for the workout. `DuckWindow` is a separate type so the one-duck rule can be
+  tested without a device.
+- The card is drawn on step CHANGE, never inside `body`.
+- No ring-switch question for Eden: `technical-decisions.md` already records
+  that he chose countdown reliability over the silent switch.
+
+**Landmines**
+- **Mutating `@State` from a computed property read during `body` silently does
+  nothing.** The card was drawn that way and never appeared, and there was no
+  error — just no card. If something renders as absent rather than wrong, look
+  for a write during view update.
+- **I asserted card rest indices from arithmetic I did in my head and was
+  wrong** — [6, 12] rather than the real [6, 15], because both sessions have
+  seven long rests, not six. The exact indices are now asserted, so the next
+  change to the fraction maths fails a test instead of silently moving a card.
+- Music ducking is implemented and **unheard**. No device, and nothing else
+  playing on the simulator.
+- `RestScreen` fires countdown cues from `onChange` of the displayed second. If
+  the view is ever not on screen while a timer runs, they will not fire.
+
+**Assertions:** 38 of 58 passing (20 skipped, 0 failures)
+
+**Next:** W6 — Home and the week. Its gate (W5) is now met.
+
 ## 2026-08-22 · W4 the Set screen · Claude Opus 5
 
 **Workstream:** W4 — The Set screen (done). W3 merged.

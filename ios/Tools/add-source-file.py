@@ -2,6 +2,7 @@
 """Add Swift source files to Morning.xcodeproj.
 
     ios/Tools/add-source-file.py Morning/Design/Tokens.swift [...]
+    ios/Tools/add-source-file.py --test MorningTests/FooTests.swift
 
 `Morning.xcodeproj` is a plain committed project using classic file references
 rather than synchronized folder groups, so a file on disk is invisible to the
@@ -19,12 +20,28 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PBXPROJ = ROOT / "Morning.xcodeproj" / "project.pbxproj"
-TARGET_GROUP = "Morning"
+APP_GROUP = "Morning"
+TEST_GROUP = "MorningTests"
 
 
 def oid(*parts: str) -> str:
     """A stable 24-hex-character object id, derived from the path."""
     return hashlib.sha1("::".join(parts).encode()).hexdigest()[:24].upper()
+
+
+def sources_phase_index(text: str, test_target: bool) -> int:
+    """Where to insert into the Sources build phase.
+
+    There are two: the app target's, then the test target's. Picking the wrong
+    one compiles a test into the app, or an app file into the tests.
+    """
+    phases = [
+        m.end()
+        for m in re.finditer(r"isa = PBXSourcesBuildPhase;\n\t\t\tbuildActionMask = \d+;\n\t\t\tfiles = \(\n", text)
+    ]
+    if len(phases) < 2:
+        raise SystemExit(f"expected two Sources build phases, found {len(phases)}")
+    return phases[1] if test_target else phases[0]
 
 
 def find_group_block(text: str, name: str) -> tuple[int, int]:
@@ -40,7 +57,7 @@ def find_group_block(text: str, name: str) -> tuple[int, int]:
     raise SystemExit(f"could not find PBXGroup with path = {name};")
 
 
-def ensure_group(text: str, name: str, parent: str = TARGET_GROUP) -> str:
+def ensure_group(text: str, name: str, parent: str = APP_GROUP) -> str:
     """Create a PBXGroup for `name` under `parent` if it does not exist yet.
 
     A new directory on disk is invisible to Xcode until a group declares it,
@@ -69,7 +86,7 @@ def ensure_group(text: str, name: str, parent: str = TARGET_GROUP) -> str:
     return text
 
 
-def add(text: str, rel: str) -> str:
+def add(text: str, rel: str, test_target: bool = False) -> str:
     path = Path(rel)
     if path.name in text and f"path = {path.name};" in text:
         print(f"  already present: {rel}")
@@ -96,30 +113,32 @@ def add(text: str, rel: str) -> str:
     text = text.replace(anchor, anchor + entry, 1)
 
     # 3. Group membership.
-    start, _ = find_group_block(text, path.parent.name or TARGET_GROUP)
+    default_group = TEST_GROUP if test_target else APP_GROUP
+    start, _ = find_group_block(text, path.parent.name or default_group)
     text = text[:start] + f"\t\t\t\t{file_id} /* {name} */,\n" + text[start:]
 
-    # 4. Sources build phase.
-    match = re.search(r"isa = PBXSourcesBuildPhase;.*?files = \(\n", text, re.S)
-    if not match:
-        raise SystemExit("could not find the Sources build phase")
-    text = text[: match.end()] + f"\t\t\t\t{build_id} /* {name} in Sources */,\n" + text[match.end() :]
+    # 4. Sources build phase — the right one of the two.
+    insert = sources_phase_index(text, test_target)
+    text = text[:insert] + f"\t\t\t\t{build_id} /* {name} in Sources */,\n" + text[insert:]
 
     print(f"  added: {rel}")
     return text
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
+    args = [a for a in sys.argv[1:] if a != "--test"]
+    test_target = "--test" in sys.argv
+    if not args:
         raise SystemExit(__doc__)
     text = PBXPROJ.read_text()
-    for rel in sys.argv[1:]:
+    for rel in args:
         if not (ROOT / rel).exists():
             raise SystemExit(f"no such file on disk: ios/{rel}")
+        default_group = TEST_GROUP if test_target else APP_GROUP
         parent = Path(rel).parent.name
-        if parent and parent != TARGET_GROUP:
-            text = ensure_group(text, parent)
-        text = add(text, rel)
+        if parent and parent != default_group:
+            text = ensure_group(text, parent, default_group)
+        text = add(text, rel, test_target)
     PBXPROJ.write_text(text)
     print(f"wrote {PBXPROJ.relative_to(ROOT.parent)}")
 

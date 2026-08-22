@@ -285,7 +285,7 @@ On the real screen it delivered 5.98:1 against a 6.6:1 floor. Now 0.72.
 
 ---
 
-## W5 · The Rest screen and the study deck — `todo`
+## W5 · The Rest screen and the study deck — `done`
 
 **Gate:** W4 done.
 
@@ -302,8 +302,10 @@ On the real screen it delivered 5.98:1 against a 6.6:1 floor. Now 0.72.
   "working, and not letting me play music". `05-platform.md §3`.
 - The six cues, per the table in `05-platform.md §3`. The count-in ascends on
   purpose.
-- **Ask Eden** whether the countdown should respect the ring switch or override
-  it. `05-platform.md §3` says to ask rather than decide.
+- ~~**Ask Eden** whether the countdown should respect the ring switch or override
+  it.~~ Already answered: `technical-decisions.md` records that Eden chose
+  countdown reliability and music ducking over respecting the silent switch, so
+  the session is `.playback`.
 - The study deck, `04-rules.md §6`. Two cards per session on rests plus one on
   the summary. Only on rests ≥ 45s. **Never on the 20-second myo rest** — that
   rest *is* the training stimulus. Not on the first long rest. Drawn without
@@ -316,6 +318,17 @@ On the real screen it delivered 5.98:1 against a 6.6:1 floor. Now 0.72.
 
 **Done when:** 33 of 53 pass, and on a real phone music from another app ducks
 once at five seconds and returns after zero.
+
+**Closed 2026-08-22.** 38 of 58 pass (four non-acceptance tests were added for
+the duck window), 0 failures. All seven `StudyDeckAcceptanceTests` pass.
+
+**The ducking half could not be closed here.** No physical iPhone has ever been
+connected to this clone, and the simulator has no other app playing music. What
+was done instead: `DuckWindow` is a separate, testable type holding the rule
+that turns six countdown cues into one duck, and `DuckWindowTests` asserts the
+session is never released between ticks and is released promptly after zero.
+That is the logic; the sensation still needs the phone, and it is on the W11
+list.
 
 **Kickoff prompt**
 

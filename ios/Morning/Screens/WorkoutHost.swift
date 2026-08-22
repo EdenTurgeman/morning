@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /* ===========================================================================
  *  RUNNING THE REAL SCREENS
@@ -30,12 +31,18 @@ struct WorkoutHost: View {
     /// state machine is covered by the acceptance tests; this is how the SCREEN
     /// for that state gets looked at and measured.
     private let repsOverride: Int?
+    /// `-step 2` lands on any step, rests included.
+    private let stepOverride: Int?
+
+    @State private var cardRests: Set<Int> = []
+    @State private var drawnCards: [Int: Card] = [:]
 
     init(
         sessionKey: String? = nil,
         progressOverride: Double? = nil,
         slot: String? = nil,
-        reps: Int? = nil
+        reps: Int? = nil,
+        step: Int? = nil
     ) {
         let store = Store()
         let history = store.load().history
@@ -51,11 +58,26 @@ struct WorkoutHost: View {
         self.progressOverride = progressOverride
         slotOverride = slot
         repsOverride = reps
+        stepOverride = step
     }
 
     var body: some View {
         Group {
-            if let set = session.currentSet {
+            if case let .rest(rest) = session.currentStep, let endsAt = session.endsAt {
+                RestScreen(
+                    seconds: rest.seconds,
+                    endsAt: endsAt,
+                    progress: progressOverride ?? sessionProgress,
+                    stepLabel: "Rest",
+                    next: session.upcomingSet,
+                    card: drawnCards[session.stepIndex],
+                    isMyo: rest.seconds < Deck.minimumRestForCard,
+                    onExtend: { session.extendRest(by: 15) },
+                    onSkip: { session.skipRest() },
+                    onBack: { session.back() },
+                    onEnd: endSession
+                )
+            } else if let set = session.currentSet {
                 SetScreen(
                     setStep: set,
                     progress: progressOverride ?? sessionProgress,
@@ -66,20 +88,25 @@ struct WorkoutHost: View {
                     isComparable: session.previousIsComparable,
                     isBeating: session.isBeatingPrevious,
                     onAdjust: { session.adjustReps(by: $0) },
-                    onLog: advanceToNextSet,
+                    onLog: { session.advance() },
                     onBack: { session.back() },
-                    onEnd: { session.abandon() }
+                    onEnd: endSession
                 )
             } else {
-                waitingForRest
+                sessionEnded
             }
         }
         .onAppear {
             Haptics.shared.prewarm()
+            // The screen must not sleep mid-set. Released on end or abandon.
+            UIApplication.shared.isIdleTimerDisabled = true
+            cardRests = Set(Deck.cardRestIndices(in: session.steps))
             // Step 0 is the warm-up timer — a screen W5 owns and the brief
             // calls the least important in the app. Until it exists, start on
             // the first set rather than on a step this host cannot render.
-            if let slotOverride {
+            if let stepOverride {
+                session.go(toStep: stepOverride)
+            } else if let slotOverride {
                 session.go(toSlot: slotOverride)
             } else if session.currentSet == nil, !session.isAtEnd {
                 session.goToFirstSet()
@@ -87,6 +114,10 @@ struct WorkoutHost: View {
             if let repsOverride {
                 session.adjustReps(by: repsOverride - session.draftReps)
             }
+            drawCardIfNeeded()
+        }
+        .onChange(of: session.stepIndex) { _, _ in
+            drawCardIfNeeded()
         }
     }
 
@@ -107,25 +138,41 @@ struct WorkoutHost: View {
         session.steps[(session.stepIndex + 1)...].compactMap(\.asSet).count
     }
 
-    /// Until W5 builds Rest, logging a set walks past the rest to the next one
-    /// rather than showing a screen that does not exist yet.
-    private func advanceToNextSet() {
-        session.advance()
-        while session.currentSet == nil, !session.isAtEnd {
-            session.advance()
-        }
+    /// Rests carry a card at the two indices the deck chose for this session.
+    ///
+    /// Drawn when the step CHANGES, never inside `body`. A computed property
+    /// that draws on read looks tidy and is wrong twice over: SwiftUI discards
+    /// state written during a view update, and a re-render would deal a second
+    /// card halfway through reading the first.
+    private func drawCardIfNeeded() {
+        let index = session.stepIndex
+        guard cardRests.contains(index), drawnCards[index] == nil else { return }
+        drawnCards[index] = Deck.draw()
     }
 
-    private var waitingForRest: some View {
+    private func endSession() {
+        session.abandon()
+        Audio.shared.stop()
+        UIApplication.shared.isIdleTimerDisabled = false
+    }
+
+    private var sessionEnded: some View {
         VStack(spacing: Space.step) {
             Text("Session complete")
                 .font(TypeScale.title)
                 .foregroundStyle(Ink.primary)
-            Text("Rest, Summary and Daybreak are W5 and W7.")
+            Text("Summary and Daybreak are W7.")
                 .font(TypeScale.body)
                 .foregroundStyle(Ink.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(DawnBackdrop(treatment: .atmospheric, progress: 1))
+        .onAppear {
+            // The screen may sleep again, and the music may come back. Holding
+            // either past the end of the session is a bug the user feels as a
+            // hot phone and silent headphones.
+            UIApplication.shared.isIdleTimerDisabled = false
+            Audio.shared.stop()
+        }
     }
 }

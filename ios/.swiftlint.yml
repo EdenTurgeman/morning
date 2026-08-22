@@ -55,7 +55,9 @@ cyclomatic_complexity:
 
 identifier_name:
   min_length: 2
-  excluded: [i, n, v, x, y, t, d, s, kg, id, of, up] # v/d/s/ts are the web schema's field names
+  # v/d/s/ts are the web schema's field names; q/a are cards.json's. Both are
+  # storage contracts and not ours to tidy up — see Schema.swift's header.
+  excluded: [i, n, v, x, y, t, d, s, q, a, kg, id, of, up]
 
 nesting:
   type_level: 3
