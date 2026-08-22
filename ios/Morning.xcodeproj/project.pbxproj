@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CCC3A6B48EFB844BF5C818EE /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737FCE27438C9AA2B24A980F /* History.swift */; };
+		4C644F76FF8A5C826BA047EF /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F23D61545A1318F65A8DD9 /* Store.swift */; };
+		45FF53B0526178752B17ED99 /* Plates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1685DFF5DE6DD054341D343F /* Plates.swift */; };
+		88416984302497CA2081C1A8 /* Steps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B89F48A9013790D8F46EBC0 /* Steps.swift */; };
 		1B3A0952856AB0FC5F592069 /* PrototypeFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */; };
 		BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */; };
 		50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149EF8C3DBE09E7D14729069 /* DesignMotion.swift */; };
@@ -52,6 +56,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		737FCE27438C9AA2B24A980F /* History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
+		55F23D61545A1318F65A8DD9 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		1685DFF5DE6DD054341D343F /* Plates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plates.swift; sourceTree = "<group>"; };
+		2B89F48A9013790D8F46EBC0 /* Steps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Steps.swift; sourceTree = "<group>"; };
 		46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeFigure.swift; sourceTree = "<group>"; };
 		FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignHaptics.swift; sourceTree = "<group>"; };
 		149EF8C3DBE09E7D14729069 /* DesignMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignMotion.swift; sourceTree = "<group>"; };
@@ -93,6 +101,10 @@
 		00B7138305DB7E908846968E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				737FCE27438C9AA2B24A980F /* History.swift */,
+				55F23D61545A1318F65A8DD9 /* Store.swift */,
+				1685DFF5DE6DD054341D343F /* Plates.swift */,
+				2B89F48A9013790D8F46EBC0 /* Steps.swift */,
 				86CB16627879A20064744804 /* Schema.swift */,
 			);
 			path = Model;
@@ -328,6 +340,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCC3A6B48EFB844BF5C818EE /* History.swift in Sources */,
+				4C644F76FF8A5C826BA047EF /* Store.swift in Sources */,
+				45FF53B0526178752B17ED99 /* Plates.swift in Sources */,
+				88416984302497CA2081C1A8 /* Steps.swift in Sources */,
 				1B3A0952856AB0FC5F592069 /* PrototypeFigure.swift in Sources */,
 				BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */,
 				50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */,

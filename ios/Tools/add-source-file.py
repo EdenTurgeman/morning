@@ -55,12 +55,14 @@ def add(text: str, rel: str) -> str:
     entry = f"\t\t{build_id} /* {name} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_id} /* {name} */; }};\n"
     text = text.replace(anchor, anchor + entry, 1)
 
-    # 2. PBXFileReference. `path` stays relative to the owning group.
+    # 2. PBXFileReference. `path` is relative to the OWNING GROUP, and the group
+    #    is looked up by the file's parent directory below — so the group already
+    #    carries the directory and the reference must carry only the filename.
+    #    Writing "Model/Steps.swift" here resolves to Morning/Model/Model/Steps.swift.
     anchor = "/* Begin PBXFileReference section */\n"
-    group_relative = path.name if path.parent.name in ("", TARGET_GROUP) else str(path).split("/", 1)[-1]
     entry = (
         f"\t\t{file_id} /* {name} */ = {{isa = PBXFileReference; "
-        f"lastKnownFileType = sourcecode.swift; path = {group_relative}; sourceTree = \"<group>\"; }};\n"
+        f"lastKnownFileType = sourcecode.swift; path = {name}; sourceTree = \"<group>\"; }};\n"
     )
     text = text.replace(anchor, anchor + entry, 1)
 

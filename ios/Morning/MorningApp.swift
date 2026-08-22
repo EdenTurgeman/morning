@@ -20,11 +20,40 @@ import SwiftUI
 
 @main
 struct MorningApp: App {
+    init() {
+        Self.applySeedIfRequested()
+    }
+
     var body: some Scene {
         WindowGroup {
             PrototypeLabView()
                 .preferredColorScheme(.dark) // used before sunrise; dark by default
         }
+    }
+
+    /// `-seed six-months` replaces the stored history with a fixture, so the
+    /// screens that read history can be reviewed at empty, one week and six
+    /// months without logging six months of workouts.
+    ///
+    /// `06-data.md §2`: *"You cannot design the Ledger, the year grid or the
+    /// history list against nothing, and you should not design them against
+    /// three sessions either."*
+    private static func applySeedIfRequested() {
+        #if DEBUG
+            guard let seed = Seed.fromLaunchArguments else { return }
+            guard let data = seed.load() else {
+                assertionFailure("seed \(seed.rawValue) failed to load")
+                return
+            }
+            do {
+                try Store().save(data)
+                try Store().saveInProgress(nil)
+            } catch {
+                // Surfaced rather than swallowed even here: a seeder that
+                // silently did nothing sends you looking for a bug in the screen.
+                assertionFailure("seeding failed: \(error.localizedDescription)")
+            }
+        #endif
     }
 }
 

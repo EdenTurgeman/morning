@@ -74,10 +74,17 @@ rule "Environment"
 
 run "bootstrap"        ./scripts/bootstrap.sh
 run "build"            xcodebuild build -project ios/Morning.xcodeproj -scheme Morning -destination "$DEST" -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO
+# TEST_RUNNER_-prefixed variables reach the test process as plain env vars, but
+# only when they are in xcodebuild's ENVIRONMENT. Passed as an argument they
+# become a build setting and the test never sees them.
+EXPORT_CHECK="$ROOT/ios/build/export-check.json"
+rm -f "$EXPORT_CHECK"
+export TEST_RUNNER_MORNING_EXPORT_PATH="$EXPORT_CHECK"
 run "test"             xcodebuild test  -project ios/Morning.xcodeproj -scheme Morning -destination "$DEST" -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO
 run "swiftlint"        bash -c 'cd ios && swiftlint lint --config .swiftlint.yml'
 run "swiftformat"      bash -c 'cd ios && swiftformat --lint --config .swiftformat .'
 run "generators"       bash -c 'node ios/Tools/gen-seeds.mjs 2026-08-21 >/dev/null && git diff --quiet -- ios/Morning/Resources/Seeds && echo "seed generator is reproducible"'
+run "export format"    bash -c 'f="ios/build/export-check.json"; if [[ -f "$f" ]]; then node --import ./scripts/alias-hook.mjs scripts/verify-export.ts "$f"; else echo "the test run wrote no export to check" >&2; exit 1; fi'
 
 rule "Acceptance suite"
 say "assertions:       $(grep -rho 'func test[A-Z]' ios/MorningTests/Acceptance/ | wc -l | tr -d ' ')"

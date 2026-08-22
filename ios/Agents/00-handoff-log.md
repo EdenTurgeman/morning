@@ -55,6 +55,59 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W3 foundations and the acceptance suite · Claude Opus 5
+
+**Workstream:** W3 — Foundations and the acceptance suite (done). W1 and W2 merged.
+
+**What I did**
+- Ported `src/lib/steps.ts` and `src/lib/plates.ts` as reasoning, not code.
+  `Model/Steps.swift`, `Model/Plates.swift`.
+- Implemented all 10 `ProgramCompilerAcceptanceTests` against the **whole**
+  golden fixture rather than the counts. A compiles to exactly 21 steps and B to
+  25, every field matching, slot ids identical and unique.
+- Implemented persistence: `Model/Store.swift`, atomic writes to Application
+  Support, a separate in-progress file, and every write able to throw. Reads are
+  lenient, writes are loud — that asymmetry is deliberate.
+- Added `Model/History.swift` for the derived reads: previous-same-set lookup
+  that returns the WEIGHT alongside the reps, load resolution that falls back
+  without backfilling, and local dates parsed at noon.
+- Implemented 8 of 10 `DataAcceptanceTests`; the two `testPhase2` stay skipped.
+- **Automated the Restore-box check.** `scripts/verify-export.ts` imports the
+  real `parseData` from the web source and runs a genuine iOS export through it.
+  Verified it fails on a deliberately corrupted export.
+- Wired `-seed`, and confirmed all five fixtures land in Application Support
+  with the right record counts.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Test classes are `@MainActor`. The app module builds with
+  `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, which is correct for a
+  single-user app; running the tests there is honest, and scattering
+  `nonisolated` through `Program.swift` to satisfy a test target is not.
+- Three data tests whose subject is a screen assert the data that screen rests
+  on, with a comment naming the workstream that owns the rest. A skip would
+  have hidden a regression that a wrong number would not.
+- `previousSet` returns the weight, not just the reps, because the caller cannot
+  decide whether it is a target without it.
+
+**Landmines**
+- **`TEST_RUNNER_`-prefixed variables must be in xcodebuild's ENVIRONMENT.**
+  Passed as an argument they become a build setting and the test never sees
+  them — the export check silently skipped for two runs before I noticed the
+  message was the old one.
+- `NSTemporaryDirectory()` inside the simulator is in its own container. Any
+  file a test hands to a host-side script needs an explicit path passed in.
+- `add-source-file.py` double-nested subgroup paths (`Morning/Model/Model/…`).
+  Fixed — the group carries the directory, the reference carries the filename.
+- `Seed.load()` reads `Bundle.main`, which is the test bundle under XCTest. The
+  data tests fall back to `Bundle(for:)` and then `Bundle.main`.
+- The `-seed` seeder writes on launch and the prototype lab does not read it
+  yet. Nothing consumes seeded history until W4/W6.
+
+**Assertions:** 18 of 53 passing (35 skipped, 0 failures)
+
+**Next:** W4 — the Set screen, on the W2 tokens. Its gate (W2 and W3) is now met.
+
 ## 2026-08-22 · W2 design system · Claude Opus 5
 
 **Workstream:** W2 — Design system (done). W1 closed.

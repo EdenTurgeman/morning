@@ -163,7 +163,7 @@ previously missing and is now wired to every rest timer.
 
 ---
 
-## W3 · Foundations and the acceptance suite — `todo`
+## W3 · Foundations and the acceptance suite — `done`
 
 **Gate:** W0 done. Can run before or after W1/W2 — it touches no UI.
 
@@ -188,6 +188,19 @@ as a wrong number six weeks from now."*
 
 **Done when:** 18 of 53 assertions pass, `-seed` works for all five fixtures, and
 an export from the app parses in the web app's Restore box.
+
+**Closed 2026-08-22.** 18 of 53 pass, 35 skipped, 0 failures. All five seeds
+land in Application Support with the right record counts (0 / 1 / 5 / 125 / 285).
+
+The Restore-box check is **no longer manual**. `scripts/verify-export.ts` imports
+the real `parseData` from `src/lib/storage.ts` — not a copy of its rules — runs a
+genuine iOS export through it, and fails if a single record is dropped or
+altered. `verify-ios.sh` runs it as a phase, so the day the two formats drift, CI
+says so instead of a restore quietly losing history.
+
+Three `DataAcceptanceTests` have a UI half belonging to W4/W6/W7. Those assert
+the data the screen will rest on and say so in a comment, which is worth more
+than a skip: it is the half that can regress silently.
 
 **Kickoff prompt**
 
