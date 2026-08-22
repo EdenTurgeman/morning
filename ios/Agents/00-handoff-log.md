@@ -8,6 +8,53 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · Figures, control boundaries, accessibility verification · Claude Opus 5
+
+**Workstream:** post-W2 refinement on the agreed direction.
+
+**What I did**
+- **Rebuilt the exercise figures as bodies.** The brief notes Eden has flagged
+  the web stick figures twice; the first native pass reproduced the same problem
+  in Swift. `PrototypeFigure.swift` draws the same poses as filled, tapered
+  shapes — limbs thinning toward the extremity with round joints, a torso with a
+  waist that rotates on its own axis, a head on a neck, dumbbells with plates.
+  Pose coordinates and the motion model are unchanged.
+- **Found and fixed a real control defect by measuring the rep control as a
+  *component* rather than as text.** Its boundary read 1.18:1 against WCAG's 3:1
+  floor — a `white 0.07` fill behind a `white 0.1` hairline. The glyph was fine
+  at 9.71:1, so the symbol was doing all the work and the button had no shape.
+  Added `Control` tokens; boundary now 3.51:1, and 4.10:1 on Rest's controls.
+- Took the `−` / `+` glyphs from 34pt medium to 38pt semibold. At 1.5m the old
+  ones were the first thing to disappear.
+- Verified the **Dynamic Type clamp**: medium vs accessibility-extra-extra-
+  extra-large differ by 1.59% of pixels, and that is cloud drift, not text.
+  Workout typography genuinely does not scale, so the no-scroll layout cannot be
+  broken by a text size.
+- Verified **Reduce Transparency**: every text zone holds, weakest 6.98:1.
+- Re-verified the four-cue stress case fits with no scrolling after the larger
+  glyphs and thicker borders.
+- Ran `./scripts/verify-ios.sh`; every phase passes. Opened PR #2.
+
+**Decisions taken**
+- Figures stay deliberately abstract. This is a movement reminder glanced at from
+  1.5m at 6:10am; detail it does not need would compete with the rep counter.
+- Control surfaces stay quiet (~1.3:1 against the sky) and the **boundary**
+  carries the contrast. The design goal was "quiet", not "invisible".
+
+**Landmines**
+- **The bay is wide and short, so a normalised x offset is worth far fewer
+  points than the same number in y.** A stance that looked hip-width in
+  coordinates rendered as two fused legs. Every figure width now derives from
+  `size.height`. Anyone editing poses will hit this.
+- The text-contrast harness passed the rep control for its entire life. **Text
+  measurement does not cover components**; boundaries need measuring separately.
+- The exercise → figure mapping is still keyed off the exercise *name* string.
+  It must grow with the real program in W4.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
+
 ## 2026-08-22 · W2 design system · Claude Opus 5
 
 **Workstream:** W2 — Design system (done). W1 closed.
