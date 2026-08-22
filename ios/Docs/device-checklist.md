@@ -23,6 +23,10 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] The screen never sleeps mid-session.
 - [ ] 120Hz with no dropped frames while a timer runs.
 - [ ] Reduce Motion produces a **calmer** app, not a broken one.
+      Partly verified in the simulator: the Set↔Rest swap collapses from ~0.45s
+      to ~0.2s and the sky stops drifting. **Daybreak, the rep control and the
+      celebration choreography are still unlooked-at under Reduce Motion** —
+      those are what to actually watch for here.
 - [ ] A full session of A and a full session of B, start to finish, zero glitches.
 - [ ] Then do it again for real at 6am. **That is the only test that actually
       counts.**
@@ -120,6 +124,40 @@ frames and every one clears the floor — but none of that says whether a
 full-width bright bar is comfortable or punishing in a dark room at 6:10am with
 auto-brightness near minimum. Look at it, in the dark, and say.
 
+### The dip between Set and Rest
+
+The swap fades the outgoing screen's furniture out before the incoming screen's
+fades in, so the two never stack legibly. That costs a dip in overall
+brightness — measured on a 60fps capture, mean luminance goes 50 → 22 → 40 over
+about 0.45s, with the sky held continuous underneath so nothing blinks.
+
+On a measurement that reads as a breath. On an OLED at 6:10am with
+auto-brightness near minimum it might read as a flicker, and it happens on every
+set — 25+ times a session. If it does, the fix is a wider overlap in
+`Motion.screenSwap`, at the cost of some mush. Look at it and say.
+
+### Reading motion without a Simulator UI
+
+`ios/Tools/frames.swift` pulls exact frames out of a `simctl` recording:
+
+```bash
+xcrun simctl io <udid> recordVideo --codec=h264 --force rec.mp4 &
+xcrun simctl launch --terminate-running-process <udid> com.edenturgeman.morning -screen set -autoplay
+# …then
+swift ios/Tools/frames.swift rec.mp4 outdir 4.45 4.50 4.55
+```
+
+Do **not** review motion with backgrounded `simctl io screenshot` calls. Each
+takes about half a second to start, so six of them "0.1s apart" land wherever
+they land — usually all on the same frame, which looks exactly like a broken
+animation.
+
+Reduce Motion can be toggled headlessly, and the app picks it up on next launch:
+
+```bash
+xcrun simctl spawn <udid> defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
+```
+
 ### 120Hz
 
 The app opts into ProMotion (`CADisableMinimumFrameDurationOnPhone` in the built
@@ -139,6 +177,9 @@ Being explicit, because "it built and the tests pass" is not the same thing:
   `Simulator.app`, only the headless runtime, so every screen was reached by
   launch argument. Buttons, the rep control's hold-to-repeat, sheets, the file
   picker and every confirmation dialog are untested by anything but the eye.
+  `-autoplay` is the one exception and it is a stand-in: it advances one step
+  1.4s after launch so the Set→Rest transition can be recorded. It proves the
+  transition, not the button.
 - **No haptic has been felt and no cue has been heard.**
 - Restore and Erase have never been run. The export *format* is checked on every
   CI run against the web app's own parser; the pickers around it are not.

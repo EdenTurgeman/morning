@@ -40,6 +40,7 @@ struct RestScreen: View {
     let next: SetStep?
     let card: Card?
     let isMyo: Bool
+    let namespace: Namespace.ID
 
     let onExtend: () -> Void
     let onSkip: () -> Void
@@ -66,7 +67,8 @@ struct RestScreen: View {
                     remaining: remaining,
                     total: Double(seconds),
                     compact: card != nil && revealed,
-                    accent: palette.accent
+                    accent: palette.accent,
+                    namespace: namespace
                 )
                 .onChange(of: Int(ceil(remaining))) { _, value in
                     speak(secondsLeft: value)
@@ -112,7 +114,7 @@ struct RestScreen: View {
         }
         .padding(.horizontal, Space.gutter)
         .safeAreaPadding(.bottom, Space.snug)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: progress))
+        // The sky is hoisted to `WorkoutHost`. See `SetScreen`.
         .dynamicTypeSize(.large)
         .task(id: endsAt) {
             revealed = false
@@ -156,6 +158,7 @@ private struct RestTimer: View {
     let total: Double
     let compact: Bool
     let accent: Color
+    let namespace: Namespace.ID
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -191,6 +194,7 @@ private struct RestTimer: View {
             }
         }
         .frame(width: size, height: size)
+        .matchedGeometryEffect(id: WorkObject.id, in: namespace)
         .animation(Motion.timerResize(reduceMotion: reduceMotion), value: compact)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(Int(ceil(remaining))) seconds remaining")

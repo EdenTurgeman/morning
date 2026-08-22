@@ -40,6 +40,31 @@ enum Motion {
         reduceMotion ? .linear(duration: 0.12) : .easeInOut(duration: 0.44)
     }
 
+    /// How a screen leaves and how the next one arrives.
+    ///
+    /// A symmetric cross-fade was the first attempt and it was wrong. Measured
+    /// off a 60fps capture, both screens sat near half opacity for ~0.2s, which
+    /// put the Set screen's cues and Done button directly on top of the Rest
+    /// screen's "+15s / Skip" and next-up label. Legible content on legible
+    /// content reads as neither.
+    ///
+    /// So: out fast, in late, with only a narrow window where both exist. That
+    /// window is deliberate rather than zero — the work object crosses it, and
+    /// the counter becoming the ring is the one continuity worth protecting.
+    /// A hard cut there would turn a morph back into a swap.
+    ///
+    /// Under Reduce Motion the geometry no longer travels, so a plain fade is
+    /// the calmer answer rather than a degraded version of this one.
+    static func screenSwap(reduceMotion: Bool) -> AnyTransition {
+        if reduceMotion {
+            return .opacity.animation(.linear(duration: 0.12))
+        }
+        return .asymmetric(
+            insertion: .opacity.animation(.easeIn(duration: 0.30).delay(0.04)),
+            removal: .opacity.animation(.easeOut(duration: 0.24))
+        )
+    }
+
     // MARK: Motion that is the point
 
     /// The study card's answer arriving. The timer yields its space to the

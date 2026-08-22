@@ -25,12 +25,26 @@ import SwiftUI
  *    a perfectly healthy 9.71:1. The symbol was doing all the work.
  * ======================================================================== */
 
+/// The one object the workout carries from screen to screen.
+///
+/// `02-design-brief.md §7` asks for `matchedGeometryEffect` so a screen's
+/// content BECOMES the next screen's rather than cross-fading, and the W1
+/// prototype demonstrated it as the counter turning into the rest ring. The
+/// real screens then shipped without it and swapped instantly — this is that
+/// gap closed.
+enum WorkObject {
+    static let id = "work-object"
+}
+
 struct RepControl: View {
     let reps: Int
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
     let accent: Color
+    /// The work object's namespace. The counter is the thing that travels: it
+    /// becomes the rest timer, and the rest timer becomes it again.
+    let namespace: Namespace.ID
     /// Reports a delta. Never an absolute — see the header.
     let onAdjust: (Int) -> Void
 
@@ -69,6 +83,7 @@ struct RepControl: View {
             .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: direction < 0))
             .foregroundStyle(isBeating ? Semantic.threshold : Ink.primary)
             .frame(minWidth: 150)
+            .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: reps)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: isBeating)
             .accessibilityLabel("\(reps) reps")

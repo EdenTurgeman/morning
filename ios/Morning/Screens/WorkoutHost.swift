@@ -17,6 +17,7 @@ import UIKit
  * ======================================================================== */
 
 struct WorkoutHost: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State var session: WorkoutSession
     private let progressOverride: Double?
     /// `-slot 4.0.0` lands on one specific set. The worst content in the
@@ -33,6 +34,10 @@ struct WorkoutHost: View {
     private let repsOverride: Int?
     /// `-step 2` lands on any step, rests included.
     private let stepOverride: Int?
+
+    /// The namespace the work object travels in. One per host, so the counter
+    /// and the timer are the same object to SwiftUI.
+    @Namespace private var workObject
 
     @State private var cardRests: Set<Int> = []
     @State private var drawnCards: [Int: Card] = [:]
@@ -71,11 +76,13 @@ struct WorkoutHost: View {
                     next: session.upcomingSet,
                     card: drawnCards[session.stepIndex],
                     isMyo: rest.seconds < Deck.minimumRestForCard,
+                    namespace: workObject,
                     onExtend: { session.extendRest(by: 15) },
-                    onSkip: { session.skipRest() },
-                    onBack: { session.back() },
+                    onSkip: { advance { session.skipRest() } },
+                    onBack: { advance { session.back() } },
                     onEnd: endSession
                 )
+                .transition(Motion.screenSwap(reduceMotion: reduceMotion))
             } else if let set = session.currentSet {
                 SetScreen(
                     setStep: set,
@@ -86,15 +93,21 @@ struct WorkoutHost: View {
                     previous: session.previous,
                     isComparable: session.previousIsComparable,
                     isBeating: session.isBeatingPrevious,
+                    namespace: workObject,
                     onAdjust: { session.adjustReps(by: $0) },
                     onLog: logSet,
-                    onBack: { session.back() },
+                    onBack: { advance { session.back() } },
                     onEnd: endSession
                 )
+                .transition(Motion.screenSwap(reduceMotion: reduceMotion))
             } else {
                 sessionEnded
             }
         }
+        // One sky, behind everything, for the whole session. Screens fade
+        // across it; it never fades itself. This is also what makes the dawn
+        // read as continuous rather than as a property of the current step.
+        .background(DawnBackdrop(treatment: .atmospheric, progress: progressOverride ?? sessionProgress))
         .onAppear {
             Haptics.shared.prewarm()
             Audio.shared.isEnabled = true
@@ -115,6 +128,17 @@ struct WorkoutHost: View {
                 session.adjustReps(by: repsOverride - session.draftReps)
             }
             drawCardIfNeeded()
+
+            // `-autoplay` advances one step after a beat, so the transition
+            // itself can be captured. No tap reaches this app in the
+            // development environment, and a transition nobody can trigger is
+            // a transition nobody has seen.
+            if ProcessInfo.processInfo.arguments.contains("-autoplay") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.4))
+                    logSet()
+                }
+            }
         }
         .onChange(of: session.stepIndex) { _, _ in
             drawCardIfNeeded()
@@ -150,7 +174,15 @@ struct WorkoutHost: View {
         if session.isAtEnd {
             onFinish()
         } else {
-            session.advance()
+            advance { session.advance() }
+        }
+    }
+
+    /// Every step change goes through here, so the work object travels rather
+    /// than the screen swapping. `Motion.stage` carries its own reduced form.
+    private func advance(_ change: () -> Void) {
+        withAnimation(Motion.stage(reduceMotion: reduceMotion)) {
+            change()
         }
     }
 
@@ -164,6 +196,8 @@ struct WorkoutHost: View {
         onAbandon()
     }
 
+    /// The end of the session, and the only place the screen is allowed to
+    /// sleep again.
     private var sessionEnded: some View {
         VStack(spacing: Space.step) {
             Text("Session complete")
@@ -174,11 +208,12 @@ struct WorkoutHost: View {
                 .foregroundStyle(Ink.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: 1))
         .onAppear {
-            // The screen may sleep again, and the music may come back. Holding
-            // either past the end of the session is a bug the user feels as a
-            // hot phone and silent headphones.
+            // Holding the screen awake or the audio session open past the end
+            // of the session is a bug the user feels as a hot phone and silent
+            // headphones. This ran on the HOST for a while, which meant it
+            // released both immediately on every appear — the screen would
+            // have slept mid-set.
             UIApplication.shared.isIdleTimerDisabled = false
             Audio.shared.stop()
         }

@@ -8,6 +8,77 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · Quality pass — the Set↔Rest transition · Claude Opus 5
+
+**Workstream:** quality pass over W4/W5, on `ios-port/quality-pass`
+
+**What I did**
+- **Built the Set↔Rest transition, which did not exist.** The app swapped the
+  two screens instantly. `02-design-brief.md §7` asks for `matchedGeometryEffect`
+  by name and the W1 prototype had already proved counter→ring continuity; none
+  of it had been wired into the real screens. The rep counter and the rest ring
+  now share `WorkObject.id` in a namespace owned by `WorkoutHost`, and every step
+  change routes through one `advance(_:)` that wraps the mutation in
+  `Motion.stage`.
+- **Hoisted `DawnBackdrop` out of `SetScreen` and `RestScreen` into the host.**
+- **Added `Motion.screenSwap`,** an asymmetric fade replacing the default
+  cross-fade.
+- **Found and fixed a stray duplicate `.onAppear` on `WorkoutHost`** that set
+  `isIdleTimerDisabled = false` and called `Audio.shared.stop()` immediately on
+  arrival. The screen would have slept mid-session and the cues would have been
+  silent. Moved to `sessionEnded`. This is exactly the bug the device checklist
+  lists as "the screen never sleeps mid-session" — it would have failed, on the
+  phone, at 6am, and nothing in the simulator would ever have shown it.
+- **Added `ios/Tools/frames.swift`** and `-autoplay`.
+- **Verified Reduce Motion for the first time.**
+
+**Decisions taken**
+- **Motion is now reviewed off video, not screenshots.** Backgrounded
+  `simctl io screenshot` calls each take ~0.5s to start, so their timestamps
+  drift past whatever you are trying to catch — six of them "0.1s apart" landed
+  on six identical frames and I spent a while believing the transition was
+  broken when it was the capture that was. `simctl io recordVideo` plus
+  `AVAssetImageGenerator` with zero tolerance gives exact frames at exact times.
+  There is no ffmpeg on this machine and none is needed.
+- **The transition was tuned against two measurements, not taste.** Consecutive
+  frame difference locates it; mean luminance across it catches the failure a
+  contact strip hides. Three versions:
+
+  | Version | Furniture | Mean luma across the swap |
+  |---|---|---|
+  | Symmetric cross-fade | both screens legible at ~50% for 0.2s — mush | — |
+  | Fade-through, sky per-screen | clean | **47 → 7 → 40. A blackout.** |
+  | Fade-through, sky hoisted | clean | 50 → 22 → 40. A breath. |
+
+  The middle row is why the sky moved to the host. Fading the furniture is
+  right; fading the sky with it made the whole display blink 25+ times a
+  session.
+- **The overlap window is deliberate, not sloppy.** Zero overlap reads as a cut
+  and kills the morph — the counter has to still be there when the ring starts.
+  Insertion is delayed 0.04s over 0.30s against a 0.24s removal: enough
+  separation that the cues and buttons never stack legibly, enough overlap that
+  14 becomes 60 in one motion.
+
+**Landmines**
+- **`-autoplay` was chained and I did not notice for a while.** I had copied the
+  block into `.onChange(of: session.stepIndex)` as well as `.onAppear`, so each
+  advance scheduled the next and the app walked the session on its own. Fixed —
+  it fires once, from `onAppear`. If a future capture seems to skip a step, look
+  there first.
+- **Reduce Motion is only verified for the swap.** I confirmed the transition
+  collapses from ~0.45s to ~0.2s, and the sky honours it in three places
+  (`PrototypeSky.swift`). Daybreak, the rep control and the celebration
+  choreography under Reduce Motion are still unlooked-at.
+- The luminance dip is 50 → 22. I believe that reads as a breath rather than a
+  flicker, but nobody has seen it on a real display in a dark room. It is on the
+  device checklist now.
+
+**Assertions:** 54 of 56 passing (2 skipped — both device-only)
+
+**Next:** W11 is the device pass and is still blocked on hardware. W12 needs
+Eden's yes per item. Everything else through W10 is merged.
+
+
 ## 2026-08-22 · Figures, control boundaries, accessibility verification · Claude Opus 5
 
 **Workstream:** post-W2 refinement on the agreed direction.
