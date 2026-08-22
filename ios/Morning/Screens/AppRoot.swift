@@ -21,6 +21,9 @@ struct AppRoot: View {
     @State private var data: AppData
     @State private var session: WorkoutSession?
     @State private var saveError: String?
+    /// The session just finished, held so the summary can show it. Cleared when
+    /// the summary is dismissed.
+    @State private var finished: (record: SessionRecord, celebration: Celebration, card: Card?)?
 
     init() {
         let store = Store()
@@ -40,7 +43,15 @@ struct AppRoot: View {
 
     var body: some View {
         Group {
-            if let session {
+            if let finished {
+                SummaryScreen(
+                    record: finished.record,
+                    celebration: finished.celebration,
+                    week: Week.progress(history: data.history),
+                    card: finished.card,
+                    onDone: { self.finished = nil }
+                )
+            } else if let session {
                 WorkoutHost(session: session, onFinish: finish, onAbandon: abandon)
             } else {
                 HomeScreen(
@@ -97,6 +108,15 @@ struct AppRoot: View {
 
         self.session = nil
         release()
+
+        // The celebration is computed from the history WITH this session in it,
+        // because a lifetime threshold fires by diffing the ledger with and
+        // without — it has to be able to see both.
+        finished = (
+            record,
+            Celebrations.forSession(record, history: updated.history),
+            Deck.draw()
+        )
     }
 
     private func abandon() {

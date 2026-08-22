@@ -55,6 +55,48 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W7 Summary, Daybreak and the tiers · Claude Opus 5
+
+**Workstream:** W7 — Summary, Daybreak and celebration tiers (done), plus W9's
+logic. W6 merged.
+
+**What I did**
+- `Model/Ledger.swift` — tonnage, milestones, next threshold. All four
+  `LedgerAcceptanceTests` pass.
+- `Model/Celebration.swift` — the eleven tiers, copy verbatim, priority order
+  from `04-rules.md §5`. All six `CelebrationAcceptanceTests` pass.
+- `Screens/Daybreak.swift` — the web build's choreography, ported beat for beat.
+- `Screens/SummaryScreen.swift`, wired into `AppRoot`.
+- `-screen summary -tier <name>` for review.
+
+**Assertions: 56 of 58.** Only the two `testPhase2` tests remain, and those are
+deliberately out of v1.
+
+**Decisions taken**
+- Daybreak derives every stage from ONE elapsed value off an absolute start
+  date. That is the native equivalent of the web's "CSS keyframes with delays,
+  cannot half-play if a frame is dropped": stages cannot desynchronise when
+  there is only one clock.
+- The completion haptic fires once, at the sun's rise, so its three transients
+  land across the bloom and flash and its swell carries the number in.
+- The summary is mounted UNDER Daybreak, as the web build does, so dismissing
+  the celebration reveals numbers that are already there.
+
+**Landmines**
+- **Two of my own tests were wrong, not the copy.** I asserted an eyebrow must
+  share no words with its headline, which failed "Best A yet" over "A personal
+  best." — the rule is that it must ADD something. And my content-word filter
+  dropped tokens under three characters, concluding "-10 vs your last A" adds
+  nothing to "Down on last time." when the 10 is the entire point. When a
+  verbatim-copy test fails, suspect the test.
+- **Daybreak's first layout put the sun directly behind the rep total and the
+  headline.** The horizon is at 0.82 and the copy is centred in the space above
+  it, not on the screen. Anything added to that column has to respect it.
+- The Daybreak review path synthesises history for a tier rather than faking a
+  `Celebration`, so what you look at is what the real tier logic produces.
+
+**Next:** W8 — History and the year grid. Then W10, then the device pass.
+
 ## 2026-08-22 · W6 Home and the week · Claude Opus 5
 
 **Workstream:** W6 — Home and the week (done). W5 merged.

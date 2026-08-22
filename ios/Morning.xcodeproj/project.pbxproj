@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9DF5540C13526E598B2DE70D /* SummaryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A834BB58E44D87754375E381 /* SummaryScreen.swift */; };
+		6B425B2FCF0269E84AC2B720 /* Daybreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4EDC5137F9FAB91B6964C /* Daybreak.swift */; };
 		5B1297F094812832230DCFEB /* Celebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70145487336A7308CD333E60 /* Celebration.swift */; };
 		F31378D50E988E2D07B8B3E6 /* Ledger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49CBBFECED3D742C3751614 /* Ledger.swift */; };
 		5132DC86BBD009A6336D53FA /* ReviewHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */; };
@@ -72,6 +74,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A834BB58E44D87754375E381 /* SummaryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScreen.swift; sourceTree = "<group>"; };
+		12F4EDC5137F9FAB91B6964C /* Daybreak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Daybreak.swift; sourceTree = "<group>"; };
 		70145487336A7308CD333E60 /* Celebration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Celebration.swift; sourceTree = "<group>"; };
 		F49CBBFECED3D742C3751614 /* Ledger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ledger.swift; sourceTree = "<group>"; };
 		1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewHost.swift; sourceTree = "<group>"; };
@@ -133,6 +137,8 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				A834BB58E44D87754375E381 /* SummaryScreen.swift */,
+				12F4EDC5137F9FAB91B6964C /* Daybreak.swift */,
 				1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */,
 				B2A026BCBEF4A59459A96AEE /* AppRoot.swift */,
 				AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */,
@@ -396,6 +402,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9DF5540C13526E598B2DE70D /* SummaryScreen.swift in Sources */,
+				6B425B2FCF0269E84AC2B720 /* Daybreak.swift in Sources */,
 				5B1297F094812832230DCFEB /* Celebration.swift in Sources */,
 				F31378D50E988E2D07B8B3E6 /* Ledger.swift in Sources */,
 				5132DC86BBD009A6336D53FA /* ReviewHost.swift in Sources */,
