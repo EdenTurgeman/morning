@@ -97,20 +97,32 @@ that comment.
 `02-design-brief.md §6` sets the target: *"The current palette holds 18:1 /
 10:1 / 6.6:1 for its three text levels — match or beat that."*
 
-| Level | Token | Used for | Measured |
+Measured across progress 0.00 → 1.00 on Set, Rest and the study card:
+
+| Level | Token | Used for | Measured span |
 |---|---|---|---|
-| Primary | `Ink.primary` | Exercise name, rep count, timer | **19.00–19.42:1** |
-| Secondary | `Ink.secondary` | Sub-label, load, set position, cues | **7.65–11.45:1** |
-| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, next-exercise meta | **7.00–7.62:1** |
-| On accent | `Ink.onAccent` | The primary action's label | **5.84–6.98:1** — see the exception below |
+| Primary | `Ink.primary` | Exercise name, rep count, timer | **12.15 – 19.00:1** |
+| Secondary | `Ink.secondary` | Sub-label, load, set position, cues | **7.65 – 11.41:1** |
+| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, meta lines | **6.98 – 9.04:1** |
+| On accent | `Ink.onAccent` | The primary action's label | **5.84 – 6.98:1** — see below |
 
-Weakest text anywhere, at any progress: **7.00:1** on Set, **7.10:1** on Rest.
-The bar is 6.6:1.
+**Where this does and does not beat the web palette, stated honestly.** The web
+figures are measured against a flat near-black background. This sky is lit at
+the bottom by design, so pure white reads 19.00:1 at the top of the screen and
+**12.15:1 over the rep counter**, which sits on the brightest region. Primary
+therefore beats the web's *secondary* bar everywhere but does not reach 18:1 at
+the counter, and it never will while the sky carries progress. That is the trade
+the direction makes.
 
-Rest had to be measured separately and across the range to find its weak point:
-its ring sits where the sky is brightest, and `SEC` fell to **6.36:1** at gold on
-`white 0.72`. It is a unit attached to a primary number, so it took the
-secondary level and now reads 7.10:1.
+What matters more, and what does hold everywhere: **the weakest text on any
+screen at any progress is 6.98:1**, against a 6.6:1 floor — and the three levels
+stay clearly separated, which is what makes the hierarchy readable rather than
+just compliant.
+
+Scoring elements against per-level bars was tried and abandoned: it turns into
+moving an element between levels until it passes. One floor, plus the range each
+level actually spans, is the honest report. `ios/Tools/measure-contrast.py`
+prints exactly that.
 
 `Ink.hairline` is furniture only — rails and dividers. It never carries glyphs.
 

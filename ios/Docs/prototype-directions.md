@@ -358,7 +358,7 @@ back is** — every text element now clears the bar across the entire session:
 | Rest · next meta | 7.41:1 | 5.96:1 | 7.92:1 |
 
 Measured at progress 0.00 / 0.20 / 0.42 / 0.65 / 0.85 / 1.00, the weakest text
-zone on the Set screen is **7.00:1**. The scrim sits behind content, so it
+zone on any screen is **6.98:1**. The scrim sits behind content, so it
 lowers background luminance without touching the glyphs — which is what makes it
 buy contrast rather than cost it.
 
@@ -434,7 +434,7 @@ can be checked, and that is wrong. These were all measured, not eyeballed.
 
 | Check | Method | Result |
 |---|---|---|
-| Text contrast, every zone, every progress | Glyph-row-snapping harness on rendered frames | Weakest **7.00:1** against a 6.6:1 bar |
+| Text contrast, every zone, every progress | `ios/Tools/measure-contrast.py` on rendered frames | Weakest **6.98:1** against a 6.6:1 floor |
 | Control boundaries | Component measurement, not text | Rep control **3.51:1**, Rest controls **4.10:1**, floor 3:1 |
 | Legibility at distance | Acuity-limited resample — 1 arcminute at 460 ppi | Name, count and timer hold to 2.0m |
 | Dark-room low brightness | Black-crush model at code 12 / 20 / 32 | No information lives in the crushed range; contrast holds or improves |
