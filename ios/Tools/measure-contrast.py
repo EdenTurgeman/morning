@@ -72,18 +72,13 @@ BAR_COMPONENT = 3.0
 
 ZONES = {
     "set": [
-        ("title   exercise name", 400, 600, 30, 1180, "primary"),
-        ("sub     sub-label", 580, 665, 30, 1180, "secondary"),
-        ("meta    load / set position", 660, 715, 30, 1180, "secondary"),
-        ("meta    target", 712, 780, 30, 1180, "secondary"),
-        ("accent  superset warning", 782, 860, 30, 1180, "tertiary"),
-        ("label   MOVEMENT", 870, 965, 30, 520, "tertiary"),
-        ("cue 1", 1420, 1520, 30, 1180, "secondary"),
-        ("cue 2", 1530, 1635, 30, 1180, "secondary"),
-        ("counter rep number", 1780, 2010, 180, 1030, "primary"),
-        ("label   Reps", 2015, 2115, 400, 810, "tertiary"),
-        ("button  primary label", 2240, 2440, 120, 1090, "tertiary"),
-        ("footer  sets to go", 2425, 2515, 30, 1180, "tertiary"),
+        ("title   exercise name", 380, 620, 30, 1180, "primary"),
+        ("sub     sub-label", 590, 700, 30, 1180, "secondary"),
+        ("meta    load / set position", 655, 770, 30, 1180, "secondary"),
+        ("counter rep number", -900, -580, 180, 1030, "primary"),
+        ("label   Reps", -620, -490, 400, 810, "tertiary"),
+        ("button  primary label", -340, -230, 120, 1090, "tertiary"),
+        ("footer  sets to go", -175, -70, 30, 1180, "tertiary"),
     ],
     # Windows stop short of the controls: their border out-inks the text.
     "rest": [
@@ -143,11 +138,26 @@ def snap(lum, y0, y1, x0, x1, min_rows=6):
     return y0 + best[0], y0 + best[1]
 
 
+def resolve(bound, height):
+    """Negative bounds count back from the bottom of the frame.
+
+    The primary action and the footer are pinned to the safe area, so their
+    position does not move when the cue list gets a line longer — but every
+    element above them does. Anchoring them from the bottom is what stops a
+    three-cue layout and a four-cue layout needing two sets of numbers.
+    """
+    return height + bound if bound < 0 else bound
+
+
 def measure_text(lum, y0, y1, x0, x1):
     snapped = snap(lum, y0, y1, x0, x1)
     if snapped is None:
         return None
     top, bottom = snapped
+    # Touching the window edge is the signature of having grabbed a neighbour
+    # rather than the element — it is how a footer window once measured the
+    # primary button's lower edge and reported 4.96:1 for text that holds 8:1.
+    suspect = top <= y0 or bottom >= y1
     band = lum[top:bottom, x0:x1]
     pad = max(6, (bottom - top) // 2)
     around = np.concatenate([
@@ -161,7 +171,7 @@ def measure_text(lum, y0, y1, x0, x1):
         core = float(np.percentile(band, 99.5))
     else:
         core = float(np.percentile(band, 0.5))
-    return ratio(core, background), core, background, (top, bottom)
+    return ratio(core, background), core, background, (top, bottom), suspect
 
 
 def main():
@@ -177,13 +187,16 @@ def main():
     worst = (1e9, "")
 
     levels = {}
+    height = lum.shape[0]
     for name, y0, y1, x0, x1, level in ZONES[screen]:
-        result = measure_text(lum, y0, y1, x0, x1)
+        result = measure_text(lum, resolve(y0, height), resolve(y1, height), x0, x1)
         if result is None:
             print(f"{name:30s}   no ink found — the window is wrong")
             continue
-        value, _, _, (top, bottom) = result
+        value, _, _, (top, bottom), suspect = result
         status = "OK" if value >= BAR else "UNDER BAR"
+        if suspect:
+            status += "  <- ink touches the window edge; widen it and re-check"
         print(f"{name:30s} {value:8.2f}:1  {top:5d}-{bottom:<7d} {level:9s}  {status}")
         levels.setdefault(level, []).append(value)
         if value < worst[0]:

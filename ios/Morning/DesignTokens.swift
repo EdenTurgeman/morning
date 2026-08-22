@@ -103,8 +103,15 @@ enum Ink {
     /// Sub-label, load, set position, cue text. Measured 9.87–11.45:1.
     static let secondary = Color.white.opacity(0.78)
 
-    /// `Reps`, `MOVEMENT`, the footer, next-exercise meta. Measured 7.00–7.61:1.
-    static let tertiary = Color.white.opacity(0.62)
+    /// `Reps`, `MOVEMENT`, the footer, next-exercise meta.
+    ///
+    /// 0.72, not 0.62. The first value here was written down from the
+    /// prototype's *measured* results without checking what the prototype was
+    /// actually using — its labels were at 0.72 and had never been switched to
+    /// the token. Built on the real screen, 0.62 delivered 5.98:1 against a
+    /// 6.6:1 floor. A token that does not deliver the number recorded beside it
+    /// is worse than no token.
+    static let tertiary = Color.white.opacity(0.72)
 
     /// Non-text furniture only — hairlines, inactive rails. Never glyphs.
     static let hairline = Color.white.opacity(0.13)
@@ -122,7 +129,13 @@ enum Semantic {
     /// Passing last time's number — the emotional centre of the app. Mint reads
     /// as "changed state" even at 2m, where the words beside it have already
     /// gone soft, which is the correct order for this to degrade in.
-    static let threshold = Color(red: 0.20, green: 0.83, blue: 0.60)
+    ///
+    /// Lifted slightly from the first value (0.20/0.83/0.60): as a 92pt numeral
+    /// that measured 6.03:1, which is comfortably fine for text that size but
+    /// under this app's own floor. Ten percent more luminance clears it without
+    /// the colour becoming anything other than mint — better than carrying a
+    /// second documented exception.
+    static let threshold = Color(red: 0.35, green: 0.88, blue: 0.68)
 
     /// The 20-second myo rest, which *is* the training stimulus. Amber says
     /// urgency without saying failure.

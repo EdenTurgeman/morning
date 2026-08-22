@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */; };
+		B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */; };
+		5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3024DEC7857A680871BEEA49 /* RepControl.swift */; };
+		D5A3E579FE786E8F5A44A632 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F4A6E3E6711B5CDB4486F1 /* Haptics.swift */; };
+		CE686143CCD8BEE741161AD3 /* WorkoutSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27CD28D350DC22D16F2B0A42 /* WorkoutSession.swift */; };
 		CCC3A6B48EFB844BF5C818EE /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737FCE27438C9AA2B24A980F /* History.swift */; };
 		4C644F76FF8A5C826BA047EF /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F23D61545A1318F65A8DD9 /* Store.swift */; };
 		45FF53B0526178752B17ED99 /* Plates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1685DFF5DE6DD054341D343F /* Plates.swift */; };
@@ -56,6 +61,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHost.swift; sourceTree = "<group>"; };
+		8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetScreen.swift; sourceTree = "<group>"; };
+		3024DEC7857A680871BEEA49 /* RepControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepControl.swift; sourceTree = "<group>"; };
+		C9F4A6E3E6711B5CDB4486F1 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		27CD28D350DC22D16F2B0A42 /* WorkoutSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSession.swift; sourceTree = "<group>"; };
 		737FCE27438C9AA2B24A980F /* History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
 		55F23D61545A1318F65A8DD9 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		1685DFF5DE6DD054341D343F /* Plates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plates.swift; sourceTree = "<group>"; };
@@ -98,9 +108,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		75B691A625410BD958A812BF /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */,
+				8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */,
+				3024DEC7857A680871BEEA49 /* RepControl.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
 		00B7138305DB7E908846968E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				C9F4A6E3E6711B5CDB4486F1 /* Haptics.swift */,
+				27CD28D350DC22D16F2B0A42 /* WorkoutSession.swift */,
 				737FCE27438C9AA2B24A980F /* History.swift */,
 				55F23D61545A1318F65A8DD9 /* Store.swift */,
 				1685DFF5DE6DD054341D343F /* Plates.swift */,
@@ -135,6 +157,7 @@
 		449C7FBA832FA356A9500DA8 /* Morning */ = {
 			isa = PBXGroup;
 			children = (
+				75B691A625410BD958A812BF /* Screens */,
 				46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */,
 				FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */,
 				149EF8C3DBE09E7D14729069 /* DesignMotion.swift */,
@@ -340,6 +363,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */,
+				B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */,
+				5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */,
+				D5A3E579FE786E8F5A44A632 /* Haptics.swift in Sources */,
+				CE686143CCD8BEE741161AD3 /* WorkoutSession.swift in Sources */,
 				CCC3A6B48EFB844BF5C818EE /* History.swift in Sources */,
 				4C644F76FF8A5C826BA047EF /* Store.swift in Sources */,
 				45FF53B0526178752B17ED99 /* Plates.swift in Sources */,

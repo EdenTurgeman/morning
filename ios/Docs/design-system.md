@@ -103,7 +103,7 @@ Measured across progress 0.00 → 1.00 on Set, Rest and the study card:
 |---|---|---|---|
 | Primary | `Ink.primary` | Exercise name, rep count, timer | **12.15 – 19.00:1** |
 | Secondary | `Ink.secondary` | Sub-label, load, set position, cues | **7.65 – 11.41:1** |
-| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, meta lines | **6.98 – 9.04:1** |
+| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, meta lines | **6.90 – 9.04:1** |
 | On accent | `Ink.onAccent` | The primary action's label | **5.84 – 6.98:1** — see below |
 
 **Where this does and does not beat the web palette, stated honestly.** The web
@@ -126,6 +126,20 @@ prints exactly that.
 
 `Ink.hairline` is furniture only — rails and dividers. It never carries glyphs.
 
+**One correction worth recording, because the mistake is easy to repeat.**
+`Ink.tertiary` was first written down as `white 0.62`, taken from the
+prototype's measured results — without checking what the prototype was actually
+using. Its labels were at 0.72 and had never been switched to the token, so the
+number in this table had been measured against a value the token did not have.
+
+Built on the real Set screen, `0.62` delivered **5.98:1** against a 6.6:1 floor.
+The token is now 0.72 and the screen measures 6.90:1 at its weakest, at gold.
+
+A token that does not deliver the figure recorded beside it is worse than no
+token, and only building the real screen on it exposed the gap. Rebuilding the
+prototypes on the tokens was supposed to catch exactly this and did not, because
+the prototype kept its literals in the places that mattered.
+
 ### The one measured exception
 
 The primary button label reads **5.84:1 at progress 0.00**, rising to 6.98:1 by
@@ -145,10 +159,16 @@ with whatever the accent happens to be at that moment.
 
 | Token | Colour | Means |
 |---|---|---|
-| `Semantic.threshold` | `#33D399` mint | You passed last time's number |
+| `Semantic.threshold` | `#59E0AD` mint | You passed last time's number |
 | `Semantic.urgency` | `#FFC257` amber | The 20-second myo rest — which *is* the training stimulus |
 
-Mint is worth a note. Held at 2m, the words *"Beating last time's 13"* have gone
+Mint was lifted from `#33D399` after measurement: as a 92pt numeral it read
+6.03:1 — comfortably fine for text that size, but under this app's own floor.
+Ten percent more luminance clears it at 6.95:1 without the colour becoming
+anything other than mint, which is better than carrying a second documented
+exception.
+
+Mint is worth a second note. Held at 2m, the words *"Beating last time's 13"* have gone
 soft while the mint is still unmistakable. Colour outliving text is the correct
 order for this to degrade in, because the state matters more than the sentence.
 

@@ -40,6 +40,35 @@ def find_group_block(text: str, name: str) -> tuple[int, int]:
     raise SystemExit(f"could not find PBXGroup with path = {name};")
 
 
+def ensure_group(text: str, name: str, parent: str = TARGET_GROUP) -> str:
+    """Create a PBXGroup for `name` under `parent` if it does not exist yet.
+
+    A new directory on disk is invisible to Xcode until a group declares it,
+    which is a separate step from declaring the files inside it.
+    """
+    if re.search(rf"path = {re.escape(name)};", text):
+        return text
+
+    group_id = oid("group", name)
+    entry = (
+        f"\t\t{group_id} /* {name} */ = {{\n"
+        f"\t\t\tisa = PBXGroup;\n"
+        f"\t\t\tchildren = (\n"
+        f"\t\t\t);\n"
+        f"\t\t\tpath = {name};\n"
+        f"\t\t\tsourceTree = \"<group>\";\n"
+        f"\t\t}};\n"
+    )
+    anchor = "/* Begin PBXGroup section */\n"
+    text = text.replace(anchor, anchor + entry, 1)
+
+    # And list it as a child of its parent, or Xcode shows an empty project.
+    start, _ = find_group_block(text, parent)
+    text = text[:start] + f"\t\t\t\t{group_id} /* {name} */,\n" + text[start:]
+    print(f"  created group: {name}")
+    return text
+
+
 def add(text: str, rel: str) -> str:
     path = Path(rel)
     if path.name in text and f"path = {path.name};" in text:
@@ -87,6 +116,9 @@ def main() -> None:
     for rel in sys.argv[1:]:
         if not (ROOT / rel).exists():
             raise SystemExit(f"no such file on disk: ios/{rel}")
+        parent = Path(rel).parent.name
+        if parent and parent != TARGET_GROUP:
+            text = ensure_group(text, parent)
         text = add(text, rel)
     PBXPROJ.write_text(text)
     print(f"wrote {PBXPROJ.relative_to(ROOT.parent)}")

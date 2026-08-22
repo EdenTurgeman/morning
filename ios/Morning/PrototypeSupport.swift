@@ -235,52 +235,51 @@ struct RestFixture {
     }
 }
 
+/// The lab's haptics. One engine — `Haptics` — with a per-treatment sharpness
+/// tilt on top, because the three W1 treatments differ in FEEL, not in
+/// vocabulary. Same events, same product meaning, tilted crisper for Precise
+/// and softer for Tactile.
+///
+/// The real screens call `Haptics.shared` directly. This exists only so the
+/// comparison treatments still feel different from each other.
 @MainActor
 final class PrototypeHaptics {
     static let shared = PrototypeHaptics()
 
-    private var engine: CHHapticEngine?
-    private var players: [String: any CHHapticPatternPlayer] = [:]
-
-    private init() {
-        prepare()
-    }
+    private init() {}
 
     func prewarm() {
-        try? engine?.start()
+        Haptics.shared.prewarm()
     }
 
     func rep(treatment: DawnTreatment) {
-        play(key: "rep-\(treatment.rawValue)", beats: shaped(HapticVocabulary.rep, for: treatment))
+        play("rep", HapticVocabulary.rep, treatment)
     }
 
     func threshold(treatment: DawnTreatment) {
-        play(key: "threshold-\(treatment.rawValue)", beats: shaped(HapticVocabulary.threshold, for: treatment))
+        play("threshold", HapticVocabulary.threshold, treatment)
     }
 
     func confirm(treatment: DawnTreatment) {
-        play(key: "confirm-\(treatment.rawValue)", beats: shaped(HapticVocabulary.logged, for: treatment))
+        play("confirm", HapticVocabulary.logged, treatment)
     }
 
     func reveal(treatment: DawnTreatment) {
-        play(key: "reveal-\(treatment.rawValue)", beats: shaped(HapticVocabulary.reveal, for: treatment))
+        play("reveal", HapticVocabulary.reveal, treatment)
     }
 
     func zero(treatment: DawnTreatment) {
-        play(key: "zero-\(treatment.rawValue)", beats: shaped(HapticVocabulary.zero, for: treatment))
+        play("zero", HapticVocabulary.zero, treatment)
     }
 
     func countdown(second: Int, treatment: DawnTreatment) {
-        play(
-            key: "countdown-\(second)-\(treatment.rawValue)",
-            beats: shaped(HapticVocabulary.countdown(second: second), for: treatment)
-        )
+        play("countdown-\(second)", HapticVocabulary.countdown(second: second), treatment)
     }
 
-    /// The three W1 treatments differ in feel, not in vocabulary: the same
-    /// events, tilted in sharpness. Precise is crisper, Tactile is softer and
-    /// more physical, Atmospheric sits between them. The product meaning of
-    /// every pattern is identical across the three.
+    private func play(_ key: String, _ beats: [HapticBeat], _ treatment: DawnTreatment) {
+        Haptics.shared.play("\(key)-\(treatment.rawValue)", shaped(beats, for: treatment))
+    }
+
     private func shaped(_ beats: [HapticBeat], for treatment: DawnTreatment) -> [HapticBeat] {
         let tilt: Float = switch treatment {
         case .atmospheric: 0
@@ -295,62 +294,6 @@ final class PrototypeHaptics {
                 sharpness: min(1, max(0, $0.sharpness + tilt)),
                 duration: $0.duration
             )
-        }
-    }
-
-    private func prepare() {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
-
-        do {
-            let engine = try CHHapticEngine()
-            engine.isAutoShutdownEnabled = true
-            engine.resetHandler = { [weak self] in
-                Task { @MainActor in
-                    self?.prepare()
-                }
-            }
-            engine.stoppedHandler = { [weak self] _ in
-                Task { @MainActor in
-                    self?.engine = nil
-                    self?.players.removeAll()
-                }
-            }
-            try engine.start()
-            self.engine = engine
-            players.removeAll()
-        } catch {
-            engine = nil
-            players.removeAll()
-        }
-    }
-
-    private func play(key: String, beats: [HapticBeat], retry: Bool = true) {
-        let events = beats.map(\.event)
-        guard let engine else {
-            prepare()
-            if retry {
-                play(key: key, beats: beats, retry: false)
-            }
-            return
-        }
-
-        do {
-            try engine.start()
-            let player: any CHHapticPatternPlayer
-            if let prepared = players[key] {
-                player = prepared
-            } else {
-                let pattern = try CHHapticPattern(events: events, parameters: [])
-                let prepared = try engine.makePlayer(with: pattern)
-                players[key] = prepared
-                player = prepared
-            }
-            try player.start(atTime: CHHapticTimeImmediate)
-        } catch {
-            prepare()
-            if retry {
-                play(key: key, beats: beats, retry: false)
-            }
         }
     }
 }

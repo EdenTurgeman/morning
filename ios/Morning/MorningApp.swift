@@ -26,9 +26,42 @@ struct MorningApp: App {
 
     var body: some Scene {
         WindowGroup {
-            PrototypeLabView()
-                .preferredColorScheme(.dark) // used before sunrise; dark by default
+            // `-screen set` boots the real screen over real persisted history.
+            // Without it the W1 direction lab is still the root, because Rest,
+            // Home and Summary do not exist yet and a half-app is worse than an
+            // honest prototype.
+            Group {
+                if Self.requestedScreen == "set" {
+                    WorkoutHost(
+                        sessionKey: Self.value(after: "-session"),
+                        progressOverride: Self.progressOverride,
+                        slot: Self.value(after: "-slot"),
+                        reps: Self.value(after: "-reps").flatMap(Int.init)
+                    )
+                } else {
+                    PrototypeLabView()
+                }
+            }
+            .preferredColorScheme(.dark) // used before sunrise; dark by default
         }
+    }
+
+    private static var requestedScreen: String? {
+        value(after: "-screen")
+    }
+
+    private static var progressOverride: Double? {
+        value(after: "-progress").flatMap(Double.init).map { min(1, max(0, $0)) }
+    }
+
+    private static func value(after flag: String) -> String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: flag),
+              arguments.indices.contains(index + 1)
+        else {
+            return nil
+        }
+        return arguments[index + 1]
     }
 
     /// `-seed six-months` replaces the stored history with a fixture, so the

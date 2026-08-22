@@ -219,7 +219,7 @@ than a skip: it is the half that can regress silently.
 
 ---
 
-## W4 · The Set screen — `todo`
+## W4 · The Set screen — `done`
 
 **Gate:** W2 and W3 done.
 
@@ -254,6 +254,20 @@ middle, pinned controls — is a DOM compromise, not a good idea to inherit.
 
 **Done when:** 26 of 53 assertions pass and the screen meets every box in
 CLAUDE.md's definition of done, at empty and at six months.
+
+**Closed 2026-08-22.** 27 of 54 pass (an assertion was added), 0 failures. The
+screen runs on real persisted history via `-screen set`, with `-seed`, `-slot`
+and `-session` to reach any state.
+
+Running it against real seeded data caught two things fixtures could not: a
+bodyweight push-up labelled "at a different weight now" (a push-up has no load,
+so reps are always comparable), and "Set 2 / 25" counting steps rather than sets.
+
+It also caught a fault in the design system itself. `Ink.tertiary` had been
+written down as `white 0.62` from the prototype's measured results, but the
+prototype's labels were at 0.72 and had never been switched to the token — so
+the recorded figure had been measured against a value the token did not have.
+On the real screen it delivered 5.98:1 against a 6.6:1 floor. Now 0.72.
 
 **Kickoff prompt**
 
