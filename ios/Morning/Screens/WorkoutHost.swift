@@ -79,6 +79,7 @@ struct WorkoutHost: View {
                     namespace: workObject,
                     onExtend: { session.extendRest(by: 15) },
                     onSkip: { advance { session.skipRest() } },
+                    onComplete: { advance { session.skipRest() } },
                     onBack: { advance { session.back() } },
                     onEnd: endSession
                 )

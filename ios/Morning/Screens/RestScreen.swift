@@ -44,6 +44,11 @@ struct RestScreen: View {
 
     let onExtend: () -> Void
     let onSkip: () -> Void
+    /// The rest running out. NOT the same as skipping: the web build wires
+    /// `useCountdown`'s `onComplete` straight to `onAdvance`, so a rest that
+    /// reaches zero moves on by itself. This port did not, and sat on "0 SEC"
+    /// until something tapped it.
+    let onComplete: () -> Void
     let onBack: () -> Void
     let onEnd: () -> Void
 
@@ -52,6 +57,8 @@ struct RestScreen: View {
     /// readable. See `Motion.answer`.
     @State private var answerShown = false
     @State private var lastSpokenSecond: Int?
+    /// Fires once per rest. `endsAt` resets it.
+    @State private var completed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var palette: DawnPalette {
@@ -75,6 +82,9 @@ struct RestScreen: View {
                 )
                 .onChange(of: Int(ceil(remaining))) { _, value in
                     speak(secondsLeft: value)
+                    if value <= 0 {
+                        finish()
+                    }
                 }
             }
 
@@ -119,6 +129,17 @@ struct RestScreen: View {
         .safeAreaPadding(.bottom, Space.snug)
         // The sky is hoisted to `WorkoutHost`. See `SetScreen`.
         .dynamicTypeSize(.large)
+        // `TimelineView` only ticks while the app is drawing. The web build
+        // carries a `setInterval` alongside its rAF loop for exactly this, and
+        // says why: "without it, a rest could hang forever on a phone that
+        // decided not to paint." This is that floor.
+        .task(id: endsAt) {
+            completed = false
+            let wait = max(0, endsAt.timeIntervalSinceNow)
+            try? await Task.sleep(for: .seconds(wait))
+            guard !Task.isCancelled else { return }
+            finish()
+        }
         .task(id: endsAt) {
             revealed = false
             answerShown = false
@@ -146,6 +167,16 @@ struct RestScreen: View {
                 answerShown = true
             }
         }
+    }
+
+    /// Zero. Plays the cue first — `speak` is idempotent on the second, so it
+    /// does not matter whether the frame or the floor got here first — then
+    /// moves on, because the rest is over and the app should not need asking.
+    private func finish() {
+        guard !completed else { return }
+        completed = true
+        speak(secondsLeft: 0)
+        onComplete()
     }
 
     /// The last five seconds and zero. Sound is for events you might not be
@@ -183,8 +214,32 @@ private struct RestTimer: View {
         total > 0 ? min(1, max(0, remaining / total)) : 0
     }
 
+    /// 0 until five seconds remain, then ramps to 1 at zero.
+    ///
+    /// Ported from `src/components/Ring.tsx`, which calls it what it is:
+    /// peripheral warning. The phone is on the floor 1.5m away and you are not
+    /// necessarily reading the digits — the ring getting hot is the part you
+    /// catch out of the corner of your eye. The port had the audio ramp and the
+    /// haptic ramp and no visual one at all.
+    private var urgency: Double {
+        remaining <= 5 ? 1 - max(0, remaining) / 5 : 0
+    }
+
     var body: some View {
         ZStack {
+            // The glow pad behind the ring. Same 0.20→0.65 range as the web.
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [accent, accent.opacity(0)],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: size * 0.70
+                    )
+                )
+                .opacity(0.20 + urgency * 0.45)
+                .blur(radius: 12)
+
             Circle()
                 .stroke(Ink.hairline, lineWidth: compact ? 4 : 5)
 
@@ -192,6 +247,7 @@ private struct RestTimer: View {
                 .trim(from: 0, to: fraction)
                 .stroke(accent, style: StrokeStyle(lineWidth: compact ? 4 : 5, lineCap: .round))
                 .rotationEffect(.degrees(-90))
+                .shadow(color: accent.opacity(0.55), radius: 8 + urgency * 14)
 
             VStack(spacing: -2) {
                 Text(Int(ceil(remaining)), format: .number)

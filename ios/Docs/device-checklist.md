@@ -38,7 +38,11 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] Switch to Music mid-session, play something, come back.
 - [ ] Force-quit mid-workout and relaunch: same step, same logged reps, correct
       remaining time.
-- [ ] Let a rest timer expire while the app is backgrounded.
+- [ ] Let a rest timer expire while the app is backgrounded. **It must have
+      moved on by itself when you come back** — a rest that reaches zero
+      advances, matching the web build. This is wired in the view rather than
+      the model, so no unit test covers it; if it regresses, this is the check
+      that catches it.
 
 ## Before any of this works: Xcode has to match the phone
 
