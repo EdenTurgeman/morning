@@ -67,10 +67,18 @@ struct SummaryReviewHost: View {
     }
 }
 
-/// Boots History directly. `-screen history`
-struct HistoryReviewHost: View {
+/// Boots one reading screen directly. `-screen history|ledger|guide|backup`
+struct ReadingReviewHost: View {
+    let which: HomeDestination
+
     var body: some View {
-        HistoryScreen(history: Store().load().history, onDelete: { _ in }, onClose: {})
+        let data = Store().load()
+        switch which {
+        case .history: HistoryScreen(history: data.history, onDelete: { _ in }, onClose: {})
+        case .ledger: LedgerScreen(history: data.history, onClose: {})
+        case .guide: GuideScreen(onClose: {})
+        case .backup: BackupScreen(data: data, onRestore: { _ in }, onErase: {}, onClose: {})
+        }
     }
 }
 

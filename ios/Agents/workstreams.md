@@ -500,7 +500,7 @@ labels at that density crowd the thing they are labelling.
 
 ---
 
-## W9 · Ledger and milestones — `todo`
+## W9 · Ledger and milestones — `done`
 
 **Gate:** W8 done.
 
@@ -522,6 +522,14 @@ labels at that density crowd the thing they are labelling.
 
 **Done when:** 51 of 53 pass — everything except the two `testPhase2` import tests.
 
+**Closed 2026-08-22.** The logic landed with W7, because the top celebration tier
+diffs the ledger and could not be built without it; all four
+`LedgerAcceptanceTests` pass. The screen landed here.
+
+Empty says **"Nothing moved yet"**. A zero rendered at 76pt is a number
+pretending to be an achievement, which is the opposite of what this screen is
+for.
+
 **Kickoff prompt**
 
 > Read `CLAUDE.md`, then `ios/Agents/00-handoff-log.md`, then the `ios-port/`
@@ -537,7 +545,7 @@ labels at that density crowd the thing they are labelling.
 
 ---
 
-## W10 · Guide and Backup — `todo`
+## W10 · Guide and Backup — `done`
 
 **Gate:** W9 done.
 
@@ -559,6 +567,17 @@ labels at that density crowd the thing they are labelling.
 
 **Done when:** export → wipe → restore reproduces the history exactly, and an
 export opens in the web app.
+
+**Closed 2026-08-22.** The round trip is asserted in `DataAcceptanceTests`, and
+"opens in the web app" is no longer a one-off human check: CI runs a real iOS
+export through the web app's own `parseData` on every push.
+
+Guide takes Dynamic Type through the accessibility sizes — the case `§6` names,
+and the opposite of the workout screens, which clamp.
+
+**iCloud was NOT built.** `05-platform.md §6` says to propose it rather than
+assume it, and it has not been proposed yet. Manual export stays regardless: it
+is the only copy that survives losing the phone *and* the account.
 
 **Kickoff prompt**
 

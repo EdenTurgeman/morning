@@ -30,8 +30,8 @@ struct MorningApp: App {
             // for review, and `-screen lab` still opens the W1 direction lab —
             // it is the record of how the look was chosen and stays runnable.
             Group {
-                if Self.requestedScreen == "history" {
-                    HistoryReviewHost()
+                if let reading = Self.requestedScreen.flatMap(HomeDestination.init(rawValue:)) {
+                    ReadingReviewHost(which: reading)
                 } else if Self.requestedScreen == "summary" {
                     SummaryReviewHost(tier: Self.value(after: "-tier"))
                 } else if Self.requestedScreen == "set" {

@@ -57,6 +57,92 @@ So: if you are an agent and cannot get onto the device, check the Xcode version
 before you debug anything else. And if the device pass has to wait for the right
 Xcode, say so and stop — do not tick these boxes from the simulator.
 
+## What each check is actually looking for
+
+Written after W1–W10, when every screen exists and the whole session runs. The
+list above predates that; this is the same list with the specifics filled in, so
+nobody has to reconstruct what "a haptic" means at 6am with a phone in one hand.
+
+### Getting to a state without playing a whole session
+
+The app boots to Home. These launch arguments jump straight to a state, and they
+exist because there is no Simulator UI on the development machine — on the phone
+you can just use the app, but they are still the fastest way to sit on one
+screen and stare at it.
+
+```text
+-seed six-months                     replace the history with a fixture
+-screen set -progress 1.00           the Set screen at the gold end of the dawn
+-screen set -slot 4.0.0              the worst content in the program
+-screen set -reps 15                 the counter already past last time
+-screen set -step 15                 a carded rest
+-screen summary -tier plateau        one celebration tier
+-screen ledger | guide | backup | history
+-screen lab                          the W1 direction lab, still runnable
+```
+
+### The haptic that matters most
+
+`DesignHaptics.swift` is the vocabulary. What to feel for, face down:
+
+| Moment | What it should feel like |
+|---|---|
+| Ordinary rep | ONE event. A detent, not a buzz |
+| **Passing last time** | **TWO events, 45ms apart.** Rhythm, not volume — that is the whole design, because the hand reads rhythm far better than amplitude |
+| Set logged | One event with more weight behind it |
+| Last five seconds | One per second, climbing in both intensity and sharpness |
+| Zero | A hard transient with a short continuous decay under it — it lands, then releases |
+| Card reveal | The softest thing in the app. An answer arriving, not an action you took |
+| Session complete | Three rising transients then a swell, choreographed against Daybreak's sun |
+
+**The acceptance test is the second row.** If passing last time's number does not
+feel obviously different from an ordinary rep with the phone face down on the
+floor, the design has failed regardless of how it looks. Nothing about it has
+ever been felt — every value is reasoned from `05-platform.md §3`, not tuned.
+
+### The ducking
+
+Start music in another app first, then run a rest to zero.
+
+- It must **dip once** at five seconds and come back once after zero.
+- Six dips means the shared release deadline is not working — that is
+  `DuckWindow`, and its logic is unit-tested, so a failure here is the session
+  activation rather than the timing.
+- Music **stopping** rather than ducking means the session category is wrong.
+  That is the exact bug Eden reported against the web build: *"working, and not
+  letting me play music."*
+
+### Glare, which only the phone can settle
+
+**10.1% of the Set screen sits at code ≥200**, almost all of it the primary
+button. Every contrast figure in `design-system.md` was measured on rendered
+frames and every one clears the floor — but none of that says whether a
+full-width bright bar is comfortable or punishing in a dark room at 6:10am with
+auto-brightness near minimum. Look at it, in the dark, and say.
+
+### 120Hz
+
+The app opts into ProMotion (`CADisableMinimumFrameDurationOnPhone` in the built
+Info.plist, checked). The things most likely to drop frames, in order:
+
+1. The rest timer's `TimelineView(.animation)` while the sky's cloud banks drift.
+2. `CloudTexture` building three 1024×256 noise fields on first access — that is
+   CPU work in a `static let`, on the main actor. It has never shown at launch
+   on the simulator, which proves nothing.
+3. Daybreak, which drives every stage off one clock for 4.4 seconds.
+
+### What has never been exercised at all
+
+Being explicit, because "it built and the tests pass" is not the same thing:
+
+- **No tap has ever reached this app.** The development machine has no
+  `Simulator.app`, only the headless runtime, so every screen was reached by
+  launch argument. Buttons, the rep control's hold-to-repeat, sheets, the file
+  picker and every confirmation dialog are untested by anything but the eye.
+- **No haptic has been felt and no cue has been heard.**
+- Restore and Erase have never been run. The export *format* is checked on every
+  CI run against the web app's own parser; the pickers around it are not.
+
 ## Notes
 
 <!-- date · device · iOS version · what you saw -->

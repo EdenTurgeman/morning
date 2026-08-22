@@ -21,7 +21,7 @@ struct AppRoot: View {
     @State private var data: AppData
     @State private var session: WorkoutSession?
     @State private var saveError: String?
-    @State private var showingHistory = false
+    @State private var destination: HomeDestination?
     /// The session just finished, held so the summary can show it. Cleared when
     /// the summary is dismissed.
     @State private var finished: FinishedSession?
@@ -69,14 +69,10 @@ struct AppRoot: View {
                     progress: Week.progress(history: data.history),
                     lastSession: data.history.max { $0.timestamp < $1.timestamp },
                     onStart: start,
-                    onOpenHistory: { showingHistory = true }
+                    onOpen: { destination = $0 }
                 )
-                .sheet(isPresented: $showingHistory) {
-                    HistoryScreen(
-                        history: data.history,
-                        onDelete: delete,
-                        onClose: { showingHistory = false }
-                    )
+                .sheet(item: $destination) { which in
+                    reading(which)
                 }
             }
         }
@@ -86,6 +82,43 @@ struct AppRoot: View {
             // Surfaced, never swallowed. A session that vanished silently is
             // the one thing this app must never do.
             Text(saveError ?? "")
+        }
+    }
+
+    @ViewBuilder
+    private func reading(_ which: HomeDestination) -> some View {
+        let close = { destination = nil }
+        switch which {
+        case .history:
+            HistoryScreen(history: data.history, onDelete: delete, onClose: close)
+        case .ledger:
+            LedgerScreen(history: data.history, onClose: close)
+        case .guide:
+            GuideScreen(onClose: close)
+        case .backup:
+            BackupScreen(data: data, onRestore: restore, onErase: erase, onClose: close)
+        }
+    }
+
+    /// Replaces the history wholesale, after the caller has confirmed the swap.
+    private func restore(_ incoming: AppData) {
+        do {
+            try store.save(incoming)
+            data = incoming
+            destination = nil
+        } catch {
+            saveError = error.localizedDescription
+        }
+    }
+
+    private func erase() {
+        do {
+            try store.save(.empty)
+            try store.saveInProgress(nil)
+            data = .empty
+            destination = nil
+        } catch {
+            saveError = error.localizedDescription
         }
     }
 

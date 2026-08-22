@@ -23,6 +23,23 @@ import SwiftUI
  *  though at the sizes here it does not need to.
  * ======================================================================== */
 
+enum HomeDestination: String, CaseIterable, Identifiable {
+    var id: String {
+        rawValue
+    }
+
+    case history, ledger, guide, backup
+
+    var title: String {
+        switch self {
+        case .history: "History"
+        case .ledger: "All time"
+        case .guide: "Guide"
+        case .backup: "Backup"
+        }
+    }
+}
+
 struct HomeScreen: View {
     let nextSession: String
     let otherSession: String
@@ -31,7 +48,8 @@ struct HomeScreen: View {
     let lastSession: SessionRecord?
 
     let onStart: (String) -> Void
-    let onOpenHistory: () -> Void
+    /// The way into the reading screens.
+    let onOpen: (HomeDestination) -> Void
 
     /// Home sits at the start of the day, so the sky sits at the start of its
     /// walk. The dawn belongs to the session, not to the menu.
@@ -69,12 +87,17 @@ struct HomeScreen: View {
                 .foregroundStyle(Ink.tertiary)
                 .frame(minHeight: Hit.minimum)
 
-                // The way into the reading screens. Quiet: they are read
-                // occasionally, not at 6:10am mid-workout.
-                Button("History", action: onOpenHistory)
-                    .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
-                    .frame(minHeight: Hit.minimum)
+                // Quiet, and on one line: these are read occasionally, not at
+                // 6:10am mid-workout, and four separate rows would compete with
+                // the one control that matters.
+                HStack(spacing: Space.section) {
+                    ForEach(HomeDestination.allCases, id: \.self) { destination in
+                        Button(destination.title) { onOpen(destination) }
+                            .font(TypeScale.microLabel)
+                            .foregroundStyle(Ink.tertiary)
+                            .frame(minHeight: Hit.minimum)
+                    }
+                }
             }
         }
         .padding(.horizontal, Space.gutter)
