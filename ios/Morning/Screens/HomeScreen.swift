@@ -31,6 +31,7 @@ struct HomeScreen: View {
     let lastSession: SessionRecord?
 
     let onStart: (String) -> Void
+    let onOpenHistory: () -> Void
 
     /// Home sits at the start of the day, so the sky sits at the start of its
     /// walk. The dawn belongs to the session, not to the menu.
@@ -67,6 +68,13 @@ struct HomeScreen: View {
                 .font(TypeScale.body)
                 .foregroundStyle(Ink.tertiary)
                 .frame(minHeight: Hit.minimum)
+
+                // The way into the reading screens. Quiet: they are read
+                // occasionally, not at 6:10am mid-workout.
+                Button("History", action: onOpenHistory)
+                    .font(TypeScale.microLabel)
+                    .foregroundStyle(Ink.tertiary)
+                    .frame(minHeight: Hit.minimum)
             }
         }
         .padding(.horizontal, Space.gutter)

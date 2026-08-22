@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F8525BB17B2655EAB943516 /* HistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */; };
 		9DF5540C13526E598B2DE70D /* SummaryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A834BB58E44D87754375E381 /* SummaryScreen.swift */; };
 		6B425B2FCF0269E84AC2B720 /* Daybreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4EDC5137F9FAB91B6964C /* Daybreak.swift */; };
 		5B1297F094812832230DCFEB /* Celebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70145487336A7308CD333E60 /* Celebration.swift */; };
@@ -74,6 +75,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryScreen.swift; sourceTree = "<group>"; };
 		A834BB58E44D87754375E381 /* SummaryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScreen.swift; sourceTree = "<group>"; };
 		12F4EDC5137F9FAB91B6964C /* Daybreak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Daybreak.swift; sourceTree = "<group>"; };
 		70145487336A7308CD333E60 /* Celebration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Celebration.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */,
 				A834BB58E44D87754375E381 /* SummaryScreen.swift */,
 				12F4EDC5137F9FAB91B6964C /* Daybreak.swift */,
 				1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */,
@@ -402,6 +405,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F8525BB17B2655EAB943516 /* HistoryScreen.swift in Sources */,
 				9DF5540C13526E598B2DE70D /* SummaryScreen.swift in Sources */,
 				6B425B2FCF0269E84AC2B720 /* Daybreak.swift in Sources */,
 				5B1297F094812832230DCFEB /* Celebration.swift in Sources */,

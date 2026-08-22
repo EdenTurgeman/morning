@@ -67,6 +67,13 @@ struct SummaryReviewHost: View {
     }
 }
 
+/// Boots History directly. `-screen history`
+struct HistoryReviewHost: View {
+    var body: some View {
+        HistoryScreen(history: Store().load().history, onDelete: { _ in }, onClose: {})
+    }
+}
+
 struct ReviewHost: View {
     let sessionKey: String?
     let progressOverride: Double?

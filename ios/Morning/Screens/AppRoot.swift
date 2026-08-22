@@ -21,6 +21,7 @@ struct AppRoot: View {
     @State private var data: AppData
     @State private var session: WorkoutSession?
     @State private var saveError: String?
+    @State private var showingHistory = false
     /// The session just finished, held so the summary can show it. Cleared when
     /// the summary is dismissed.
     @State private var finished: FinishedSession?
@@ -67,8 +68,16 @@ struct AppRoot: View {
                     load: load(for: nextKey),
                     progress: Week.progress(history: data.history),
                     lastSession: data.history.max { $0.timestamp < $1.timestamp },
-                    onStart: start
+                    onStart: start,
+                    onOpenHistory: { showingHistory = true }
                 )
+                .sheet(isPresented: $showingHistory) {
+                    HistoryScreen(
+                        history: data.history,
+                        onDelete: delete,
+                        onClose: { showingHistory = false }
+                    )
+                }
             }
         }
         .alert("Could not save", isPresented: .constant(saveError != nil)) {
@@ -130,6 +139,20 @@ struct AppRoot: View {
         session?.abandon()
         session = nil
         release()
+    }
+
+    /// Deletion keys off `ts`, the record's identity — never an index, which
+    /// would delete the wrong session the moment the list is sorted differently
+    /// from the file.
+    private func delete(_ record: SessionRecord) {
+        var updated = data
+        updated.history.removeAll { $0.timestamp == record.timestamp }
+        do {
+            try store.save(updated)
+            data = updated
+        } catch {
+            saveError = error.localizedDescription
+        }
     }
 
     private func release() {
