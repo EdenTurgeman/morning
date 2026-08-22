@@ -36,7 +36,8 @@ struct MorningApp: App {
                         sessionKey: Self.value(after: "-session"),
                         progressOverride: Self.progressOverride,
                         slot: Self.value(after: "-slot"),
-                        reps: Self.value(after: "-reps").flatMap(Int.init)
+                        reps: Self.value(after: "-reps").flatMap(Int.init),
+                        step: Self.value(after: "-step").flatMap(Int.init)
                     )
                 } else {
                     PrototypeLabView()

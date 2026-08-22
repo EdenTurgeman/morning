@@ -53,6 +53,11 @@ final class StudyDeckAcceptanceTests: XCTestCase {
                 "\(key) carries \(indices.count) cards on rests — eight cards in twenty minutes is homework"
             )
         }
+        // The exact steps, so a change to the fraction maths shows up here
+        // rather than as a card that silently stops appearing.
+        XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "A")), [6, 15])
+        XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "B")), [6, 15])
+
         // The summary's card is drawn by the summary, which is W7. What the
         // deck owes it is a longer think, because there is no timer to beat.
         XCTAssertEqual(Deck.summaryRevealDelay, 14)
