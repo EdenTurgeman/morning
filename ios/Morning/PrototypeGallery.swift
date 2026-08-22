@@ -179,10 +179,10 @@ struct PrototypeLabView: View {
 
     private var stageAnimation: Animation {
         if reduceMotion {
-            return .linear(duration: 0.12)
+            return Motion.stage(reduceMotion: true)
         }
         switch treatment {
-        case .atmospheric: return .easeInOut(duration: 0.44)
+        case .atmospheric: return Motion.stage(reduceMotion: false)
         case .precise: return .easeOut(duration: 0.22)
         case .tactile: return .spring(duration: 0.36, bounce: 0.14)
         }
@@ -202,7 +202,7 @@ private struct PrototypeMenu: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.025, green: 0.03, blue: 0.065)
+            Surface.labChrome
                 .ignoresSafeArea()
 
             ScrollView {
@@ -337,7 +337,7 @@ private struct PrototypeMenu: View {
             .buttonStyle(.plain)
             .padding(.horizontal, 20)
             .padding(.top, 10)
-            .background(Color(red: 0.025, green: 0.03, blue: 0.065).opacity(0.94))
+            .background(Surface.labChrome.opacity(0.94))
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -552,7 +552,7 @@ private struct SetPrototypeView: View {
                 accent: palette.accent
             ) {
                 PrototypeHaptics.shared.confirm(treatment: treatment)
-                withAnimation(reduceMotion ? .linear(duration: 0.01) : .spring(duration: 0.32, bounce: 0.24)) {
+                withAnimation(Motion.commit(reduceMotion: reduceMotion)) {
                     loggedPulse.toggle()
                 }
                 onAdvance()
@@ -595,7 +595,7 @@ private struct SetPrototypeView: View {
         } else if let previous = fixture.previous {
             if isBeating {
                 Text("Beating last time's \(previous)")
-                    .foregroundStyle(Color.morningSuccess)
+                    .foregroundStyle(Semantic.threshold)
             }
         } else {
             Text("First time — just go to failure")
@@ -624,10 +624,10 @@ private struct SetPrototypeView: View {
 
     private var stepAnimation: Animation {
         if reduceMotion {
-            return .linear(duration: 0.08)
+            return Motion.rep(reduceMotion: true)
         }
         switch treatment {
-        case .atmospheric: return .easeOut(duration: 0.18)
+        case .atmospheric: return Motion.rep(reduceMotion: false)
         case .precise: return .linear(duration: 0.12)
         case .tactile: return .spring(duration: 0.28, bounce: 0.22)
         }
@@ -722,9 +722,9 @@ private struct RepObject: View {
                     .font(.system(size: 92, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
-                    .foregroundStyle(isBeating ? Color.morningSuccess : .white)
+                    .foregroundStyle(isBeating ? Semantic.threshold : .white)
                     .shadow(
-                        color: isBeating ? Color.morningSuccess.opacity(0.38) : .clear,
+                        color: isBeating ? Semantic.threshold.opacity(0.38) : .clear,
                         radius: 8
                     )
                 Text("Reps")
@@ -740,7 +740,7 @@ private struct RepObject: View {
                     .font(.system(size: 88, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
-                    .foregroundStyle(isBeating ? Color.morningSuccess : .white)
+                    .foregroundStyle(isBeating ? Semantic.threshold : .white)
 
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {
@@ -750,13 +750,13 @@ private struct RepObject: View {
 
                         if previous != nil {
                             Rectangle()
-                                .fill(isBeating ? Color.morningSuccess : .white.opacity(0.56))
+                                .fill(isBeating ? Semantic.threshold : .white.opacity(0.56))
                                 .frame(width: 2, height: 13)
                                 .offset(x: proxy.size.width * 0.5)
                         }
 
                         Circle()
-                            .fill(isBeating ? Color.morningSuccess : .white)
+                            .fill(isBeating ? Semantic.threshold : .white)
                             .frame(width: 8, height: 8)
                             .offset(x: proxy.size.width * (0.5 + Double(delta) * 0.17) - 4)
                     }
@@ -783,19 +783,19 @@ private struct RepObject: View {
                     .overlay {
                         Circle()
                             .stroke(
-                                isBeating ? Color.morningSuccess : Color.white.opacity(0.18),
+                                isBeating ? Semantic.threshold : Color.white.opacity(0.18),
                                 lineWidth: isBeating ? 4 : 1
                             )
                     }
                     .shadow(color: .black.opacity(0.36), radius: 16, y: 10)
-                    .shadow(color: isBeating ? Color.morningSuccess.opacity(0.18) : .clear, radius: 7)
+                    .shadow(color: isBeating ? Semantic.threshold.opacity(0.18) : .clear, radius: 7)
 
                 VStack(spacing: 2) {
                     if let previous {
                         Text("LAST \(previous)")
                             .font(.caption2.weight(.bold).monospacedDigit())
                             .tracking(1)
-                            .foregroundStyle(isBeating ? Color.morningSuccess : .white.opacity(0.66))
+                            .foregroundStyle(isBeating ? Semantic.threshold : .white.opacity(0.66))
                     }
 
                     Text(reps, format: .number)
@@ -808,7 +808,7 @@ private struct RepObject: View {
                 }
 
                 Capsule()
-                    .fill(isBeating ? Color.morningSuccess : .white.opacity(0.34))
+                    .fill(isBeating ? Semantic.threshold : .white.opacity(0.34))
                     .frame(width: isBeating ? 32 : 20, height: 4)
                     .offset(y: -70)
             }
@@ -894,7 +894,7 @@ private struct RepStepButton: View {
             while !Task.isCancelled {
                 action()
                 try? await Task.sleep(for: .milliseconds(delay))
-                delay = max(60, Int(Double(delay) * repeatAcceleration))
+                delay = max(Motion.Hold.floor, Int(Double(delay) * repeatAcceleration))
             }
         }
     }
@@ -906,7 +906,7 @@ private struct RepStepButton: View {
 
     private var initialRepeatDelay: Int {
         switch treatment {
-        case .atmospheric: 410
+        case .atmospheric: Motion.Hold.firstDelay
         case .precise: 340
         case .tactile: 380
         }
@@ -914,7 +914,7 @@ private struct RepStepButton: View {
 
     private var repeatDelay: Int {
         switch treatment {
-        case .atmospheric: 230
+        case .atmospheric: Motion.Hold.repeatDelay
         case .precise: 170
         case .tactile: 210
         }
@@ -922,7 +922,7 @@ private struct RepStepButton: View {
 
     private var repeatAcceleration: Double {
         switch treatment {
-        case .atmospheric: 0.8
+        case .atmospheric: Motion.Hold.acceleration
         case .precise: 0.72
         case .tactile: 0.78
         }
@@ -996,7 +996,7 @@ private struct RestPrototypeView: View {
             if scenario == .myo {
                 Text("The 20-second rest IS the mechanism — don't stretch it")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(red: 1, green: 0.76, blue: 0.34))
+                    .foregroundStyle(Semantic.urgency)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
                     .padding(.top, 12)
@@ -1083,6 +1083,25 @@ private struct RestPrototypeView: View {
             guard !Task.isCancelled else { return }
             finishRest()
         }
+        .task(id: endDate) {
+            // The last five seconds, one pulse each, intensifying — so the count
+            // works with the phone on the floor and the volume off.
+            // `05-platform.md §3`. Every countdown gets this, the 20-second myo
+            // rest included: that rest IS the training stimulus, so knowing
+            // where you are in it matters more there, not less.
+            guard frozenRemaining == nil else { return }
+            for second in stride(from: 5, through: 1, by: -1) {
+                let fireAt = endDate.addingTimeInterval(-Double(second))
+                let wait = fireAt.timeIntervalSinceNow
+                if wait > 0 {
+                    try? await Task.sleep(for: .seconds(wait))
+                } else if wait < -0.5 {
+                    continue // this tick is already in the past
+                }
+                guard !Task.isCancelled else { return }
+                PrototypeHaptics.shared.countdown(second: second, treatment: treatment)
+            }
+        }
     }
 
     private func resetTimer() {
@@ -1094,9 +1113,7 @@ private struct RestPrototypeView: View {
     private func revealAnswer() {
         guard !answerRevealed else { return }
         PrototypeHaptics.shared.reveal(treatment: treatment)
-        let animation: Animation = reduceMotion
-            ? .easeOut(duration: 0.18)
-            : .spring(duration: 0.5, bounce: 0.12)
+        let animation = Motion.reveal(reduceMotion: reduceMotion)
         withAnimation(animation) {
             answerRevealed = true
         }
@@ -1188,9 +1205,7 @@ private struct RestTimerObject: View {
             in: namespace
         )
         .animation(
-            reduceMotion
-                ? .easeOut(duration: 0.18)
-                : .spring(duration: 0.55, bounce: 0.1),
+            Motion.timerResize(reduceMotion: reduceMotion),
             value: compact
         )
         .accessibilityElement(children: .combine)

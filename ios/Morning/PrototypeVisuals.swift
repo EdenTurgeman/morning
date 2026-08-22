@@ -164,42 +164,17 @@ private struct LegibilityScrim: View {
     let treatment: DawnTreatment
     let progress: Double
 
-    /// Near-black, faintly blue — pure black flattens the night out of the sky.
-    private static let ink = Color(red: 0.016, green: 0.02, blue: 0.039)
-
-    private var stops: [Gradient.Stop] {
-        switch treatment {
-        case .atmospheric:
-            // Follows the Atmospheric sky's own luminance: quiet where the sky
-            // is dark, strongest across the bottom third where it is warmest.
-            //
-            // It also scales with progress, because the sky it is holding back
-            // does. Measured on rendered frames, a fixed scrim that cleared the
-            // bar at twilight let the cue text, the Reps label and the footer
-            // fall to 6.2-6.5:1 by the time the palette reached gold.
-            let ramp = min(1, max(0, progress))
-            return [
-                .init(color: Self.ink.opacity(0.30), location: 0),
-                .init(color: Self.ink.opacity(0.14 + 0.04 * ramp), location: 0.38),
-                .init(color: Self.ink.opacity(0.20 + 0.08 * ramp), location: 0.58),
-                .init(color: Self.ink.opacity(0.48 + 0.08 * ramp), location: 0.78),
-                .init(color: Self.ink.opacity(0.64 + 0.07 * ramp), location: 1),
-            ]
-        case .precise, .tactile:
-            // These backdrops carry far less light, so they keep the gentler
-            // original shape.
-            return [
-                .init(color: Self.ink.opacity(0.36), location: 0),
-                .init(color: Self.ink.opacity(0.16), location: 0.42),
-                .init(color: Self.ink.opacity(0.10), location: 0.62),
-                .init(color: Self.ink.opacity(0.38), location: 1),
-            ]
-        }
-    }
-
     var body: some View {
         Rectangle()
-            .fill(LinearGradient(stops: stops, startPoint: .top, endPoint: .bottom))
+            .fill(
+                LinearGradient(
+                    stops: treatment == .atmospheric
+                        ? Scrim.atmospheric(progress: progress)
+                        : Scrim.comparison,
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .allowsHitTesting(false)
     }
 }

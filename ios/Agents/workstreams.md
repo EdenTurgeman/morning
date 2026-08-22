@@ -54,7 +54,7 @@ agent loses an hour to a stray comma.
 
 ---
 
-## W1 · Research pass and directions — `in progress`
+## W1 · Research pass and directions — `done`
 
 **Gate:** W0 done. **And you have run the web app and done a full session of A
 and a full session of B.** Non-negotiable — `ios-port/README.md` first-session
@@ -90,6 +90,16 @@ skipped. `02-design-brief.md §4` and `§5`.
 real iPhone, and **Eden has picked a direction.** Do not proceed past this
 without that. Extract patterns, never ship someone's brand.
 
+**Closed 2026-08-22.** `research-notes.md` written; Atmospheric, Precise and
+Tactile all run; Eden chose **Atmospheric Dawn**.
+
+One part of the gate could not be met here and was **carried to W11**, not
+waived: no physical iPhone has ever been connected to this clone, and no signing
+identity is configured, so "run on a real iPhone" — and with it haptic quality
+and 120Hz frame pacing — remains unverified. `device-checklist.md` is the right
+home for it and already lists those checks. Everything that a simulator *can*
+settle was settled and measured; see `ios/Docs/prototype-directions.md`.
+
 **Kickoff prompt**
 
 > Read `CLAUDE.md`, then `ios/Agents/00-handoff-log.md`, then the `ios-port/`
@@ -108,7 +118,7 @@ without that. Extract patterns, never ship someone's brand.
 
 ---
 
-## W2 · Design system — `todo`
+## W2 · Design system — `done`
 
 **Gate:** W1 done and a direction agreed by Eden.
 
@@ -131,6 +141,13 @@ materials, motion curves, **haptic vocabulary**. One file, written down, the way
 
 **Done when:** the file is written and the tokens exist in code, and the W1
 prototypes have been rebuilt on top of them without visual regression.
+
+**Closed 2026-08-22.** `ios/Docs/design-system.md` written; tokens live in
+`DesignTokens.swift`, `DesignMotion.swift` and `DesignHaptics.swift`. The
+Atmospheric prototypes were rebuilt on them and re-measured: no regression, and
+the weakest text zone on any screen at any progress is 7.00:1 against a 6.6:1
+bar. The haptic table is complete, including the countdown pulse that was
+previously missing and is now wired to every rest timer.
 
 **Kickoff prompt**
 

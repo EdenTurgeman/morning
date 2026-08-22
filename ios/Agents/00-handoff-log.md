@@ -8,6 +8,60 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · W2 design system · Claude Opus 5
+
+**Workstream:** W2 — Design system (done). W1 closed.
+
+**What I did**
+- Wrote `ios/Docs/design-system.md` in full: direction, colour, ink with
+  measured contrast, semantic colour, the scrim, type, spacing, hit targets,
+  material, motion with every reduced form, the complete haptic table, and the
+  sound design carried forward from `05-platform.md §3`.
+- Implemented it as three token files — `DesignTokens.swift`,
+  `DesignMotion.swift`, `DesignHaptics.swift` — and rebuilt the Atmospheric
+  prototypes on them. Re-measured: no regression.
+- Added `ios/Tools/add-source-file.py`. The project uses classic file references,
+  so a new file needs four correct pbxproj entries; doing that by hand is how a
+  project file gets corrupted.
+- Deleted the duplicate `DawnPalette`, `Color.morningSuccess`, the per-treatment
+  haptic profile structs and the scattered colour literals they fed.
+- **Wired the countdown haptic**, which the vocabulary required and nothing was
+  playing: one pulse per second through the last five, intensifying, on every
+  timer including the 20-second myo rest.
+- Ran `./scripts/verify-ios.sh`; every phase passes. CI green.
+
+**Decisions taken**
+- **Tokens record what the design is, not what I assumed.** My first
+  `Motion.Hold` and `Motion.rep` values were invented and did not match the
+  running prototypes. Corrected the tokens to the implemented Atmospheric values
+  rather than changing behaviour to match a guess — and fixed the two figures
+  `prototype-directions.md` had already stated wrongly.
+- The haptic vocabulary is one set of events; the three W1 treatments differ by
+  a sharpness tilt only. Product meaning is identical across them.
+- Precise and Tactile are frozen comparison artifacts. They keep their own
+  literals and the gentler scrim, and they do not constrain the system.
+- **W1's device gate is carried to W11, not waived.** See the landmine below.
+
+**Landmines**
+- **The device gate is still open and I could not close it.** No physical iPhone
+  has ever been connected to this clone and no signing identity is configured,
+  so `devicectl` and `xctrace` see simulators only. Haptic quality and 120Hz
+  frame pacing are unverified. Every haptic pattern in `DesignHaptics.swift` is
+  designed but has never been felt — the numbers are reasoned, not tuned.
+- `HapticVocabulary.complete` is defined and deliberately not wired to anything.
+  It belongs to W7, against the Daybreak choreography it has to land on.
+- `CloudTexture` builds three 1024×256 noise fields on first access, on the main
+  actor. Fast enough not to show at launch here; still CPU work in a `static
+  let` and worth profiling on device.
+- `add-source-file.py` finds a group by `path = <name>;`. There is no `Design`
+  group — the token files sit flat in `Morning/`. Adding a nested group needs a
+  PBXGroup by hand first.
+
+**Assertions:** 0 of 53 passing (53 skipped) — W3 is where that changes.
+
+**Next:** W3 — foundations and the acceptance suite. It has no UI and its gate
+(W0) is long met, so it can start immediately.
+
 ## 2026-08-22 · W1 living dawn sky · Claude Opus 5
 
 **Workstream:** W1 — Research pass and directions (in progress)

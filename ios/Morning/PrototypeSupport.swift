@@ -1,10 +1,6 @@
 import CoreHaptics
 import SwiftUI
 
-extension Color {
-    static let morningSuccess = Color(red: 0.2, green: 0.83, blue: 0.6)
-}
-
 struct SetFixture {
     let exercise: String
     let sub: String?
@@ -239,74 +235,6 @@ struct RestFixture {
     }
 }
 
-struct DawnPalette {
-    let progress: Double
-
-    var accent: Color {
-        interpolate(stops: accentStops)
-    }
-
-    var zenith: Color {
-        let progressValue = min(1, max(0, progress))
-        return Color(
-            red: 0.015 + progressValue * 0.025,
-            green: 0.02 + progressValue * 0.018,
-            blue: 0.055 + progressValue * 0.018
-        )
-    }
-
-    /// The accent, lifted for use as **text**.
-    ///
-    /// The ramp's raw values are picked to be a light source — the sky, the
-    /// ring, the progress bar, the primary fill. Used as small text on a lit
-    /// background the darkest of them measures 4.59:1, barely over AA and well
-    /// under this app's 6.6:1 tertiary bar. Lifting toward white keeps the hue
-    /// unmistakably accent-family while clearing the bar at every progress.
-    ///
-    /// Rule: the raw `accent` fills and lights; `accentText` is the only one
-    /// that carries glyphs.
-    var accentText: Color {
-        accent.mix(with: .white, by: 0.42, in: .perceptual)
-    }
-
-    var middle: Color {
-        accent.opacity(0.35)
-    }
-
-    var horizon: Color {
-        accent
-    }
-
-    private var accentStops: [(Double, Color)] {
-        [
-            (0, Color(red: 0x6F / 255.0, green: 0x80 / 255.0, blue: 0xE0 / 255.0)),
-            (0.26, Color(red: 0xA9 / 255.0, green: 0x74 / 255.0, blue: 0xE3 / 255.0)),
-            (0.5, Color(red: 0xED / 255.0, green: 0x6B / 255.0, blue: 0xAF / 255.0)),
-            (0.74, Color(red: 0xFF / 255.0, green: 0x82 / 255.0, blue: 0x71 / 255.0)),
-            (1, Color(red: 0xFF / 255.0, green: 0xB4 / 255.0, blue: 0x40 / 255.0)),
-        ]
-    }
-
-    private func interpolate(stops: [(Double, Color)]) -> Color {
-        let progressValue = min(1, max(0, progress))
-        for index in 1 ..< stops.count where progressValue <= stops[index].0 {
-            let lower = stops[index - 1]
-            let upper = stops[index]
-            let local = (progressValue - lower.0) / (upper.0 - lower.0)
-            return lower.1.mix(with: upper.1, by: local, in: .perceptual)
-        }
-        return stops.last?.1 ?? .white
-    }
-}
-
-private struct ThresholdHapticProfile {
-    let firstIntensity: Float
-    let firstSharpness: Float
-    let secondIntensity: Float
-    let secondSharpness: Float
-    let delay: TimeInterval
-}
-
 @MainActor
 final class PrototypeHaptics {
     static let shared = PrototypeHaptics()
@@ -323,90 +251,51 @@ final class PrototypeHaptics {
     }
 
     func rep(treatment: DawnTreatment) {
-        let profile = repProfile(for: treatment)
-        play(key: "rep-\(treatment.rawValue)", events: [
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: profile.intensity),
-                    .init(parameterID: .hapticSharpness, value: profile.sharpness),
-                ],
-                relativeTime: 0
-            ),
-        ])
+        play(key: "rep-\(treatment.rawValue)", beats: shaped(HapticVocabulary.rep, for: treatment))
     }
 
     func threshold(treatment: DawnTreatment) {
-        let profile = thresholdProfile(for: treatment)
-        play(key: "threshold-\(treatment.rawValue)", events: [
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: profile.firstIntensity),
-                    .init(parameterID: .hapticSharpness, value: profile.firstSharpness),
-                ],
-                relativeTime: 0
-            ),
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: profile.secondIntensity),
-                    .init(parameterID: .hapticSharpness, value: profile.secondSharpness),
-                ],
-                relativeTime: profile.delay
-            ),
-        ])
+        play(key: "threshold-\(treatment.rawValue)", beats: shaped(HapticVocabulary.threshold, for: treatment))
     }
 
     func confirm(treatment: DawnTreatment) {
-        let sharpness: Float = treatment == .precise ? 0.66 : 0.42
-        play(key: "confirm-\(treatment.rawValue)", events: [
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.62),
-                    .init(parameterID: .hapticSharpness, value: sharpness),
-                ],
-                relativeTime: 0
-            ),
-        ])
+        play(key: "confirm-\(treatment.rawValue)", beats: shaped(HapticVocabulary.logged, for: treatment))
     }
 
     func reveal(treatment: DawnTreatment) {
-        let sharpness: Float = treatment == .tactile ? 0.18 : 0.26
-        play(key: "reveal-\(treatment.rawValue)", events: [
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.2),
-                    .init(parameterID: .hapticSharpness, value: sharpness),
-                ],
-                relativeTime: 0
-            ),
-        ])
+        play(key: "reveal-\(treatment.rawValue)", beats: shaped(HapticVocabulary.reveal, for: treatment))
     }
 
     func zero(treatment: DawnTreatment) {
-        let sharpness: Float = treatment == .precise ? 0.86 : 0.62
-        play(key: "zero-\(treatment.rawValue)", events: [
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.9),
-                    .init(parameterID: .hapticSharpness, value: sharpness),
-                ],
-                relativeTime: 0
-            ),
-            CHHapticEvent(
-                eventType: .hapticContinuous,
-                parameters: [
-                    .init(parameterID: .hapticIntensity, value: 0.38),
-                    .init(parameterID: .hapticSharpness, value: 0.24),
-                ],
-                relativeTime: 0.025,
-                duration: 0.18
-            ),
-        ])
+        play(key: "zero-\(treatment.rawValue)", beats: shaped(HapticVocabulary.zero, for: treatment))
+    }
+
+    func countdown(second: Int, treatment: DawnTreatment) {
+        play(
+            key: "countdown-\(second)-\(treatment.rawValue)",
+            beats: shaped(HapticVocabulary.countdown(second: second), for: treatment)
+        )
+    }
+
+    /// The three W1 treatments differ in feel, not in vocabulary: the same
+    /// events, tilted in sharpness. Precise is crisper, Tactile is softer and
+    /// more physical, Atmospheric sits between them. The product meaning of
+    /// every pattern is identical across the three.
+    private func shaped(_ beats: [HapticBeat], for treatment: DawnTreatment) -> [HapticBeat] {
+        let tilt: Float = switch treatment {
+        case .atmospheric: 0
+        case .precise: 0.18
+        case .tactile: -0.16
+        }
+        guard tilt != 0 else { return beats }
+        return beats.map {
+            HapticBeat(
+                time: $0.time,
+                intensity: $0.intensity,
+                sharpness: min(1, max(0, $0.sharpness + tilt)),
+                duration: $0.duration
+            )
+        }
     }
 
     private func prepare() {
@@ -435,11 +324,12 @@ final class PrototypeHaptics {
         }
     }
 
-    private func play(key: String, events: [CHHapticEvent], retry: Bool = true) {
+    private func play(key: String, beats: [HapticBeat], retry: Bool = true) {
+        let events = beats.map(\.event)
         guard let engine else {
             prepare()
             if retry {
-                play(key: key, events: events, retry: false)
+                play(key: key, beats: beats, retry: false)
             }
             return
         }
@@ -459,44 +349,8 @@ final class PrototypeHaptics {
         } catch {
             prepare()
             if retry {
-                play(key: key, events: events, retry: false)
+                play(key: key, beats: beats, retry: false)
             }
-        }
-    }
-
-    private func repProfile(for treatment: DawnTreatment) -> (intensity: Float, sharpness: Float) {
-        switch treatment {
-        case .atmospheric: (0.28, 0.46)
-        case .precise: (0.3, 0.88)
-        case .tactile: (0.38, 0.58)
-        }
-    }
-
-    private func thresholdProfile(
-        for treatment: DawnTreatment
-    ) -> ThresholdHapticProfile {
-        switch treatment {
-        case .atmospheric: ThresholdHapticProfile(
-                firstIntensity: 0.44,
-                firstSharpness: 0.5,
-                secondIntensity: 0.72,
-                secondSharpness: 0.62,
-                delay: 0.075
-            )
-        case .precise: ThresholdHapticProfile(
-                firstIntensity: 0.46,
-                firstSharpness: 0.86,
-                secondIntensity: 0.82,
-                secondSharpness: 0.96,
-                delay: 0.045
-            )
-        case .tactile: ThresholdHapticProfile(
-                firstIntensity: 0.52,
-                firstSharpness: 0.58,
-                secondIntensity: 0.8,
-                secondSharpness: 0.7,
-                delay: 0.06
-            )
         }
     }
 }

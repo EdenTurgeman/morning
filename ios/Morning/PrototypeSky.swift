@@ -265,10 +265,10 @@ struct StarField: View {
     }
 
     private func drawMeteor(in context: inout GraphicsContext, size: CGSize, time: Double) {
-        let cycle = 11.0
+        let cycle = Motion.Drift.meteorCycle
         let slot = floor(time / cycle)
         let local = time - slot * cycle
-        let flight = 1.15
+        let flight = Motion.Drift.meteorFlight
         guard local < flight else { return }
 
         // Deterministic per slot, so it never lands in the same place twice.
@@ -359,7 +359,7 @@ struct CrepuscularRays: View {
         .allowsHitTesting(false)
         .onAppear {
             guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 150).repeatForever(autoreverses: true)) {
+            withAnimation(.easeInOut(duration: Motion.Drift.rays).repeatForever(autoreverses: true)) {
                 angle = 1.6
             }
         }
@@ -387,7 +387,7 @@ struct AtmosphericSky: View {
             let size = proxy.size
 
             ZStack {
-                Color(red: 0.012, green: 0.018, blue: 0.05)
+                Surface.night
 
                 // 1. The sky proper. The zenith stays deep blue at every
                 //    progress; only the horizon takes the live warmth.
@@ -467,7 +467,7 @@ struct AtmosphericSky: View {
                     ),
                     bandHeight: size.height * 0.46,
                     opacity: reduceTransparency ? 0.30 : 0.58,
-                    period: 200
+                    period: Motion.Drift.cloudFar
                 )
                 .position(x: size.width / 2, y: size.height * 0.40)
 
@@ -484,7 +484,7 @@ struct AtmosphericSky: View {
                     ),
                     bandHeight: size.height * 0.34,
                     opacity: reduceTransparency ? 0.26 : 0.52,
-                    period: 128
+                    period: Motion.Drift.cloudNear
                 )
                 .position(x: size.width / 2, y: size.height * 0.68)
 

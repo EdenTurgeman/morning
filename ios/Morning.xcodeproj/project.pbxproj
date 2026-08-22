@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */; };
+		50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149EF8C3DBE09E7D14729069 /* DesignMotion.swift */; };
+		54939B36D54BD7D003DC78CC /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */; };
 		01CDD70DCAAC5F0B4C5634FC /* compiled-steps.json in Resources */ = {isa = PBXBuildFile; fileRef = 23A673461F31BBF2CAD31193 /* compiled-steps.json */; };
 		11B3830861A8042CFE2EC16B /* guide.json in Resources */ = {isa = PBXBuildFile; fileRef = 0467526E89A9AC7036DABA5C /* guide.json */; };
 		44705BBFF21CB2A5D7E56C1C /* one-year.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = 1A4A7286BC04B821EFB83F64 /* one-year.seed.json */; };
@@ -48,6 +51,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignHaptics.swift; sourceTree = "<group>"; };
+		149EF8C3DBE09E7D14729069 /* DesignMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignMotion.swift; sourceTree = "<group>"; };
+		5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		0467526E89A9AC7036DABA5C /* guide.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = guide.json; sourceTree = "<group>"; };
 		14E9A8930D24EFADB8C754B9 /* empty.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = empty.seed.json; sourceTree = "<group>"; };
 		189E6B6DEBDD2BA7F18FF4A3 /* MorningTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MorningTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,6 +121,9 @@
 		449C7FBA832FA356A9500DA8 /* Morning */ = {
 			isa = PBXGroup;
 			children = (
+				FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */,
+				149EF8C3DBE09E7D14729069 /* DesignMotion.swift */,
+				5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */,
 				DACFE1E6FE33BF6F63E6AF0C /* Debug */,
 				00B7138305DB7E908846968E /* Model */,
 				1C864FA44DDA41CB014530FA /* Resources */,
@@ -316,6 +325,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */,
+				50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */,
+				54939B36D54BD7D003DC78CC /* DesignTokens.swift in Sources */,
 				E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */,
 				8B39848510BCA22B6E31BDD9 /* Program.swift in Sources */,
 				E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */,
