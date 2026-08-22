@@ -113,12 +113,23 @@ web component and every model property no view reads. Five gaps, one large:
   `Cue.beatIt` was composed, tested and never played; `RepDial.tsx` fires its
   equivalent from exactly that spot.
 - **Logging a set played no tone.** `Cue.confirm`, same story.
-- **The celebration does not differ by tier.** `Celebration.milestoneBurst` and
-  `.rays` are computed, asserted by tests, and read by no view — so a lifetime
-  milestone and a plateau get identical choreography. `04-rules.md §5` has a
-  column for each. **Still open** — see below.
-- **History has no week strip.** `§7` asks for one and the file's own header
-  claims one. **Still open.**
+- **The celebration did not differ by tier.** `Celebration.milestoneBurst` and
+  `.rays` were computed, asserted by tests, and read by no view — so a lifetime
+  milestone and a plateau got identical choreography, though `04-rules.md §5`
+  has a column for each. Rays are gated on the tier now, and the burst is
+  **more light rather than confetti**: the web throws paper (`src/lib/burst.ts`)
+  and Eden's instruction is to take the behaviour, not the mechanism. Paper in a
+  sunrise would be a second visual language and the wrong one, so the sun flares
+  wider and harder instead. Measured across the three: plateau 20.1, record
+  22.5, week-complete 23.4.
+- **History had no week strip.** `§7` asks for "a week strip **and** a year
+  grid" and this file's own header always claimed both. `WeeklyProgress.recent`
+  was computed for it and read by nothing. The grid answers "which mornings";
+  the strip answers "which weeks held together", which is the unit the streak is
+  actually measured in.
+- `-tier week-complete` is new, because there was no way to reach a bursting
+  tier at all — which is how `milestoneBurst` went unrendered without anyone
+  noticing.
 
 **How to find this class of bug:** list every stored property on a model type
 and grep the view layer for a read of it. Two of `Celebration`'s seven fields

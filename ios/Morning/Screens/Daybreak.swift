@@ -175,11 +175,19 @@ struct Daybreak: View {
                     .position(x: size.width / 2, y: horizonY)
 
                 // 0.70 — rays bloom outward. Scale and opacity, never rotation.
+                //
+                // Gated on the TIER. `04-rules.md §5` has a column for rays and
+                // a column for confetti, tier by tier, and the port read
+                // neither — so a lifetime milestone and a plateau got identical
+                // choreography. Seven of the eleven tiers earn rays; the four
+                // that do not are `weight-changed`, `plateau`, `matched` and
+                // `done`, all of which are honest-but-flat outcomes that should
+                // not be dressed up.
                 Rays(accent: Semantic.urgency)
                     .frame(width: size.width * 1.9, height: size.width * 1.9)
                     .position(x: size.width / 2, y: horizonY)
-                    .scaleEffect(0.6 + 0.4 * ramp(elapsed, from: beats.rays, over: 0.9))
-                    .opacity(ramp(elapsed, from: beats.rays, over: 0.7) * 0.38)
+                    .scaleEffect((0.6 + 0.4 * ramp(elapsed, from: beats.rays, over: 0.9)) * burstScale)
+                    .opacity(celebration.rays ? ramp(elapsed, from: beats.rays, over: 0.7) * 0.38 * burstGain : 0)
                     // The rays fan up behind the copy, so they are held back
                     // where the copy is and let go below it.
                     .mask {
@@ -220,12 +228,33 @@ struct Daybreak: View {
                 // asked for that too.
                 Rectangle()
                     .fill(Semantic.urgency)
-                    .opacity(flash(elapsed) * (reduceMotion ? 0.06 : 0.22))
+                    .opacity(flash(elapsed) * (reduceMotion ? 0.06 : 0.22) * burstGain)
                     .ignoresSafeArea()
             }
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
+    }
+
+    /// The milestone burst, in this app's own material rather than confetti.
+    ///
+    /// `04-rules.md §5` calls it confetti because the web build throws paper
+    /// (`src/lib/burst.ts`). Eden's instruction is to take the behaviour, not
+    /// the mechanism: what has to survive is that **crossing a lifetime
+    /// threshold, sweeping every set, hitting a streak milestone or completing
+    /// a week is visibly bigger than an ordinary morning.** Paper confetti in a
+    /// sunrise would be a second visual language and the wrong one — so the
+    /// burst is simply more light. The sun flares wider and harder.
+    ///
+    /// Deliberately restrained. The app is not gamified and the reward is being
+    /// told something true; this is emphasis on a moment that earned it, not a
+    /// prize.
+    private var burstGain: Double {
+        celebration.milestoneBurst ? 1.55 : 1
+    }
+
+    private var burstScale: Double {
+        celebration.milestoneBurst ? 1.12 : 1
     }
 
     /// Overshoots at the top and settles, so the sun has weight rather than
