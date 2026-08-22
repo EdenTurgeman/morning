@@ -396,7 +396,7 @@ inheriting it: see `design-system.md`.
 
 ---
 
-## W7 · Summary, Daybreak and the celebration tiers — `todo`
+## W7 · Summary, Daybreak and the celebration tiers — `done`
 
 **Gate:** W6 done.
 
@@ -425,6 +425,17 @@ inheriting it: see `design-system.md`.
 - **Un-skip and implement: `CelebrationAcceptanceTests` (6).**
 
 **Done when:** 47 of 53 pass.
+
+**Closed 2026-08-22.** 56 of 58 pass — every assertion except the two
+`testPhase2` tests, which are deliberately out of v1. The ledger was ported here
+too, because the top tier diffs it, which also closes **W9's logic**: all four
+`LedgerAcceptanceTests` pass.
+
+Daybreak's choreography is the web build's, ported beat for beat from the header
+comment `§8` says to read first. Everything derives from one elapsed value read
+off an absolute start date — the native equivalent of "CSS keyframes with
+delays, cannot half-play if a frame is dropped", because no stage can
+desynchronise from another when there is only one clock.
 
 **Kickoff prompt**
 

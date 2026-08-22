@@ -30,7 +30,9 @@ struct MorningApp: App {
             // for review, and `-screen lab` still opens the W1 direction lab —
             // it is the record of how the look was chosen and stays runnable.
             Group {
-                if Self.requestedScreen == "set" {
+                if Self.requestedScreen == "summary" {
+                    SummaryReviewHost(tier: Self.value(after: "-tier"))
+                } else if Self.requestedScreen == "set" {
                     ReviewHost(
                         sessionKey: Self.value(after: "-session"),
                         progressOverride: Self.progressOverride,
