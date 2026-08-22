@@ -47,7 +47,7 @@ struct ExerciseMotionBay: View {
             Text("MOVEMENT")
                 .font(.caption2.weight(.semibold))
                 .tracking(1.6)
-                .foregroundStyle(.white.opacity(0.58))
+                .foregroundStyle(.white.opacity(0.62))
                 .padding(.horizontal, 13)
                 .padding(.vertical, 10)
         }

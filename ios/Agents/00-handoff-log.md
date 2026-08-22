@@ -8,6 +8,66 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · W1 living dawn sky · Claude Opus 5
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Ran `bootstrap.sh --check` and `verify-ios.sh` on the inherited tree: all green.
+- Built a registration-tolerant contrast harness that snaps to the actual glyph
+  rows before measuring. The previous hand-placed bands drifted onto a gradient
+  and a ring arc, reporting 1.3:1 and 4.87:1 for zones that actually measure
+  6.6:1 and 7.7:1. Do not trust a fixed y-band on a screen whose layout moves.
+- Simulated arm's-length and dark-room legibility from physics rather than by
+  eye: acuity-limited sheets at 0.6/1.2/1.5/2.0 m (1 arcminute at the iPhone 16
+  Pro's 460 ppi), and a low-brightness black-crush model.
+- **Rebuilt the Atmospheric sky after Eden rejected it as boring.** It was one
+  static mesh, 34 fixed dots and a scrim; the web `Sky.tsx` it was meant to
+  succeed has eight layers and four animations. New `PrototypeSky.swift` carries
+  ozone band, haze, twinkling stars, meteors, progress-carrying crepuscular
+  rays, two parallax cloud banks and anti-banding grain.
+- Reshaped the legibility scrim, which was ramped backwards, and made it scale
+  with progress. Every text zone now clears the brief's 6.6:1 tertiary bar
+  across the whole session; weakest is 7.00:1, up from 5.33:1.
+- Fixed three under-bar elements: primary button label to full black, MOVEMENT
+  to white 0.62, superset warning line lifted 42% toward white.
+- Added a `-progress` launch argument and captured the full dawn walk.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Atmospheric Dawn is the direction. Eden said "proceed to W2", which is gated on
+  a chosen direction, and he had already named Atmospheric as his preference.
+  Flagged to him in-session so he can correct it.
+- The sky's structure is ported from the web build's *reasoning*, not its code.
+  Zenith never takes the accent hue; cloud noise is baked once and translated.
+- The scrim is a function of progress. A fixed scrim that cleared the bar at
+  twilight let three elements fall below it by the time the palette reached gold.
+- The primary button label at 5.84:1 at progress 0.00 is a deliberate exception,
+  recorded with its reasoning. Lightening the accent to fix it would distort a
+  hand-picked ramp for a figure that already clears AA-large twice over.
+- Still no third-party animation dependency. Native `MeshGradient`, `Canvas`,
+  `TimelineView` and baked `CGImage` tiles cover all of it.
+
+**Landmines**
+- **Physical-device work remains impossible here.** `devicectl` and `xctrace`
+  show simulators only, and no development team is set for signing. Haptic
+  quality and 120Hz frame pacing are therefore still unverified — the two W1
+  items nobody can close without Eden's phone.
+- The distance and dark-room simulations model *spatial acuity* and *low-brightness
+  black crush*. They do not model glare, dark adaptation or panel calibration.
+  10.1% of the Set frame sits at code ≥200, almost all of it the primary button —
+  the glare candidate at 6am, and only the real phone can settle it.
+- `CloudTexture` builds three 1024×256 noise fields on first access, on the main
+  actor. It is fast enough not to show at launch here, but it is CPU work in a
+  `static let` and worth profiling on device.
+- The offline replica of the noise algorithm lives in the scratchpad, not the
+  repo. If `CloudTexture.make` changes, that replica silently stops matching.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** W2 — design system. The sky's constants (palette, scrim ramp, drift
+periods, contrast bars) are the first tokens it should absorb.
+
 ## 2026-08-22 · W1 Atmospheric lead refinement · GPT-5.6 Sol
 
 **Workstream:** W1 — Research pass and directions (in progress)

@@ -127,7 +127,18 @@ struct PrototypeLabView: View {
         _mode = State(initialValue: selectedMode)
         _setScenario = State(initialValue: SetScenario.scenario(for: value))
         _restScenario = State(initialValue: selectedRestScenario)
-        _progress = State(initialValue: selectedRestScenario == .myo ? 0.74 : 0.42)
+        // `-progress 0.85` overrides the scenario default. Reviewing the sky at
+        // several progress values is the only way to check the claim that the
+        // session's position is readable from the environment alone.
+        let defaultProgress = selectedRestScenario == .myo ? 0.74 : 0.42
+        var chosenProgress = defaultProgress
+        if let flag = arguments.firstIndex(of: "-progress"),
+           arguments.indices.contains(flag + 1),
+           let parsed = Double(arguments[flag + 1])
+        {
+            chosenProgress = min(1, max(0, parsed))
+        }
+        _progress = State(initialValue: chosenProgress)
         _isPresentingPrototype = State(initialValue: !value.contains("menu"))
     }
 
@@ -490,7 +501,10 @@ private struct SetPrototypeView: View {
                 if fixture.straightIntoNext {
                     Text("No rest after this — straight into the next one.")
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(palette.accent)
+                        // The raw accent is too dark to carry text over a lit
+                        // sky — measured 5.48:1. Lifted toward white it stays
+                        // unmistakably accent-family and clears the bar.
+                        .foregroundStyle(palette.accent.mix(with: .white, by: 0.42, in: .perceptual))
                         .padding(.top, 4)
                 }
             }

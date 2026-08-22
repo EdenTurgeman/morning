@@ -12,7 +12,7 @@ struct DawnPrimaryButton: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity)
                 .frame(height: 68)
-                .foregroundStyle(Color.black.opacity(0.82))
+                .foregroundStyle(Color.black)
                 .background {
                     if treatment == .tactile {
                         RoundedRectangle(cornerRadius: 22)

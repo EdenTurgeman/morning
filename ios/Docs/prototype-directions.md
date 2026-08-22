@@ -279,3 +279,129 @@ w1-lead-atmospheric-menu.png
 w1-lead-precise-set.png
 w1-lead-tactile-set.png
 ```
+
+## The sky, rebuilt as a living dawn
+
+Eden's review of the focused lead pass was blunt: *"The background of the app
+during the workouts is just too boring, our previous one had animations and
+stuff, right now it's just boring with the halo design."*
+
+He was right, and the diagnosis was specific. The native Atmospheric backdrop
+was one flat colour, one static `MeshGradient`, 34 fixed dots and a scrim.
+Nothing moved. The web build's `src/components/Sky.tsx` — which this port had
+not actually read — carries eight layers and four independent animations, and
+its header documents why each one exists.
+
+This pass ports that reasoning rather than that code. `PrototypeSky.swift`.
+
+### What the sky is now
+
+| Layer | Carries | Motion |
+|---|---|---|
+| Base + `MeshGradient` | The dawn palette. Zenith stays deep blue; only the horizon takes the live warmth | with progress |
+| Ozone band | The purple-pink band between blue zenith and warm ground | opacity peaks mid-session on a sine, not a ramp |
+| Haze | Atmosphere is denser near the ground | with progress |
+| Stars | How early it still is | twinkle on individual phases; thin out with progress |
+| Meteor | That the sky is not a loop | one per ~11s while the sky is dark enough to hold stars |
+| Crepuscular rays | The sun, without a sun — **strengthening** with progress | 150s drift |
+| Two cloud banks | Depth, through parallax | 200s and 128s, opposite scales |
+| Grain | Stops the gradients banding on OLED | static, deliberately |
+
+### Decisions inside it
+
+- **The zenith never takes the accent hue.** Rayleigh scattering is
+  wavelength-dependent, so the top of a real sky stays blue at the height of a
+  sunrise. Tinting everything with the live accent is what makes a sky read as
+  a coloured wash.
+- **Cloud noise is baked once** into a tiling `CGImage`, then translated. The
+  web build makes the same call for the same reason: generating noise per frame
+  across a screen held awake for twenty minutes is not affordable, and a
+  translated bitmap is free.
+- **The streak ratio is the whole trick.** Low frequency across x, high down y.
+  The first attempt had it inverted and produced vertical streaks, which read as
+  screen noise rather than cloud.
+- **One tile covers the band vertically.** A vertically repeating tile reads as
+  banding, which is the opposite of cloud. The tile then repeats horizontally
+  and travels exactly one tile width per cycle, so the loop lands on an
+  identical frame.
+- **Drift runs on repeating transform animations, not a per-frame clock.** Only
+  the star Canvas sits inside `TimelineView`. Nothing mutates observable state
+  per frame; nothing animates a blur radius or a mask.
+- **Still no sun disc and no bottom halo.** Both were removed earlier as
+  decoration competing with the copy, and they stay removed. The rays are the
+  sun's presence without its body — and they grow with progress, so they carry
+  state rather than merely moving.
+
+### The legibility trade, measured
+
+A richer sky costs contrast, which is exactly the risk `02-design-brief.md §5`
+names for this direction: *"The risk is mush — atmosphere fighting legibility at
+6am."* It was measured rather than guessed, on rendered frames.
+
+Adding the sky pushed cue 2 from 8.31:1 to 6.43:1, the footer from 6.86:1 to
+5.56:1 and Rest's next-exercise meta line from 7.41:1 to 5.96:1 — three
+elements under the brief's 6.6:1 tertiary bar.
+
+The fix was the web build's own layer 7, which the native port had shaped
+backwards: heaviest at the top, where the sky is already near-black, and
+lightest at 62%, right where the horizon warmth peaks. Reshaped to follow the
+sky's actual luminance — and **scaled with progress, because the sky it holds
+back is** — every text element now clears the bar across the entire session:
+
+| Element | Flat sky | Living sky, old scrim | Living sky, progress scrim |
+|---|---|---|---|
+| cue 1 | 8.72:1 | 7.04:1 | 7.59:1 |
+| cue 2 | 8.31:1 | 6.43:1 | 7.40:1 |
+| counter | 10.49:1 | 8.48:1 | 11.63:1 |
+| `Reps` | 5.67:1 | 5.33:1 | 7.33:1 |
+| footer | 6.86:1 | 5.56:1 | 7.34:1 |
+| Rest · next meta | 7.41:1 | 5.96:1 | 7.92:1 |
+
+Measured at progress 0.00 / 0.20 / 0.42 / 0.65 / 0.85 / 1.00, the weakest text
+zone on the Set screen is **7.00:1**. The scrim sits behind content, so it
+lowers background luminance without touching the glyphs — which is what makes it
+buy contrast rather than cost it.
+
+Three elements were also fixed directly: the primary button label went to full
+black (5.76 → 6.98:1), `MOVEMENT` to `white 0.62` (6.59 → 7.35:1), and the
+superset warning line — which the raw accent cannot carry over a lit sky at
+5.48:1 — was lifted 42% toward white, reaching 9.00:1 while staying
+unmistakably accent-family.
+
+### The one measured exception
+
+The **primary button label reads 5.84:1 at progress 0.00**, rising to 6.98:1 by
+mid-session. At twilight the accent is a mid-lightness indigo, so black-on-accent
+cannot reach 6.6:1 there.
+
+This is left alone deliberately. The 6.6:1 figure is the bar for *tertiary body
+text*; this is a 68pt filled control whose label clears WCAG AA for large text
+nearly twice over. The alternative — lightening the accent at low progress —
+would distort a ramp whose five stops are hand-picked and load-bearing:
+*"a formula gave an even ramp; it did not give a sunrise."* Damaging the app's
+central idea to move a button label from 5.84:1 to 6.6:1 is the wrong trade.
+
+### Reduce Motion
+
+Verified with the setting on: **0.00% of pixels change over six seconds.** Drift,
+twinkle and meteors all stop. Every layer's structure, colour and progress
+reading survive, so the sky is calmer rather than broken — and drifting cloud is
+precisely the kind of thing Reduce Motion exists to switch off.
+
+### New launch argument
+
+```text
+-progress 0.85
+```
+
+Overrides the scenario's default progress. Reviewing the sky across the range is
+the only way to check the claim that session position is readable from the
+environment alone — and it is what caught the contrast failure at the gold end.
+
+Captures in ignored `ios/build/`:
+
+```text
+ladder/progress-ladder.png     the dawn walk, 0.00 -> 1.00
+legibility-v2/                 acuity-limited distance sheets
+iter/                          the current review matrix
+```

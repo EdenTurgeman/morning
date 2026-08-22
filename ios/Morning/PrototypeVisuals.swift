@@ -15,27 +15,7 @@ struct DawnBackdrop: View {
             ZStack {
                 switch treatment {
                 case .atmospheric:
-                    Color(red: 0.012, green: 0.018, blue: 0.05)
-
-                    MeshGradient(
-                        width: 3,
-                        height: 3,
-                        points: [
-                            .init(0, 0), .init(0.5, 0), .init(1, 0),
-                            .init(0, 0.48), .init(0.52, 0.44), .init(1, 0.48),
-                            .init(0, 1), .init(0.5, 1), .init(1, 1),
-                        ],
-                        colors: [
-                            palette.zenith, palette.zenith, palette.zenith,
-                            palette.middle.opacity(0.5), palette.middle, palette.middle.opacity(0.5),
-                            palette.horizon.opacity(0.28),
-                            palette.horizon.opacity(0.72),
-                            palette.horizon.opacity(0.28),
-                        ],
-                        smoothsColors: true
-                    )
-
-                    Stars(progress: progress)
+                    AtmosphericSky(progress: progress, palette: palette)
 
                 case .precise:
                     Color(red: 0.018, green: 0.02, blue: 0.032)
@@ -68,40 +48,10 @@ struct DawnBackdrop: View {
                     )
                 }
 
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            stops: [
-                                .init(color: Color.black.opacity(0.36), location: 0),
-                                .init(color: Color.black.opacity(0.16), location: 0.42),
-                                .init(color: Color.black.opacity(0.06), location: 0.62),
-                                .init(color: Color.black.opacity(0.38), location: 1),
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                LegibilityScrim(treatment: treatment, progress: progress)
             }
         }
         .ignoresSafeArea()
-    }
-}
-
-private struct Stars: View {
-    let progress: Double
-
-    var body: some View {
-        Canvas { context, size in
-            for i in 0 ..< 34 {
-                let x = (Double((i * 83) % 97) / 97) * size.width
-                let y = (Double((i * 47) % 61) / 61) * size.height * 0.66
-                let diameter = i.isMultiple(of: 7) ? 1.7 : 1.05
-                let rect = CGRect(x: x, y: y, width: diameter, height: diameter)
-                context.fill(Path(ellipseIn: rect), with: .color(.white.opacity(0.42)))
-            }
-        }
-        .opacity(max(0.08, 0.72 - progress * 0.58))
-        .allowsHitTesting(false)
     }
 }
 
@@ -198,5 +148,58 @@ private struct WorkObjectContinuity: ViewModifier {
 extension View {
     func workObjectContinuity(id: String, in namespace: Namespace.ID) -> some View {
         modifier(WorkObjectContinuity(id: id, namespace: namespace))
+    }
+}
+
+/// The sky gets bright enough near the bottom to swallow secondary text sitting
+/// over it — the web build carries the same layer for the same reason. It sits
+/// BEHIND the content, so it lowers the background luminance without touching
+/// the glyphs, which is what makes it buy contrast rather than cost it.
+///
+/// The first native version ramped the wrong way: it was heaviest at the top,
+/// where the sky is already near-black, and lightest at 62%, right where the
+/// horizon warmth peaks. Measured against the rendered frames, that shape put
+/// the cue text, the Reps label and the footer under the brief's tertiary bar.
+private struct LegibilityScrim: View {
+    let treatment: DawnTreatment
+    let progress: Double
+
+    /// Near-black, faintly blue — pure black flattens the night out of the sky.
+    private static let ink = Color(red: 0.016, green: 0.02, blue: 0.039)
+
+    private var stops: [Gradient.Stop] {
+        switch treatment {
+        case .atmospheric:
+            // Follows the Atmospheric sky's own luminance: quiet where the sky
+            // is dark, strongest across the bottom third where it is warmest.
+            //
+            // It also scales with progress, because the sky it is holding back
+            // does. Measured on rendered frames, a fixed scrim that cleared the
+            // bar at twilight let the cue text, the Reps label and the footer
+            // fall to 6.2-6.5:1 by the time the palette reached gold.
+            let p = min(1, max(0, progress))
+            return [
+                .init(color: Self.ink.opacity(0.30), location: 0),
+                .init(color: Self.ink.opacity(0.14 + 0.04 * p), location: 0.38),
+                .init(color: Self.ink.opacity(0.20 + 0.08 * p), location: 0.58),
+                .init(color: Self.ink.opacity(0.48 + 0.08 * p), location: 0.78),
+                .init(color: Self.ink.opacity(0.64 + 0.07 * p), location: 1),
+            ]
+        case .precise, .tactile:
+            // These backdrops carry far less light, so they keep the gentler
+            // original shape.
+            return [
+                .init(color: Self.ink.opacity(0.36), location: 0),
+                .init(color: Self.ink.opacity(0.16), location: 0.42),
+                .init(color: Self.ink.opacity(0.10), location: 0.62),
+                .init(color: Self.ink.opacity(0.38), location: 1),
+            ]
+        }
+    }
+
+    var body: some View {
+        Rectangle()
+            .fill(LinearGradient(stops: stops, startPoint: .top, endPoint: .bottom))
+            .allowsHitTesting(false)
     }
 }
