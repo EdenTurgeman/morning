@@ -423,13 +423,31 @@ form you have to remember to write is one you will forget to write.
 | Token | Full | Reduced | Why |
 |---|---|---|---|
 | `Motion.rep` | easeOut 0.18s | linear 0.08s | Must feel like the digit moved because you pushed it |
-| `Motion.commit` | spring 0.32s, bounce 0.24 | linear 0.01s | Something was committed; a little weight |
+| `Motion.commit` | spring 0.32s, bounce 0.24 | linear 0.01s | Something was committed; a little weight — **defined but unused in the product**, see below |
 | `Motion.stage` | easeInOut 0.44s | linear 0.12s | Set ↔ Rest, carrying the work object across |
 | `Motion.reveal` | spring 0.50s, bounce 0.12 | easeOut 0.18s | The answer arriving |
 | `Motion.timerResize` | spring 0.55s, bounce 0.10 | easeOut 0.18s | The timer yielding its space to the card |
 | `Motion.screenSwap` | out 0.24s / in 0.30s after 0.04s | opacity 0.12s | How a screen leaves and the next arrives |
 | `Motion.threshold` | easeOut 0.20s after 0.22s | linear 0.12s | The second beat of passing last time's number |
 | `Motion.answer` | easeOut 0.28s after 0.34s | easeOut 0.16s after 0.10s | The answer's ink, once the card has stopped growing |
+
+**`Motion.commit` is currently only used by the W1 lab.** Logging a set moves
+the whole work object instead, which is a bigger gesture than a pulse and does
+the same job. The token stays because it is part of the vocabulary and the next
+screen that commits something will want it — but the table above would
+otherwise be claiming behaviour the app does not have.
+
+### Every reduced form, and the one that was wrong
+
+`Motion.answer` and `Motion.threshold` both keep their **delay** under Reduce
+Motion, shortened rather than dropped. That is deliberate and it is the rule the
+others should be read against: Reduce Motion asks for less movement, not less
+information, and in both cases the gap between the two events *is* the
+information — the number then what it means, the card then the words.
+
+`threshold`'s reduced form originally had no delay at all, so the two beats
+collapsed into one frame for exactly the people who had asked for calmer. Caught
+by measuring rather than by reading it.
 
 ### The three that are delays, and why each number is what it is
 
