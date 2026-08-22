@@ -251,6 +251,22 @@ final class SessionLifecycleAcceptanceTests: XCTestCase {
         XCTAssertEqual(finished.sessionKey, "A")
     }
 
+    /// `src/hooks/useWorkout.ts` computes minutes as `Math.max(1, ...)`. The
+    /// port had `max(0, ...)`, so a session finished inside thirty seconds
+    /// recorded a duration the web build cannot produce — in a file the web
+    /// build reads back through Restore.
+    func testAVeryShortSessionStillRecordsOneMinute() {
+        let store = Store(directory: directory)
+        let session = WorkoutSession(sessionKey: "A", store: store)
+        session.goToFirstSet()
+        session.adjustReps(by: 1)
+
+        // Finished the instant it started.
+        let finished = session.finish(now: Date(timeIntervalSince1970: Double(session.startedAt) / 1000))
+
+        XCTAssertEqual(finished.minutes, 1, "no session lasts zero minutes")
+    }
+
     // MARK: - Helpers
 
     private func record(

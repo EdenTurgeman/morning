@@ -252,7 +252,13 @@ final class WorkoutSession {
         if let set = currentSet {
             log[set.slot] = draftReps
         }
-        let minutes = max(0, Int((Double(Int(now.timeIntervalSince1970 * 1000) - startedAt) / 60000).rounded()))
+        // Floor of ONE, not zero. `src/hooks/useWorkout.ts` does
+        // `Math.max(1, ...)` and the port did `max(0, ...)`, so a session
+        // finished inside thirty seconds recorded "0 minutes" here and "1
+        // minute" on the web. That is a value outside the range the web build
+        // can produce, in a file the web build reads back.
+        let elapsed = Double(Int(now.timeIntervalSince1970 * 1000) - startedAt) / 60000
+        let minutes = max(1, Int(elapsed.rounded()))
         return SessionRecord(
             date: Self.localDateString(now, calendar: calendar),
             sessionKey: sessionKey,

@@ -128,6 +128,8 @@ struct WorkoutHost: View {
         .onAppear {
             Haptics.shared.prewarm()
             Audio.shared.isEnabled = true
+            // Bring the audio session up now, not during a countdown tick.
+            Audio.shared.prepare()
             // The screen must not sleep mid-set. Released on end or abandon.
             UIApplication.shared.isIdleTimerDisabled = true
             cardRests = Set(Deck.cardRestIndices(in: session.steps))
@@ -148,6 +150,8 @@ struct WorkoutHost: View {
             // itself can be captured. No tap reaches this app in the
             // development environment, and a transition nobody can trigger is
             // a transition nobody has seen.
+            autorunIfAsked()
+
             if ProcessInfo.processInfo.arguments.contains("-autoplay") {
                 Task { @MainActor in
                     try? await Task.sleep(for: .seconds(1.4))
@@ -174,6 +178,7 @@ struct WorkoutHost: View {
         }
         .onChange(of: session.stepIndex) { _, _ in
             drawCardIfNeeded()
+            autorunIfAsked()
         }
     }
 
@@ -207,6 +212,26 @@ struct WorkoutHost: View {
             onFinish()
         } else {
             advance { session.advance() }
+        }
+    }
+
+    /// `-autorun` plays a whole session through, hands-free.
+    ///
+    /// Only sets need it: the warm-up and every rest now advance themselves
+    /// when their clock reaches zero, which is the behaviour this flag exposed
+    /// as missing in the first place. So this logs the current set after a
+    /// beat and then waits for the rest to hand the next one over.
+    ///
+    /// It is how the app first ran start to finish. `07-acceptance.md` asks for
+    /// "a full session of A and a full session of B, zero glitches", and with
+    /// no Simulator UI on this machine there was otherwise no way to ask.
+    private func autorunIfAsked() {
+        guard ProcessInfo.processInfo.arguments.contains("-autorun"),
+              session.currentSet != nil else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.2))
+            guard !Task.isCancelled, session.currentSet != nil else { return }
+            logSet()
         }
     }
 

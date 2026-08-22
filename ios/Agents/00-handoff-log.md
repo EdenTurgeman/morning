@@ -62,6 +62,21 @@ The - **The threshold delay had to clear the digit ROLL, not visual fusion.** Th
   screen did nothing over the last five seconds while the audio and the haptics
   both ramped.
 
+- **Built the warm-up screen, which W5 deferred and nobody came back for.** Step
+  0 of both sessions is a 90-second warm-up with cues. `WorkoutHost` called
+  `goToFirstSet()` past it on every session under a comment saying "until it
+  exists" — so the app silently dropped a programmed step. And the step stayed
+  reachable: `back()` from the first set landed on it, the `Group` had no branch
+  for a timer, and it fell through to a placeholder reading **"Session complete
+  / Summary and Daybreak are W7."** A workout that had not started announcing it
+  was over, quoting a workstream number, one tap in.
+- **Fixed `minutes` flooring at 0 instead of 1.** `src/hooks/useWorkout.ts` does
+  `Math.max(1, …)`. A session finished inside thirty seconds recorded a duration
+  the web build cannot produce, in a file the web build reads back through
+  Restore. Test added.
+- **Removed `ScaffoldView`.** Dead — only its own `#Preview` referenced it — and
+  its copy said "no screens built yet", which stopped being true at W4.
+
 **Read the web source for behaviour, not just for reasoning.** Both of those
 were one grep away the whole time. `src/hooks/useCountdown.ts` wires
 `onComplete` to `onAdvance` and carries a `setInterval` beside its rAF loop
@@ -130,7 +145,35 @@ it will not, and measure it.**
   flicker, but nobody has seen it on a real display in a dark room. It is on the
   device checklist now.
 
-**Assertions:** 54 of 56 passing (2 skipped — both device-only)
+- **Moved the audio session off the main thread.** Found by running a whole
+  session hands-free and reading the device log — `AVAudioSession Hang Risk`,
+  fired the first time a cue played. `activate()` was doing `setCategory` and
+  `setActive` synchronously on the main actor on **every** cue, five times per
+  rest, during the animating countdown.
+- **Added `-autorun`**, which plays a session from Home with no taps: start,
+  warm-up, every set and rest, finish, Daybreak, Summary. `07-acceptance.md`
+  asks for "a full session of A and a full session of B, start to finish, zero
+  glitches" and there had been no way to ask. It only works because the warm-up
+  and the rests now advance themselves — the flag and those fixes found each
+  other.
+
+**What the behaviour diff found, and what it cleared.** I went through every
+`useEffect`, timer and listener in `src/` against the port. Cleared: `back()` is
+guarded (the port's `move(to:)` clamps to `steps.indices`), a double-tap on the
+final Done cannot write two records (`AppRoot.finish` guards and runs to
+completion on the main actor), the status bar needs no tint because the zenith
+stays dark at every progress, and `unlockAudio` is a web-only autoplay
+workaround. Still open, and Eden's call rather than mine: the web sets an **app
+icon badge** with the sessions still owed this week (`setWeekBadge`). The native
+equivalent needs notification permission, which `05-platform.md §7` says to
+propose. **That belongs in W12.**
+
+The one deliberate divergence I left: the web's `progress` is `i / steps.length`
+and the port's is `stepIndex / (count - 1)`, so the port's dawn actually
+completes on the final step instead of stopping at 0.95. That is form, and the
+brief wants the dawn to finish.
+
+**Assertions:** 55 of 57 passing (2 skipped — both device-only)
 
 **Next:** W11 is the device pass and is still blocked on hardware. W12 needs
 Eden's yes per item. Everything else through W10 is merged.

@@ -76,6 +76,7 @@ struct AppRoot: View {
                 }
             }
         }
+        .onAppear { autorunIfAsked() }
         .alert("Could not save", isPresented: .constant(saveError != nil)) {
             Button("OK") { saveError = nil }
         } message: {
@@ -128,6 +129,24 @@ struct AppRoot: View {
 
     private func load(for key: String) -> Double? {
         data.loads?[key] ?? program.first { $0.key == key }?.defaultLoad
+    }
+
+    /// `-autorun` plays a whole session from Home, hands-free, and it starts
+    /// here rather than inside the workout so the smoke test covers the real
+    /// entry path — Home, start, warm-up, every set and rest, finish, Daybreak,
+    /// Summary. `07-acceptance.md` asks for "a full session of A and a full
+    /// session of B, start to finish, zero glitches", and with no Simulator UI
+    /// on this machine there was no way to ask until now.
+    private func autorunIfAsked() {
+        let args = ProcessInfo.processInfo.arguments
+        guard args.contains("-autorun"), session == nil, finished == nil else { return }
+        let key = args.firstIndex(of: "-session")
+            .flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } ?? nextKey
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
+            guard session == nil else { return }
+            start(key)
+        }
     }
 
     private func start(_ key: String) {

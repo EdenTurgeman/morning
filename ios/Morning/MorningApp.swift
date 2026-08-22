@@ -95,26 +95,3 @@ struct MorningApp: App {
         #endif
     }
 }
-
-/// The original placeholder remains useful for confirming a minimal project
-/// launch while the W1 prototype lab is the active root.
-struct ScaffoldView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Morning")
-                .font(.largeTitle.weight(.semibold))
-            Text("Scaffold only — no screens built yet.")
-                .foregroundStyle(.secondary)
-            Divider()
-            Text("Start at CLAUDE.md, then ios/Agents/00-handoff-log.md.")
-                .font(.footnote)
-                .foregroundStyle(.tertiary)
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
-
-#Preview {
-    ScaffoldView()
-}

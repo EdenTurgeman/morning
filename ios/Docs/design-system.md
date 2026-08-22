@@ -374,6 +374,51 @@ form you have to remember to write is one you will forget to write.
 | `Motion.stage` | easeInOut 0.44s | linear 0.12s | Set ↔ Rest, carrying the work object across |
 | `Motion.reveal` | spring 0.50s, bounce 0.12 | easeOut 0.18s | The answer arriving |
 | `Motion.timerResize` | spring 0.55s, bounce 0.10 | easeOut 0.18s | The timer yielding its space to the card |
+| `Motion.screenSwap` | out 0.24s / in 0.30s after 0.04s | opacity 0.12s | How a screen leaves and the next arrives |
+| `Motion.threshold` | easeOut 0.20s after 0.22s | linear 0.12s | The second beat of passing last time's number |
+| `Motion.answer` | easeOut 0.28s after 0.34s | easeOut 0.16s after 0.10s | The answer's ink, once the card has stopped growing |
+
+### The three that are delays, and why each number is what it is
+
+Every one of these was measured off a 60fps capture rather than chosen, and in
+each case the first value I picked from first principles was wrong.
+
+**`screenSwap` is asymmetric because a symmetric cross-fade is mush.** Both
+screens sat near half opacity for ~0.2s, which put the Set screen's cues and
+Done button directly on top of the Rest screen's controls. The overlap window
+is deliberately non-zero, though: the work object crosses it, and the counter
+becoming the ring is the continuity worth protecting.
+
+**`threshold`'s 0.22s clears the digit ROLL, not perceptual fusion.** The
+counter recolours over 0.18s but `contentTransition(.numericText)` is not
+finished until ~0.24s. A 0.09s delay — the figure vision needs to read two
+events as separate — still had the sentence fully legible while the digit was
+mid-roll.
+
+**`answer`'s 0.34s clears the card's growth.** The layout change is the point,
+so the card still grows immediately; only the ink waits.
+
+**None of these will animate from a `@ViewBuilder` branch swap.** `.transition`
+on a branch, with or without a delayed `.animation(_:value:)`, does nothing —
+the content simply appears. Both the rep comparison line and the study card now
+use opacity on a view that never leaves the tree. If you add a fourth, assume
+it will not animate and measure it.
+
+### The sky does not participate
+
+`DawnBackdrop` belongs to `WorkoutHost`, not to the screens. Owned per-screen it
+faded with everything else and mean luminance across a Set→Rest swap went
+47 → 7 → 40 — a full blackout, 25+ times a session. Held continuous underneath,
+the same swap measures 50 → 22 → 40.
+
+### The countdown's last five seconds
+
+`urgency` ramps 0 → 1 over the final five seconds and drives the ring's glow
+(opacity 0.20 → 0.65) and its shadow (8 → 22px). Ported from
+`src/components/Ring.tsx`, which names what it is for: peripheral warning. The
+audio and the haptics both ramped over this window and the screen did nothing,
+which is backwards — the phone is 1.5m away and the ring going hot is the part
+caught out of the corner of the eye.
 
 **Fast where it's in the way, slow where it's the point.** Rep and stage
 transitions are quick because you are mid-workout. Reveal and resize are slower
@@ -478,6 +523,22 @@ be actively misleading.
 deactivated after with `.notifyOthersOnDeactivation` — an always-active session
 ducks music for the whole twenty minutes, which is exactly the bug Eden reported
 against the web build as *"working, and not letting me play music"*.
+
+**The session comes up when the workout opens, not when a cue plays.** A full
+hands-free session run produced this the first time a cue sounded:
+
+    AVAudioSession Hang Risk — this method can lead to UI unresponsiveness
+    if called on the main thread.
+
+`activate()` was running `setCategory` and `setActive` on the main actor on
+*every* cue — five times per rest — and the moment it landed on was the worst
+available: the last five seconds of a rest, while `TimelineView(.animation)`
+drives the ring. `07-acceptance.md` asks for no dropped frames while a timer
+runs, and this was a synchronous IPC call into `mediaserverd` in exactly that
+window.
+
+`Audio.prepare()` now runs once when a workout opens, and the session work
+happens off the main thread. Later cues only schedule a buffer.
 
 **The countdown's last five seconds must be one duck, not six pumps.** Six cues
 share a release deadline that each one pushes forward, so the music dips once at

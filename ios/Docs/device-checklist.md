@@ -116,6 +116,28 @@ Start music in another app first, then run a rest to zero.
 - Six dips means the shared release deadline is not working — that is
   `DuckWindow`, and its logic is unit-tested, so a failure here is the session
   activation rather than the timing.
+- The session is brought up when the workout OPENS, not when the first cue
+  plays, and off the main thread. It used to be configured on every cue — five
+  times per rest, synchronously, on the main actor, during the animating
+  countdown, which the runtime flagged as a hang risk. If the first cue of a
+  session is late or clipped, that change is where to look.
+- **Listen for the very first cue of a session, and the completion chime.**
+  Session activation is now asynchronous, so a cue arriving on a cold session
+  races it by a few milliseconds. The engine still starts synchronously, so the
+  buffer is queued either way — but nothing in this app's audio has ever
+  actually been heard, and this is the one place the change could bite. The
+  chime is the exposed case: `AppRoot.finish()` stops the session and Daybreak
+  sounds 0.38s later.
+- **Check the hang-risk faults are actually gone.** Run a rest to zero with the
+  device attached and watch the console for `AVAudioSession Hang Risk`. A full
+  session logged **87** of them before the fix, two per countdown tick. It logs
+  **12** on the simulator afterwards, and those are environmental: the headless
+  simulator has no audio route, so `AVAudioEngine.start()` fails with `-10879`,
+  `engine.isRunning` stays false, and every cue retries it — and `start()`
+  activates the session internally, on the main thread. On a device with a real
+  route the engine starts once. **If the count is not zero on the phone, that
+  assumption was wrong** and the engine start needs the same treatment the
+  session got.
 - Music **stopping** rather than ducking means the session category is wrong.
   That is the exact bug Eden reported against the web build: *"working, and not
   letting me play music."*
