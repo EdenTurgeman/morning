@@ -64,11 +64,11 @@ struct DawnSecondaryButton: View {
                                 RoundedRectangle(cornerRadius: treatment == .precise ? 15 : 20)
                                     .stroke(
                                         quiet
-                                            ? Color.white.opacity(0.12)
+                                            ? Control.quietBorder
                                             : treatment == .precise
                                             ? accent.opacity(0.4)
-                                            : Color.white.opacity(0.12),
-                                        lineWidth: 1
+                                            : Control.border,
+                                        lineWidth: treatment == .precise ? 1 : Control.borderWidth
                                     )
                             }
                     }

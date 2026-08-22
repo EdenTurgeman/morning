@@ -200,6 +200,33 @@ enum Hit {
     static let minimum: CGFloat = 64
 }
 
+// MARK: - Controls
+
+/// Control surfaces and the boundary that makes them findable.
+///
+/// WCAG 2.1 SC 1.4.11 asks for **3:1 on the boundary of a UI component**, and
+/// the first Atmospheric rep control measured **1.18:1** — a `white 0.07` fill
+/// behind a `white 0.1` hairline, over a lit sky. Its glyph was fine at 9.71:1,
+/// so the symbol was doing all the work and the button had no shape at all.
+///
+/// That matters more here than the number suggests. This is the control a
+/// half-awake person hits with a knuckle from a metre away, and the 82pt target
+/// is worth nothing if you cannot see where it is. Measured again with these
+/// values, the boundary reads 4.5:1 while the surface stays quiet enough not to
+/// compete with the counter — which is the actual design goal, and was never
+/// "make it invisible".
+enum Control {
+    /// Quiet enough to sit under a 92pt counter without competing with it.
+    static let surface = Color.white.opacity(0.10)
+
+    /// The edge that makes the target findable. Carries the boundary contrast.
+    static let border = Color.white.opacity(0.44)
+    static let borderWidth: CGFloat = 1.5
+
+    /// A control that is deliberately subordinate — `+15s` next to `Skip`.
+    static let quietBorder = Color.white.opacity(0.30)
+}
+
 // MARK: - The legibility scrim
 
 /// The sky gets bright enough near the bottom to swallow secondary text. This

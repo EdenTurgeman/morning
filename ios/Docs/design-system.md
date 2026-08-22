@@ -158,6 +158,32 @@ location  1.00   0.64 + 0.07·progress
 Near-black and faintly blue (`Surface.ink`), never pure black — pure black
 flattens the night out of the sky.
 
+### Control boundaries
+
+WCAG 2.1 SC 1.4.11 asks for **3:1 on the boundary of a UI component**, and the
+first Atmospheric rep control measured **1.18:1** — a `white 0.07` fill behind a
+`white 0.1` hairline, over a lit sky. Its glyph was fine at 9.71:1, so the
+symbol was doing all the work and the button had no shape at all.
+
+That matters more here than the number suggests: this is the control a
+half-awake person hits with a knuckle from a metre away, and an 82pt target is
+worth nothing if you cannot see where it is. It only surfaced because the
+control was measured as a *component* rather than as text — the text harness had
+been giving it a clean bill of health all along.
+
+| Token | Value | For |
+|---|---|---|
+| `Control.surface` | `white 0.10` | Quiet enough to sit under a 92pt counter |
+| `Control.border` | `white 0.44`, 1.5pt | The edge that makes the target findable |
+| `Control.quietBorder` | `white 0.30` | A deliberately subordinate control — `+15s` beside `Skip` |
+
+Measured after: rep control **3.51:1**, Rest's `+15s` / `Skip` **4.10:1**. The
+surface stays at ~1.3:1 against the sky, which is the point — the design goal
+was "quiet", and it was never "invisible".
+
+The `−` and `+` glyphs also went from 34pt medium to 38pt semibold. At 1.5m the
+old ones were the first thing to disappear.
+
 ---
 
 ## Type

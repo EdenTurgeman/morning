@@ -852,16 +852,14 @@ private struct RepStepButton: View {
                     .background(
                         treatment == .precise
                             ? Color.black.opacity(0.32)
-                            : Color.white.opacity(0.07),
+                            : Control.surface,
                         in: RoundedRectangle(cornerRadius: treatment == .precise ? 16 : 24)
                     )
                     .overlay {
                         RoundedRectangle(cornerRadius: treatment == .precise ? 16 : 24)
                             .stroke(
-                                treatment == .precise
-                                    ? accent.opacity(0.42)
-                                    : Color.white.opacity(0.1),
-                                lineWidth: 1
+                                treatment == .precise ? accent.opacity(0.42) : Control.border,
+                                lineWidth: treatment == .precise ? 1 : Control.borderWidth
                             )
                     }
             }
@@ -880,8 +878,8 @@ private struct RepStepButton: View {
 
     private var label: some View {
         Text(symbol)
-            .font(.system(size: 34, weight: .medium, design: .rounded))
-            .frame(width: 82, height: 82)
+            .font(.system(size: 38, weight: .semibold, design: .rounded))
+            .frame(width: Hit.repControl, height: Hit.repControl)
             .foregroundStyle(.white)
     }
 
