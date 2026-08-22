@@ -37,7 +37,12 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] Open Control Centre mid-set, then come back.
 - [ ] Switch to Music mid-session, play something, come back.
 - [ ] Force-quit mid-workout and relaunch: same step, same logged reps, correct
-      remaining time.
+      remaining time. **Both halves now verified in the simulator** — quitting
+      18s into a 60s rest and relaunching showed 39s left, derived from the
+      absolute end date rather than a tick counter; and quitting a 20s rest and
+      relaunching 30s later advanced to the next set rather than sitting on
+      "0 SEC", which is the web's behaviour and was the bug. What is left for
+      the phone is the same thing with a real suspend rather than a terminate.
 - [ ] Let a rest timer expire while the app is backgrounded. **It must have
       moved on by itself when you come back** — a rest that reaches zero
       advances, matching the web build. This is wired in the view rather than
