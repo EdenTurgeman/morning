@@ -81,6 +81,8 @@ screen and stare at it.
 ```text
 -seed six-months                     replace the history with a fixture
 -screen set -progress 1.00           the Set screen at the gold end of the dawn
+-screen set -step 0                  the warm-up, which the app now starts on
+-autorun                             play a whole session from Home, no taps
 -screen set -slot 4.0.0              the worst content in the program
 -screen set -reps 15                 the counter already past last time
 -screen set -step 15                 a carded rest
@@ -129,15 +131,22 @@ Start music in another app first, then run a rest to zero.
   chime is the exposed case: `AppRoot.finish()` stops the session and Daybreak
   sounds 0.38s later.
 - **Check the hang-risk faults are actually gone.** Run a rest to zero with the
-  device attached and watch the console for `AVAudioSession Hang Risk`. A full
-  session logged **87** of them before the fix, two per countdown tick. It logs
-  **12** on the simulator afterwards, and those are environmental: the headless
-  simulator has no audio route, so `AVAudioEngine.start()` fails with `-10879`,
-  `engine.isRunning` stays false, and every cue retries it — and `start()`
-  activates the session internally, on the main thread. On a device with a real
-  route the engine starts once. **If the count is not zero on the phone, that
-  assumption was wrong** and the engine start needs the same treatment the
-  session got.
+  device attached and watch the console for `AVAudioSession Hang Risk`.
+
+  | | Per rest |
+  |---|---|
+  | Before anything | 12.4 (session A: 87 over 7 rests) |
+  | Session work moved off the main thread | 12.2 (session B: 122 over 10) |
+  | Engine retry bounded to one attempt | **1** |
+
+  The middle row is the useful one: moving our own session calls off the main
+  thread changed nothing, because the storm was `AVAudioEngine.start()`
+  retrying on every cue and activating the session internally each time. On the
+  simulator it can never succeed — no audio route, `error -10879`.
+
+  On a device with a real route the engine should start once and the count
+  should be **zero**. If it is not, the remaining call is inside
+  `AVAudioEngine.start()` and needs the same treatment the session got.
 - Music **stopping** rather than ducking means the session category is wrong.
   That is the exact bug Eden reported against the web build: *"working, and not
   letting me play music."*

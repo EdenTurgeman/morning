@@ -264,6 +264,41 @@ to web apps.
   scroll would break the layout rather than help. Reading screens — Guide,
   cards, History — support the accessibility sizes instead. That split is
   deliberate and is not an accessibility shortcut.
+- **One divergence inside that split, named rather than left silent.**
+  `02-design-brief.md §6` lists **cards** among the reading surfaces. Card text
+  does not currently scale, on a rest or on the summary, and there are two
+  separate reasons — only one of which is deliberate.
+
+  The deliberate one: the study card lives on the Rest screen, and that screen
+  must never scroll. At an accessibility size a seven-line answer would push the
+  timer or the controls off the bottom, and `04-rules.md §6` is unambiguous that
+  you must never miss the timer because you were thinking. So the rest card is
+  clamped with the workout.
+
+  The incidental one: `TypeScale.question` and `TypeScale.answer` are
+  `Font.system(size:)` — **fixed points, not text styles** — so they would not
+  scale even where nothing clamps them, which is the summary card. Half the
+  scale is built on text styles (`body`, `label`, `microLabel`, `action`) and
+  scales properly; `counter`, `title`, `question` and `answer` are fixed.
+
+  For counters and titles fixed is right and intended. For the summary card it
+  is not, and the fix is not free: `answer`'s 14.5pt is tuned to the seven-line
+  stress case on a screen that cannot scroll, and the nearest scaling style
+  (`.subheadline`, 15pt) is half a point larger. **Left as it is, deliberately,
+  and flagged rather than quietly changed** — moving type on the most
+  constrained screen in the app is Eden's call, not a tidy-up.
+- **Where the clamps actually are**, because "supports Dynamic Type" and "does
+  not clamp" are not the same claim:
+
+  | Screen | Scrolls | Clamp |
+  |---|---|---|
+  | Set, Rest, Warm-up | never | `.large` |
+  | Guide | yes | `…accessibility3` |
+  | History, Ledger | yes | none |
+  | Home, Summary, Backup | no | none |
+
+  The last row is the one to watch: those three neither scroll nor clamp, so
+  they are relying on the layout holding at whatever the system asks for.
 
 ---
 
@@ -538,7 +573,22 @@ runs, and this was a synchronous IPC call into `mediaserverd` in exactly that
 window.
 
 `Audio.prepare()` now runs once when a workout opens, and the session work
-happens off the main thread. Later cues only schedule a buffer.
+happens off the main thread.
+
+**That alone changed nothing measurable, and it took a second full session to
+notice.** Session A logged 87 faults over 7 rests; session B, with the fix,
+logged 122 over 10 — 12.4 per rest against 12.2. The dominant source was never
+our own session calls. It was `AVAudioEngine.start()`, which activates the
+session internally, on the main thread, and was being retried on **every cue**
+because the headless simulator has no audio route (`error -10879`) so the engine
+never starts and never stops trying.
+
+Bounding that retry to one attempt per activation takes it to **1 fault per
+rest**. On a device the engine starts once and there should be none.
+
+An interruption — a phone call mid-rest — clears the flags so the next cue
+rebuilds session and engine, because otherwise a bounded retry latches and the
+rest of the session goes silent.
 
 **The countdown's last five seconds must be one duck, not six pumps.** Six cues
 share a release deadline that each one pushes forward, so the music dips once at

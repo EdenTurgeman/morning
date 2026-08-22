@@ -160,11 +160,42 @@ final class Audio {
     /// re-ran `setCategory` and `setActive` on EVERY cue — five times per rest,
     /// during the animating countdown.
     private var sessionActive = false
+    /// Set when `engine.start()` throws, so a cue-per-second countdown does not
+    /// retry it a cue-per-second. Cleared by the next `prepare()`.
+    ///
+    /// This is what actually caused the fault storm. `AVAudioEngine.start()`
+    /// activates the session internally, on the main thread, so an engine that
+    /// cannot start turns every cue into two hang-risk faults — and the
+    /// headless simulator has no audio route at all (`error -10879`), so it
+    /// never starts and never stops trying.
+    private var engineFailed = false
 
     /// Set false to keep the app silent without unpicking the call sites.
     var isEnabled = true
 
-    private init() {}
+    private init() {
+        // An interruption — a phone call mid-rest, which the device checklist
+        // asks for explicitly — deactivates the session out from under us and
+        // stops the engine. Without this, `engineFailed` would latch and the
+        // rest of the session would be silent. Clearing both flags means the
+        // next cue simply rebuilds everything.
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in Audio.shared.interrupted() }
+        }
+    }
+
+    private func interrupted() {
+        sessionActive = false
+        engineFailed = false
+        // `started` deliberately stays true. An interruption stops the engine,
+        // it does not detach the player — re-running `engine.attach` on a node
+        // that is already attached is not something to find out about at 6am.
+        // `startEngineIfNeeded` restarts a stopped engine on its own.
+    }
 
     /// Called when a workout opens, so the session is ready long before the
     /// first cue needs it.
@@ -181,6 +212,7 @@ final class Audio {
     func prepare() {
         guard !sessionActive else { return }
         sessionActive = true
+        engineFailed = false
         // Optimistic, so a burst of cues does not queue a burst of requests —
         // but cleared again if the activation actually failed, because the old
         // synchronous path retried on every cue and losing that would make one
@@ -216,11 +248,17 @@ final class Audio {
 
     func play(_ cue: Cue, now: Date = Date()) {
         guard isEnabled else { return }
-        // Session first (idempotent, off-thread), engine second. Only the
-        // session call is the hang risk; starting the engine here keeps a cue
-        // that arrives on a cold session audible rather than silent.
+        // Session first (idempotent, off-thread), engine second. Starting the
+        // engine here keeps a cue that arrives on a cold session audible rather
+        // than silent — but ONCE, not once per cue.
         prepare()
-        try? startEngineIfNeeded()
+        if !engineFailed {
+            do {
+                try startEngineIfNeeded()
+            } catch {
+                engineFailed = true
+            }
+        }
         window.extend(from: now, by: DuckWindow.hold + cue.length)
         scheduleRelease()
 

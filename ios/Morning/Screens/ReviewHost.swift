@@ -103,7 +103,10 @@ struct ReviewHost: View {
             progressOverride: progressOverride,
             slot: slot,
             reps: reps,
-            step: step
+            step: step,
+            // `-screen set` means the Set screen. The app itself starts on the
+            // warm-up; see `WorkoutHost.startAtFirstSet`.
+            startAtFirstSet: true
         )
     }
 }

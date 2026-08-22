@@ -34,6 +34,13 @@ struct WorkoutHost: View {
     private let repsOverride: Int?
     /// `-step 2` lands on any step, rests included.
     private let stepOverride: Int?
+    /// Review only. The app starts a session on step 0, the warm-up, exactly as
+    /// the web build does — but `-screen set` should mean the Set screen, so
+    /// the review host skips ahead. Keeping these two paths separate is the
+    /// point: the app used to skip the warm-up because the review tool wanted
+    /// it skipped, and the warm-up went unbuilt for five workstreams as a
+    /// result.
+    private let startAtFirstSet: Bool
 
     /// The namespace the work object travels in. One per host, so the counter
     /// and the timer are the same object to SwiftUI.
@@ -54,7 +61,8 @@ struct WorkoutHost: View {
         progressOverride: Double? = nil,
         slot: String? = nil,
         reps: Int? = nil,
-        step: Int? = nil
+        step: Int? = nil,
+        startAtFirstSet: Bool = false
     ) {
         _session = State(initialValue: session)
         self.onFinish = onFinish
@@ -63,6 +71,7 @@ struct WorkoutHost: View {
         slotOverride = slot
         repsOverride = reps
         stepOverride = step
+        self.startAtFirstSet = startAtFirstSet
     }
 
     var body: some View {
@@ -140,6 +149,8 @@ struct WorkoutHost: View {
                 session.go(toStep: stepOverride)
             } else if let slotOverride {
                 session.go(toSlot: slotOverride)
+            } else if startAtFirstSet {
+                session.goToFirstSet()
             }
             if let repsOverride {
                 session.adjustReps(by: repsOverride - session.draftReps)

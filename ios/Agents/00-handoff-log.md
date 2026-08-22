@@ -145,11 +145,30 @@ it will not, and measure it.**
   flicker, but nobody has seen it on a real display in a dark room. It is on the
   device checklist now.
 
-- **Moved the audio session off the main thread.** Found by running a whole
-  session hands-free and reading the device log — `AVAudioSession Hang Risk`,
-  fired the first time a cue played. `activate()` was doing `setCategory` and
-  `setActive` synchronously on the main actor on **every** cue, five times per
-  rest, during the animating countdown.
+- **Killed a fault storm in the audio session.** Found by running a whole
+  session hands-free and reading the device log: 87 `AVAudioSession Hang Risk`
+  faults, two per second, at exactly the five countdown seconds, while
+  `TimelineView(.animation)` drives the ring.
+
+  **My first fix was correct and did nothing, and I published a wrong number
+  before catching it.** I moved `setCategory`/`setActive` off the main actor —
+  right, but not the cause. I then compared a full session's 87 against a single
+  rest's 12 and wrote "87 down to 12" into the commit, the PR and two docs.
+  Session B, with the fix in, logged **122 over 10 rests — 12.2 per rest against
+  A's 12.4.** No change at all.
+
+  The real source is `AVAudioEngine.start()`, which activates the session
+  internally on the main thread and was being retried on **every cue**, because
+  the headless simulator has no audio route (`error -10879`) so the engine never
+  starts and never stops trying. Bounding the retry to one attempt per
+  activation: **1 fault per rest.**
+
+  **Normalise before you compare.** Both sessions were sitting there; I used one
+  of them and not the other.
+- **Handled audio interruptions.** The bounded retry needed it: a phone call
+  mid-rest deactivates the session and stops the engine, and without clearing
+  the flags the retry latches and the rest of the session is silent. That is a
+  device-checklist scenario, so it would have been found — on the phone, at 6am.
 - **Added `-autorun`**, which plays a session from Home with no taps: start,
   warm-up, every set and rest, finish, Daybreak, Summary. `07-acceptance.md`
   asks for "a full session of A and a full session of B, start to finish, zero
