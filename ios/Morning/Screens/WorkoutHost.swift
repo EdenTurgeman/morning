@@ -67,7 +67,23 @@ struct WorkoutHost: View {
 
     var body: some View {
         Group {
-            if case let .rest(rest) = session.currentStep, let endsAt = session.endsAt {
+            if case let .timer(timer) = session.currentStep, let endsAt = session.endsAt {
+                WarmupScreen(
+                    step: timer,
+                    endsAt: endsAt,
+                    progress: progressOverride ?? sessionProgress,
+                    // Blank on purpose. The chrome's centre is orientation —
+                    // "Set 2 / 14", "Rest" — and here the headline directly
+                    // beneath it already says "Warm-up". Saying it twice, 40pt
+                    // apart, is not orientation.
+                    stepLabel: "",
+                    namespace: workObject,
+                    onDone: { advance { session.advance() } },
+                    onBack: { advance { session.back() } },
+                    onEnd: endSession
+                )
+                .transition(Motion.screenSwap(reduceMotion: reduceMotion))
+            } else if case let .rest(rest) = session.currentStep, let endsAt = session.endsAt {
                 RestScreen(
                     seconds: rest.seconds,
                     endsAt: endsAt,
@@ -115,15 +131,13 @@ struct WorkoutHost: View {
             // The screen must not sleep mid-set. Released on end or abandon.
             UIApplication.shared.isIdleTimerDisabled = true
             cardRests = Set(Deck.cardRestIndices(in: session.steps))
-            // Step 0 is the warm-up timer — a screen W5 owns and the brief
-            // calls the least important in the app. Until it exists, start on
-            // the first set rather than on a step this host cannot render.
+            // The session starts on step 0, the warm-up, exactly as the web
+            // build does. This used to call `goToFirstSet()` and skip it,
+            // deferred "until the screen exists" — see `WarmupScreen`.
             if let stepOverride {
                 session.go(toStep: stepOverride)
             } else if let slotOverride {
                 session.go(toSlot: slotOverride)
-            } else if session.currentSet == nil, !session.isAtEnd {
-                session.goToFirstSet()
             }
             if let repsOverride {
                 session.adjustReps(by: repsOverride - session.draftReps)
@@ -216,24 +230,28 @@ struct WorkoutHost: View {
 
     /// The end of the session, and the only place the screen is allowed to
     /// sleep again.
+    /// Nothing should reach this.
+    ///
+    /// It is the `else` on a `Group` that now has a branch for every step kind
+    /// — timer, rest and set — and the real end of a session goes through
+    /// `onFinish`, not through here. It used to read "Session complete /
+    /// Summary and Daybreak are W7", and one tap of Back from the first set
+    /// landed on it, because the warm-up had no branch.
+    ///
+    /// So it stays, deliberately blank apart from the sky, and it releases the
+    /// resources rather than announcing anything. A silent screen is a bug; a
+    /// screen that lies about the session being over is a worse one.
     private var sessionEnded: some View {
-        VStack(spacing: Space.step) {
-            Text("Session complete")
-                .font(TypeScale.title)
-                .foregroundStyle(Ink.primary)
-            Text("Summary and Daybreak are W7.")
-                .font(TypeScale.body)
-                .foregroundStyle(Ink.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            // Holding the screen awake or the audio session open past the end
-            // of the session is a bug the user feels as a hot phone and silent
-            // headphones. This ran on the HOST for a while, which meant it
-            // released both immediately on every appear — the screen would
-            // have slept mid-set.
-            UIApplication.shared.isIdleTimerDisabled = false
-            Audio.shared.stop()
-        }
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onAppear {
+                // Holding the screen awake or the audio session open past the end
+                // of the session is a bug the user feels as a hot phone and silent
+                // headphones. This ran on the HOST for a while, which meant it
+                // released both immediately on every appear — the screen would
+                // have slept mid-set.
+                UIApplication.shared.isIdleTimerDisabled = false
+                Audio.shared.stop()
+            }
     }
 }
