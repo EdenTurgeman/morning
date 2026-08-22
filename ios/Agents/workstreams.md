@@ -627,12 +627,29 @@ the only test that actually counts.
 `05-platform.md §4` and `§7` are explicit that these are to be **proposed, not
 built**. They were non-goals on the web only because they were impossible there.
 
-- **Live Activity / Dynamic Island** for the rest timer. `Text(timerInterval:)`
-  counts down on the Lock Screen with no updates from the app at all, so it costs
-  essentially nothing. Eden has asked about this specifically. It is the feature
-  most likely to make the app feel native rather than ported — and the one most
-  likely to become annoying if overdone. Prototype one-per-rest *and*
-  one-for-the-session and decide from how it feels.
+- **Live Activity / Dynamic Island** for the rest timer. ✅ **EDEN HAS SAID YES**
+  (2026-08-23), in his words: *"wire this into a live activity thing that will
+  show even if my app is closed i think it would be good and i can re-open the
+  app from that at the top."*
+
+  So the requirements are his, not inferred:
+  1. The rest timer is visible **with the app closed** — Lock Screen and
+     Dynamic Island, not just in-app.
+  2. **Tapping it reopens the app**, landing on the step it is counting.
+
+  `Text(timerInterval:)` counts down on the Lock Screen with no updates from the
+  app at all, so it costs essentially nothing — which matters, because the rest
+  timer already derives from an absolute `endsAt` and a Live Activity wants
+  exactly that. `ActivityKit`, a Widget Extension target, and
+  `NSSupportsLiveActivities` in Info.plist.
+
+  Still open and worth deciding from how it feels rather than up front:
+  one-per-rest or one-for-the-session. One per rest is truer to the timer;
+  one for the session is quieter and survives the gaps between rests. Prototype
+  both.
+
+  **He asked for it "after we're done"**, so it is still queued behind the
+  completeness pass — but it is no longer gated on his approval.
 - **Home-screen widget**: the week's pips and which session is next. Small,
   quiet, honest.
 - **HealthKit**: each session as a strength-training workout, closing the rings.
