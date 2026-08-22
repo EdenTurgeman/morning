@@ -297,8 +297,26 @@ to web apps.
   | History, Ledger | yes | none |
   | Home, Summary, Backup | no | none |
 
-  The last row is the one to watch: those three neither scroll nor clamp, so
-  they are relying on the layout holding at whatever the system asks for.
+  The last row neither scrolls nor clamps, so it relies on the layout holding at
+  whatever the system asks for. **Measured, at
+  `UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge`:**
+
+  | Screen | Pixels changed vs default | Verdict |
+  |---|---|---|
+  | Guide | 16.1% | scales, scrolls, fine |
+  | Summary | 2.3% | nothing clipped, headroom to spare |
+  | Home | 2.0% | nothing clipped |
+
+  Home and Summary are safe — but not because they scale gracefully. They
+  barely scale at all, because their type is almost entirely fixed sizes. That
+  is the right answer for a rep counter and the wrong one for a card, which is
+  the point above.
+
+  To reproduce: append
+  `-UIPreferredContentSizeCategoryName UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge`
+  to any launch. In zsh, pass the arguments separately — an unquoted variable
+  holding the whole string is **not** word-split, and the app silently falls
+  back to Home, which is a very convincing way to measure the wrong screen.
 
 ---
 
