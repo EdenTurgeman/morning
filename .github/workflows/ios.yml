@@ -43,6 +43,12 @@ jobs:
       - name: Build and test
         # The acceptance suite is the executable specification. Every assertion
         # in it was once a real bug — see ios-port/07-acceptance.md.
+        #
+        # TEST_RUNNER_-prefixed variables reach the test process as plain env
+        # vars, but ONLY from the environment. Passed as an xcodebuild argument
+        # they become a build setting and the test never sees them.
+        env:
+          TEST_RUNNER_MORNING_EXPORT_PATH: ${{ github.workspace }}/ios/build/export-check.json
         run: |
           xcodebuild test \
             -project ios/Morning.xcodeproj \
@@ -50,6 +56,18 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -resultBundlePath ios/build/TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Export stays readable by the web app
+        # 07-acceptance.md asks that an export "opens in the web app's Restore
+        # box and parses". This runs a real export through the web app's OWN
+        # parser — src/lib/storage.ts, not a copy of its rules — so the day the
+        # two formats drift, CI says so instead of a restore quietly losing
+        # history. Needs no npm install: the tool imports only node built-ins
+        # and the project's own TypeScript.
+        run: |
+          test -f ios/build/export-check.json \
+            || { echo "the test run wrote no export to check"; exit 1; }
+          node --import ./scripts/alias-hook.mjs scripts/verify-export.ts ios/build/export-check.json
 
       - name: Report skipped assertions
         # Skipped count going down is the port's real progress bar.
