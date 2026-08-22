@@ -70,6 +70,11 @@ struct SetScreen: View {
             Spacer(minLength: Space.step)
 
             DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
+                // `Cue.confirm` was composed and never played. The web fires it
+                // from exactly this button (`src/screens/Workout.tsx`), and the
+                // haptic alone is not the same acknowledgement when the phone
+                // is on the floor rather than in your hand.
+                Audio.shared.play(.confirm)
                 onLog()
             }
 

@@ -95,6 +95,36 @@ The - **The threshold delay had to clear the digit ROLL, not visual fusion.** Th
   the summary card had the mirror-image bug: its closure set state directly
   instead of calling `reveal()`, so only the auto-reveal ever fired the haptic.
 
+### Completeness pass — Eden asked "are all the behaviours implemented?"
+
+They were not. Audited `04-rules.md` rule by rule against the port, plus every
+web component and every model property no view reads. Five gaps, one large:
+
+- **There was no weight picker at all.** `AppData.loads` was read and never
+  written. `Plates.swift`'s own header says "once the weight became adjustable
+  the breakdown had to be derived" — the maths was built for a control that
+  never shipped, and the Guide tells the user to "change it on the home screen".
+  Everything downstream was therefore dead too: the `weight-changed` celebration
+  tier and the rep control's "different weight now" could never fire, because
+  the weight could never change. Home has a picker now, bounded by
+  `Plates.maximum`, and there is a test walking the whole chain.
+- **The threshold played no tone.** `04-rules.md §1` says to give the emotional
+  centre "haptic detent, colour, motion, sound" and the port had three of four.
+  `Cue.beatIt` was composed, tested and never played; `RepDial.tsx` fires its
+  equivalent from exactly that spot.
+- **Logging a set played no tone.** `Cue.confirm`, same story.
+- **The celebration does not differ by tier.** `Celebration.milestoneBurst` and
+  `.rays` are computed, asserted by tests, and read by no view — so a lifetime
+  milestone and a plateau get identical choreography. `04-rules.md §5` has a
+  column for each. **Still open** — see below.
+- **History has no week strip.** `§7` asks for one and the file's own header
+  claims one. **Still open.**
+
+**How to find this class of bug:** list every stored property on a model type
+and grep the view layer for a read of it. Two of `Celebration`'s seven fields
+are dead, and they are precisely the two that make the reward differ by what you
+achieved. The same sweep is how the weight picker surfaced.
+
 **Read the web source for behaviour, not just for reasoning.** Both of those
 were one grep away the whole time. `src/hooks/useCountdown.ts` wires
 `onComplete` to `onAdvance` and carries a `setInterval` beside its rAF loop

@@ -69,7 +69,8 @@ struct AppRoot: View {
                     progress: Week.progress(history: data.history),
                     lastSession: data.history.max { $0.timestamp < $1.timestamp },
                     onStart: start,
-                    onOpen: { destination = $0 }
+                    onOpen: { destination = $0 },
+                    onLoadChange: { setLoad($0, for: nextKey) }
                 )
                 .sheet(item: $destination) { which in
                     reading(which)
@@ -146,6 +147,25 @@ struct AppRoot: View {
             try? await Task.sleep(for: .seconds(1.5))
             guard session == nil else { return }
             start(key)
+        }
+    }
+
+    /// The working weight for one session key.
+    ///
+    /// Written to `AppData.loads`, which the port has always read and never
+    /// written. Recorded against each finished session's `kg` as well, so
+    /// changing it never retroactively rewrites what was lifted last month —
+    /// `04-rules.md §4`.
+    private func setLoad(_ kg: Double, for key: String) {
+        var updated = data
+        var loads = updated.loads ?? [:]
+        loads[key] = kg
+        updated.loads = loads
+        do {
+            try store.save(updated)
+            data = updated
+        } catch {
+            saveError = error.localizedDescription
         }
     }
 

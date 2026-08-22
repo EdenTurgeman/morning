@@ -50,6 +50,21 @@ struct HomeScreen: View {
     let onStart: (String) -> Void
     /// The way into the reading screens.
     let onOpen: (HomeDestination) -> Void
+    /// The working weight for the session about to start.
+    ///
+    /// This was missing entirely. `Plates.swift`'s own header says "once the
+    /// weight became adjustable the breakdown had to be derived" — the maths
+    /// was built for a control that never shipped. `AppData.loads` was read and
+    /// never written, the Guide told you to "change it on the home screen", and
+    /// the whole weight-change chain downstream of it — the `weight-changed`
+    /// celebration tier, the rep control's "different weight now" — could never
+    /// fire, because the weight could never change.
+    let onLoadChange: (Double) -> Void
+
+    /// `-edit-load` opens the picker at launch, because no tap reaches this app
+    /// in the development environment. Inline layout rather than a
+    /// presentation, so an initial `@State` value is enough here.
+    @State private var editingLoad = ProcessInfo.processInfo.arguments.contains("-edit-load")
 
     /// Home sits at the start of the day, so the sky sits at the start of its
     /// walk. The dawn belongs to the session, not to the menu.
@@ -58,11 +73,17 @@ struct HomeScreen: View {
         DawnPalette(progress: skyProgress)
     }
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         VStack(alignment: .leading, spacing: Space.section) {
             header
 
             loadout
+
+            if editingLoad {
+                weightPicker
+            }
 
             WeekMeter(progress: progress, hasHistory: lastSession != nil, accent: palette.accent)
 
@@ -137,24 +158,115 @@ struct HomeScreen: View {
     /// The answer to "what do I set up" is plates, not a weight.
     private var loadout: some View {
         VStack(alignment: .leading, spacing: Space.tight) {
-            Text("Set up")
-                .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
+            HStack {
+                Text("Set up")
+                    .font(TypeScale.microLabel)
+                    .foregroundStyle(Ink.tertiary)
+
+                Spacer()
+
+                if load != nil {
+                    Button(editingLoad ? "Done" : "Change") {
+                        withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
+                            editingLoad.toggle()
+                        }
+                    }
+                    .font(TypeScale.microLabel)
+                    .foregroundStyle(palette.accentText)
+                    .frame(minHeight: Hit.minimum)
+                }
+            }
 
             if let load {
-                Text("\(Plates.format(load)) kg per handle")
-                    .font(TypeScale.counter(38))
-                    .foregroundStyle(Ink.primary)
+                // Hidden while the picker is open: the picker shows the same
+                // number and the same plate breakdown, and two of each is one
+                // too many.
+                if !editingLoad {
+                    Text("\(Plates.format(load)) kg per handle")
+                        .font(TypeScale.counter(38))
+                        .foregroundStyle(Ink.primary)
 
-                Text(Plates.breakdown(for: load) ?? "not loadable with the plates you own")
-                    .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    Text(Plates.breakdown(for: load) ?? "not loadable with the plates you own")
+                        .font(TypeScale.body)
+                        .foregroundStyle(Ink.secondary)
+                }
             } else {
                 Text("Bodyweight only")
                     .font(TypeScale.counter(38))
                     .foregroundStyle(Ink.primary)
             }
         }
+    }
+
+    /// Lighter / heavier, one plate step at a time.
+    ///
+    /// `04-rules.md` and the Guide both say the same thing: the program's
+    /// numbers are a starting guess, and the honest fix when one is wrong is to
+    /// tell the app, so that rep counts stay a measure of effort instead of a
+    /// record of falling short of an arbitrary target. Bounded by the plates
+    /// actually owned — `Plates.maximum` — because a weight you cannot load is
+    /// not a weight you can pick.
+    private var weightPicker: some View {
+        let current = load ?? 0
+        return VStack(spacing: Space.snug) {
+            HStack(spacing: Space.gutter) {
+                stepButton("−", label: "Lighter", enabled: current > 0) {
+                    change(to: current - Plates.step)
+                }
+
+                VStack(spacing: 0) {
+                    Text("\(Plates.format(current)) kg")
+                        .font(TypeScale.counter(34))
+                        .monospacedDigit()
+                        .foregroundStyle(Ink.primary)
+                    Text("per handle")
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(Ink.tertiary)
+                }
+                .frame(maxWidth: .infinity)
+
+                stepButton("+", label: "Heavier", enabled: current < Plates.maximum) {
+                    change(to: current + Plates.step)
+                }
+            }
+
+            Text(Plates.breakdown(for: current) ?? "not loadable with the plates you own")
+                .font(TypeScale.body)
+                .foregroundStyle(Ink.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func stepButton(
+        _ symbol: String,
+        label: String,
+        enabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(symbol)
+                .font(.system(size: 30, weight: .semibold, design: .rounded))
+                .frame(width: 62, height: 62)
+                .foregroundStyle(enabled ? Ink.primary : Ink.tertiary)
+                .background(Control.surface, in: RoundedRectangle(cornerRadius: 18))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Control.border, lineWidth: Control.borderWidth)
+                }
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .accessibilityLabel(label)
+    }
+
+    /// Clamped to what the plates can actually make, and reported rounded so
+    /// floating-point drift never puts 7.499999 in the file.
+    private func change(to kg: Double) {
+        let next = min(Plates.maximum, max(0, (kg * 100).rounded() / 100))
+        guard next != load else { return }
+        Audio.shared.play(.confirm)
+        Haptics.shared.rep()
+        onLoadChange(next)
     }
 }
 

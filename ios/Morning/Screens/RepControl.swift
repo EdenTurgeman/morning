@@ -152,8 +152,15 @@ struct RepControl: View {
         // The threshold is two events 45ms apart; a rep is one. Rhythm rather
         // than volume, because that is what the hand can tell apart with the
         // phone face down on the floor.
+        //
+        // And a tone, which was missing. `04-rules.md §1` is explicit that
+        // passing last time's number is the emotional centre and to "give it
+        // everything: haptic detent, colour, motion, sound" — the port had
+        // three of the four. `Cue.beatIt` was composed, tested, and never
+        // played; `src/components/RepDial.tsx` fires its equivalent right here.
         if wouldCross {
             Haptics.shared.threshold()
+            Audio.shared.play(.beatIt)
         } else {
             Haptics.shared.rep()
         }
