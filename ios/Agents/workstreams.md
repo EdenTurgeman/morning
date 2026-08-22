@@ -453,7 +453,7 @@ desynchronise from another when there is only one clock.
 
 ---
 
-## W8 · History and the year grid — `todo`
+## W8 · History and the year grid — `done`
 
 **Gate:** W7 done.
 
@@ -473,6 +473,18 @@ desynchronise from another when there is only one clock.
 
 **Done when:** reviewed at empty, one week, six months and one year of seeded
 data, and the grid fits at every size.
+
+**Closed 2026-08-22.** Reviewed at all four. The grid fits by construction: it
+is drawn in a `Canvas` whose cell size is derived from the width it is given, so
+there is no dimension it could overflow into, and it is self-sizing on a 53:7
+aspect rather than pinned to a height it does not need.
+
+Deletion is behind an explicit edit mode and keys off `ts`, the record's
+identity — never an index, which would delete the wrong session the moment the
+list is sorted differently from the file.
+
+Month labels are deliberately absent: cells land around 5pt on a phone and
+labels at that density crowd the thing they are labelling.
 
 **Kickoff prompt**
 

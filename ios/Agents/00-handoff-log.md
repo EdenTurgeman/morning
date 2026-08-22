@@ -55,6 +55,40 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W8 History and the year grid · Claude Opus 5
+
+**Workstream:** W8 — History and the year grid (done). W7 merged.
+
+**What I did**
+- `Screens/HistoryScreen.swift` — reverse-chronological sessions, the year grid,
+  and an explicit edit mode for deletion.
+- Wired History into Home, and `-screen history` for review.
+- Reviewed at empty, one week, six months and one year.
+
+**Decisions taken**
+- **The grid fits by construction.** Cell size is derived from the width the
+  `Canvas` is given, so it has no dimension to overflow into — the constraint
+  that killed the first web version cannot recur here.
+- It is **self-sizing on a 53:7 aspect**, not pinned to a height. My first
+  version fixed 132pt and the grid only needed 47, leaving it floating in dead
+  space: the cell size follows the width, so the height is not a free choice.
+- Deletion keys off `ts`, never an index.
+- Month labels omitted. At ~5pt cells they crowd what they label.
+- Empty shows the grid EMPTY rather than hiding it, so the shape of what is
+  coming is visible from day one.
+
+**Landmines**
+- The year grid's colour scale is relative to the user's OWN range — quietest
+  session indigo, best gold. With one session everything is gold, which is
+  correct and looks odd; do not "fix" it with an absolute scale.
+- `HistoryScreen` is presented as a sheet from Home. There is no tap in this
+  environment, so the sheet path itself has never been exercised — only
+  `-screen history`, which builds the same view directly.
+
+**Assertions:** 56 of 58 (unchanged — W8 has no assertions of its own)
+
+**Next:** W10 — Guide and Backup. Then W11, the device pass.
+
 ## 2026-08-22 · W7 Summary, Daybreak and the tiers · Claude Opus 5
 
 **Workstream:** W7 — Summary, Daybreak and celebration tiers (done), plus W9's
