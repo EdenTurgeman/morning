@@ -56,6 +56,21 @@ The - **The threshold delay had to clear the digit ROLL, not visual fusion.** Th
 - **Stopped the study card's answer landing on top of the question.** Three
   layers of legible text for ~150ms on every card reveal.
 
+- **Made a rest that reaches zero move on, and gave the last five seconds a
+  visual.** Two regressions against the web build, found by watching a 20-second
+  myo rest run out. The rest sat on "0 SEC" forever waiting for a tap, and the
+  screen did nothing over the last five seconds while the audio and the haptics
+  both ramped.
+
+**Read the web source for behaviour, not just for reasoning.** Both of those
+were one grep away the whole time. `src/hooks/useCountdown.ts` wires
+`onComplete` to `onAdvance` and carries a `setInterval` beside its rAF loop
+specifically so "a rest could [not] hang forever on a phone that decided not to
+paint"; `src/components/Ring.tsx` computes an `urgency` term over the last five
+seconds and calls it peripheral warning. CLAUDE.md rule 2 says the source wins
+on *what*. On the myo rest the port was telling the user "The 20-second rest IS
+the mechanism — don't stretch it" while stretching it indefinitely.
+
 **The one bug behind three of those:** `@ViewBuilder` branch swaps do not
 animate here. `.transition(.opacity)` on a branch, with or without a delayed
 `.animation(_:value:)`, had no effect in either the rep comparison line or the
