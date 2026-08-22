@@ -139,6 +139,23 @@ struct WorkoutHost: View {
                     logSet()
                 }
             }
+
+            // `-autorep` nudges the counter up one after the same beat. The
+            // counter prefills to last time's number, so one step crosses it —
+            // which is the moment `01-product.md` calls the emotional centre of
+            // the app, and the only way to watch it happen here.
+            if ProcessInfo.processInfo.arguments.contains("-autorep") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.4))
+                    // Deliberately NOT wrapped in `withAnimation`. A tap is not
+                    // wrapped either — `RepControl` drives the counter and the
+                    // comparison line from `.animation(_:value:)` alone. An
+                    // explicit wrap here would animate the capture with a
+                    // timing the product never uses, which is a harness that
+                    // measures itself.
+                    session.adjustReps(by: 1)
+                }
+            }
         }
         .onChange(of: session.stepIndex) { _, _ in
             drawCardIfNeeded()

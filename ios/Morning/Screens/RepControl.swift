@@ -64,6 +64,9 @@ struct RepControl: View {
                 .foregroundStyle(Ink.tertiary)
 
             comparison
+                // The counter has already changed by the time this arrives.
+                // See `Motion.threshold`.
+                .animation(Motion.threshold(reduceMotion: reduceMotion), value: isBeating)
         }
     }
 
@@ -91,6 +94,14 @@ struct RepControl: View {
     }
 
     /// One line, and it only ever says something true.
+    ///
+    /// The comparable case keeps BOTH sentences in the tree and crossfades them
+    /// on opacity, rather than swapping `@ViewBuilder` branches. That is not
+    /// tidiness — a branch swap here does not animate. Measured off a 60fps
+    /// capture, the beating sentence went 0% to 97% legible in a single frame
+    /// and 0.12s BEFORE the digit began to move, with both `.transition` and a
+    /// delayed `.animation(_:value:)` on it. Opacity on a view that never
+    /// leaves the tree is the primitive that honours a delay reliably.
     @ViewBuilder
     private var comparison: some View {
         if let previous {
@@ -100,17 +111,21 @@ struct RepControl: View {
                 Text("Last time: \(previous.reps) at \(Plates.format(previous.kg ?? 0)) kg — different weight now")
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.tertiary)
-            } else if isBeating {
-                Text("Beating last time's \(previous.reps)")
-                    .font(TypeScale.bodyEmphasis)
-                    .foregroundStyle(Semantic.threshold)
             } else {
-                // Equal or below, prefilled from last time: the number IS last
-                // time's number, so repeating it underneath would say it twice.
-                Text("Last time: \(previous.reps)")
-                    .font(TypeScale.body)
-                    .foregroundStyle(Ink.tertiary)
-                    .opacity(reps == previous.reps ? 0 : 1)
+                ZStack {
+                    // Equal or below, prefilled from last time: the number IS
+                    // last time's number, so repeating it underneath would say
+                    // it twice.
+                    Text("Last time: \(previous.reps)")
+                        .font(TypeScale.body)
+                        .foregroundStyle(Ink.tertiary)
+                        .opacity(isBeating || reps == previous.reps ? 0 : 1)
+
+                    Text("Beating last time's \(previous.reps)")
+                        .font(TypeScale.bodyEmphasis)
+                        .foregroundStyle(Semantic.threshold)
+                        .opacity(isBeating ? 1 : 0)
+                }
             }
         } else {
             Text("First time — just go to failure")

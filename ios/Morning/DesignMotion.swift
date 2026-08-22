@@ -29,6 +29,29 @@ enum Motion {
         reduceMotion ? .linear(duration: 0.08) : .easeOut(duration: 0.18)
     }
 
+    /// The second beat of crossing last time's number.
+    ///
+    /// The haptic for this moment is two events 45ms apart, and the reason is
+    /// in `DesignHaptics.swift`: the hand reads rhythm far better than it reads
+    /// amplitude. The screen was doing the opposite — the digit changing colour
+    /// and the sentence underneath arriving in the same frame, one beat where
+    /// the hand gets two.
+    ///
+    /// So the fact lands after the number. The delay is 0.22s, and the number
+    /// that matters is not the haptic's 45ms — it is how long the counter takes
+    /// to *finish*. The digit rolls under `contentTransition(.numericText)`, so
+    /// the new glyph is not fully there until about 0.24s after the tap even
+    /// though its colour animation is 0.18s. Measured off a 60fps capture, a
+    /// 0.09s delay still had the sentence fully legible while the digit was
+    /// mid-roll: the second beat arriving before the first.
+    ///
+    /// Vision also fuses what touch separates — below roughly 80ms two visual
+    /// events read as one — so this could not have been the haptic's 45ms
+    /// either. Both constraints point the same way.
+    static func threshold(reduceMotion: Bool) -> Animation {
+        reduceMotion ? .linear(duration: 0.12) : .easeOut(duration: 0.20).delay(0.22)
+    }
+
     /// Logging a set. A little weight, because something was committed.
     static func commit(reduceMotion: Bool) -> Animation {
         reduceMotion ? .linear(duration: 0.01) : .spring(duration: 0.32, bounce: 0.24)
