@@ -77,6 +77,24 @@ The - **The threshold delay had to clear the digit ROLL, not visual fusion.** Th
 - **Removed `ScaffoldView`.** Dead — only its own `#Preview` referenced it — and
   its copy said "no screens built yet", which stopped being true at W4.
 
+- **"End" had no confirmation.** The web wraps it in a `Confirm` — "End this
+  session? / Nothing will be saved — not even the sets you've already logged." —
+  and the port called `onAbandon()` straight through. One tap of a control in
+  the corner of every workout screen discarded the session, silently, no undo.
+  The acceptance test for the rule is named `…AfterAConfirm` and its comment
+  refers to "the confirmation copy"; that copy existed only in the web build.
+- **Every destructive confirmation is now an `alert`.** Having built the End
+  dialog I looked at it, and on iOS 26 `confirmationDialog` renders as a
+  translucent card over the content with **no visible cancel**. Measured on a
+  settled frame — I checked it was settled rather than mid-animation, because it
+  looks mid-animation. Restore, Erase and Delete had the same problem by
+  construction.
+- **Moved the primary action's haptic into `DawnPrimaryButton`.** Four of five
+  call sites wrote it out and Guide's Export forgot, so the one primary action
+  that opens a file picker was the one that said nothing to the hand. Tapping
+  the summary card had the mirror-image bug: its closure set state directly
+  instead of calling `reveal()`, so only the auto-reveal ever fired the haptic.
+
 **Read the web source for behaviour, not just for reasoning.** Both of those
 were one grep away the whole time. `src/hooks/useCountdown.ts` wires
 `onComplete` to `onAdvance` and carries a `setInterval` beside its rAF loop

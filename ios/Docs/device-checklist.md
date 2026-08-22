@@ -229,6 +229,13 @@ Being explicit, because "it built and the tests pass" is not the same thing:
   1.4s after launch so the Set→Rest transition can be recorded. It proves the
   transition, not the button.
 - **No haptic has been felt and no cue has been heard.**
+- **Every destructive confirmation is an `alert`, not a `confirmationDialog`.**
+  Measured on iOS 26: the sheet form renders as a translucent card floating over
+  the content, with the message in low-contrast grey and **no visible cancel
+  button**. That is wrong for "End this session?" — one tap of a control in the
+  corner of every workout screen throws the whole session away — and it is wrong
+  for Erase. Check on the phone that both buttons are actually there, since this
+  is OS rendering and iOS 27 may differ again.
 - Restore and Erase have never been run. The export *format* is checked on every
   CI run against the web app's own parser; the pickers around it are not.
 

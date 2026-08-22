@@ -46,6 +46,14 @@ struct WorkoutHost: View {
     /// and the timer are the same object to SwiftUI.
     @Namespace private var workObject
 
+    /// "End" discards the whole session, so it asks first. See `endSession`.
+    ///
+    /// `-confirm-end` opens it shortly after launch. A confirmation dialog
+    /// nobody can reach is a confirmation dialog nobody has read, and no tap
+    /// reaches this app in the development environment. Deferred rather than
+    /// set as the initial value: a dialog raised during the first render, before
+    /// the view is in a window, is simply dropped.
+    @State private var confirmingEnd = false
     @State private var cardRests: Set<Int> = []
     @State private var drawnCards: [Int: Card] = [:]
 
@@ -130,6 +138,28 @@ struct WorkoutHost: View {
                 sessionEnded
             }
         }
+        // The web build guards End with a confirmation and this port did not:
+        // `endSession()` called `onAbandon()` straight through, so one tap of a
+        // control in the corner of every workout screen discarded the whole
+        // session — every logged set, silently, no undo. `04-rules.md §8` calls
+        // losing a session the one unacceptable failure mode, and the acceptance
+        // test for the rule is literally named "...AfterAConfirm" while its
+        // comment refers to "the confirmation copy". That copy existed only in
+        // the web build. Verbatim from `src/screens/Workout.tsx`.
+        //
+        // An `alert`, not a `confirmationDialog`. The sheet version renders on
+        // iOS 26 as a translucent card floating over the exercise figure, with
+        // the message in low-contrast grey over a busy background and **no
+        // visible cancel** — measured on a settled frame, not guessed at. For
+        // the one control that throws a session away, "how do I say no" must be
+        // on screen, and the sentence explaining what you are about to lose has
+        // to be readable at 6:10am.
+        .alert("End this session?", isPresented: $confirmingEnd) {
+            Button("End and discard", role: .destructive) { onAbandon() }
+            Button("Keep going", role: .cancel) {}
+        } message: {
+            Text("Nothing will be saved — not even the sets you've already logged.")
+        }
         // One sky, behind everything, for the whole session. Screens fade
         // across it; it never fades itself. This is also what makes the dawn
         // read as continuous rather than as a property of the current step.
@@ -163,6 +193,13 @@ struct WorkoutHost: View {
             // a transition nobody has seen.
             autorunIfAsked()
 
+            if ProcessInfo.processInfo.arguments.contains("-confirm-end") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.0))
+                    confirmingEnd = true
+                }
+            }
+
             if ProcessInfo.processInfo.arguments.contains("-autoplay") {
                 Task { @MainActor in
                     try? await Task.sleep(for: .seconds(1.4))
@@ -190,6 +227,13 @@ struct WorkoutHost: View {
         .onChange(of: session.stepIndex) { _, _ in
             drawCardIfNeeded()
             autorunIfAsked()
+
+            if ProcessInfo.processInfo.arguments.contains("-confirm-end") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.0))
+                    confirmingEnd = true
+                }
+            }
         }
     }
 
@@ -261,7 +305,7 @@ struct WorkoutHost: View {
     }
 
     private func endSession() {
-        onAbandon()
+        confirmingEnd = true
     }
 
     /// The end of the session, and the only place the screen is allowed to

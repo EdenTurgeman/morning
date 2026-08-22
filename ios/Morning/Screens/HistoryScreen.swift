@@ -59,10 +59,10 @@ struct HistoryScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(DawnBackdrop(treatment: .atmospheric, progress: 0.12))
-        .confirmationDialog(
+        // See `WorkoutHost`: the sheet form has no visible cancel on iOS 26.
+        .alert(
             "Delete this session?",
-            isPresented: .constant(confirming != nil),
-            titleVisibility: .visible
+            isPresented: .constant(confirming != nil)
         ) {
             Button("Delete", role: .destructive) {
                 if let confirming {
