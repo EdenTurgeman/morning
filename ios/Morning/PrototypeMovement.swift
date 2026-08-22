@@ -131,7 +131,7 @@ private struct ExerciseFigure: View {
 
     var body: some View {
         Canvas { context, size in
-            var renderer = FigureRenderer(
+            let renderer = FigureRenderer(
                 pose: pose,
                 limbColor: accent,
                 bodyColor: .white.opacity(0.82),

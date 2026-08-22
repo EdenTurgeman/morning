@@ -2,6 +2,25 @@ import CoreHaptics
 import Foundation
 import SwiftUI
 
+/// The value passed after `-prototype`.
+///
+/// This used to be read as `ProcessInfo.arguments.last`, which was true only
+/// while `-prototype <value>` was the final pair on the command line. Adding
+/// `-progress <n>` after it silently broke every `snapshot` freeze and the
+/// `autoplay` advance — the timers ran live in captures that were supposed to
+/// be frozen at 45 seconds. Read the flag, never the tail.
+enum PrototypeLaunch {
+    static var value: String {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let flag = arguments.firstIndex(of: "-prototype"),
+              arguments.indices.contains(flag + 1)
+        else {
+            return ""
+        }
+        return arguments[flag + 1]
+    }
+}
+
 enum DawnTreatment: String, CaseIterable, Identifiable {
     case atmospheric
     case precise
@@ -105,14 +124,9 @@ struct PrototypeLabView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init() {
+        let value = PrototypeLaunch.value
+        guard !value.isEmpty else { return }
         let arguments = ProcessInfo.processInfo.arguments
-        guard let flag = arguments.firstIndex(of: "-prototype"),
-              arguments.indices.contains(flag + 1)
-        else {
-            return
-        }
-
-        let value = arguments[flag + 1]
         let selectedTreatment = DawnTreatment.allCases.first { value.hasPrefix($0.rawValue) } ?? .atmospheric
         let selectedMode: PrototypeMode = value.contains("rest") || value.contains("card") ? .rest : .set
         let selectedRestScenario: RestScenario = if value.contains("myo") {
@@ -573,7 +587,7 @@ private struct SetPrototypeView: View {
         .safeAreaPadding(.top, 4)
         .safeAreaPadding(.bottom, 6)
         .task {
-            guard (ProcessInfo.processInfo.arguments.last ?? "").contains("autoplay") else { return }
+            guard PrototypeLaunch.value.contains("autoplay") else { return }
             try? await Task.sleep(for: .milliseconds(1200))
             guard !Task.isCancelled else { return }
             onAdvance()
@@ -963,8 +977,7 @@ private struct RestPrototypeView: View {
         self.onClose = onClose
         self.onAdvance = onAdvance
         fixture = RestFixture.fixture(for: scenario)
-        let prototypeArgument = ProcessInfo.processInfo.arguments.last ?? ""
-        frozenRemaining = prototypeArgument.contains("snapshot")
+        frozenRemaining = PrototypeLaunch.value.contains("snapshot")
             ? TimeInterval(scenario == .myo ? 5 : 45)
             : nil
     }

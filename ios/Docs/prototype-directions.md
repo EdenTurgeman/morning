@@ -394,7 +394,15 @@ precisely the kind of thing Reduce Motion exists to switch off.
 -progress 0.85
 ```
 
-Overrides the scenario's default progress. Reviewing the sky across the range is
+Overrides the scenario's default progress. It can be combined with any
+`-prototype` value.
+
+**A trap this created and then had to fix.** `snapshot` and `autoplay` were
+detected by reading `ProcessInfo.arguments.last`, which was true only while
+`-prototype <value>` was the final pair on the command line. Adding `-progress`
+after it silently broke every freeze — captures that were supposed to be frozen
+at 45 seconds were showing live countdowns, and nothing failed to announce it.
+`PrototypeLaunch.value` now reads the flag. Read the flag, never the tail. Reviewing the sky across the range is
 the only way to check the claim that session position is readable from the
 environment alone — and it is what caught the contrast failure at the gold end.
 
