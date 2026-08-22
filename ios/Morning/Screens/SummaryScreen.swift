@@ -33,6 +33,9 @@ struct SummaryScreen: View {
     /// environment — without this the summary is unreviewable.
     @State private var showingDaybreak = !ProcessInfo.processInfo.arguments.contains("-skip-daybreak")
     @State private var cardRevealed = false
+    /// Separate from `cardRevealed`, exactly as on the rest screen: the card
+    /// takes its space first and the words arrive once it has stopped growing.
+    @State private var cardAnswerShown = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The session ended at sunrise, which is when it is actually happening.
@@ -96,14 +99,18 @@ struct SummaryScreen: View {
             factsRow
 
             if let card {
-                SummaryCard(card: card, revealed: cardRevealed) { cardRevealed = true }
-                    .task(id: card.id) {
-                        // Fourteen seconds rather than the rest screen's 6.5–11:
-                        // there is no timer to beat here.
-                        try? await Task.sleep(for: .seconds(Deck.summaryRevealDelay))
-                        guard !Task.isCancelled else { return }
-                        reveal()
-                    }
+                SummaryCard(card: card, revealed: cardRevealed, answerShown: cardAnswerShown) {
+                    reveal()
+                }
+                .task(id: card.id) {
+                    cardRevealed = false
+                    cardAnswerShown = false
+                    // Fourteen seconds rather than the rest screen's 6.5–11:
+                    // there is no timer to beat here.
+                    try? await Task.sleep(for: .seconds(Deck.summaryRevealDelay))
+                    guard !Task.isCancelled else { return }
+                    reveal()
+                }
             }
 
             Spacer(minLength: Space.step)
@@ -154,6 +161,13 @@ struct SummaryScreen: View {
         withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
             cardRevealed = true
         }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(Motion.answerDelay(reduceMotion: reduceMotion)))
+            guard !Task.isCancelled else { return }
+            withAnimation(Motion.answer(reduceMotion: reduceMotion)) {
+                cardAnswerShown = true
+            }
+        }
     }
 }
 
@@ -161,6 +175,10 @@ struct SummaryScreen: View {
 private struct SummaryCard: View {
     let card: Card
     let revealed: Bool
+    /// See `RepControl.comparison` and `StudyCard`: a `@ViewBuilder` branch
+    /// insertion does not animate, `.transition(.opacity)` or not. The answer
+    /// was appearing instantly. Opacity on a view that holds its space does.
+    let answerShown: Bool
     let onReveal: () -> Void
 
     var body: some View {
@@ -182,7 +200,7 @@ private struct SummaryCard: View {
                         .foregroundStyle(Ink.secondary)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
-                        .transition(.opacity)
+                        .opacity(answerShown ? 1 : 0)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
