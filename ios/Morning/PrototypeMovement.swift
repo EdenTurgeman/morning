@@ -20,7 +20,7 @@ struct ExerciseMotionBay: View {
                 phase: 0,
                 accent: accent
             )
-            .opacity(0.18)
+            .opacity(0.13)
 
             if reduceMotion {
                 ExerciseFigure(
@@ -131,161 +131,144 @@ private struct ExerciseFigure: View {
 
     var body: some View {
         Canvas { context, size in
-            switch movement {
-            case .overheadPress:
-                drawOverheadPress(context: &context, size: size)
-            case .pushUp:
-                drawPushUp(context: &context, size: size)
-            case .lateralRaise:
-                drawLateralRaise(context: &context, size: size)
-            case .floorFly:
-                drawFloorFly(context: &context, size: size)
-            case .row:
-                drawRow(context: &context, size: size)
-            case .curl:
-                drawCurl(context: &context, size: size)
-            }
+            var renderer = FigureRenderer(
+                pose: pose,
+                limbColor: accent,
+                bodyColor: .white.opacity(0.82),
+                size: size
+            )
+            renderer.draw(into: &context)
         }
         .padding(.horizontal, 34)
         .padding(.vertical, 14)
         .allowsHitTesting(false)
     }
 
-    private var bodyColor: Color {
-        .white.opacity(0.74)
-    }
-
-    private func drawOverheadPress(context: inout GraphicsContext, size: CGSize) {
-        let shoulderY = 0.4
-        drawHead(context: &context, size: size, center: point(0.5, 0.25, in: size))
-        stroke([(0.5, 0.34), (0.5, 0.69)], color: bodyColor, context: &context, size: size)
-        stroke([(0.38, 0.82), (0.5, 0.69), (0.62, 0.82)], color: bodyColor, context: &context, size: size)
-
-        let leftElbow = interpolated(from: (0.36, 0.51), to: (0.43, 0.23))
-        let leftHand = interpolated(from: (0.36, 0.3), to: (0.43, 0.08))
-        let rightElbow = mirrored(leftElbow)
-        let rightHand = mirrored(leftHand)
-        stroke([(0.5, shoulderY), leftElbow, leftHand], color: accent, context: &context, size: size)
-        stroke([(0.5, shoulderY), rightElbow, rightHand], color: accent, context: &context, size: size)
-        drawDumbbell(at: leftHand, context: &context, size: size)
-        drawDumbbell(at: rightHand, context: &context, size: size)
-    }
-
-    private func drawPushUp(context: inout GraphicsContext, size: CGSize) {
-        let bodyY = 0.43 + phase * 0.13
-        let shoulder = (0.34, bodyY)
-        let ankle = (0.78, bodyY + 0.05)
-        stroke([shoulder, ankle], color: bodyColor, context: &context, size: size)
-        drawHead(context: &context, size: size, center: point(0.25, bodyY - 0.02, in: size))
-
-        let elbow = (0.4, 0.7 - phase * 0.03)
-        let hand = (0.3, 0.76)
-        stroke([shoulder, elbow, hand], color: accent, context: &context, size: size)
-        stroke([(0.66, bodyY + 0.04), (0.82, 0.76)], color: bodyColor, context: &context, size: size)
-        stroke([(0.27, 0.78), (0.34, 0.78)], color: accent.opacity(0.8), context: &context, size: size)
-        stroke([(0.28, 0.81), (0.35, 0.81)], color: accent.opacity(0.6), context: &context, size: size)
-    }
-
-    private func drawLateralRaise(context: inout GraphicsContext, size: CGSize) {
-        drawHead(context: &context, size: size, center: point(0.5, 0.23, in: size))
-        stroke([(0.5, 0.32), (0.5, 0.67)], color: bodyColor, context: &context, size: size)
-        stroke([(0.38, 0.82), (0.5, 0.67), (0.62, 0.82)], color: bodyColor, context: &context, size: size)
-
-        let leftElbow = interpolated(from: (0.43, 0.57), to: (0.31, 0.39))
-        let leftHand = interpolated(from: (0.46, 0.73), to: (0.14, 0.4))
-        let rightElbow = mirrored(leftElbow)
-        let rightHand = mirrored(leftHand)
-        stroke([(0.5, 0.38), leftElbow, leftHand], color: accent, context: &context, size: size)
-        stroke([(0.5, 0.38), rightElbow, rightHand], color: accent, context: &context, size: size)
-        drawDumbbell(at: leftHand, context: &context, size: size)
-        drawDumbbell(at: rightHand, context: &context, size: size)
-    }
-
-    private func drawFloorFly(context: inout GraphicsContext, size: CGSize) {
-        drawHead(context: &context, size: size, center: point(0.5, 0.24, in: size))
-        stroke([(0.5, 0.32), (0.5, 0.77)], color: bodyColor, context: &context, size: size)
-        stroke([(0.43, 0.78), (0.57, 0.78)], color: bodyColor, context: &context, size: size)
-
-        let leftElbow = interpolated(from: (0.29, 0.49), to: (0.43, 0.36))
-        let leftHand = interpolated(from: (0.12, 0.5), to: (0.45, 0.22))
-        let rightElbow = mirrored(leftElbow)
-        let rightHand = mirrored(leftHand)
-        stroke([(0.5, 0.39), leftElbow, leftHand], color: accent, context: &context, size: size)
-        stroke([(0.5, 0.39), rightElbow, rightHand], color: accent, context: &context, size: size)
-        drawDumbbell(at: leftHand, context: &context, size: size)
-        drawDumbbell(at: rightHand, context: &context, size: size)
-    }
-
-    private func drawRow(context: inout GraphicsContext, size: CGSize) {
-        drawHead(context: &context, size: size, center: point(0.31, 0.34, in: size))
-        stroke([(0.35, 0.39), (0.65, 0.55)], color: bodyColor, context: &context, size: size)
-        stroke([(0.65, 0.55), (0.52, 0.82), (0.73, 0.82)], color: bodyColor, context: &context, size: size)
-
-        let elbow = interpolated(from: (0.48, 0.65), to: (0.54, 0.45))
-        let hand = interpolated(from: (0.43, 0.78), to: (0.65, 0.58))
-        stroke([(0.43, 0.45), elbow, hand], color: accent, context: &context, size: size)
-        drawDumbbell(at: hand, context: &context, size: size)
-    }
-
-    private func drawCurl(context: inout GraphicsContext, size: CGSize) {
-        drawHead(context: &context, size: size, center: point(0.5, 0.23, in: size))
-        stroke([(0.5, 0.32), (0.5, 0.68)], color: bodyColor, context: &context, size: size)
-        stroke([(0.38, 0.82), (0.5, 0.68), (0.62, 0.82)], color: bodyColor, context: &context, size: size)
-
-        let leftHand = interpolated(from: (0.36, 0.72), to: (0.39, 0.38))
-        let rightHand = mirrored(leftHand)
-        stroke([(0.44, 0.38), (0.36, 0.55), leftHand], color: accent, context: &context, size: size)
-        stroke([(0.56, 0.38), (0.64, 0.55), rightHand], color: accent, context: &context, size: size)
-        drawDumbbell(at: leftHand, context: &context, size: size)
-        drawDumbbell(at: rightHand, context: &context, size: size)
-    }
-
-    private func drawHead(context: inout GraphicsContext, size: CGSize, center: CGPoint) {
-        let diameter = min(size.width, size.height) * 0.09
-        let rect = CGRect(
-            x: center.x - diameter / 2,
-            y: center.y - diameter / 2,
-            width: diameter,
-            height: diameter
-        )
-        context.stroke(
-            Path(ellipseIn: rect),
-            with: .color(bodyColor),
-            style: StrokeStyle(lineWidth: 4)
-        )
-    }
-
-    private func drawDumbbell(
-        at location: (Double, Double),
-        context: inout GraphicsContext,
-        size: CGSize
-    ) {
-        stroke(
-            [(location.0 - 0.035, location.1), (location.0 + 0.035, location.1)],
-            color: .white.opacity(0.86),
-            lineWidth: 5,
-            context: &context,
-            size: size
-        )
-    }
-
-    private func stroke(
-        _ coordinates: [(Double, Double)],
-        color: Color,
-        lineWidth: Double = 5,
-        context: inout GraphicsContext,
-        size: CGSize
-    ) {
-        guard let first = coordinates.first else { return }
-        var path = Path()
-        path.move(to: point(first.0, first.1, in: size))
-        for coordinate in coordinates.dropFirst() {
-            path.addLine(to: point(coordinate.0, coordinate.1, in: size))
+    /// The pose coordinates are unchanged from the stroke version — only the
+    /// rendering gained mass. Each one interpolates between an honest start and
+    /// finish position for the real movement.
+    private var pose: FigurePose {
+        switch movement {
+        case .overheadPress: overheadPress
+        case .pushUp: pushUp
+        case .lateralRaise: lateralRaise
+        case .floorFly: floorFly
+        case .row: row
+        case .curl: curl
         }
-        context.stroke(
-            path,
-            with: .color(color),
-            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
+    }
+
+    private var overheadPress: FigurePose {
+        let hand = interpolated(from: (0.36, 0.30), to: (0.43, 0.09))
+        let elbow = interpolated(from: (0.34, 0.50), to: (0.43, 0.24))
+        return FigurePose(
+            head: (0.5, 0.22),
+            neck: (0.5, 0.33),
+            hip: (0.5, 0.66),
+            arms: [
+                [(0.44, 0.39), elbow, hand],
+                [(0.56, 0.39), mirrored(elbow), mirrored(hand)],
+            ],
+            legs: [
+                [(0.465, 0.68), (0.455, 0.79), (0.450, 0.90)],
+                [(0.535, 0.68), (0.545, 0.79), (0.550, 0.90)],
+            ],
+            dumbbells: [hand, mirrored(hand)]
+        )
+    }
+
+    private var pushUp: FigurePose {
+        // The body drops toward the floor and presses back up; the hands stay put.
+        let drop = phase * 0.12
+        return FigurePose(
+            head: (0.24, 0.40 + drop),
+            neck: (0.34, 0.44 + drop),
+            hip: (0.62, 0.52 + drop * 0.7),
+            arms: [
+                [(0.34, 0.45 + drop), (0.40, 0.60 + drop * 0.4), (0.31, 0.76)],
+            ],
+            legs: [
+                [(0.62, 0.53 + drop * 0.7), (0.75, 0.64 + drop * 0.4), (0.86, 0.76)],
+            ],
+            ground: (0.16, 0.94, 0.80)
+        )
+    }
+
+    private var lateralRaise: FigurePose {
+        let hand = interpolated(from: (0.42, 0.62), to: (0.20, 0.40))
+        let elbow = interpolated(from: (0.43, 0.51), to: (0.32, 0.40))
+        return FigurePose(
+            head: (0.5, 0.21),
+            neck: (0.5, 0.32),
+            hip: (0.5, 0.64),
+            arms: [
+                [(0.44, 0.37), elbow, hand],
+                [(0.56, 0.37), mirrored(elbow), mirrored(hand)],
+            ],
+            legs: [
+                [(0.465, 0.66), (0.455, 0.78), (0.450, 0.90)],
+                [(0.535, 0.66), (0.545, 0.78), (0.550, 0.90)],
+            ],
+            dumbbells: [hand, mirrored(hand)]
+        )
+    }
+
+    private var floorFly: FigurePose {
+        // Lying down: the arms open wide and close above the chest.
+        let hand = interpolated(from: (0.16, 0.44), to: (0.44, 0.22))
+        let elbow = interpolated(from: (0.28, 0.48), to: (0.44, 0.36))
+        return FigurePose(
+            head: (0.5, 0.22),
+            neck: (0.5, 0.33),
+            hip: (0.5, 0.70),
+            arms: [
+                [(0.45, 0.39), elbow, hand],
+                [(0.55, 0.39), mirrored(elbow), mirrored(hand)],
+            ],
+            legs: [
+                [(0.470, 0.72), (0.458, 0.82), (0.452, 0.90)],
+                [(0.530, 0.72), (0.542, 0.82), (0.548, 0.90)],
+            ],
+            dumbbells: [hand, mirrored(hand)],
+            ground: (0.10, 0.90, 0.92)
+        )
+    }
+
+    private var row: FigurePose {
+        // Hinged at the hip, torso near horizontal, elbow driving back.
+        let hand = interpolated(from: (0.40, 0.74), to: (0.58, 0.56))
+        let elbow = interpolated(from: (0.44, 0.62), to: (0.56, 0.44))
+        return FigurePose(
+            head: (0.24, 0.36),
+            neck: (0.34, 0.42),
+            hip: (0.64, 0.54),
+            arms: [
+                [(0.38, 0.45), elbow, hand],
+            ],
+            legs: [
+                [(0.622, 0.56), (0.608, 0.74), (0.622, 0.90)],
+                [(0.678, 0.56), (0.692, 0.74), (0.706, 0.90)],
+            ],
+            dumbbells: [hand]
+        )
+    }
+
+    private var curl: FigurePose {
+        let hand = interpolated(from: (0.37, 0.66), to: (0.42, 0.40))
+        let elbow = interpolated(from: (0.39, 0.53), to: (0.40, 0.54))
+        return FigurePose(
+            head: (0.5, 0.21),
+            neck: (0.5, 0.32),
+            hip: (0.5, 0.64),
+            arms: [
+                [(0.44, 0.37), elbow, hand],
+                [(0.56, 0.37), mirrored(elbow), mirrored(hand)],
+            ],
+            legs: [
+                [(0.465, 0.66), (0.455, 0.78), (0.450, 0.90)],
+                [(0.535, 0.66), (0.545, 0.78), (0.550, 0.90)],
+            ],
+            dumbbells: [hand, mirrored(hand)]
         )
     }
 
@@ -301,9 +284,5 @@ private struct ExerciseFigure: View {
 
     private func mirrored(_ point: (Double, Double)) -> (Double, Double) {
         (1 - point.0, point.1)
-    }
-
-    private func point(_ x: Double, _ y: Double, in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * x, y: size.height * y)
     }
 }

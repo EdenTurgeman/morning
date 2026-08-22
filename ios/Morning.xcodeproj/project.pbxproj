@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B3A0952856AB0FC5F592069 /* PrototypeFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */; };
 		BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */; };
 		50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149EF8C3DBE09E7D14729069 /* DesignMotion.swift */; };
 		54939B36D54BD7D003DC78CC /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */; };
@@ -51,6 +52,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeFigure.swift; sourceTree = "<group>"; };
 		FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignHaptics.swift; sourceTree = "<group>"; };
 		149EF8C3DBE09E7D14729069 /* DesignMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignMotion.swift; sourceTree = "<group>"; };
 		5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 		449C7FBA832FA356A9500DA8 /* Morning */ = {
 			isa = PBXGroup;
 			children = (
+				46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */,
 				FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */,
 				149EF8C3DBE09E7D14729069 /* DesignMotion.swift */,
 				5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */,
@@ -325,6 +328,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B3A0952856AB0FC5F592069 /* PrototypeFigure.swift in Sources */,
 				BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */,
 				50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */,
 				54939B36D54BD7D003DC78CC /* DesignTokens.swift in Sources */,

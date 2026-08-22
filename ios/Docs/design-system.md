@@ -250,6 +250,38 @@ No third-party animation dependency. `MeshGradient`, `Canvas`, `TimelineView`
 and baked `CGImage` tiles cover all of it — the gates are in
 `technical-decisions.md` and nothing has cleared them.
 
+### The exercise figure
+
+`§7` is direct about this: *"The current figures are SVG stick figures animated
+with SMIL and the user has said twice that they need work… They should look like
+a body, not a diagram."*
+
+Twice is the part that matters, and the first native pass reproduced the same
+problem in Swift — uniform 5pt round-capped strokes and a circle for a head.
+What makes that read as a diagram is not the abstraction. It is that every line
+is the same width and every joint is a corner.
+
+`PrototypeFigure.swift` draws the same poses as **filled, tapered shapes**:
+
+- Limbs taper from shoulder to hand and from hip to foot, with round joints,
+  because there is a bone end inside a joint.
+- The torso is a mass with a waist and curved sides, not a line — and it rotates
+  on its own axis, so a bent-over row leans as one body.
+- The head is an ellipse slightly taller than wide, on a neck. A circle floating
+  above the shoulders is exactly the "ball on a stick" read.
+- Dumbbells have plates, so they are loaded rather than held rods.
+
+The pose coordinates and the motion model are unchanged from the stroke version.
+No assets, no dependency, no anatomy library.
+
+One trap worth recording: the bay is wide and short, so **a normalised x offset
+is worth far fewer points than the same number in y**. A stance that looked
+hip-width in coordinates rendered as two fused legs. Widths are all derived from
+`size.height` for the same reason.
+
+It stays deliberately abstract. This is a movement reminder glanced at from 1.5m
+at 6:10am, and detail it does not need would only compete with the rep counter.
+
 ---
 
 ## Motion
