@@ -160,13 +160,19 @@ struct SetScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// A cue carries the training effect when it SHOUTS — the program's copy
-    /// uses capitals for exactly the words that matter. Read from the content
-    /// rather than hand-listed, so adding a cue needs no edit here.
+    /// A cue carries the training effect when it names one.
+    ///
+    /// `intensityWords` is already in `Program.swift`, transcribed from the web
+    /// build's `INTENSITY_WORDS` — it is content, not a heuristic. My first
+    /// version here guessed at "contains a shouted word", which silently missed
+    /// "Go to failure" and "mechanism": both lowercase, both exactly the cues
+    /// that matter most.
+    ///
+    /// The emphasis is brighter ink, heavier weight and a filled accent marker
+    /// — deliberately NOT a second text colour. The accent is already doing a
+    /// job and a second hue at 6am is noise.
     private func carriesEffect(_ cue: String) -> Bool {
-        cue.contains(where: \.isUppercase) && cue.split(separator: " ").contains {
-            $0.count > 2 && $0.allSatisfy { !$0.isLowercase }
-        }
+        intensityWords.contains { cue.contains($0) }
     }
 
     /// Four cues need a shorter bay than two. The screen never scrolls, so

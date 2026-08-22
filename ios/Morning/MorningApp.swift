@@ -32,7 +32,11 @@ struct MorningApp: App {
             // honest prototype.
             Group {
                 if Self.requestedScreen == "set" {
-                    WorkoutHost(progressOverride: Self.progressOverride)
+                    WorkoutHost(
+                        sessionKey: Self.value(after: "-session"),
+                        progressOverride: Self.progressOverride,
+                        slot: Self.value(after: "-slot")
+                    )
                 } else {
                     PrototypeLabView()
                 }

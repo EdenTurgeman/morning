@@ -18,8 +18,12 @@ import SwiftUI
 struct WorkoutHost: View {
     @State private var session: WorkoutSession
     private let progressOverride: Double?
+    /// `-slot 4.0.0` lands on one specific set. The worst content in the
+    /// program is not the first set, and a screen that must never scroll has to
+    /// be checked against its worst case rather than its first.
+    private let slotOverride: String?
 
-    init(sessionKey: String? = nil, progressOverride: Double? = nil) {
+    init(sessionKey: String? = nil, progressOverride: Double? = nil, slot: String? = nil) {
         let store = Store()
         let history = store.load().history
         let key = sessionKey ?? NextSession.proposed(from: history)
@@ -32,6 +36,7 @@ struct WorkoutHost: View {
             )
         )
         self.progressOverride = progressOverride
+        slotOverride = slot
     }
 
     var body: some View {
@@ -60,7 +65,9 @@ struct WorkoutHost: View {
             // Step 0 is the warm-up timer — a screen W5 owns and the brief
             // calls the least important in the app. Until it exists, start on
             // the first set rather than on a step this host cannot render.
-            if session.currentSet == nil, !session.isAtEnd {
+            if let slotOverride {
+                session.go(toSlot: slotOverride)
+            } else if session.currentSet == nil, !session.isAtEnd {
                 session.goToFirstSet()
             }
         }
