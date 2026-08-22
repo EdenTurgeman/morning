@@ -477,7 +477,7 @@ private struct SetPrototypeView: View {
                         Text("MYO")
                             .font(.caption2.weight(.bold))
                             .tracking(1.4)
-                            .foregroundStyle(palette.accent)
+                            .foregroundStyle(palette.accentText)
                             .padding(.horizontal, 9)
                             .padding(.vertical, 5)
                             .background(palette.accent.opacity(0.14), in: Capsule())
@@ -501,10 +501,7 @@ private struct SetPrototypeView: View {
                 if fixture.straightIntoNext {
                     Text("No rest after this — straight into the next one.")
                         .font(.subheadline.weight(.medium))
-                        // The raw accent is too dark to carry text over a lit
-                        // sky — measured 5.48:1. Lifted toward white it stays
-                        // unmistakably accent-family and clears the bar.
-                        .foregroundStyle(palette.accent.mix(with: .white, by: 0.42, in: .perceptual))
+                        .foregroundStyle(palette.accentText)
                         .padding(.top, 4)
                 }
             }
@@ -1012,7 +1009,7 @@ private struct RestPrototypeView: View {
                     question: question,
                     answer: fixture.answer ?? "",
                     revealed: answerRevealed,
-                    accent: palette.accent,
+                    palette: palette,
                     onReveal: revealAnswer
                 )
                 .padding(.top, 10)
@@ -1242,7 +1239,7 @@ private struct StudyCardPrototype: View {
     let question: String
     let answer: String
     let revealed: Bool
-    let accent: Color
+    let palette: DawnPalette
     let onReveal: () -> Void
 
     var body: some View {
@@ -1251,7 +1248,7 @@ private struct StudyCardPrototype: View {
                 Text(topic)
                     .font(.caption2.weight(.semibold))
                     .tracking(1.8)
-                    .foregroundStyle(accent)
+                    .foregroundStyle(palette.accentText)
 
                 Text(question)
                     .font(.system(size: 17, weight: .semibold))
@@ -1263,7 +1260,7 @@ private struct StudyCardPrototype: View {
                         .fill(.white.opacity(0.13))
                         .frame(height: 1)
                     Rectangle()
-                        .fill(revealed ? .white.opacity(0.24) : accent)
+                        .fill(revealed ? .white.opacity(0.24) : palette.accent)
                         .frame(width: revealed ? nil : 92, height: revealed ? 1 : 2)
                 }
 

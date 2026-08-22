@@ -405,3 +405,24 @@ ladder/progress-ladder.png     the dawn walk, 0.00 -> 1.00
 legibility-v2/                 acuity-limited distance sheets
 iter/                          the current review matrix
 ```
+
+### `accentText` — the ramp fills, it does not write
+
+Measuring the study card turned up the weakest text anywhere in the app: the
+topic label (`SPARKLING`) at **4.59:1**, barely over AA and far under the
+tertiary bar. Same cause as the superset warning line: the accent ramp's five
+stops are picked to be a *light source* — sky, ring, progress bar, primary fill
+— and the darker end of that ramp cannot carry small glyphs on a lit background.
+
+`DawnPalette.accentText` lifts the live accent 42% toward white. The rule it
+encodes:
+
+> The raw `accent` fills and lights. `accentText` is the only one that carries
+> glyphs.
+
+Applied to the study-card topic, the `MYO` badge and the superset warning line.
+Measured across the range, the topic label now reads 7.37:1 at twilight, 7.71:1
+mid-session and 8.75:1 at gold. The study card's longest answer holds
+7.39–8.71:1 over the same range.
+
+This is the first real W2 token, found by measurement rather than by taste.

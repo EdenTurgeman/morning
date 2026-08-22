@@ -255,6 +255,20 @@ struct DawnPalette {
         )
     }
 
+    /// The accent, lifted for use as **text**.
+    ///
+    /// The ramp's raw values are picked to be a light source — the sky, the
+    /// ring, the progress bar, the primary fill. Used as small text on a lit
+    /// background the darkest of them measures 4.59:1, barely over AA and well
+    /// under this app's 6.6:1 tertiary bar. Lifting toward white keeps the hue
+    /// unmistakably accent-family while clearing the bar at every progress.
+    ///
+    /// Rule: the raw `accent` fills and lights; `accentText` is the only one
+    /// that carries glyphs.
+    var accentText: Color {
+        accent.mix(with: .white, by: 0.42, in: .perceptual)
+    }
+
     var middle: Color {
         accent.opacity(0.35)
     }
