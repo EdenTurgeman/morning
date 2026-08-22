@@ -10,10 +10,31 @@ struct DawnPrimaryButton: View {
     let title: String
     let treatment: DawnTreatment
     let accent: Color
+    /// Off only for the W1 direction lab, which fires its own treatment-varying
+    /// haptic to compare them — two at once would make every treatment feel
+    /// identical, which is the one thing that lab exists to tell apart.
+    ///
+    /// Declared before `action` so the trailing-closure call sites still read
+    /// as trailing closures.
+    var haptic = true
     let action: () -> Void
 
+    /// The haptic lives HERE, not at the call sites.
+    ///
+    /// It used to be written out by each caller, and four of the five
+    /// remembered. Guide's Export did not, so the one primary action in the app
+    /// that opens a file picker was also the one that said nothing to the hand.
+    /// `02-design-brief.md §12` asks whether every tap answers in the hand as
+    /// well as on screen, and a haptic you have to remember to write is one you
+    /// will forget to write — the same argument `DesignMotion` already makes
+    /// about reduced motion.
     var body: some View {
-        Button(action: action) {
+        Button {
+            if haptic {
+                Haptics.shared.logged()
+            }
+            action()
+        } label: {
             Text(title)
                 .font(.headline)
                 .frame(maxWidth: .infinity)

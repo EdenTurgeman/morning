@@ -120,7 +120,6 @@ struct SummaryScreen: View {
                 treatment: .atmospheric,
                 accent: DawnPalette(progress: skyProgress).accent
             ) {
-                Haptics.shared.logged()
                 onDone()
             }
         }

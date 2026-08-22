@@ -70,7 +70,6 @@ struct SetScreen: View {
             Spacer(minLength: Space.step)
 
             DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
-                Haptics.shared.logged()
                 onLog()
             }
 

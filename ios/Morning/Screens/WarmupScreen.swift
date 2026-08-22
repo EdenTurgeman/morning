@@ -80,7 +80,6 @@ struct WarmupScreen: View {
             Spacer(minLength: Space.step)
 
             DawnPrimaryButton(title: "Done — start lifting", treatment: .atmospheric, accent: palette.accent) {
-                Haptics.shared.logged()
                 finish()
             }
         }

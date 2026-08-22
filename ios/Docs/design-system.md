@@ -508,6 +508,19 @@ colour and progress reading survives. Calmer, not broken.
 Every tap in the shipped app is mute to the hand, which makes this the single
 largest available improvement in felt quality.
 
+**The primary action's haptic lives in `DawnPrimaryButton`, not at its call
+sites.** It used to be written out by each caller and four of the five
+remembered; Guide's Export did not, so the one primary action that opens a file
+picker was the one that said nothing to the hand. Tapping the summary card had
+the same shape of bug from the other direction — its closure set state directly
+instead of calling `reveal()`, so only the fourteen-second auto-reveal ever
+produced the reveal haptic, and the one case where it genuinely *is* an action
+you took was the silent one.
+
+The W1 lab opts out with `haptic: false`, because it fires its own
+treatment-varying haptic and two at once would make every treatment feel
+identical.
+
 The vocabulary is data in `DesignHaptics.swift`, separate from the engine that
 plays it, so the design can be read without reading playback code.
 

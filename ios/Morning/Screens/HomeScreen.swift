@@ -74,7 +74,6 @@ struct HomeScreen: View {
                     treatment: .atmospheric,
                     accent: palette.accent
                 ) {
-                    Haptics.shared.logged()
                     onStart(nextSession)
                 }
 

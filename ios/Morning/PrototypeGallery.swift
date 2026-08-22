@@ -568,7 +568,8 @@ private struct SetPrototypeView: View {
             DawnPrimaryButton(
                 title: "Done",
                 treatment: treatment,
-                accent: palette.accent
+                accent: palette.accent,
+                haptic: false
             ) {
                 PrototypeHaptics.shared.confirm(treatment: treatment)
                 withAnimation(Motion.commit(reduceMotion: reduceMotion)) {
