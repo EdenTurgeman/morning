@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F931E872C9CD5A79F428A21F /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB45F7318157028E123837CC /* Deck.swift */; };
+		61246B97184D35D802FC0D9E /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 896971FECE671753F440F58F /* Cards.swift */; };
 		2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */; };
 		B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */; };
 		5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3024DEC7857A680871BEEA49 /* RepControl.swift */; };
@@ -61,6 +63,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AB45F7318157028E123837CC /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		896971FECE671753F440F58F /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
 		7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHost.swift; sourceTree = "<group>"; };
 		8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetScreen.swift; sourceTree = "<group>"; };
 		3024DEC7857A680871BEEA49 /* RepControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepControl.swift; sourceTree = "<group>"; };
@@ -121,6 +125,8 @@
 		00B7138305DB7E908846968E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				AB45F7318157028E123837CC /* Deck.swift */,
+				896971FECE671753F440F58F /* Cards.swift */,
 				C9F4A6E3E6711B5CDB4486F1 /* Haptics.swift */,
 				27CD28D350DC22D16F2B0A42 /* WorkoutSession.swift */,
 				737FCE27438C9AA2B24A980F /* History.swift */,
@@ -363,6 +369,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F931E872C9CD5A79F428A21F /* Deck.swift in Sources */,
+				61246B97184D35D802FC0D9E /* Cards.swift in Sources */,
 				2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */,
 				B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */,
 				5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */,
