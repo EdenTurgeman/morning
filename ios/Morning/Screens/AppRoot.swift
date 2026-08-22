@@ -23,7 +23,14 @@ struct AppRoot: View {
     @State private var saveError: String?
     /// The session just finished, held so the summary can show it. Cleared when
     /// the summary is dismissed.
-    @State private var finished: (record: SessionRecord, celebration: Celebration, card: Card?)?
+    @State private var finished: FinishedSession?
+
+    /// What the summary needs after a session ends.
+    struct FinishedSession {
+        let record: SessionRecord
+        let celebration: Celebration
+        let card: Card?
+    }
 
     init() {
         let store = Store()
@@ -112,10 +119,10 @@ struct AppRoot: View {
         // The celebration is computed from the history WITH this session in it,
         // because a lifetime threshold fires by diffing the ledger with and
         // without — it has to be able to see both.
-        finished = (
-            record,
-            Celebrations.forSession(record, history: updated.history),
-            Deck.draw()
+        finished = FinishedSession(
+            record: record,
+            celebration: Celebrations.forSession(record, history: updated.history),
+            card: Deck.draw()
         )
     }
 

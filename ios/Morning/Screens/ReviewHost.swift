@@ -45,18 +45,18 @@ struct SummaryReviewHost: View {
 
         switch tier {
         case "plateau":
-            let a = make(150, kg: 7.5, ts: 1000)
-            let b = make(150, kg: 7.5, ts: 2000)
-            let c = make(150, kg: 7.5, ts: 3000)
-            return (c, Celebrations.forSession(c, history: [a, b, c]))
+            let first = make(150, kg: 7.5, ts: 1000)
+            let second = make(150, kg: 7.5, ts: 2000)
+            let third = make(150, kg: 7.5, ts: 3000)
+            return (third, Celebrations.forSession(third, history: [first, second, third]))
         case "record":
-            let a = make(100, kg: 7.5, ts: 1000)
-            let b = make(200, kg: 7.5, ts: 2000)
-            return (b, Celebrations.forSession(b, history: [a, b]))
+            let earlier = make(100, kg: 7.5, ts: 1000)
+            let best = make(200, kg: 7.5, ts: 2000)
+            return (best, Celebrations.forSession(best, history: [earlier, best]))
         case "weight-changed":
-            let a = make(150, kg: 7.5, ts: 1000)
-            let b = make(120, kg: 10, ts: 2000)
-            return (b, Celebrations.forSession(b, history: [a, b]))
+            let before = make(150, kg: 7.5, ts: 1000)
+            let heavier = make(120, kg: 10, ts: 2000)
+            return (heavier, Celebrations.forSession(heavier, history: [before, heavier]))
         case "first":
             let only = make(163, kg: 7.5, ts: 1000)
             return (only, Celebrations.forSession(only, history: [only]))

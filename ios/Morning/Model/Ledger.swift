@@ -178,14 +178,20 @@ enum Milestones {
     }
 
     /// The next threshold being headed for, for the Ledger screen.
-    static func next(after ledger: Ledger) -> (label: String, remaining: String, fraction: Double)? {
+    struct NextThreshold: Equatable {
+        let label: String
+        let remaining: String
+        let fraction: Double
+    }
+
+    static func next(after ledger: Ledger) -> NextThreshold? {
         guard let target = tonnes.first(where: { Double($0) > ledger.tonnes }) else { return nil }
         let previous = tonnes.last { Double($0) <= ledger.tonnes } ?? 0
         let span = Double(target - previous)
-        return (
-            "\(format(target)) tonnes",
-            String(format: "%.1f t to go", Double(target) - ledger.tonnes),
-            span > 0 ? (ledger.tonnes - Double(previous)) / span : 0
+        return NextThreshold(
+            label: "\(format(target)) tonnes",
+            remaining: String(format: "%.1f t to go", Double(target) - ledger.tonnes),
+            fraction: span > 0 ? (ledger.tonnes - Double(previous)) / span : 0
         )
     }
 

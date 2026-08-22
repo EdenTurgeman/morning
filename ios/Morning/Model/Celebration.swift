@@ -97,6 +97,11 @@ enum Celebrations {
     /// is the separate, larger burst.
     static let ordinaryConfettiAlways = true
 
+    // Long on purpose. The eleven tiers read top to bottom in priority order,
+    // and that ordering IS the specification — `04-rules.md §5`'s table in
+    // executable form. Splitting it into per-tier helpers would hide the one
+    // property most worth being able to check at a glance.
+    // swiftlint:disable:next function_body_length
     static func forSession(
         _ record: SessionRecord,
         history: [SessionRecord],

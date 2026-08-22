@@ -21,7 +21,7 @@ final class CelebrationAcceptanceTests: XCTestCase {
     private let today = DateComponents(
         calendar: Calendar(identifier: .gregorian),
         year: 2026, month: 8, day: 18, hour: 9
-    ).date!
+    ).date ?? Date(timeIntervalSince1970: 1_787_050_800)
 
     /// Exactly one tier fires, in the documented priority order.
     func testExactlyOneTierFiresInPriorityOrder() throws {
