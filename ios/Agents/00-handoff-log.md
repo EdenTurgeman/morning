@@ -55,6 +55,47 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W6 Home and the week · Claude Opus 5
+
+**Workstream:** W6 — Home and the week (done). W5 merged.
+
+**What I did**
+- `Model/Week.swift` — weeks, streaks, longest run and the nudge, ported from
+  `src/lib/week.ts`. All eight `WeekAndStreakAcceptanceTests` pass.
+- `Screens/HomeScreen.swift`, `Screens/AppRoot.swift` — **Home is the app root
+  now**, and a workout in progress resumes on launch.
+- `WorkoutHost` takes an injected session; `AppRoot` owns the lifecycle.
+  `ReviewHost` keeps the launch-argument entry points for review.
+- Reviewed Home at empty, one week and six months.
+
+**Decisions taken**
+- **The day-one nudge is suppressed.** With no history the arithmetic says
+  "this week's out of reach", which is true and the wrong first sentence for
+  someone who has not started. The subtitle already says what day one is.
+- **The contrast exception is gone.** Home sits at the ramp's dark end
+  permanently, so its button measured 5.99:1 every time rather than only at the
+  start of a session. A second screen inheriting an exception means the
+  exception was wrong. `accentFill` lifts the accent 12% for fills that carry a
+  label; every screen now clears the floor at every progress, weakest 7.00:1.
+- Finishing saves the record BEFORE clearing the in-progress file.
+
+**Landmines**
+- **`weekStartsOn` means a different number in each build** — 1 here
+  (Foundation, Sunday = 1), 0 in the web (JavaScript). The offset arithmetic is
+  identical *because* of that. Neither should be "fixed" to match the other.
+- Every date in the week tests is fixed and the calendar pinned to
+  Europe/London. A test reading `Date()` passes for eleven months and then
+  fails in the week the clocks change.
+- **The measurement tool snapped onto the week pips and reported 4.65:1** for a
+  label that holds 10:1. The pips are filled accent furniture, not glyphs. The
+  `home` zones are now taken from a row profile of the rendered screen.
+- History, Ledger, Guide and Backup have no way in yet. Home has the space for
+  it; W8–W10 own the screens.
+
+**Assertions:** 46 of 58 passing (12 skipped, 0 failures)
+
+**Next:** W7 — Summary, Daybreak and the celebration tiers.
+
 ## 2026-08-22 · W5 Rest and the study deck · Claude Opus 5
 
 **Workstream:** W5 — Rest screen and study deck (done). W4 merged.

@@ -48,6 +48,21 @@ struct DawnPalette {
         accent.mix(with: .white, by: 0.42, in: .perceptual)
     }
 
+    /// The accent, lifted for use as a FILL THAT CARRIES A LABEL.
+    ///
+    /// Same problem as `accentText`, from the other side. Black on the raw
+    /// accent measures 5.84:1 at twilight on the Set screen and 5.99:1 on Home,
+    /// which sits at the ramp's dark end permanently rather than passing
+    /// through it. Both were about to be written down as "documented
+    /// exceptions"; a 12% lift clears the floor at every progress instead, and
+    /// is invisible at the gold end.
+    ///
+    /// So the rule has three parts, not two: the raw `accent` LIGHTS,
+    /// `accentText` WRITES, and `accentFill` CARRIES A LABEL.
+    var accentFill: Color {
+        accent.mix(with: .white, by: 0.12, in: .perceptual)
+    }
+
     /// The top of the sky. Deliberately NOT the accent hue: Rayleigh scattering
     /// is wavelength-dependent, so a real zenith stays deep blue even at the
     /// height of a sunrise. A sky that takes the accent everywhere reads as a
