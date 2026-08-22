@@ -103,7 +103,7 @@ Measured across progress 0.00 → 1.00 on Set, Rest and the study card:
 |---|---|---|---|
 | Primary | `Ink.primary` | Exercise name, rep count, timer | **12.15 – 19.00:1** |
 | Secondary | `Ink.secondary` | Sub-label, load, set position, cues | **7.65 – 11.41:1** |
-| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, meta lines | **6.98 – 9.04:1** |
+| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, meta lines | **6.90 – 9.04:1** |
 | On accent | `Ink.onAccent` | The primary action's label | **5.84 – 6.98:1** — see below |
 
 **Where this does and does not beat the web palette, stated honestly.** The web
@@ -125,6 +125,20 @@ level actually spans, is the honest report. `ios/Tools/measure-contrast.py`
 prints exactly that.
 
 `Ink.hairline` is furniture only — rails and dividers. It never carries glyphs.
+
+**One correction worth recording, because the mistake is easy to repeat.**
+`Ink.tertiary` was first written down as `white 0.62`, taken from the
+prototype's measured results — without checking what the prototype was actually
+using. Its labels were at 0.72 and had never been switched to the token, so the
+number in this table had been measured against a value the token did not have.
+
+Built on the real Set screen, `0.62` delivered **5.98:1** against a 6.6:1 floor.
+The token is now 0.72 and the screen measures 6.90:1 at its weakest, at gold.
+
+A token that does not deliver the figure recorded beside it is worse than no
+token, and only building the real screen on it exposed the gap. Rebuilding the
+prototypes on the tokens was supposed to catch exactly this and did not, because
+the prototype kept its literals in the places that mattered.
 
 ### The one measured exception
 

@@ -106,6 +106,13 @@ final class WorkoutSession {
         currentStep?.asSet
     }
 
+    /// Jumps to the step logging `slot`. For tests and for anything that needs
+    /// to land on a specific set rather than walk to it.
+    func go(toSlot slot: String, now: Date = Date()) {
+        guard let index = steps.firstIndex(where: { $0.asSet?.slot == slot }) else { return }
+        move(to: index, now: now)
+    }
+
     /// Jumps to the first set, past the warm-up. Used by tests and by anything
     /// that wants to skip the least important screen in the app.
     func goToFirstSet(now: Date = Date()) {
@@ -124,8 +131,17 @@ final class WorkoutSession {
     /// Whether last time's number is a like-for-like target. Reps are only
     /// comparable at the same weight; if the working weight moved, every delta
     /// is meaningless and the screen must say so rather than imply a target.
+    ///
+    /// **Bodyweight sets are always comparable.** A push-up has no load, so the
+    /// session's dumbbell weight has nothing to do with it — comparing the two
+    /// told a real seeded history that 14 push-ups were "at a different weight
+    /// now", which is both false and the kind of thing only running against
+    /// real data catches.
     var previousIsComparable: Bool {
         guard let previous, let set = currentSet else { return false }
+        if set.bodyweight {
+            return true
+        }
         return previous.kg == set.load
     }
 
@@ -133,6 +149,16 @@ final class WorkoutSession {
     var isBeatingPrevious: Bool {
         guard previousIsComparable, let previous else { return false }
         return draftReps > previous.reps
+    }
+
+    /// Which set this is, and how many the session has. "Set 2 / 25" counting
+    /// STEPS is a different and misleading number: it includes the warm-up and
+    /// every rest.
+    var setPosition: (index: Int, total: Int)? {
+        guard currentSet != nil else { return nil }
+        let sets = steps.enumerated().filter { $0.element.asSet != nil }
+        guard let position = sets.firstIndex(where: { $0.offset == stepIndex }) else { return nil }
+        return (position + 1, sets.count)
     }
 
     /// True on the last step. `advance()` deliberately does nothing here — the

@@ -64,6 +64,32 @@ final class SessionLifecycleAcceptanceTests: XCTestCase {
         XCTAssertEqual(fresh.draftReps, set.bodyweight ? 10 : 12)
     }
 
+    /// Reps are only comparable at the same weight — and bodyweight sets have
+    /// no weight, so they always are.
+    ///
+    /// Not one of the eight; added because running the real screen over real
+    /// seeded history showed 14 push-ups labelled "at a different weight now".
+    /// The record's `kg` is the session's dumbbell weight and has nothing to do
+    /// with a push-up.
+    func testBodyweightSetsAreAlwaysComparable() throws {
+        let steps = StepCompiler.build(session: "B")
+        let bodyweight = try XCTUnwrap(steps.compactMap(\.asSet).first(where: \.bodyweight))
+        let loaded = try XCTUnwrap(steps.compactMap(\.asSet).first { $0.load != nil })
+
+        // History logged at a weight that has since changed.
+        let history = [record(key: "B", at: 1000, log: [bodyweight.slot: 14, loaded.slot: 12], kg: 6.25)]
+        let session = WorkoutSession(sessionKey: "B", kg: 5, history: history)
+
+        session.go(toSlot: bodyweight.slot)
+        XCTAssertTrue(session.previousIsComparable, "a push-up has no load — 14 is still 14")
+
+        session.go(toSlot: loaded.slot)
+        XCTAssertFalse(
+            session.previousIsComparable,
+            "a loaded set at 5 kg must not treat 6.25 kg reps as a target"
+        )
+    }
+
     /// Back returns to the previous step without losing logged reps, and shows
     /// the number actually entered this session rather than last week's.
     func testBackReturnsWithoutLosingLoggedReps() throws {
@@ -227,7 +253,12 @@ final class SessionLifecycleAcceptanceTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func record(key: String, at ts: Int, log: [String: Int] = ["0.0.0": 1]) -> SessionRecord {
+    private func record(
+        key: String,
+        at ts: Int,
+        log: [String: Int] = ["0.0.0": 1],
+        kg: Double = 7.5
+    ) -> SessionRecord {
         SessionRecord(
             date: "2026-08-16",
             sessionKey: key,
@@ -235,7 +266,7 @@ final class SessionLifecycleAcceptanceTests: XCTestCase {
             minutes: 16,
             reps: log.values.reduce(0, +),
             timestamp: ts,
-            kg: 7.5
+            kg: kg
         )
     }
 

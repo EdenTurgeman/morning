@@ -103,8 +103,15 @@ enum Ink {
     /// Sub-label, load, set position, cue text. Measured 9.87–11.45:1.
     static let secondary = Color.white.opacity(0.78)
 
-    /// `Reps`, `MOVEMENT`, the footer, next-exercise meta. Measured 7.00–7.61:1.
-    static let tertiary = Color.white.opacity(0.62)
+    /// `Reps`, `MOVEMENT`, the footer, next-exercise meta.
+    ///
+    /// 0.72, not 0.62. The first value here was written down from the
+    /// prototype's *measured* results without checking what the prototype was
+    /// actually using — its labels were at 0.72 and had never been switched to
+    /// the token. Built on the real screen, 0.62 delivered 5.98:1 against a
+    /// 6.6:1 floor. A token that does not deliver the number recorded beside it
+    /// is worse than no token.
+    static let tertiary = Color.white.opacity(0.72)
 
     /// Non-text furniture only — hairlines, inactive rails. Never glyphs.
     static let hairline = Color.white.opacity(0.13)
