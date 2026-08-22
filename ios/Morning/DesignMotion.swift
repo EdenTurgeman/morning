@@ -97,6 +97,29 @@ enum Motion {
         reduceMotion ? .easeOut(duration: 0.18) : .spring(duration: 0.50, bounce: 0.12)
     }
 
+    /// The answer arriving, after the card has finished growing.
+    ///
+    /// Revealing changes the layout: the timer halves and the card takes the
+    /// space, which `02-design-brief.md §9` singles out as the app's example of
+    /// motion carrying meaning. That motion should happen immediately — it is
+    /// the explanation. The TEXT should not.
+    ///
+    /// Measured on a 60fps capture, it did. A six-line answer appeared at full
+    /// length and full opacity while the question was still travelling to its
+    /// new position and "Tap if you have it" was still fading out on top of it:
+    /// three layers of legible text at once, for about 150ms.
+    ///
+    /// So the answer holds its space from the first frame — the card grows on
+    /// schedule — and its ink waits for the layout to settle.
+    static func answer(reduceMotion: Bool) -> Animation {
+        reduceMotion ? .easeOut(duration: 0.16) : .easeOut(duration: 0.28)
+    }
+
+    /// How long the card takes to stop moving. `answer` waits this out.
+    static func answerDelay(reduceMotion: Bool) -> TimeInterval {
+        reduceMotion ? 0.10 : 0.34
+    }
+
     /// The timer resizing as the card takes half the screen.
     static func timerResize(reduceMotion: Bool) -> Animation {
         reduceMotion ? .easeOut(duration: 0.18) : .spring(duration: 0.55, bounce: 0.10)

@@ -48,6 +48,9 @@ struct RestScreen: View {
     let onEnd: () -> Void
 
     @State private var revealed = false
+    /// Separate from `revealed` because the card grows before the answer is
+    /// readable. See `Motion.answer`.
+    @State private var answerShown = false
     @State private var lastSpokenSecond: Int?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -87,7 +90,7 @@ struct RestScreen: View {
             }
 
             if let card {
-                StudyCard(card: card, revealed: revealed, accent: palette.accent) {
+                StudyCard(card: card, revealed: revealed, answerShown: answerShown, accent: palette.accent) {
                     // Tapping only brings the answer forward.
                     reveal()
                 }
@@ -118,6 +121,7 @@ struct RestScreen: View {
         .dynamicTypeSize(.large)
         .task(id: endsAt) {
             revealed = false
+            answerShown = false
             lastSpokenSecond = nil
             guard card != nil else { return }
             try? await Task.sleep(for: .seconds(Deck.revealDelay(forRestOf: seconds)))
@@ -132,6 +136,15 @@ struct RestScreen: View {
         Haptics.shared.reveal()
         withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
             revealed = true
+        }
+        // The card takes its new shape now; the words arrive once it has
+        // stopped moving.
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(Motion.answerDelay(reduceMotion: reduceMotion)))
+            guard !Task.isCancelled else { return }
+            withAnimation(Motion.answer(reduceMotion: reduceMotion)) {
+                answerShown = true
+            }
         }
     }
 
@@ -249,6 +262,9 @@ private struct NextUp: View {
 private struct StudyCard: View {
     let card: Card
     let revealed: Bool
+    /// The answer holds its layout space from the moment `revealed` flips, so
+    /// the card grows on schedule, but stays invisible until this follows.
+    let answerShown: Bool
     let accent: Color
     let onReveal: () -> Void
 
@@ -282,7 +298,7 @@ private struct StudyCard: View {
                         .foregroundStyle(Ink.secondary)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
-                        .transition(.opacity)
+                        .opacity(answerShown ? 1 : 0)
                 } else {
                     Text("Tap if you have it")
                         .font(TypeScale.body)
