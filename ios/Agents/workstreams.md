@@ -639,6 +639,15 @@ built**. They were non-goals on the web only because they were impossible there.
 - **Control Centre / Action Button**: starting today's session in one press is
   plausibly the best affordance available on this hardware for a 20-minute daily
   habit.
+- **App icon badge with the sessions still owed this week.** Added during the
+  quality pass, from reading the web source rather than the brief: `src/App.tsx`
+  calls `setWeekBadge(week.remaining)`, with a comment saying installed iOS web
+  apps have supported it since 16.4 so "the badge answers 'am I behind?' without
+  opening anything". **The web build already does this and the port does not**,
+  which makes it a regression rather than a new feature — but the native
+  equivalent needs notification permission, and `05-platform.md §7` puts
+  anything needing that behind a yes. Cheapest item on this list and the only
+  one that restores something already shipped.
 
 Each of these is a new target, added in Xcode once it is agreed.
 
