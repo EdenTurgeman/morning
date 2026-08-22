@@ -678,3 +678,50 @@ whether the native one wins. The acceptance test when it lands is that five
 derived numbers match the web app's Ledger on the same device: tonnage, total
 reps, session count, current streak, longest run, and the year grid. The two
 `testPhase2` tests in `DataAcceptanceTests` are that workstream's entry point.
+
+---
+
+## W13 · Daybreak in Metal — `todo`, Eden's own piece
+
+**Gate:** none from a rules point of view — `02-design-brief.md §7` already
+anticipates it ("Material and light. Metal shaders through SwiftUI's
+`.colorEffect`"). The real gate is that **Eden wants to work on this one
+himself**, so do not quietly ship a version and present it as done.
+
+Asked for on 2026-08-23, in his words:
+
+> I want to find the time to work on the Workout done rising sun animation, i
+> want to work on it with SwiftUI + Metal to create something beautiful and GPU
+> accelerated, something unique that is both a rising sun and interesting and
+> non standard.
+
+**What exists today.** `Screens/Daybreak.swift` is a `TimelineView(.animation)`
+driving a `Canvas`, everything derived from one elapsed value off an absolute
+start date. Reviewed frame by frame during the quality pass and it does run its
+documented choreography exactly — the horizon drawing outward before anything
+else, the sun overshooting and settling, the rays blooming, the flash, the
+number, the staggered pips. It is correct. It is also, by construction,
+*conventional*: a filled circle, a radial gradient and some drawn rays.
+
+**What "non standard" has to survive.** Three things are load-bearing and any
+Metal version has to keep them, because they were each expensive to get right:
+
+1. **One clock.** Every stage reads from a single elapsed value, which is what
+   makes it impossible for two stages to desynchronise. A shader with its own
+   time source alongside SwiftUI's would reintroduce exactly that.
+2. **The beats, and their reduced forms.** The stage timings in the header
+   comment are not decoration — the anticipation beat before anything moves is
+   the one the web build lacked. Under Reduce Motion the sun fades up instead of
+   rising, the rays hold still, and the flash is scaled from 2.7× to 1.3× of
+   baseline luminance. A shader still has to have a calm version.
+3. **It is a sunrise, not a fireworks display.** The app is not gamified and the
+   reward is being told something true. The animation can be as beautiful as it
+   likes; it must not start congratulating.
+
+**Worth knowing before starting.** `CloudTexture` already bakes value-noise fBm
+into a tiling `CGImage` on the CPU — that is the obvious first thing a shader
+subsumes. `.colorEffect`, `.distortionEffect` and `.layerEffect` all take a
+Metal `[[stitchable]]` function and need no separate render pass. The 120Hz
+target and the "no dropped frames while a timer runs" acceptance item apply here
+too, and Daybreak is already listed in the device checklist as one of the three
+most likely places to drop frames.
