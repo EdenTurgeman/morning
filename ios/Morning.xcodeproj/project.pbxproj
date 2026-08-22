@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B3A0952856AB0FC5F592069 /* PrototypeFigure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */; };
+		BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */; };
+		50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149EF8C3DBE09E7D14729069 /* DesignMotion.swift */; };
+		54939B36D54BD7D003DC78CC /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */; };
 		01CDD70DCAAC5F0B4C5634FC /* compiled-steps.json in Resources */ = {isa = PBXBuildFile; fileRef = 23A673461F31BBF2CAD31193 /* compiled-steps.json */; };
 		11B3830861A8042CFE2EC16B /* guide.json in Resources */ = {isa = PBXBuildFile; fileRef = 0467526E89A9AC7036DABA5C /* guide.json */; };
 		44705BBFF21CB2A5D7E56C1C /* one-year.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = 1A4A7286BC04B821EFB83F64 /* one-year.seed.json */; };
@@ -17,6 +21,8 @@
 		7577405680D7386411BCF700 /* GoldenSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB729A2E1D11FEE4A5E626A1 /* GoldenSteps.swift */; };
 		81D6E43879143CC1B837A1A4 /* program.json in Resources */ = {isa = PBXBuildFile; fileRef = 9193B31768BB3671C62B0804 /* program.json */; };
 		83FD0DBA9D90BF5A1CC04621 /* SessionLifecycleAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A39B803CD8EB4E0B97FE1F /* SessionLifecycleAcceptanceTests.swift */; };
+		A0B1C2D3E4F5061728394A5B /* PrototypeVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5061728394A5B6C /* PrototypeVisuals.swift */; };
+		C1D2E3F405162738495A6B7C /* PrototypeSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2E3F405162738495A6B7C8D /* PrototypeSky.swift */; };
 		8B39848510BCA22B6E31BDD9 /* Program.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6BE780D77850D65FE149EB0 /* Program.swift */; };
 		8CF93CAE58C61E7A2851AA9B /* CelebrationAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBD349C71D10ED7172AC1B85 /* CelebrationAcceptanceTests.swift */; };
 		A4351156A1C7694FB10ADEAF /* ProgramCompilerAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBECFE938E10A87FF09083D0 /* ProgramCompilerAcceptanceTests.swift */; };
@@ -26,8 +32,12 @@
 		B6A8E30AAADDAC6FCFE3FAE7 /* one-week.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = 5930A5EA3F4D9E0310E0D17B /* one-week.seed.json */; };
 		BBBB05F50B3030723E1682D0 /* one-session.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = B4AD829D49F6D2CCE3B6B2D7 /* one-session.seed.json */; };
 		CD741167DFB072CD6816DF26 /* six-months.seed.json in Resources */ = {isa = PBXBuildFile; fileRef = CAA8DF1E4C4C59523EC54435 /* six-months.seed.json */; };
+		C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */; };
 		D6AFFD8EB7FD1564C8ABBBCC /* WeekAndStreakAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */; };
+		E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */; };
+		E5F60718293A4B5C6D7E8F90 /* PrototypeButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */; };
 		E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9EF34F789D4A17D31F0529 /* MorningApp.swift */; };
+		F1A2B3C4D5E60718293A4B5C /* PrototypeMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B3C4D5E60718293A4B5C6D /* PrototypeMovement.swift */; };
 		F4261B66A4478DA70FECAC8B /* LedgerAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B926210B4DC5C23339F7676B /* LedgerAcceptanceTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +52,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeFigure.swift; sourceTree = "<group>"; };
+		FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignHaptics.swift; sourceTree = "<group>"; };
+		149EF8C3DBE09E7D14729069 /* DesignMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignMotion.swift; sourceTree = "<group>"; };
+		5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		0467526E89A9AC7036DABA5C /* guide.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = guide.json; sourceTree = "<group>"; };
 		14E9A8930D24EFADB8C754B9 /* empty.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = empty.seed.json; sourceTree = "<group>"; };
 		189E6B6DEBDD2BA7F18FF4A3 /* MorningTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MorningTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,15 +71,22 @@
 		91D2A8214FBACBBE29DA6BC0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B99F4D0685122FC0B3DE761 /* cards.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cards.json; sourceTree = "<group>"; };
 		A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekAndStreakAcceptanceTests.swift; sourceTree = "<group>"; };
+		A2B3C4D5E60718293A4B5C6D /* PrototypeMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeMovement.swift; sourceTree = "<group>"; };
+		A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeGallery.swift; sourceTree = "<group>"; };
 		A9E09AB74F9D6BB9ADD2B984 /* DataAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataAcceptanceTests.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5061728394A5B6C /* PrototypeVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeVisuals.swift; sourceTree = "<group>"; };
+		D2E3F405162738495A6B7C8D /* PrototypeSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeSky.swift; sourceTree = "<group>"; };
 		ADCB96C50583BBED894BFA01 /* Seeds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Seeds.swift; sourceTree = "<group>"; };
 		B4AD829D49F6D2CCE3B6B2D7 /* one-session.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "one-session.seed.json"; sourceTree = "<group>"; };
 		B926210B4DC5C23339F7676B /* LedgerAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerAcceptanceTests.swift; sourceTree = "<group>"; };
 		CAA8DF1E4C4C59523EC54435 /* six-months.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "six-months.seed.json"; sourceTree = "<group>"; };
+		C4D5E6F708192A3B4C5D6E7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DB729A2E1D11FEE4A5E626A1 /* GoldenSteps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenSteps.swift; sourceTree = "<group>"; };
 		DBECFE938E10A87FF09083D0 /* ProgramCompilerAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramCompilerAcceptanceTests.swift; sourceTree = "<group>"; };
+		D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeSupport.swift; sourceTree = "<group>"; };
 		E6BE780D77850D65FE149EB0 /* Program.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Program.swift; sourceTree = "<group>"; };
 		EBD349C71D10ED7172AC1B85 /* CelebrationAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationAcceptanceTests.swift; sourceTree = "<group>"; };
+		F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeButtons.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -102,11 +123,22 @@
 		449C7FBA832FA356A9500DA8 /* Morning */ = {
 			isa = PBXGroup;
 			children = (
+				46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */,
+				FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */,
+				149EF8C3DBE09E7D14729069 /* DesignMotion.swift */,
+				5FB2CBBBF7F890A7EFFA3D5B /* DesignTokens.swift */,
 				DACFE1E6FE33BF6F63E6AF0C /* Debug */,
 				00B7138305DB7E908846968E /* Model */,
 				1C864FA44DDA41CB014530FA /* Resources */,
+				C4D5E6F708192A3B4C5D6E7F /* Info.plist */,
 				6B9EF34F789D4A17D31F0529 /* MorningApp.swift */,
 				E6BE780D77850D65FE149EB0 /* Program.swift */,
+				A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */,
+				D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */,
+				B1C2D3E4F5061728394A5B6C /* PrototypeVisuals.swift */,
+				D2E3F405162738495A6B7C8D /* PrototypeSky.swift */,
+				F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */,
+				A2B3C4D5E60718293A4B5C6D /* PrototypeMovement.swift */,
 			);
 			path = Morning;
 			sourceTree = "<group>";
@@ -296,8 +328,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B3A0952856AB0FC5F592069 /* PrototypeFigure.swift in Sources */,
+				BEFFA2B4AFB6CD44F4DB4FC1 /* DesignHaptics.swift in Sources */,
+				50B65DA260DEA0461DBAFA39 /* DesignMotion.swift in Sources */,
+				54939B36D54BD7D003DC78CC /* DesignTokens.swift in Sources */,
 				E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */,
 				8B39848510BCA22B6E31BDD9 /* Program.swift in Sources */,
+				E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */,
+				C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */,
+				A0B1C2D3E4F5061728394A5B /* PrototypeVisuals.swift in Sources */,
+				C1D2E3F405162738495A6B7C /* PrototypeSky.swift in Sources */,
+				E5F60718293A4B5C6D7E8F90 /* PrototypeButtons.swift in Sources */,
+				F1A2B3C4D5E60718293A4B5C /* PrototypeMovement.swift in Sources */,
 				625B26B51E50A993E82173D1 /* Schema.swift in Sources */,
 				B4C173916B1C25BF3CA377B1 /* Seeds.swift in Sources */,
 			);
@@ -397,11 +439,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_TESTABILITY = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Morning;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Morning/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -529,11 +568,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Morning;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Morning/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

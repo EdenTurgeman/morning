@@ -16,6 +16,14 @@ set -uo pipefail
 
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
+
+# Platform guard runs BEFORE the report files are truncated. A run on the wrong
+# OS must not destroy the last good report from a real macOS run.
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "Not macOS. Nothing here can be verified." >&2
+  exit 1
+fi
+
 REPORT="$ROOT/ios/build/verify-report.txt"
 RAW="$ROOT/ios/build/verify-raw.log"
 mkdir -p "$ROOT/ios/build"
@@ -49,11 +57,6 @@ run()  { # run <phase name> <cmd...>
     printf '%s\n' "$out" | tail -40 | sed 's/^/  | /' | tee -a "$REPORT" >/dev/null
   fi
 }
-
-if [[ "$(uname -s)" != "Darwin" ]]; then
-  echo "Not macOS. Nothing here can be verified." >&2
-  exit 1
-fi
 
 rule "Environment"
 {

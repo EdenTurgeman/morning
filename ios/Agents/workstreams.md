@@ -54,7 +54,7 @@ agent loses an hour to a stray comma.
 
 ---
 
-## W1 · Research pass and directions — `todo`
+## W1 · Research pass and directions — `done`
 
 **Gate:** W0 done. **And you have run the web app and done a full session of A
 and a full session of B.** Non-negotiable — `ios-port/README.md` first-session
@@ -65,13 +65,12 @@ skipped. `02-design-brief.md §4` and `§5`.
 
 **Scope**
 
-- The screen research pass in `§4`, using the **screensdesign MCP**
-  (<https://screensdesign.com>). **Eden has connected it** — but not in every
-  client. Run this workstream in the client where it is configured, and start by
-  listing its tools and reading their parameters; the brief says the surface may
-  have changed since it was written. If you cannot see the tools, say so rather
-  than improvising the research pass from memory. The table in `§4` says what to
-  search for and what question each search answers.
+- The screen research pass in `§4`, using publicly inspectable evidence from
+  shipped apps: official product/help pages, App Store listing creatives, public
+  demos and walkthroughs, Apple design profiles, and platform documentation.
+  Eden explicitly chose this method after the available screen-library MCPs
+  required paid plans. The table in `§4` says what to search for and what
+  question each search answers. Separate observed evidence from interpretation.
 - Write `ios-port/research-notes.md` (a skeleton exists). Mechanics, not skins.
   For each screen studied: the mechanic, what they left out, how they handle the
   hard case, one thing you'd steal and one you wouldn't.
@@ -91,6 +90,16 @@ skipped. `02-design-brief.md §4` and `§5`.
 real iPhone, and **Eden has picked a direction.** Do not proceed past this
 without that. Extract patterns, never ship someone's brand.
 
+**Closed 2026-08-22.** `research-notes.md` written; Atmospheric, Precise and
+Tactile all run; Eden chose **Atmospheric Dawn**.
+
+One part of the gate could not be met here and was **carried to W11**, not
+waived: no physical iPhone has ever been connected to this clone, and no signing
+identity is configured, so "run on a real iPhone" — and with it haptic quality
+and 120Hz frame pacing — remains unverified. `device-checklist.md` is the right
+home for it and already lists those checks. Everything that a simulator *can*
+settle was settled and measured; see `ios/Docs/prototype-directions.md`.
+
 **Kickoff prompt**
 
 > Read `CLAUDE.md`, then `ios/Agents/00-handoff-log.md`, then the `ios-port/`
@@ -101,15 +110,15 @@ without that. Extract patterns, never ship someone's brand.
 > `ios-port/02-design-brief.md` end to end first; it is the main document and
 > this workstream is its §4 and §5. Before you design anything: run the web app
 > with `npm run dev` and do a full session of A and a full session of B while
-> reading `ios-port/04-rules.md`. Then do the screensdesign research pass, write
-> `ios-port/research-notes.md`, and build two or three running direction
+> reading `ios-port/04-rules.md`. Then do the public-evidence research pass,
+> write `ios-port/research-notes.md`, and build two or three running direction
 > prototypes of the Set and Rest screens with real motion and haptics. Come back
 > to Eden with directions to choose between — do not pick one yourself, and do
 > not start building the app. Append your handoff entry when you stop.
 
 ---
 
-## W2 · Design system — `todo`
+## W2 · Design system — `done`
 
 **Gate:** W1 done and a direction agreed by Eden.
 
@@ -132,6 +141,13 @@ materials, motion curves, **haptic vocabulary**. One file, written down, the way
 
 **Done when:** the file is written and the tokens exist in code, and the W1
 prototypes have been rebuilt on top of them without visual regression.
+
+**Closed 2026-08-22.** `ios/Docs/design-system.md` written; tokens live in
+`DesignTokens.swift`, `DesignMotion.swift` and `DesignHaptics.swift`. The
+Atmospheric prototypes were rebuilt on them and re-measured: no regression, and
+the weakest text zone on any screen at any progress is 7.00:1 against a 6.6:1
+bar. The haptic table is complete, including the countdown pulse that was
+previously missing and is now wired to every rest timer.
 
 **Kickoff prompt**
 

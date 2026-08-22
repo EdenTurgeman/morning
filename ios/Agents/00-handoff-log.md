@@ -8,6 +8,422 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · Figures, control boundaries, accessibility verification · Claude Opus 5
+
+**Workstream:** post-W2 refinement on the agreed direction.
+
+**What I did**
+- **Rebuilt the exercise figures as bodies.** The brief notes Eden has flagged
+  the web stick figures twice; the first native pass reproduced the same problem
+  in Swift. `PrototypeFigure.swift` draws the same poses as filled, tapered
+  shapes — limbs thinning toward the extremity with round joints, a torso with a
+  waist that rotates on its own axis, a head on a neck, dumbbells with plates.
+  Pose coordinates and the motion model are unchanged.
+- **Found and fixed a real control defect by measuring the rep control as a
+  *component* rather than as text.** Its boundary read 1.18:1 against WCAG's 3:1
+  floor — a `white 0.07` fill behind a `white 0.1` hairline. The glyph was fine
+  at 9.71:1, so the symbol was doing all the work and the button had no shape.
+  Added `Control` tokens; boundary now 3.51:1, and 4.10:1 on Rest's controls.
+- Took the `−` / `+` glyphs from 34pt medium to 38pt semibold. At 1.5m the old
+  ones were the first thing to disappear.
+- Verified the **Dynamic Type clamp**: medium vs accessibility-extra-extra-
+  extra-large differ by 1.59% of pixels, and that is cloud drift, not text.
+  Workout typography genuinely does not scale, so the no-scroll layout cannot be
+  broken by a text size.
+- Verified **Reduce Transparency**: every text zone holds, weakest 6.98:1.
+- Re-verified the four-cue stress case fits with no scrolling after the larger
+  glyphs and thicker borders.
+- Ran `./scripts/verify-ios.sh`; every phase passes. Opened PR #2.
+
+**Decisions taken**
+- Figures stay deliberately abstract. This is a movement reminder glanced at from
+  1.5m at 6:10am; detail it does not need would compete with the rep counter.
+- Control surfaces stay quiet (~1.3:1 against the sky) and the **boundary**
+  carries the contrast. The design goal was "quiet", not "invisible".
+
+**Landmines**
+- **The bay is wide and short, so a normalised x offset is worth far fewer
+  points than the same number in y.** A stance that looked hip-width in
+  coordinates rendered as two fused legs. Every figure width now derives from
+  `size.height`. Anyone editing poses will hit this.
+- The text-contrast harness passed the rep control for its entire life. **Text
+  measurement does not cover components**; boundaries need measuring separately.
+- The exercise → figure mapping is still keyed off the exercise *name* string.
+  It must grow with the real program in W4.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
+
+## 2026-08-22 · W2 design system · Claude Opus 5
+
+**Workstream:** W2 — Design system (done). W1 closed.
+
+**What I did**
+- Wrote `ios/Docs/design-system.md` in full: direction, colour, ink with
+  measured contrast, semantic colour, the scrim, type, spacing, hit targets,
+  material, motion with every reduced form, the complete haptic table, and the
+  sound design carried forward from `05-platform.md §3`.
+- Implemented it as three token files — `DesignTokens.swift`,
+  `DesignMotion.swift`, `DesignHaptics.swift` — and rebuilt the Atmospheric
+  prototypes on them. Re-measured: no regression.
+- Added `ios/Tools/add-source-file.py`. The project uses classic file references,
+  so a new file needs four correct pbxproj entries; doing that by hand is how a
+  project file gets corrupted.
+- Deleted the duplicate `DawnPalette`, `Color.morningSuccess`, the per-treatment
+  haptic profile structs and the scattered colour literals they fed.
+- **Wired the countdown haptic**, which the vocabulary required and nothing was
+  playing: one pulse per second through the last five, intensifying, on every
+  timer including the 20-second myo rest.
+- Ran `./scripts/verify-ios.sh`; every phase passes. CI green.
+
+**Decisions taken**
+- **Tokens record what the design is, not what I assumed.** My first
+  `Motion.Hold` and `Motion.rep` values were invented and did not match the
+  running prototypes. Corrected the tokens to the implemented Atmospheric values
+  rather than changing behaviour to match a guess — and fixed the two figures
+  `prototype-directions.md` had already stated wrongly.
+- The haptic vocabulary is one set of events; the three W1 treatments differ by
+  a sharpness tilt only. Product meaning is identical across them.
+- Precise and Tactile are frozen comparison artifacts. They keep their own
+  literals and the gentler scrim, and they do not constrain the system.
+- **W1's device gate is carried to W11, not waived.** See the landmine below.
+
+**Landmines**
+- **The device gate is still open and I could not close it.** No physical iPhone
+  has ever been connected to this clone and no signing identity is configured,
+  so `devicectl` and `xctrace` see simulators only. Haptic quality and 120Hz
+  frame pacing are unverified. Every haptic pattern in `DesignHaptics.swift` is
+  designed but has never been felt — the numbers are reasoned, not tuned.
+- `HapticVocabulary.complete` is defined and deliberately not wired to anything.
+  It belongs to W7, against the Daybreak choreography it has to land on.
+- `CloudTexture` builds three 1024×256 noise fields on first access, on the main
+  actor. Fast enough not to show at launch here; still CPU work in a `static
+  let` and worth profiling on device.
+- `add-source-file.py` finds a group by `path = <name>;`. There is no `Design`
+  group — the token files sit flat in `Morning/`. Adding a nested group needs a
+  PBXGroup by hand first.
+
+**Assertions:** 0 of 53 passing (53 skipped) — W3 is where that changes.
+
+**Next:** W3 — foundations and the acceptance suite. It has no UI and its gate
+(W0) is long met, so it can start immediately.
+
+## 2026-08-22 · W1 living dawn sky · Claude Opus 5
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Ran `bootstrap.sh --check` and `verify-ios.sh` on the inherited tree: all green.
+- Built a registration-tolerant contrast harness that snaps to the actual glyph
+  rows before measuring. The previous hand-placed bands drifted onto a gradient
+  and a ring arc, reporting 1.3:1 and 4.87:1 for zones that actually measure
+  6.6:1 and 7.7:1. Do not trust a fixed y-band on a screen whose layout moves.
+- Simulated arm's-length and dark-room legibility from physics rather than by
+  eye: acuity-limited sheets at 0.6/1.2/1.5/2.0 m (1 arcminute at the iPhone 16
+  Pro's 460 ppi), and a low-brightness black-crush model.
+- **Rebuilt the Atmospheric sky after Eden rejected it as boring.** It was one
+  static mesh, 34 fixed dots and a scrim; the web `Sky.tsx` it was meant to
+  succeed has eight layers and four animations. New `PrototypeSky.swift` carries
+  ozone band, haze, twinkling stars, meteors, progress-carrying crepuscular
+  rays, two parallax cloud banks and anti-banding grain.
+- Reshaped the legibility scrim, which was ramped backwards, and made it scale
+  with progress. Every text zone now clears the brief's 6.6:1 tertiary bar
+  across the whole session; weakest is 7.00:1, up from 5.33:1.
+- Fixed three under-bar elements: primary button label to full black, MOVEMENT
+  to white 0.62, superset warning line lifted 42% toward white.
+- Added a `-progress` launch argument and captured the full dawn walk.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Atmospheric Dawn is the direction. Eden said "proceed to W2", which is gated on
+  a chosen direction, and he had already named Atmospheric as his preference.
+  Flagged to him in-session so he can correct it.
+- The sky's structure is ported from the web build's *reasoning*, not its code.
+  Zenith never takes the accent hue; cloud noise is baked once and translated.
+- The scrim is a function of progress. A fixed scrim that cleared the bar at
+  twilight let three elements fall below it by the time the palette reached gold.
+- The primary button label at 5.84:1 at progress 0.00 is a deliberate exception,
+  recorded with its reasoning. Lightening the accent to fix it would distort a
+  hand-picked ramp for a figure that already clears AA-large twice over.
+- Still no third-party animation dependency. Native `MeshGradient`, `Canvas`,
+  `TimelineView` and baked `CGImage` tiles cover all of it.
+
+**Landmines**
+- **Physical-device work remains impossible here.** `devicectl` and `xctrace`
+  show simulators only, and no development team is set for signing. Haptic
+  quality and 120Hz frame pacing are therefore still unverified — the two W1
+  items nobody can close without Eden's phone.
+- The distance and dark-room simulations model *spatial acuity* and *low-brightness
+  black crush*. They do not model glare, dark adaptation or panel calibration.
+  10.1% of the Set frame sits at code ≥200, almost all of it the primary button —
+  the glare candidate at 6am, and only the real phone can settle it.
+- `CloudTexture` builds three 1024×256 noise fields on first access, on the main
+  actor. It is fast enough not to show at launch here, but it is CPU work in a
+  `static let` and worth profiling on device.
+- The offline replica of the noise algorithm lives in the scratchpad, not the
+  repo. If `CloudTexture.make` changes, that replica silently stops matching.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** W2 — design system. The sky's constants (palette, scrim ramp, drift
+periods, contrast bars) are the first tokens it should absorb.
+
+## 2026-08-22 · W1 Atmospheric lead refinement · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Treated Atmospheric Dawn as Eden's leading candidate without removing Precise
+  or Tactile or closing the W1 gate.
+- Removed Atmospheric's previous-rep badge and the redundant equal-state “Last
+  time” subtitle. First-run, changed-weight, and 13 → 14 honesty remain.
+- Moved the fixed target into the exercise metadata hierarchy and deleted the
+  decorative bottom horizon, line, and sun.
+- Added a 142–178pt app-owned native Canvas movement bay to every Set. It maps
+  the fixed exercise name to overhead press, push-up, lateral raise, floor fly,
+  bent-over row, or curl motion without a package or placeholder asset.
+- Added a static start/end Reduced Motion form and retained 82pt rep controls,
+  the 68pt primary action, no scrolling, and full four-cue content.
+- Measured seven representative Set/card/menu text zones at 6.88:1–12.03:1;
+  the quiet movement-bay label is the weakest sampled zone.
+- Replaced the easy-to-miss Rest picker with visible Timer only, Question →
+  answer, and Myo rows; made the lab's Open action persistent at the bottom.
+- Rechecked plain Rest and carded Rest before and after the silent auto-reveal;
+  the 64pt compact timer, longest answer, next exercise, and both controls fit.
+- Captured the focused Atmospheric matrix plus Precise/Tactile comparison Sets
+  in ignored `ios/build/`.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Atmospheric is marked `LEADING`, not selected. W1 stays open and W2 does not
+  begin until Eden explicitly chooses.
+- The sunrise atmosphere now expresses session progress only through authored
+  palette interpolation and fading stars. Threshold comparison belongs at the
+  counter, not in the background.
+- A native schematic is enough to test movement-bay layout and motion language.
+  Rive or Lottie still needs a demonstrated final asset/state-machine advantage
+  before it can enter the project.
+
+**Landmines**
+- The movement figures are app-owned layout/motion prototypes, not final
+  anatomical illustrations. Their exercise mapping must grow with the real
+  program if this direction is chosen.
+- Physical-device frame pacing, haptics, and 1.5m dark-room legibility remain
+  unverified because no signed device is connected.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Let Eden compare the revised Atmospheric equal/crossing/long-content
+states and card flow. Keep W1 open until he explicitly chooses; do not start W2.
+
+## 2026-08-22 · W1 contrast and motion pass · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Reworked all three Set/Rest treatments after Eden rejected low contrast and
+  decorative halo effects.
+- Added stable dark luminance zones, raised secondary text to role-based
+  68–78% white, and measured eight representative simulator text zones at
+  7.79:1–11.38:1.
+- Removed the Atmospheric radial threshold bloom and large Tactile Set ellipse.
+  Atmospheric now has one small sun and horizon; Tactile state lives in its rim
+  and detent; Precise remains shadowless.
+- Reduced timer, counter, and primary-button accent shadows; removed the
+  duplicate Rest label; kept all hard-case fixtures visible without scrolling.
+- Added Set-to-Rest work-object continuity with `matchedGeometryEffect`,
+  treatment-specific screen transitions, grouped Liquid Glass controls, and
+  opacity-only Reduced Motion transitions.
+- Captured identical 13 → 14 Sets, frozen 45-second Rests, the longest revealed
+  card, a frozen 5-second myo Rest, and the four-cue Set in `ios/build/`.
+- Evaluated native animation APIs and popular packages, documented the gates,
+  and added no dependency.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Light must communicate progress or state. Background atmosphere may establish
+  Morning's identity, but it cannot become a second focal object behind copy.
+- Native SwiftUI already covers the demonstrated motion: matched geometry,
+  numeric transitions, MeshGradient, Canvas, and Liquid Glass. Pow, Lottie,
+  Rive, Hero, and Vortex do not currently solve a proven prototype problem.
+- W1 remains a three-direction comparison. This pass does not choose for Eden
+  and does not start W2.
+
+**Landmines**
+- PNG contrast sampling validates the rendered simulator composition, not
+  physical-device 1.5m dark-room legibility.
+- Frame pacing and haptic quality still require a signed build on Eden's
+  physical iPhone; no signing identity or device is connected.
+- Final review captures are intentionally under ignored `ios/build/`, not source
+  control.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Show Eden the restrained controlled matrix, then tune on the physical
+phone and wait for his W1 direction decision. Do not begin W2 beforehand.
+
+## 2026-08-22 · W1 interaction audit · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Applied a severity-ranked interaction audit after the second visual pass.
+- Added an explicit app Info.plist and verified
+  `CADisableMinimumFrameDurationOnPhone = true` in the built bundle.
+- Made Rest zero and Skip advance to the next Set, fixed extension after expiry,
+  and added a distinct zero haptic.
+- Added loaded-first-run, superset-partner-two, myo-set-two, four-cue, longest
+  answer, and deterministic launch fixtures.
+- Added VoiceOver activation, 64pt Back/End hit areas, fixed workout Dynamic
+  Type, Reduce Transparency fallbacks, and fuller Reduce Motion behavior.
+- Parameterized hold acceleration, numeric motion, and haptic shape by treatment.
+- Added Core Haptics stop/reset recovery, prepared-player reuse, and one retry of
+  the triggering event.
+- Observed a real 20-second myo Rest automatically advance to the 4–5 rep Set.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Workout screens deliberately clamp Dynamic Type to `.large`; reading screens
+  later support accessibility sizes.
+- Skip confirms but does not play the zero pattern. Automatic expiry does.
+- ProMotion support is a committed product setting, not a profiler-only tweak.
+
+**Landmines**
+- Physical-device frame pacing and haptics remain unverified because no signing
+  identity or physical iPhone is connected.
+- Four-cue Set content is a stress harness assembled from fixed program copy,
+  not a new product exercise.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Physical-device comparison and Eden's direction decision.
+
+## 2026-08-22 · W1 second visual pass · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Submitted the first running prototypes to a strict visual review. The review
+  correctly rejected them as one Dawn composition with three component skins.
+- Rebuilt the backgrounds and threshold mechanics so the concepts now diverge:
+  Atmospheric has authored horizon/sun light, Precise has a functional grid and
+  real-value instrumentation with no sky, and Tactile has one transforming
+  object with a restrained glass control layer.
+- Added a deterministic 13 → 14 state. Previous reps now live inside every
+  counter and crossing changes environment, marker, or physical rim.
+- Added semantic mint for threshold success and amber for myo urgency, both off
+  the Dawn progress ramp.
+- Increased compact Rest time to 64pt, raised low-contrast labels, removed faux
+  calibration language, added real timer tick segments, and made `+15s`
+  subordinate during myo Rest.
+- Added reduced-motion forms for numeric changes, object tilt, card reveal,
+  timer resizing, and environmental breathing.
+- Split visual background/chrome code into `PrototypeVisuals.swift` and added
+  frozen-time launch states for controlled comparisons.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Product hierarchy can stay consistent while the concepts differ in what
+  carries meaning: environment, measurement, or object.
+- The 13 → 14 moment is the comparison state; equality screenshots do not
+  evaluate the product's emotional centre.
+- Success remains a semantic state rather than borrowing the current Dawn hue.
+
+**Landmines**
+- Still awaiting physical-device haptic tuning and Eden's direction choice.
+- The simulator screenshots prove composition, not 1.5m dark-room legibility.
+- The app has no signing identity configured on this Mac yet.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Run identical Set/Rest states on the physical phone, tune haptics and
+distance contrast, then ask Eden to choose the execution to formalize in W2.
+
+## 2026-08-21 · W1 simulator prototypes · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Replaced `ScaffoldView` as the active root with a running direction lab.
+- Built Atmospheric Dawn, Precise Dawn, and Tactile Dawn Set/Rest treatments
+  over one shared hardcoded state harness.
+- Added first-run, comparable, changed-weight, superset, myo, longest-content,
+  plain Rest, carded Rest, and myo Rest scenarios.
+- Added accelerated hold-to-repeat, directional numeric transitions, interactive
+  Liquid Glass controls, perceptual five-stop sunrise interpolation, absolute
+  countdowns, automatic card reveal, and distinct Core Haptics patterns.
+- Added deterministic `-prototype` launch arguments and documented the
+  comparison in `ios/Docs/prototype-directions.md`.
+- Captured and inspected all three Set treatments plus plain, carded, and myo
+  Rest states on the iPhone 16 Pro simulator. Nothing scrolls.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- All three treatments retain the dawn. Precision and physicality are execution
+  layers, not replacement identities.
+- The native palette uses SwiftUI's perceptual `Color.mix`; direct RGB
+  interpolation was rejected before the milestone.
+- Tactile glass is limited to buttons. The rep/timer object remains an opaque,
+  high-contrast content object.
+- Study cards use stable question → rule → answer geometry, not a 3D flip.
+
+**Landmines**
+- Simulator review cannot judge Core Haptics. W1 remains open until physical
+  iPhone testing and Eden's direction choice.
+- The prototype lab is intentionally hardcoded and is not W3/W4 application
+  architecture.
+- `PrototypeGallery.swift` is long but below the configured error threshold;
+  split it when the chosen treatment becomes product code rather than spending
+  W1 on throwaway structure.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Select the development team, run the three treatments on the physical
+iPhone 16 Pro, tune haptics/legibility, and put the direction choice in front of
+Eden.
+
+## 2026-08-21 · W1 research milestone · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Completed full web sessions A and B, including Back correction, both study
+  card placements, myo rests, Daybreak, and Summary.
+- Replaced the unavailable paid screen-library requirement, by Eden's explicit
+  decision, with public shipped-app evidence: official documentation, App Store
+  creatives, public demos, Apple profiles, and platform guidance.
+- Wrote `ios-port/research-notes.md` with observed mechanics, rejected patterns,
+  hard cases, sources, and the implications for every question in the brief.
+- Wrote `ios/Docs/technical-decisions.md`: native Observation, atomic Codable
+  JSON, Core Haptics, one ducked playback audio session, native rendering and
+  motion, and zero baseline runtime dependencies.
+
+**Decisions taken**
+- The sunrise remains Morning's identity. W1 compares Atmospheric Dawn, Precise
+  Dawn, and Tactile Dawn as native executions of one idea rather than unrelated
+  app brands.
+- SmartGym contributes only the focus mechanic — one set and one action. Its
+  generic dashboard, editable-program clutter, prediction, tables, and messaging
+  are explicitly rejected.
+- Liquid Glass is reserved for sparse interactive controls above the content
+  layer. It is not the sky, timer face, cue card, or app identity.
+- Countdown audio uses `.playback + .duckOthers`, always audible, with one duck
+  from five through zero. Eden chose this over silent-switch compliance.
+
+**Landmines**
+- Public App Store creatives establish visible composition, not interaction.
+  Behavioural claims in the notes rely on public demos or documentation.
+- The web Summary starts animations and its 14-second card reveal while hidden
+  under Daybreak. Native timing begins only when Summary is perceptible.
+- A physical-device signing team still needs selecting before haptic direction
+  testing; simulator work can continue.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Build a shared hardcoded Set/Rest state harness, then three running
+native Dawn treatments with real motion and Core Haptics.
+
 ## 2026-08-21 · W0 compile baseline · GPT-5.6 Sol
 
 **Workstream:** W0 — Make it compile

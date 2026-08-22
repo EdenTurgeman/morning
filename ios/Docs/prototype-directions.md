@@ -1,0 +1,468 @@
+# W1 native Dawn prototypes
+
+Running comparison build for Set and Rest. These are direction tests, not the
+application architecture and not finished screens.
+
+## Open the lab
+
+Run the app normally to choose:
+
+- Atmospheric Dawn
+- Precise Dawn
+- Tactile Dawn
+- Set or Rest
+- hardcoded comparison state
+- session progress
+
+Launch arguments open deterministic states directly:
+
+```text
+-prototype atmospheric-set
+-prototype atmospheric-set-beating
+-prototype precise-set
+-prototype precise-set-beating
+-prototype tactile-set
+-prototype tactile-set-beating
+-prototype atmospheric-rest
+-prototype atmospheric-rest-snapshot
+-prototype atmospheric-card
+-prototype atmospheric-card-snapshot
+-prototype atmospheric-card-menu
+-prototype precise-rest
+-prototype precise-rest-snapshot
+-prototype tactile-rest-snapshot
+-prototype tactile-myo-rest
+-prototype tactile-myo-rest-snapshot
+-prototype atmospheric-set-long-content
+```
+
+Appending `snapshot` freezes a Rest at 45 seconds (5 seconds for myo) so
+treatments can be compared in the same state rather than at arbitrary capture
+times. Appending `autoplay` to a Set launch value advances it into Rest after
+1.2 seconds for transition review.
+
+## Shared contract
+
+Every treatment uses the same fixed product behaviour:
+
+- one screen and one primary action
+- 82pt rep controls
+- bodyweight first-run default 10; loaded default 12
+- same-slot/same-weight previous value adjacent to the counter
+- a deterministic 13 → 14 threshold-crossing state
+- changed-weight history explicitly non-comparable
+- automatic absolute-time Rest
+- `+15s` and `Skip →`, no invented Rest control
+- automatic silent card reveal at 9.6 seconds on a 60-second Rest
+- 20-second myo Rest with no study card
+- no scrolling inside Set or Rest
+
+The lab includes first run, comparable, changed weight, superset, myo, longest
+Set content, plain Rest, longest card answer, and myo Rest fixtures.
+
+## Atmospheric Dawn
+
+Hypothesis: progress is fastest to understand when the environment itself gets
+lighter.
+
+- authored five-stop perceptual sunrise interpolation
+- MeshGradient sky whose luminance and stars change only with session progress
+- unboxed counter and simple controls with no broad bloom behind content
+- ring remains supporting evidence around a dominant number
+
+Watch for atmosphere making text feel soft or visually noisy.
+
+## Precise Dawn
+
+Hypothesis: Morning can retain warmth while making the previous-set threshold
+feel exact.
+
+- the same sunrise is quieter behind the content
+- calibration rail and threshold notch under the rep count
+- squared hairline controls and dashed timer depletion
+- progress reads through illumination as well as hue
+
+Watch for the interface becoming cold or generic.
+
+## Tactile Dawn
+
+Hypothesis: object continuity and physical response create the largest native
+upgrade.
+
+- one lit counter object becomes the Rest timer
+- interactive Liquid Glass only on controls touched by the user
+- opaque reading surfaces and stable contrast for content
+- pressure, numeric travel, ordinary detent, and double threshold haptic
+
+Watch for unnecessary skeuomorphism or material effects competing with the
+exercise.
+
+## Motion and haptics
+
+- Rep changes use directional numeric transitions.
+- Hold repeat accelerates from 380ms to a 60ms floor.
+- Ordinary rep, passing last time, logging, and card reveal have distinct Core
+  Haptics patterns.
+- The manipulated work object uses matched geometry between Set and Rest:
+  an unboxed number becomes a ring, a calibrated number becomes timer ticks,
+  and the tactile counter becomes the tactile timer.
+- Atmospheric changes dissolve, Precise changes use a short 12pt calibrated
+  translation, and Tactile changes use a restrained spring.
+- Card reveal transfers space from the timer to text instead of flipping a card.
+- Reduce Motion preserves state through short opacity changes, without
+  matched-geometry travel, and shows static start/end exercise positions.
+
+The simulator proves layout, timing, material, and compilation. Haptic quality
+still requires the physical iPhone 16 Pro.
+
+## Current evidence
+
+- All three Set treatments fit the iPhone 16 Pro without scrolling.
+- Plain Rest, longest revealed card, and myo Rest fit with controls visible.
+- The counter, exercise, and Rest time remain the dominant distant-reading
+  elements.
+- `./scripts/verify-ios.sh` remains green with 53 acceptance assertions present
+  and 53 intentionally skipped at W1.
+
+## Second-pass corrections
+
+The first visual review rejected the prototypes as one shared layout with three
+skins. The second pass changed the concepts rather than polishing that result:
+
+- Atmospheric originally added an authored horizon and sun; the focused lead
+  pass below later removed both after they stopped earning their space.
+- Precise removes the sky entirely. Its grid, relative threshold rail, and timer
+  ticks correspond to real values.
+- Tactile reduces glass to the manipulated control layer. The counter/timer
+  object compresses, tilts, seats a rim detent, and uses an opaque primary
+  action.
+- Previous reps moved into every counter rather than remaining a subtitle.
+- Passing the threshold now uses semantic mint, deliberately outside the Dawn
+  progress ramp.
+- Compact card timers increased to 64pt inside a 136pt ring.
+- Low-contrast labels were raised and dashboard-like uppercase tracking reduced.
+- Myo mechanism copy uses separate amber urgency; `+15s` remains 64pt but is
+  visually subordinate.
+- Reduced Motion removes object tilt and numeric travel and shortens timer/card
+  geometry changes.
+
+## Interaction-audit corrections
+
+A separate code audit then exercised the prototypes as controls rather than
+screens:
+
+- The app explicitly opts into ProMotion through
+  `CADisableMinimumFrameDurationOnPhone`; the built Info.plist is checked.
+- Rest zero and Skip now advance into the next Set. Zero plays a shaped
+  transient-plus-decay pattern; Skip confirms without impersonating zero.
+- `+15s` extends from the later of the saved end date or now, so an expired
+  timer never remains stuck at zero.
+- Loaded first run, superset partner two, myo set two, four-cue stress content,
+  and the longest card answer have deterministic fixtures and launch arguments.
+- Rep controls expose VoiceOver activation; Back and End have 64pt hit regions;
+  workout typography is intentionally clamped at the fixed `.large` size.
+- Reduce Transparency replaces interactive glass with opaque, bordered control
+  surfaces.
+- Haptic sharpness, timing, hold acceleration, and numeric motion differ by
+  treatment while retaining the same product semantics.
+- Core Haptics now prewarms, handles stop/reset, caches prepared players, and
+  retries the triggering event once after recovery.
+- A live 20-second myo Rest was observed auto-advancing to the 4–5 rep Set with
+  the exact program cue.
+
+## Third-pass contrast and restraint
+
+Eden rejected the remaining low-contrast areas and decorative halo vocabulary.
+The third pass treats light as state, not decoration:
+
+- All treatments now share a stable dark luminance veil behind the title, cues,
+  comparison, next-exercise copy, and controls.
+- Secondary text moved from 58–68% white to 68–78% white according to role.
+  A simulator PNG audit composited the declared text alpha over median 5×5
+  background samples at eight representative text zones. The measured range
+  was 7.79:1–11.38:1; the worst sampled zone was the Atmospheric footer.
+- The Atmospheric threshold bloom was removed. This pass briefly retained a
+  small sun and horizon; the focused lead pass below removes them entirely.
+- The Atmospheric timer ring shadow is 6pt and supporting, not a second light
+  source.
+- Tactile removes the large Set ellipse entirely and limits background accent
+  to 10% in the MeshGradient. Its threshold is the counter rim and detent.
+- Tactile timer and counter accent shadows were reduced to 8pt and 7pt. Precise
+  remains essentially shadowless.
+- The duplicate `Rest` label below `Rest · 9 / 21` was removed. Set and Rest now
+  retain only content that changes the next action.
+- Liquid Glass is grouped with `GlassEffectContainer` and remains limited to
+  manipulated Tactile controls. The primary action is opaque.
+
+Controlled final captures in ignored `ios/build/` use one iPhone 16 Pro state:
+
+```text
+w1-final-atmospheric-set.png
+w1-final-precise-set.png
+w1-final-tactile-set.png
+w1-final-atmospheric-rest.png
+w1-final-precise-rest.png
+w1-final-tactile-rest.png
+w1-final-card-revealed.png
+w1-final-myo-rest.png
+w1-final-four-cue-set.png
+```
+
+The final matrix was checked for centering, distant hierarchy, overflow,
+overloaded labels, text backing luminance, and non-semantic glow. The longest
+revealed card, four-cue Set, and 5-second myo Rest keep controls visible without
+scrolling.
+
+## Animation dependency decision
+
+Native SwiftUI now demonstrates the required treatment-specific motion with
+`matchedGeometryEffect`, numeric text transitions, `MeshGradient`, `Canvas`,
+`GlassEffectContainer`, and interactive `glassEffect`.
+
+- Pow was reviewed, but its stock effects would add a generic delight
+  vocabulary without solving a current prototype problem.
+- Lottie requires authored After Effects assets; no such asset currently beats
+  the native sunrise.
+- Rive remains conditional on a future interactive exercise figure or state
+  machine that demonstrably outperforms native code.
+- Hero is view-controller oriented and is not a fit for this SwiftUI app.
+- Vortex could be reconsidered for a later completion moment, not for Set or
+  Rest.
+- `PhaseAnimator`, `KeyframeAnimator`, and shaders remain available natively,
+  but adding them without a state they clarify would only add motion.
+
+No third-party animation package was added.
+
+## Focused Atmospheric lead pass
+
+Eden now prefers Atmospheric Dawn, without formally choosing it or closing W1.
+The lab marks it as `LEADING`; Precise and Tactile remain runnable comparison
+treatments.
+
+- Atmospheric removes the previous-rep badge above the number. An equal,
+  prefilled comparable Set shows `13` without repeating “Last time: 13”.
+- Crossing to `14` remains unmistakable through semantic mint, the explicit
+  “Beating last time's 13” line, numeric motion, and the threshold haptic.
+- First-run Sets still say “First time — just go to failure”. Changed-weight
+  Sets still explain that the old reps were logged at a different weight.
+- The fixed target moved into the exercise/meta hierarchy. It is no longer a
+  second comparator above the counter.
+- The decorative bottom horizon, line, and sun were deleted. Atmospheric light
+  now communicates only session progress through the palette interpolation and
+  fading stars.
+- Every Set reserves a 142–178pt native movement bay. App-owned Canvas figures
+  animate real fixed exercises: overhead press, push-up, lateral raise, floor
+  fly, bent-over row, and curl. No placeholder package or asset was added.
+- Full-motion figures interpolate between honest start and finish positions.
+  Reduce Motion overlays those two positions statically.
+- The four-cue fixture uses the 142pt bay, compact 16pt cue setting, full 82pt
+  rep controls, and the same 68pt primary action. It remains no-scroll.
+- Seven representative rendered text zones measured 6.88:1–12.03:1 using the
+  declared white alpha over median simulator background samples. The quiet
+  `MOVEMENT` label is the weakest sampled zone.
+- The prototype menu replaces the easy-to-miss Rest picker with visible Timer
+  only, Question → answer, and Myo choices. The card row says that its fun fact
+  reveals automatically, and the selected prototype's Open action stays visible.
+- Carded Rest still reveals silently at 9.6 seconds, keeps a 64pt compact timer,
+  and fits the longest fixed answer with both controls visible.
+
+Controlled captures in ignored `ios/build/`:
+
+```text
+w1-lead-atmospheric-equal.png
+w1-lead-atmospheric-beating.png
+w1-lead-atmospheric-long.png
+w1-lead-atmospheric-rest.png
+w1-lead-atmospheric-card-question.png
+w1-lead-atmospheric-card-answer.png
+w1-lead-atmospheric-menu.png
+w1-lead-precise-set.png
+w1-lead-tactile-set.png
+```
+
+## The sky, rebuilt as a living dawn
+
+Eden's review of the focused lead pass was blunt: *"The background of the app
+during the workouts is just too boring, our previous one had animations and
+stuff, right now it's just boring with the halo design."*
+
+He was right, and the diagnosis was specific. The native Atmospheric backdrop
+was one flat colour, one static `MeshGradient`, 34 fixed dots and a scrim.
+Nothing moved. The web build's `src/components/Sky.tsx` — which this port had
+not actually read — carries eight layers and four independent animations, and
+its header documents why each one exists.
+
+This pass ports that reasoning rather than that code. `PrototypeSky.swift`.
+
+### What the sky is now
+
+| Layer | Carries | Motion |
+|---|---|---|
+| Base + `MeshGradient` | The dawn palette. Zenith stays deep blue; only the horizon takes the live warmth | with progress |
+| Ozone band | The purple-pink band between blue zenith and warm ground | opacity peaks mid-session on a sine, not a ramp |
+| Haze | Atmosphere is denser near the ground | with progress |
+| Stars | How early it still is | twinkle on individual phases; thin out with progress |
+| Meteor | That the sky is not a loop | one per ~11s while the sky is dark enough to hold stars |
+| Crepuscular rays | The sun, without a sun — **strengthening** with progress | 150s drift |
+| Two cloud banks | Depth, through parallax | 200s and 128s, opposite scales |
+| Grain | Stops the gradients banding on OLED | static, deliberately |
+
+### Decisions inside it
+
+- **The zenith never takes the accent hue.** Rayleigh scattering is
+  wavelength-dependent, so the top of a real sky stays blue at the height of a
+  sunrise. Tinting everything with the live accent is what makes a sky read as
+  a coloured wash.
+- **Cloud noise is baked once** into a tiling `CGImage`, then translated. The
+  web build makes the same call for the same reason: generating noise per frame
+  across a screen held awake for twenty minutes is not affordable, and a
+  translated bitmap is free.
+- **The streak ratio is the whole trick.** Low frequency across x, high down y.
+  The first attempt had it inverted and produced vertical streaks, which read as
+  screen noise rather than cloud.
+- **One tile covers the band vertically.** A vertically repeating tile reads as
+  banding, which is the opposite of cloud. The tile then repeats horizontally
+  and travels exactly one tile width per cycle, so the loop lands on an
+  identical frame.
+- **Drift runs on repeating transform animations, not a per-frame clock.** Only
+  the star Canvas sits inside `TimelineView`. Nothing mutates observable state
+  per frame; nothing animates a blur radius or a mask.
+- **Still no sun disc and no bottom halo.** Both were removed earlier as
+  decoration competing with the copy, and they stay removed. The rays are the
+  sun's presence without its body — and they grow with progress, so they carry
+  state rather than merely moving.
+
+### The legibility trade, measured
+
+A richer sky costs contrast, which is exactly the risk `02-design-brief.md §5`
+names for this direction: *"The risk is mush — atmosphere fighting legibility at
+6am."* It was measured rather than guessed, on rendered frames.
+
+Adding the sky pushed cue 2 from 8.31:1 to 6.43:1, the footer from 6.86:1 to
+5.56:1 and Rest's next-exercise meta line from 7.41:1 to 5.96:1 — three
+elements under the brief's 6.6:1 tertiary bar.
+
+The fix was the web build's own layer 7, which the native port had shaped
+backwards: heaviest at the top, where the sky is already near-black, and
+lightest at 62%, right where the horizon warmth peaks. Reshaped to follow the
+sky's actual luminance — and **scaled with progress, because the sky it holds
+back is** — every text element now clears the bar across the entire session:
+
+| Element | Flat sky | Living sky, old scrim | Living sky, progress scrim |
+|---|---|---|---|
+| cue 1 | 8.72:1 | 7.04:1 | 7.59:1 |
+| cue 2 | 8.31:1 | 6.43:1 | 7.40:1 |
+| counter | 10.49:1 | 8.48:1 | 11.63:1 |
+| `Reps` | 5.67:1 | 5.33:1 | 7.33:1 |
+| footer | 6.86:1 | 5.56:1 | 7.34:1 |
+| Rest · next meta | 7.41:1 | 5.96:1 | 7.92:1 |
+
+Measured at progress 0.00 / 0.20 / 0.42 / 0.65 / 0.85 / 1.00, the weakest text
+zone on any screen is **6.98:1**. The scrim sits behind content, so it
+lowers background luminance without touching the glyphs — which is what makes it
+buy contrast rather than cost it.
+
+Three elements were also fixed directly: the primary button label went to full
+black (5.76 → 6.98:1), `MOVEMENT` to `white 0.62` (6.59 → 7.35:1), and the
+superset warning line — which the raw accent cannot carry over a lit sky at
+5.48:1 — was lifted 42% toward white, reaching 9.00:1 while staying
+unmistakably accent-family.
+
+### The one measured exception
+
+The **primary button label reads 5.84:1 at progress 0.00**, rising to 6.98:1 by
+mid-session. At twilight the accent is a mid-lightness indigo, so black-on-accent
+cannot reach 6.6:1 there.
+
+This is left alone deliberately. The 6.6:1 figure is the bar for *tertiary body
+text*; this is a 68pt filled control whose label clears WCAG AA for large text
+nearly twice over. The alternative — lightening the accent at low progress —
+would distort a ramp whose five stops are hand-picked and load-bearing:
+*"a formula gave an even ramp; it did not give a sunrise."* Damaging the app's
+central idea to move a button label from 5.84:1 to 6.6:1 is the wrong trade.
+
+### Reduce Motion
+
+Verified with the setting on: **0.00% of pixels change over six seconds.** Drift,
+twinkle and meteors all stop. Every layer's structure, colour and progress
+reading survive, so the sky is calmer rather than broken — and drifting cloud is
+precisely the kind of thing Reduce Motion exists to switch off.
+
+### New launch argument
+
+```text
+-progress 0.85
+```
+
+Overrides the scenario's default progress. It can be combined with any
+`-prototype` value.
+
+**A trap this created and then had to fix.** `snapshot` and `autoplay` were
+detected by reading `ProcessInfo.arguments.last`, which was true only while
+`-prototype <value>` was the final pair on the command line. Adding `-progress`
+after it silently broke every freeze — captures that were supposed to be frozen
+at 45 seconds were showing live countdowns, and nothing failed to announce it.
+`PrototypeLaunch.value` now reads the flag. Read the flag, never the tail. Reviewing the sky across the range is
+the only way to check the claim that session position is readable from the
+environment alone — and it is what caught the contrast failure at the gold end.
+
+Captures in ignored `ios/build/`:
+
+```text
+ladder/progress-ladder.png     the dawn walk, 0.00 -> 1.00
+legibility-v2/                 acuity-limited distance sheets
+iter/                          the current review matrix
+```
+
+### `accentText` — the ramp fills, it does not write
+
+Measuring the study card turned up the weakest text anywhere in the app: the
+topic label (`SPARKLING`) at **4.59:1**, barely over AA and far under the
+tertiary bar. Same cause as the superset warning line: the accent ramp's five
+stops are picked to be a *light source* — sky, ring, progress bar, primary fill
+— and the darker end of that ramp cannot carry small glyphs on a lit background.
+
+`DawnPalette.accentText` lifts the live accent 42% toward white. The rule it
+encodes:
+
+> The raw `accent` fills and lights. `accentText` is the only one that carries
+> glyphs.
+
+Applied to the study-card topic, the `MYO` badge and the superset warning line.
+Measured across the range, the topic label now reads 7.37:1 at twilight, 7.71:1
+mid-session and 8.75:1 at gold. The study card's longest answer holds
+7.39–8.71:1 over the same range.
+
+This is the first real W2 token, found by measurement rather than by taste.
+
+## Verifications a simulator can actually settle
+
+Recorded because the obvious reading of "needs the device" is that nothing here
+can be checked, and that is wrong. These were all measured, not eyeballed.
+
+| Check | Method | Result |
+|---|---|---|
+| Text contrast, every zone, every progress | `ios/Tools/measure-contrast.py` on rendered frames | Weakest **6.98:1** against a 6.6:1 floor |
+| Control boundaries | Component measurement, not text | Rep control **3.51:1**, Rest controls **4.10:1**, floor 3:1 |
+| Legibility at distance | Acuity-limited resample — 1 arcminute at 460 ppi | Name, count and timer hold to 2.0m |
+| Dark-room low brightness | Black-crush model at code 12 / 20 / 32 | No information lives in the crushed range; contrast holds or improves |
+| Reduce Motion | Frame diff over six seconds | **0.00%** of pixels change; structure and progress reading intact |
+| Reduce Transparency | Re-measured all text zones | Weakest 6.98:1 |
+| Dynamic Type clamp | medium vs accessibility-XXXL frame diff | 1.59%, and that is cloud drift — workout type genuinely does not scale |
+| No scrolling at longest content | Four-cue fixture after the larger glyphs and borders | Fits, controls visible |
+| Set → Rest work-object continuity | Burst capture at ~110ms through the 0.44s transition | The counter travels up and grows into the ring. Not a cross-fade |
+
+### What still genuinely needs the phone
+
+Only these, and they are the W11 list:
+
+- **Haptic quality.** Every pattern in `DesignHaptics.swift` is reasoned from
+  `05-platform.md §3` and has never been felt. Whether passing last time's
+  number is tellable from an ordinary rep *with the phone face down* is the
+  acceptance test, and it cannot be run here.
+- **120Hz frame pacing.** The app opts into ProMotion and the built Info.plist
+  is checked, but a simulator's frame timing proves nothing about a device's.
+- **Glare at 6:10am.** 10.1% of the Set frame sits at code ≥200, almost all of
+  it the primary button. Whether that is comfortable or punishing in a dark room
+  at minimum brightness is a physical question.
+- **Music ducking**, once the audio work lands in W5.
