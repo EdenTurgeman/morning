@@ -55,6 +55,48 @@ The **Landmines** field is worth more than the summary of what you built.
 
 **Next:** W3 — foundations and the acceptance suite. No UI; gate long met.
 
+## 2026-08-22 · W9 Ledger screen, W10 Guide and Backup · Claude Opus 5
+
+**Workstream:** W9 and W10 (done). Every screen in `02-design-brief.md §11` now
+exists.
+
+**What I did**
+- `Screens/LedgerScreen.swift` — one staggering true number, its provenance
+  under it, the facts, and the next threshold.
+- `Screens/GuideScreen.swift` — the nine entries verbatim, plus `BackupScreen`
+  and the export document.
+- Wired all four reading screens into Home behind one quiet row, and
+  `-screen history|ledger|guide|backup` for review.
+
+**Decisions taken**
+- The Ledger's headline is TONNAGE, not sessions or reps: load is fixed and reps
+  are the only signal, so tonnage is the number that makes that signal compound.
+  The provenance sits under it because a number that size is only worth
+  something if you can see where it came from.
+- Empty says "Nothing moved yet". A zero at 76pt is a number pretending to be an
+  achievement.
+- Guide takes Dynamic Type through the accessibility sizes. The workout screens
+  clamp; this one is read monthly and scrolls by design.
+- Restore names BOTH session counts in its confirmation, because replacing 120
+  sessions with 3 is the mistake that dialog exists to prevent.
+- **iCloud was not built.** `05-platform.md §6` says propose, not assume.
+
+**Landmines**
+- `BackupDocument` carries pre-encoded `Data`, not an `AppData`. `FileDocument`'s
+  members are nonisolated while this module's `Codable` conformances are
+  main-actor by default; encoding at the call site is simpler than fighting it.
+- **None of the sheet, file-picker or confirmation paths have been exercised.**
+  There is no Simulator UI here, so every screen was reached by launch argument
+  and no dialog has ever been opened. The export FORMAT is covered by CI; the
+  pickers are not covered by anything.
+- The Ledger's `since` date and `weeks` derive from `Date()`. Nothing pins them,
+  so a test asserting them would drift.
+
+**Assertions:** 56 of 58 (unchanged — W9's assertions landed with W7)
+
+**Next:** W11, the device pass. It is the only workstream left, and everything
+in it needs the hardware this clone has never had.
+
 ## 2026-08-22 · W8 History and the year grid · Claude Opus 5
 
 **Workstream:** W8 — History and the year grid (done). W7 merged.
