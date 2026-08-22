@@ -8,6 +8,54 @@ The **Landmines** field is worth more than the summary of what you built.
 
 ---
 
+## 2026-08-22 · W1 Atmospheric lead refinement · GPT-5.6 Sol
+
+**Workstream:** W1 — Research pass and directions (in progress)
+
+**What I did**
+- Treated Atmospheric Dawn as Eden's leading candidate without removing Precise
+  or Tactile or closing the W1 gate.
+- Removed Atmospheric's previous-rep badge and the redundant equal-state “Last
+  time” subtitle. First-run, changed-weight, and 13 → 14 honesty remain.
+- Moved the fixed target into the exercise metadata hierarchy and deleted the
+  decorative bottom horizon, line, and sun.
+- Added a 142–178pt app-owned native Canvas movement bay to every Set. It maps
+  the fixed exercise name to overhead press, push-up, lateral raise, floor fly,
+  bent-over row, or curl motion without a package or placeholder asset.
+- Added a static start/end Reduced Motion form and retained 82pt rep controls,
+  the 68pt primary action, no scrolling, and full four-cue content.
+- Measured seven representative Set/card/menu text zones at 6.88:1–12.03:1;
+  the quiet movement-bay label is the weakest sampled zone.
+- Replaced the easy-to-miss Rest picker with visible Timer only, Question →
+  answer, and Myo rows; made the lab's Open action persistent at the bottom.
+- Rechecked plain Rest and carded Rest before and after the silent auto-reveal;
+  the 64pt compact timer, longest answer, next exercise, and both controls fit.
+- Captured the focused Atmospheric matrix plus Precise/Tactile comparison Sets
+  in ignored `ios/build/`.
+- Ran `./scripts/verify-ios.sh`; every phase passes.
+
+**Decisions taken**
+- Atmospheric is marked `LEADING`, not selected. W1 stays open and W2 does not
+  begin until Eden explicitly chooses.
+- The sunrise atmosphere now expresses session progress only through authored
+  palette interpolation and fading stars. Threshold comparison belongs at the
+  counter, not in the background.
+- A native schematic is enough to test movement-bay layout and motion language.
+  Rive or Lottie still needs a demonstrated final asset/state-machine advantage
+  before it can enter the project.
+
+**Landmines**
+- The movement figures are app-owned layout/motion prototypes, not final
+  anatomical illustrations. Their exercise mapping must grow with the real
+  program if this direction is chosen.
+- Physical-device frame pacing, haptics, and 1.5m dark-room legibility remain
+  unverified because no signed device is connected.
+
+**Assertions:** 0 of 53 passing (53 skipped)
+
+**Next:** Let Eden compare the revised Atmospheric equal/crossing/long-content
+states and card flow. Keep W1 open until he explicitly chooses; do not start W2.
+
 ## 2026-08-22 · W1 contrast and motion pass · GPT-5.6 Sol
 
 **Workstream:** W1 — Research pass and directions (in progress)

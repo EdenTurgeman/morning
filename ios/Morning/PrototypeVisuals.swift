@@ -2,26 +2,16 @@ import SwiftUI
 
 struct DawnBackdrop: View {
     let treatment: DawnTreatment
-    let mode: PrototypeMode
     let progress: Double
-    let thresholdCrossed: Bool
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @State private var breathing = false
 
     private var palette: DawnPalette {
         DawnPalette(progress: progress)
     }
 
-    private var horizonFraction: Double {
-        mode == .set
-            ? 0.82 - progress * 0.04
-            : 0.79 - progress * 0.08
-    }
-
     var body: some View {
-        GeometryReader { proxy in
+        GeometryReader { _ in
             ZStack {
                 switch treatment {
                 case .atmospheric:
@@ -46,32 +36,6 @@ struct DawnBackdrop: View {
                     )
 
                     Stars(progress: progress)
-
-                    Rectangle()
-                        .fill(
-                            thresholdCrossed
-                                ? Color.morningSuccess.opacity(0.74)
-                                : palette.accent.opacity(0.46)
-                        )
-                        .frame(height: 1)
-                        .position(
-                            x: proxy.size.width / 2,
-                            y: proxy.size.height * horizonFraction
-                        )
-
-                    Circle()
-                        .fill(thresholdCrossed ? Color.morningSuccess : palette.accent)
-                        .overlay(
-                            Circle()
-                                .fill(.white.opacity(0.5))
-                                .frame(width: 7, height: 7)
-                        )
-                        .frame(width: 22, height: 22)
-                        .scaleEffect(breathing && !reduceMotion ? 1.06 : 1)
-                        .position(
-                            x: proxy.size.width / 2,
-                            y: proxy.size.height * horizonFraction
-                        )
 
                 case .precise:
                     Color(red: 0.018, green: 0.02, blue: 0.032)
@@ -117,12 +81,6 @@ struct DawnBackdrop: View {
                             endPoint: .bottom
                         )
                     )
-            }
-            .onAppear {
-                guard treatment == .atmospheric, !reduceMotion else { return }
-                withAnimation(.easeInOut(duration: 5.5).repeatForever(autoreverses: true)) {
-                    breathing = true
-                }
             }
         }
         .ignoresSafeArea()

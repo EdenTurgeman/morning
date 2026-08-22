@@ -109,3 +109,72 @@ private struct TactileGlassButton: ViewModifier {
         }
     }
 }
+
+struct RestScenarioSelector: View {
+    @Binding var selection: RestScenario
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("Rest content")
+                .font(.subheadline.weight(.semibold))
+
+            ForEach(RestScenario.allCases) { scenario in
+                Button {
+                    selection = scenario
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: icon(for: scenario))
+                            .font(.headline)
+                            .frame(width: 28)
+                            .foregroundStyle(selection == scenario ? accent : .white.opacity(0.66))
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(title(for: scenario))
+                                .font(.subheadline.weight(.semibold))
+                            Text(subtitle(for: scenario))
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.64))
+                        }
+
+                        Spacer()
+
+                        Image(systemName: selection == scenario ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selection == scenario ? accent : .white.opacity(0.28))
+                    }
+                    .padding(.horizontal, 13)
+                    .frame(minHeight: 58)
+                    .background(
+                        selection == scenario ? Color.white.opacity(0.09) : Color.white.opacity(0.035),
+                        in: RoundedRectangle(cornerRadius: 16)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func title(for scenario: RestScenario) -> String {
+        switch scenario {
+        case .plain: "Timer only"
+        case .card: "Question → answer"
+        case .myo: "Myo 20s"
+        }
+    }
+
+    private func subtitle(for scenario: RestScenario) -> String {
+        switch scenario {
+        case .plain: "Plain 60-second Rest"
+        case .card: "Fun fact · reveals automatically"
+        case .myo: "Mechanism Rest · no card"
+        }
+    }
+
+    private func icon(for scenario: RestScenario) -> String {
+        switch scenario {
+        case .plain: "timer"
+        case .card: "rectangle.on.rectangle.angled"
+        case .myo: "bolt.fill"
+        }
+    }
+}

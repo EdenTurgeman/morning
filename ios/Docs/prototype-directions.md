@@ -27,6 +27,7 @@ Launch arguments open deterministic states directly:
 -prototype atmospheric-rest-snapshot
 -prototype atmospheric-card
 -prototype atmospheric-card-snapshot
+-prototype atmospheric-card-menu
 -prototype precise-rest
 -prototype precise-rest-snapshot
 -prototype tactile-rest-snapshot
@@ -65,7 +66,7 @@ Hypothesis: progress is fastest to understand when the environment itself gets
 lighter.
 
 - authored five-stop perceptual sunrise interpolation
-- MeshGradient sky, a stable horizon, and one slowly breathing 22pt sun
+- MeshGradient sky whose luminance and stars change only with session progress
 - unboxed counter and simple controls with no broad bloom behind content
 - ring remains supporting evidence around a dominant number
 
@@ -108,8 +109,8 @@ exercise.
 - Atmospheric changes dissolve, Precise changes use a short 12pt calibrated
   translation, and Tactile changes use a restrained spring.
 - Card reveal transfers space from the timer to text instead of flipping a card.
-- Reduce Motion freezes environmental breathing and preserves state through
-  short opacity changes, without matched-geometry travel.
+- Reduce Motion preserves state through short opacity changes, without
+  matched-geometry travel, and shows static start/end exercise positions.
 
 The simulator proves layout, timing, material, and compilation. Haptic quality
 still requires the physical iPhone 16 Pro.
@@ -128,8 +129,8 @@ still requires the physical iPhone 16 Pro.
 The first visual review rejected the prototypes as one shared layout with three
 skins. The second pass changed the concepts rather than polishing that result:
 
-- Atmospheric owns stars, authored horizon position, a visible sun, and a
-  lasting environmental change when 13 becomes 14.
+- Atmospheric originally added an authored horizon and sun; the focused lead
+  pass below later removed both after they stopped earning their space.
 - Precise removes the sky entirely. Its grid, relative threshold rail, and timer
   ticks correspond to real values.
 - Tactile reduces glass to the manipulated control layer. The counter/timer
@@ -142,8 +143,8 @@ skins. The second pass changed the concepts rather than polishing that result:
 - Low-contrast labels were raised and dashboard-like uppercase tracking reduced.
 - Myo mechanism copy uses separate amber urgency; `+15s` remains 64pt but is
   visually subordinate.
-- Reduced Motion now freezes environmental breathing, removes object tilt and
-  numeric travel, and shortens timer/card geometry changes.
+- Reduced Motion removes object tilt and numeric travel and shortens timer/card
+  geometry changes.
 
 ## Interaction-audit corrections
 
@@ -180,10 +181,10 @@ The third pass treats light as state, not decoration:
   A simulator PNG audit composited the declared text alpha over median 5×5
   background samples at eight representative text zones. The measured range
   was 7.79:1–11.38:1; the worst sampled zone was the Atmospheric footer.
-- The Atmospheric threshold bloom was removed. Crossing last time changes the
-  counter, badge, small sun, and 1pt horizon line to semantic mint.
-- Atmospheric light is now a small solid sun rather than a radial halo. The
-  timer ring shadow is 6pt and supporting, not a second light source.
+- The Atmospheric threshold bloom was removed. This pass briefly retained a
+  small sun and horizon; the focused lead pass below removes them entirely.
+- The Atmospheric timer ring shadow is 6pt and supporting, not a second light
+  source.
 - Tactile removes the large Set ellipse entirely and limits background accent
   to 10% in the MeshGradient. Its threshold is the counter rim and detent.
 - Tactile timer and counter accent shadows were reduced to 8pt and 7pt. Precise
@@ -231,3 +232,50 @@ Native SwiftUI now demonstrates the required treatment-specific motion with
   but adding them without a state they clarify would only add motion.
 
 No third-party animation package was added.
+
+## Focused Atmospheric lead pass
+
+Eden now prefers Atmospheric Dawn, without formally choosing it or closing W1.
+The lab marks it as `LEADING`; Precise and Tactile remain runnable comparison
+treatments.
+
+- Atmospheric removes the previous-rep badge above the number. An equal,
+  prefilled comparable Set shows `13` without repeating “Last time: 13”.
+- Crossing to `14` remains unmistakable through semantic mint, the explicit
+  “Beating last time's 13” line, numeric motion, and the threshold haptic.
+- First-run Sets still say “First time — just go to failure”. Changed-weight
+  Sets still explain that the old reps were logged at a different weight.
+- The fixed target moved into the exercise/meta hierarchy. It is no longer a
+  second comparator above the counter.
+- The decorative bottom horizon, line, and sun were deleted. Atmospheric light
+  now communicates only session progress through the palette interpolation and
+  fading stars.
+- Every Set reserves a 142–178pt native movement bay. App-owned Canvas figures
+  animate real fixed exercises: overhead press, push-up, lateral raise, floor
+  fly, bent-over row, and curl. No placeholder package or asset was added.
+- Full-motion figures interpolate between honest start and finish positions.
+  Reduce Motion overlays those two positions statically.
+- The four-cue fixture uses the 142pt bay, compact 16pt cue setting, full 82pt
+  rep controls, and the same 68pt primary action. It remains no-scroll.
+- Seven representative rendered text zones measured 6.88:1–12.03:1 using the
+  declared white alpha over median simulator background samples. The quiet
+  `MOVEMENT` label is the weakest sampled zone.
+- The prototype menu replaces the easy-to-miss Rest picker with visible Timer
+  only, Question → answer, and Myo choices. The card row says that its fun fact
+  reveals automatically, and the selected prototype's Open action stays visible.
+- Carded Rest still reveals silently at 9.6 seconds, keeps a 64pt compact timer,
+  and fits the longest fixed answer with both controls visible.
+
+Controlled captures in ignored `ios/build/`:
+
+```text
+w1-lead-atmospheric-equal.png
+w1-lead-atmospheric-beating.png
+w1-lead-atmospheric-long.png
+w1-lead-atmospheric-rest.png
+w1-lead-atmospheric-card-question.png
+w1-lead-atmospheric-card-answer.png
+w1-lead-atmospheric-menu.png
+w1-lead-precise-set.png
+w1-lead-tactile-set.png
+```

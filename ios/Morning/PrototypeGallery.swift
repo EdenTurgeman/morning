@@ -128,7 +128,7 @@ struct PrototypeLabView: View {
         _setScenario = State(initialValue: SetScenario.scenario(for: value))
         _restScenario = State(initialValue: selectedRestScenario)
         _progress = State(initialValue: selectedRestScenario == .myo ? 0.74 : 0.42)
-        _isPresentingPrototype = State(initialValue: true)
+        _isPresentingPrototype = State(initialValue: !value.contains("menu"))
     }
 
     var body: some View {
@@ -219,8 +219,18 @@ private struct PrototypeMenu: View {
                                         )
 
                                     VStack(alignment: .leading, spacing: 3) {
-                                        Text(item.title)
-                                            .font(.headline)
+                                        HStack(spacing: 8) {
+                                            Text(item.title)
+                                                .font(.headline)
+                                            if item == .atmospheric {
+                                                Text("LEADING")
+                                                    .font(.caption2.weight(.bold))
+                                                    .tracking(1)
+                                                    .foregroundStyle(
+                                                        DawnPalette(progress: progress).accent
+                                                    )
+                                            }
+                                        }
                                         Text(item.subtitle)
                                             .font(.subheadline)
                                             .foregroundStyle(.secondary)
@@ -262,11 +272,10 @@ private struct PrototypeMenu: View {
                                 }
                             }
                         } else {
-                            Picker("Rest state", selection: $restScenario) {
-                                ForEach(RestScenario.allCases) { item in
-                                    Text(item.rawValue).tag(item)
-                                }
-                            }
+                            RestScenarioSelector(
+                                selection: $restScenario,
+                                accent: DawnPalette(progress: progress).accent
+                            )
                         }
 
                         VStack(alignment: .leading, spacing: 8) {
@@ -297,23 +306,27 @@ private struct PrototypeMenu: View {
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
-
-                    Button(action: onOpen) {
-                        Text("Open \(mode.rawValue.capitalized) prototype")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 64)
-                            .foregroundStyle(.black.opacity(0.78))
-                            .background(
-                                DawnPalette(progress: progress).accent,
-                                in: RoundedRectangle(cornerRadius: 22)
-                            )
-                    }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            Button(action: onOpen) {
+                Text("Open \(mode.rawValue.capitalized) prototype")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 64)
+                    .foregroundStyle(.black.opacity(0.78))
+                    .background(
+                        DawnPalette(progress: progress).accent,
+                        in: RoundedRectangle(cornerRadius: 22)
+                    )
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .background(Color(red: 0.025, green: 0.03, blue: 0.065).opacity(0.94))
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -332,16 +345,13 @@ private struct PrototypeStage: View {
     let onAdvanceFromSet: () -> Void
     let onAdvanceFromRest: () -> Void
     @Namespace private var workObjectNamespace
-    @State private var thresholdCrossed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
             DawnBackdrop(
                 treatment: treatment,
-                mode: mode,
-                progress: progress,
-                thresholdCrossed: mode == .set && thresholdCrossed
+                progress: progress
             )
 
             switch mode {
@@ -352,8 +362,7 @@ private struct PrototypeStage: View {
                     progress: progress,
                     namespace: workObjectNamespace,
                     onClose: onClose,
-                    onAdvance: onAdvanceFromSet,
-                    onThresholdChange: { thresholdCrossed = $0 }
+                    onAdvance: onAdvanceFromSet
                 )
                 .transition(stageTransition)
             case .rest:
@@ -372,10 +381,6 @@ private struct PrototypeStage: View {
         .preferredColorScheme(.dark)
         .onAppear {
             PrototypeHaptics.shared.prewarm()
-            thresholdCrossed = setScenario == .beating
-        }
-        .onChange(of: setScenario) { _, scenario in
-            thresholdCrossed = scenario == .beating
         }
     }
 
@@ -402,7 +407,6 @@ private struct SetPrototypeView: View {
     let namespace: Namespace.ID
     let onClose: () -> Void
     let onAdvance: () -> Void
-    let onThresholdChange: (Bool) -> Void
 
     @State private var reps: Int
     @State private var direction = 1
@@ -417,8 +421,7 @@ private struct SetPrototypeView: View {
         progress: Double,
         namespace: Namespace.ID,
         onClose: @escaping () -> Void,
-        onAdvance: @escaping () -> Void,
-        onThresholdChange: @escaping (Bool) -> Void
+        onAdvance: @escaping () -> Void
     ) {
         self.treatment = treatment
         self.scenario = scenario
@@ -426,7 +429,6 @@ private struct SetPrototypeView: View {
         self.namespace = namespace
         self.onClose = onClose
         self.onAdvance = onAdvance
-        self.onThresholdChange = onThresholdChange
         fixture = SetFixture.fixture(for: scenario)
         _reps = State(initialValue: fixture.initialReps)
     }
@@ -455,7 +457,7 @@ private struct SetPrototypeView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     Text(fixture.exercise)
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
                         .tracking(-1.1)
                         .lineLimit(2)
                         .minimumScaleFactor(0.82)
@@ -481,6 +483,10 @@ private struct SetPrototypeView: View {
                     .font(.subheadline.monospacedDigit())
                     .foregroundStyle(.white.opacity(0.72))
 
+                Text("Target \(fixture.target)")
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.78))
+
                 if fixture.straightIntoNext {
                     Text("No rest after this — straight into the next one.")
                         .font(.subheadline.weight(.medium))
@@ -489,19 +495,26 @@ private struct SetPrototypeView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 14)
+            .padding(.top, 10)
 
-            Spacer(minLength: 8)
+            ExerciseMotionBay(
+                treatment: treatment,
+                exercise: fixture.exercise,
+                accent: palette.accent
+            )
+            .frame(height: movementBayHeight)
+            .padding(.top, 10)
 
-            CueList(cues: fixture.cues, accent: palette.accent)
+            CueList(
+                cues: fixture.cues,
+                accent: palette.accent,
+                compact: fixture.cues.count >= 4
+            )
+            .padding(.top, fixture.cues.count >= 4 ? 8 : 12)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
             VStack(spacing: 5) {
-                Text("Target · \(fixture.target)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.74))
-
                 RepObject(
                     treatment: treatment,
                     reps: reps,
@@ -513,12 +526,14 @@ private struct SetPrototypeView: View {
                     onStep: step
                 )
 
-                comparisonCopy
-                    .font(.subheadline)
-                    .frame(minHeight: 22)
+                if showsComparisonCopy {
+                    comparisonCopy
+                        .font(.subheadline)
+                        .frame(minHeight: 22)
+                }
             }
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 6)
 
             DawnPrimaryButton(
                 title: "Done",
@@ -549,6 +564,18 @@ private struct SetPrototypeView: View {
         }
     }
 
+    private var movementBayHeight: Double {
+        switch fixture.cues.count {
+        case 4...: 142
+        case 3: 158
+        default: 178
+        }
+    }
+
+    private var showsComparisonCopy: Bool {
+        fixture.previous == nil || fixture.previousKg != nil || isBeating
+    }
+
     @ViewBuilder
     private var comparisonCopy: some View {
         if let previous = fixture.previous, let previousKg = fixture.previousKg {
@@ -558,9 +585,6 @@ private struct SetPrototypeView: View {
             if isBeating {
                 Text("Beating last time's \(previous)")
                     .foregroundStyle(Color.morningSuccess)
-            } else {
-                Text("Last time: \(previous) — beat it")
-                    .foregroundStyle(.white.opacity(0.7))
             }
         } else {
             Text("First time — just go to failure")
@@ -575,7 +599,6 @@ private struct SetPrototypeView: View {
         withAnimation(stepAnimation) {
             reps = newValue
         }
-        onThresholdChange(isComparable && newValue > (fixture.previous ?? .max))
 
         if let previous = fixture.previous,
            fixture.previousKg == nil,
@@ -603,9 +626,10 @@ private struct SetPrototypeView: View {
 private struct CueList: View {
     let cues: [String]
     let accent: Color
+    let compact: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: compact ? 6 : 9) {
             ForEach(cues, id: \.self) { cue in
                 HStack(alignment: .firstTextBaseline, spacing: 11) {
                     Circle()
@@ -613,7 +637,12 @@ private struct CueList: View {
                         .frame(width: 5, height: 5)
 
                     Text(cue)
-                        .font(.system(size: 17, weight: carriesTrainingEffect(cue) ? .semibold : .regular))
+                        .font(
+                            .system(
+                                size: compact ? 16 : 17,
+                                weight: carriesTrainingEffect(cue) ? .semibold : .regular
+                            )
+                        )
                         .foregroundStyle(
                             carriesTrainingEffect(cue)
                                 ? Color.white.opacity(0.94)
@@ -677,34 +706,19 @@ private struct RepObject: View {
     private var readout: some View {
         switch treatment {
         case .atmospheric:
-            ZStack(alignment: .topTrailing) {
-                VStack(spacing: 0) {
-                    Text(reps, format: .number)
-                        .font(.system(size: 92, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
-                        .foregroundStyle(isBeating ? Color.morningSuccess : .white)
-                        .shadow(
-                            color: isBeating ? Color.morningSuccess.opacity(0.38) : .clear,
-                            radius: 8
-                        )
-                    Text("Reps")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.72))
-                }
-
-                if let previous {
-                    Text("Last \(previous)")
-                        .font(.caption2.weight(.bold).monospacedDigit())
-                        .foregroundStyle(isBeating ? Color.black.opacity(0.72) : .white.opacity(0.76))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(
-                            isBeating ? Color.morningSuccess : Color.white.opacity(0.1),
-                            in: Capsule()
-                        )
-                        .offset(x: 11, y: 5)
-                }
+            VStack(spacing: 0) {
+                Text(reps, format: .number)
+                    .font(.system(size: 92, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: direction < 0))
+                    .foregroundStyle(isBeating ? Color.morningSuccess : .white)
+                    .shadow(
+                        color: isBeating ? Color.morningSuccess.opacity(0.38) : .clear,
+                        radius: 8
+                    )
+                Text("Reps")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.72))
             }
         case .precise:
             let previousValue = previous ?? reps

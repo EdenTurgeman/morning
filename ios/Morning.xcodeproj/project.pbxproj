@@ -32,6 +32,7 @@
 		E1D4B4C0A55E4F31B6D8A911 /* PrototypeGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */; };
 		E5F60718293A4B5C6D7E8F90 /* PrototypeButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */; };
 		E7E5BD436B7643D6158FE6BB /* MorningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9EF34F789D4A17D31F0529 /* MorningApp.swift */; };
+		F1A2B3C4D5E60718293A4B5C /* PrototypeMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B3C4D5E60718293A4B5C6D /* PrototypeMovement.swift */; };
 		F4261B66A4478DA70FECAC8B /* LedgerAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B926210B4DC5C23339F7676B /* LedgerAcceptanceTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +62,7 @@
 		91D2A8214FBACBBE29DA6BC0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B99F4D0685122FC0B3DE761 /* cards.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = cards.json; sourceTree = "<group>"; };
 		A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekAndStreakAcceptanceTests.swift; sourceTree = "<group>"; };
+		A2B3C4D5E60718293A4B5C6D /* PrototypeMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeMovement.swift; sourceTree = "<group>"; };
 		A8C9F2E17B3D4A56C0D1E222 /* PrototypeGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeGallery.swift; sourceTree = "<group>"; };
 		A9E09AB74F9D6BB9ADD2B984 /* DataAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataAcceptanceTests.swift; sourceTree = "<group>"; };
 		B1C2D3E4F5061728394A5B6C /* PrototypeVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeVisuals.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				D4E6F80123456789ABCDEF01 /* PrototypeSupport.swift */,
 				B1C2D3E4F5061728394A5B6C /* PrototypeVisuals.swift */,
 				F60718293A4B5C6D7E8F9012 /* PrototypeButtons.swift */,
+				A2B3C4D5E60718293A4B5C6D /* PrototypeMovement.swift */,
 			);
 			path = Morning;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 				C3D5E7F90123456789ABCDEF /* PrototypeSupport.swift in Sources */,
 				A0B1C2D3E4F5061728394A5B /* PrototypeVisuals.swift in Sources */,
 				E5F60718293A4B5C6D7E8F90 /* PrototypeButtons.swift in Sources */,
+				F1A2B3C4D5E60718293A4B5C /* PrototypeMovement.swift in Sources */,
 				625B26B51E50A993E82173D1 /* Schema.swift in Sources */,
 				B4C173916B1C25BF3CA377B1 /* Seeds.swift in Sources */,
 			);
