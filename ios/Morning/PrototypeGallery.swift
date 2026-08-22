@@ -492,7 +492,7 @@ private struct SetPrototypeView: View {
                 if let sub = fixture.sub {
                     Text(sub)
                         .font(.title3)
-                        .foregroundStyle(.white.opacity(0.78))
+                        .foregroundStyle(Ink.secondary)
                 }
 
                 Text(fixture.meta)
@@ -501,7 +501,7 @@ private struct SetPrototypeView: View {
 
                 Text("Target \(fixture.target)")
                     .font(.subheadline.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.78))
+                    .foregroundStyle(Ink.secondary)
 
                 if fixture.straightIntoNext {
                     Text("No rest after this — straight into the next one.")
@@ -1197,9 +1197,12 @@ private struct RestTimerObject: View {
                     .monospacedDigit()
                     .contentTransition(reduceMotion ? .opacity : .numericText(countsDown: true))
                 Text("SEC")
-                    .font(.caption.weight(.semibold))
+                    .font(TypeScale.label)
                     .tracking(1.2)
-                    .foregroundStyle(.white.opacity(0.72))
+                    // Measured 6.36:1 at gold on white 0.72 — the Rest ring
+                    // sits where the sky is brightest. It is a unit attached to
+                    // a primary number, so it takes the secondary level.
+                    .foregroundStyle(Ink.secondary)
             }
         }
         .frame(width: size, height: size)
@@ -1285,7 +1288,7 @@ private struct StudyCardPrototype: View {
                 if revealed {
                     Text(answer)
                         .font(.system(size: 14.5))
-                        .foregroundStyle(.white.opacity(0.78))
+                        .foregroundStyle(Ink.secondary)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .transition(.opacity)

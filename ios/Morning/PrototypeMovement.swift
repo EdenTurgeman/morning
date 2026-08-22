@@ -45,9 +45,9 @@ struct ExerciseMotionBay: View {
         }
         .overlay(alignment: .topLeading) {
             Text("MOVEMENT")
-                .font(.caption2.weight(.semibold))
+                .font(TypeScale.microLabel)
                 .tracking(1.6)
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(Ink.tertiary)
                 .padding(.horizontal, 13)
                 .padding(.vertical, 10)
         }

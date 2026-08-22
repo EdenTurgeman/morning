@@ -104,7 +104,7 @@ struct PrototypeChrome: View {
                         .font(.caption.weight(.medium))
                         .frame(minWidth: 64, minHeight: 64, alignment: .trailing)
                 }
-                .foregroundStyle(.white.opacity(0.78))
+                .foregroundStyle(Ink.secondary)
 
                 Text(step)
                     .font(.caption.weight(.semibold).monospacedDigit())

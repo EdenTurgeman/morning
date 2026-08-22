@@ -104,7 +104,13 @@ that comment.
 | Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, next-exercise meta | **7.00–7.62:1** |
 | On accent | `Ink.onAccent` | The primary action's label | **5.84–6.98:1** — see the exception below |
 
-Weakest text anywhere, at any progress: **7.00:1**. The bar is 6.6:1.
+Weakest text anywhere, at any progress: **7.00:1** on Set, **7.10:1** on Rest.
+The bar is 6.6:1.
+
+Rest had to be measured separately and across the range to find its weak point:
+its ring sits where the sky is brightest, and `SEC` fell to **6.36:1** at gold on
+`white 0.72`. It is a unit attached to a primary number, so it took the
+secondary level and now reads 7.10:1.
 
 `Ink.hairline` is furniture only — rails and dividers. It never carries glyphs.
 
