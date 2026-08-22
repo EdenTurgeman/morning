@@ -1,6 +1,12 @@
 import SwiftUI
 
 struct DawnPrimaryButton: View {
+    /// The accent lifted enough to carry a black label at every progress.
+    /// Callers pass the raw accent; this is what actually gets painted.
+    private var fill: Color {
+        accent.mix(with: .white, by: 0.12, in: .perceptual)
+    }
+
     let title: String
     let treatment: DawnTreatment
     let accent: Color
@@ -29,7 +35,7 @@ struct DawnPrimaryButton: View {
                             }
                     } else {
                         RoundedRectangle(cornerRadius: treatment == .precise ? 16 : 22)
-                            .fill(accent)
+                            .fill(fill)
                             .shadow(
                                 color: accent.opacity(treatment == .atmospheric ? 0.2 : 0.1),
                                 radius: 6,

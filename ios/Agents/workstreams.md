@@ -346,7 +346,7 @@ list.
 
 ---
 
-## W6 · Home and the week — `todo`
+## W6 · Home and the week — `done`
 
 **Gate:** W5 done.
 
@@ -368,6 +368,18 @@ list.
 - **Un-skip and implement: `WeekAndStreakAcceptanceTests` (8).**
 
 **Done when:** 41 of 53 pass.
+
+**Closed 2026-08-22.** 46 of 58 pass, 0 failures. All eight
+`WeekAndStreakAcceptanceTests`.
+
+Home is the app root now, and a workout in progress resumes on launch rather
+than flashing Home on its way back. Reviewed at empty, one week and six months.
+
+Two things worth carrying forward. On day one the nudge said *"This week's out
+of reach"* — arithmetically right, and the wrong first sentence for someone who
+has not started; it is suppressed when there is no history at all. And building
+Home retired the design system's one documented contrast exception rather than
+inheriting it: see `design-system.md`.
 
 **Kickoff prompt**
 

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5132DC86BBD009A6336D53FA /* ReviewHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */; };
+		95C1ED329C907C0FC7458814 /* AppRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A026BCBEF4A59459A96AEE /* AppRoot.swift */; };
+		3AE499B31E48ADD989449B5D /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */; };
+		600EEC908B0CB5EE23F8074A /* Week.swift in Sources */ = {isa = PBXBuildFile; fileRef = E070EE3FA0F72F5CC9BC3DEB /* Week.swift */; };
 		88E70088BB8FFC282137A2FD /* RestScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */; };
 		21C8E85EF7883D0892480846 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56359319D3EF2A90354C8A3 /* Audio.swift */; };
 		E872A9E953257A1010305C73 /* DuckWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */; };
@@ -66,6 +70,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewHost.swift; sourceTree = "<group>"; };
+		B2A026BCBEF4A59459A96AEE /* AppRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoot.swift; sourceTree = "<group>"; };
+		AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		E070EE3FA0F72F5CC9BC3DEB /* Week.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Week.swift; sourceTree = "<group>"; };
 		A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestScreen.swift; sourceTree = "<group>"; };
 		B56359319D3EF2A90354C8A3 /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
 		E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckWindowTests.swift; sourceTree = "<group>"; };
@@ -121,6 +129,9 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				1BF7EA2C83E33372D59115D3 /* ReviewHost.swift */,
+				B2A026BCBEF4A59459A96AEE /* AppRoot.swift */,
+				AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */,
 				A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */,
 				7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */,
 				8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */,
@@ -132,6 +143,7 @@
 		00B7138305DB7E908846968E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				E070EE3FA0F72F5CC9BC3DEB /* Week.swift */,
 				B56359319D3EF2A90354C8A3 /* Audio.swift */,
 				AB45F7318157028E123837CC /* Deck.swift */,
 				896971FECE671753F440F58F /* Cards.swift */,
@@ -378,6 +390,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5132DC86BBD009A6336D53FA /* ReviewHost.swift in Sources */,
+				95C1ED329C907C0FC7458814 /* AppRoot.swift in Sources */,
+				3AE499B31E48ADD989449B5D /* HomeScreen.swift in Sources */,
+				600EEC908B0CB5EE23F8074A /* Week.swift in Sources */,
 				88E70088BB8FFC282137A2FD /* RestScreen.swift in Sources */,
 				21C8E85EF7883D0892480846 /* Audio.swift in Sources */,
 				F931E872C9CD5A79F428A21F /* Deck.swift in Sources */,

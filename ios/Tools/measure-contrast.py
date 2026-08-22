@@ -88,6 +88,24 @@ ZONES = {
         ("next    exercise", 2175, 2230, 30, 1180, "secondary"),
         ("next    meta line", 2240, 2292, 30, 1180, "tertiary"),
     ],
+    # Home is not inside a workout, so its start controls are bottom-pinned but
+    # everything above them is short and top-anchored.
+    # Home is not inside a workout, so its start controls are bottom-pinned but
+    # everything above them is short and top-anchored. Windows are taken from a
+    # row profile of the rendered screen rather than guessed — and they stop
+    # short of the week pips, which are filled accent furniture, not glyphs.
+    "home": [
+        ("title   Morning", 275, 345, 30, 1180, "primary"),
+        ("subtitle", 358, 412, 30, 1180, "secondary"),
+        ("label   Set up", 496, 542, 30, 1180, "tertiary"),
+        ("loadout kg", 568, 690, 30, 1180, "primary"),
+        ("plates", 700, 748, 30, 1180, "secondary"),
+        ("label   This week", 838, 884, 30, 1180, "tertiary"),
+        ("nudge", 952, 1008, 30, 1180, "secondary"),
+        ("run line", 1028, 1074, 30, 1180, "tertiary"),
+        ("button  start label", -580, -360, 120, 1090, "tertiary"),
+        ("other   session", -262, -206, 30, 1180, "tertiary"),
+    ],
     "card": [
         ("timer   compact", 840, 1120, 300, 910, "primary"),
         ("topic", 1170, 1230, 30, 1180, "tertiary"),

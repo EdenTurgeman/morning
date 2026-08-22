@@ -26,21 +26,22 @@ struct MorningApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // `-screen set` boots the real screen over real persisted history.
-            // Without it the W1 direction lab is still the root, because Rest,
-            // Home and Summary do not exist yet and a half-app is worse than an
-            // honest prototype.
+            // The app is Home now. `-screen set` boots straight into a workout
+            // for review, and `-screen lab` still opens the W1 direction lab —
+            // it is the record of how the look was chosen and stays runnable.
             Group {
                 if Self.requestedScreen == "set" {
-                    WorkoutHost(
+                    ReviewHost(
                         sessionKey: Self.value(after: "-session"),
                         progressOverride: Self.progressOverride,
                         slot: Self.value(after: "-slot"),
                         reps: Self.value(after: "-reps").flatMap(Int.init),
                         step: Self.value(after: "-step").flatMap(Int.init)
                     )
-                } else {
+                } else if Self.requestedScreen == "lab" {
                     PrototypeLabView()
+                } else {
+                    AppRoot()
                 }
             }
             .preferredColorScheme(.dark) // used before sunrise; dark by default

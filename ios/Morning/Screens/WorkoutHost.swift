@@ -17,7 +17,7 @@ import UIKit
  * ======================================================================== */
 
 struct WorkoutHost: View {
-    @State private var session: WorkoutSession
+    @State var session: WorkoutSession
     private let progressOverride: Double?
     /// `-slot 4.0.0` lands on one specific set. The worst content in the
     /// program is not the first set, and a screen that must never scroll has to
@@ -37,24 +37,23 @@ struct WorkoutHost: View {
     @State private var cardRests: Set<Int> = []
     @State private var drawnCards: [Int: Card] = [:]
 
+    /// The session belongs to whoever started it — `AppRoot` in the app, or a
+    /// launch argument in review. The host only renders it and reports back.
+    let onFinish: () -> Void
+    let onAbandon: () -> Void
+
     init(
-        sessionKey: String? = nil,
+        session: WorkoutSession,
+        onFinish: @escaping () -> Void = {},
+        onAbandon: @escaping () -> Void = {},
         progressOverride: Double? = nil,
         slot: String? = nil,
         reps: Int? = nil,
         step: Int? = nil
     ) {
-        let store = Store()
-        let history = store.load().history
-        let key = sessionKey ?? NextSession.proposed(from: history)
-        _session = State(
-            initialValue: WorkoutSession(
-                sessionKey: key,
-                kg: store.load().loads?[key],
-                history: history,
-                store: store
-            )
-        )
+        _session = State(initialValue: session)
+        self.onFinish = onFinish
+        self.onAbandon = onAbandon
         self.progressOverride = progressOverride
         slotOverride = slot
         repsOverride = reps
@@ -88,7 +87,7 @@ struct WorkoutHost: View {
                     isComparable: session.previousIsComparable,
                     isBeating: session.isBeatingPrevious,
                     onAdjust: { session.adjustReps(by: $0) },
-                    onLog: { session.advance() },
+                    onLog: logSet,
                     onBack: { session.back() },
                     onEnd: endSession
                 )
@@ -98,6 +97,7 @@ struct WorkoutHost: View {
         }
         .onAppear {
             Haptics.shared.prewarm()
+            Audio.shared.isEnabled = true
             // The screen must not sleep mid-set. Released on end or abandon.
             UIApplication.shared.isIdleTimerDisabled = true
             cardRests = Set(Deck.cardRestIndices(in: session.steps))
@@ -144,6 +144,16 @@ struct WorkoutHost: View {
     /// that draws on read looks tidy and is wrong twice over: SwiftUI discards
     /// state written during a view update, and a re-render would deal a second
     /// card halfway through reading the first.
+    /// Logging the last set finishes the session rather than walking off the
+    /// end of the step list.
+    private func logSet() {
+        if session.isAtEnd {
+            onFinish()
+        } else {
+            session.advance()
+        }
+    }
+
     private func drawCardIfNeeded() {
         let index = session.stepIndex
         guard cardRests.contains(index), drawnCards[index] == nil else { return }
@@ -151,9 +161,7 @@ struct WorkoutHost: View {
     }
 
     private func endSession() {
-        session.abandon()
-        Audio.shared.stop()
-        UIApplication.shared.isIdleTimerDisabled = false
+        onAbandon()
     }
 
     private var sessionEnded: some View {

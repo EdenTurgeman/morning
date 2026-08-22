@@ -140,17 +140,30 @@ token, and only building the real screen on it exposed the gap. Rebuilding the
 prototypes on the tokens was supposed to catch exactly this and did not, because
 the prototype kept its literals in the places that mattered.
 
-### The one measured exception
+### The exception that turned out to be avoidable
 
-The primary button label reads **5.84:1 at progress 0.00**, rising to 6.98:1 by
-mid-session. At twilight the accent is a mid-lightness indigo, so black-on-accent
-cannot reach 6.6:1 there.
+For three workstreams this document carried a documented exception: the primary
+button's label read **5.84:1** at twilight, where the accent is a mid-lightness
+indigo, and the reasoning was that a 68pt filled control clearing AA-large twice
+over did not justify distorting a hand-picked ramp.
 
-Left alone deliberately. 6.6:1 is the bar for *tertiary body text*; this is a
-68pt filled control whose label clears WCAG AA for large text nearly twice over.
-The alternative — lightening the accent at low progress — would distort a ramp
-whose five stops are hand-picked and load-bearing. Damaging the app's central
-idea to move a button label from 5.84:1 to 6.6:1 is the wrong trade.
+Building **Home** is what showed that reasoning was too comfortable. Home sits at
+the ramp's dark end *permanently* rather than passing through it, so its start
+button measured 5.99:1 every single time — and a second screen about to inherit
+the same exception is a signal that the exception was wrong, not that it needed
+restating.
+
+The fix costs nothing and distorts nothing:
+
+> The raw `accent` **lights**. `accentText` **writes**. `accentFill` **carries a
+> label**.
+
+`accentFill` lifts the live accent 12% toward white — enough that black on it
+clears the floor at every progress, invisible at the gold end. Measured after:
+**7.02:1** on the Set screen at twilight, **7.14:1** on Home.
+
+There is now **no text on any screen, at any progress, below 7.00:1** against a
+6.6:1 floor.
 
 ### Semantic colour, kept off the ramp
 
