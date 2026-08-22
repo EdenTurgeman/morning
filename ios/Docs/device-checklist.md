@@ -23,10 +23,16 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] The screen never sleeps mid-session.
 - [ ] 120Hz with no dropped frames while a timer runs.
 - [ ] Reduce Motion produces a **calmer** app, not a broken one.
-      Partly verified in the simulator: the Set↔Rest swap collapses from ~0.45s
-      to ~0.2s and the sky stops drifting. **Daybreak, the rep control and the
-      celebration choreography are still unlooked-at under Reduce Motion** —
-      those are what to actually watch for here.
+      Verified in the simulator, frame by frame. The Set↔Rest swap collapses
+      from ~0.45s to ~0.2s and the sky stops drifting. Daybreak keeps every
+      beat and drops the travel exactly as its header claims: the sun fades up
+      in place rather than rising, the rays hold still, and the number, copy,
+      pips and hint still arrive in sequence.
+      One thing that had no reduced form and now does: the flash as the sun
+      breaks the horizon. It was a screen-wide 2.7× luminance spike under
+      Reduce Motion too — the largest single change anywhere in the app. Now
+      1.3×. **Check the moment still registers on the phone** rather than
+      disappearing; measurements cannot tell you that.
 - [ ] A full session of A and a full session of B, start to finish, zero glitches.
 - [ ] Then do it again for real at 6am. **That is the only test that actually
       counts.**

@@ -209,9 +209,18 @@ struct Daybreak: View {
                     .opacity(ramp(elapsed, from: beats.sun, over: 0.4))
 
                 // 0.90 — a brief warm flash at the moment it breaks the horizon.
+                //
+                // Scaled right down under Reduce Motion. Every other stage here
+                // already has a reduced form — the sun fades up instead of
+                // rising, the rays hold still, nothing drifts on exit — and this
+                // one did not, so the calmer version still threw a screen-wide
+                // luminance spike. Measured off a capture: mean luminance goes
+                // 20 → 54 in about 0.2s, which is the largest single change
+                // anywhere in the app. Someone who has asked for calmer has
+                // asked for that too.
                 Rectangle()
                     .fill(Semantic.urgency)
-                    .opacity(flash(elapsed) * 0.22)
+                    .opacity(flash(elapsed) * (reduceMotion ? 0.06 : 0.22))
                     .ignoresSafeArea()
             }
         }

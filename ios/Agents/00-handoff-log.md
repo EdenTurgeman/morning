@@ -145,10 +145,16 @@ it will not, and measure it.**
   advance scheduled the next and the app walked the session on its own. Fixed —
   it fires once, from `onAppear`. If a future capture seems to skip a step, look
   there first.
-- **Reduce Motion is only verified for the swap.** I confirmed the transition
-  collapses from ~0.45s to ~0.2s, and the sky honours it in three places
-  (`PrototypeSky.swift`). Daybreak, the rep control and the celebration
-  choreography under Reduce Motion are still unlooked-at.
+- **Gave Daybreak's flash a reduced form.** Every other stage had one — the sun
+  fades up instead of rising, the rays hold still, nothing drifts on exit — and
+  the flash did not, so the calm version still threw a screen-wide 2.7×
+  luminance spike, the largest single change anywhere in the app. Now 1.3×.
+  Full motion is untouched: measured 53.9 against a 20.0 baseline before and
+  after.
+- **Reduce Motion is now verified for the swap and for Daybreak**, frame by
+  frame — it keeps every beat and drops the travel, as its header claims. The
+  sky honours it in three places (`PrototypeSky.swift`). The rep control under
+  Reduce Motion is still unlooked-at.
 - **`-autorep` originally wrapped the change in `withAnimation`, which a tap
   does not.** It was measuring a timing the product never runs. Any harness that
   drives the app has to take the same path a finger would or it measures itself.
