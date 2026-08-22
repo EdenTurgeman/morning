@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		48E7F30F07F7F38E63E0C55A /* WarmupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */; };
 		CCF825DDC6F35B071354A4E3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6A732CF5554EC40FA5747E /* GuideScreen.swift */; };
 		E7611D0998871513EC10B8C9 /* LedgerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF661806566B13880E59A82 /* LedgerScreen.swift */; };
 		1F8525BB17B2655EAB943516 /* HistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */; };
@@ -77,6 +78,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarmupScreen.swift; sourceTree = "<group>"; };
 		4E6A732CF5554EC40FA5747E /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
 		BDF661806566B13880E59A82 /* LedgerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerScreen.swift; sourceTree = "<group>"; };
 		BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryScreen.swift; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */,
 				4E6A732CF5554EC40FA5747E /* GuideScreen.swift */,
 				BDF661806566B13880E59A82 /* LedgerScreen.swift */,
 				BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */,
@@ -411,6 +414,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48E7F30F07F7F38E63E0C55A /* WarmupScreen.swift in Sources */,
 				CCF825DDC6F35B071354A4E3 /* GuideScreen.swift in Sources */,
 				E7611D0998871513EC10B8C9 /* LedgerScreen.swift in Sources */,
 				1F8525BB17B2655EAB943516 /* HistoryScreen.swift in Sources */,

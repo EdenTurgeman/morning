@@ -29,6 +29,7 @@ struct SetScreen: View {
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
+    let namespace: Namespace.ID
 
     let onAdjust: (Int) -> Void
     let onLog: () -> Void
@@ -62,13 +63,18 @@ struct SetScreen: View {
                 isComparable: isComparable,
                 isBeating: isBeating,
                 accent: palette.accent,
+                namespace: namespace,
                 onAdjust: onAdjust
             )
 
             Spacer(minLength: Space.step)
 
             DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
-                Haptics.shared.logged()
+                // `Cue.confirm` was composed and never played. The web fires it
+                // from exactly this button (`src/screens/Workout.tsx`), and the
+                // haptic alone is not the same acknowledgement when the phone
+                // is on the floor rather than in your hand.
+                Audio.shared.play(.confirm)
                 onLog()
             }
 
@@ -79,7 +85,10 @@ struct SetScreen: View {
         }
         .padding(.horizontal, Space.gutter)
         .safeAreaPadding(.bottom, Space.snug)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: progress))
+        // No backdrop here on purpose. The sky belongs to `WorkoutHost`, not to
+        // this screen: it is the one thing that must not blink when Set becomes
+        // Rest. Owned per-screen, it faded out and in with everything else and
+        // the whole display dipped to near-black mid-transition.
         // The workout deliberately clamps Dynamic Type. `§6` allows it: this
         // type is already at the top of the scale, and a screen that must never
         // scroll would break rather than help at accessibility sizes. Reading

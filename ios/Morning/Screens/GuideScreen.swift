@@ -178,10 +178,13 @@ struct BackupScreen: View {
         }
         // Restore CONFIRMS THE SWAP by naming both counts, because replacing
         // 120 sessions with 3 is the mistake this dialog exists to prevent.
-        .confirmationDialog(
+        // `alert`, not `confirmationDialog`, and the same reason as the End
+        // dialog in `WorkoutHost`: measured on iOS 26, the sheet renders as a
+        // translucent card with **no visible cancel**. On a control that
+        // replaces every session you have, "how do I say no" must be on screen.
+        .alert(
             "Replace your history?",
-            isPresented: .constant(pendingRestore != nil),
-            titleVisibility: .visible
+            isPresented: .constant(pendingRestore != nil)
         ) {
             Button("Replace", role: .destructive) {
                 if let pendingRestore {
@@ -196,11 +199,7 @@ struct BackupScreen: View {
                     + "You currently have \(data.history.count). This cannot be undone.")
             }
         }
-        .confirmationDialog(
-            "Erase everything?",
-            isPresented: $confirmingErase,
-            titleVisibility: .visible
-        ) {
+        .alert("Erase everything?", isPresented: $confirmingErase) {
             Button("Erase", role: .destructive, action: onErase)
             Button("Cancel", role: .cancel) {}
         } message: {

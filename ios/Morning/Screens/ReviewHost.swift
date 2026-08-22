@@ -30,6 +30,14 @@ struct SummaryReviewHost: View {
         )
     }
 
+    private static func dateString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = .current
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
     /// Builds the history a given tier actually needs, rather than faking a
     /// `Celebration` — the point of looking at it is to see what the real tier
     /// logic produces.
@@ -57,6 +65,30 @@ struct SummaryReviewHost: View {
             let before = make(150, kg: 7.5, ts: 1000)
             let heavier = make(120, kg: 10, ts: 2000)
             return (heavier, Celebrations.forSession(heavier, history: [before, heavier]))
+        case "week-complete":
+            // Five sessions inside the current week, so the tier that earns a
+            // burst is reachable for review at all. Without this there was no
+            // way to look at `milestoneBurst`, which is how it went unrendered.
+            let calendar = Calendar.current
+            let now = Date()
+            let week = calendar.dateInterval(of: .weekOfYear, for: now)?.start ?? now
+            var built: [SessionRecord] = []
+            for day in 0 ..< 5 {
+                let when = calendar.date(byAdding: .day, value: day, to: week) ?? now
+                built.append(
+                    SessionRecord(
+                        date: Self.dateString(when),
+                        sessionKey: day.isMultiple(of: 2) ? "A" : "B",
+                        log: [slot: 40 + day],
+                        minutes: 17,
+                        reps: 40 + day,
+                        timestamp: Int(when.timeIntervalSince1970 * 1000),
+                        kg: 7.5
+                    )
+                )
+            }
+            let last = built[built.count - 1]
+            return (last, Celebrations.forSession(last, history: built))
         case "first":
             let only = make(163, kg: 7.5, ts: 1000)
             return (only, Celebrations.forSession(only, history: [only]))
@@ -103,7 +135,10 @@ struct ReviewHost: View {
             progressOverride: progressOverride,
             slot: slot,
             reps: reps,
-            step: step
+            step: step,
+            // `-screen set` means the Set screen. The app itself starts on the
+            // warm-up; see `WorkoutHost.startAtFirstSet`.
+            startAtFirstSet: true
         )
     }
 }

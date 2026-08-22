@@ -69,13 +69,15 @@ struct AppRoot: View {
                     progress: Week.progress(history: data.history),
                     lastSession: data.history.max { $0.timestamp < $1.timestamp },
                     onStart: start,
-                    onOpen: { destination = $0 }
+                    onOpen: { destination = $0 },
+                    onLoadChange: { setLoad($0, for: nextKey) }
                 )
                 .sheet(item: $destination) { which in
                     reading(which)
                 }
             }
         }
+        .onAppear { autorunIfAsked() }
         .alert("Could not save", isPresented: .constant(saveError != nil)) {
             Button("OK") { saveError = nil }
         } message: {
@@ -128,6 +130,43 @@ struct AppRoot: View {
 
     private func load(for key: String) -> Double? {
         data.loads?[key] ?? program.first { $0.key == key }?.defaultLoad
+    }
+
+    /// `-autorun` plays a whole session from Home, hands-free, and it starts
+    /// here rather than inside the workout so the smoke test covers the real
+    /// entry path — Home, start, warm-up, every set and rest, finish, Daybreak,
+    /// Summary. `07-acceptance.md` asks for "a full session of A and a full
+    /// session of B, start to finish, zero glitches", and with no Simulator UI
+    /// on this machine there was no way to ask until now.
+    private func autorunIfAsked() {
+        let args = ProcessInfo.processInfo.arguments
+        guard args.contains("-autorun"), session == nil, finished == nil else { return }
+        let key = args.firstIndex(of: "-session")
+            .flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } ?? nextKey
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
+            guard session == nil else { return }
+            start(key)
+        }
+    }
+
+    /// The working weight for one session key.
+    ///
+    /// Written to `AppData.loads`, which the port has always read and never
+    /// written. Recorded against each finished session's `kg` as well, so
+    /// changing it never retroactively rewrites what was lifted last month —
+    /// `04-rules.md §4`.
+    private func setLoad(_ kg: Double, for key: String) {
+        var updated = data
+        var loads = updated.loads ?? [:]
+        loads[key] = kg
+        updated.loads = loads
+        do {
+            try store.save(updated)
+            data = updated
+        } catch {
+            saveError = error.localizedDescription
+        }
     }
 
     private func start(_ key: String) {

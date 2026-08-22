@@ -50,6 +50,8 @@ struct HistoryScreen: View {
                     VStack(alignment: .leading, spacing: Space.section) {
                         YearGrid(history: history)
 
+                        weekStrip
+
                         sessions
                     }
                     .padding(.horizontal, Space.gutter)
@@ -59,10 +61,10 @@ struct HistoryScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(DawnBackdrop(treatment: .atmospheric, progress: 0.12))
-        .confirmationDialog(
+        // See `WorkoutHost`: the sheet form has no visible cancel on iOS 26.
+        .alert(
             "Delete this session?",
-            isPresented: .constant(confirming != nil),
-            titleVisibility: .visible
+            isPresented: .constant(confirming != nil)
         ) {
             Button("Delete", role: .destructive) {
                 if let confirming {
@@ -106,6 +108,69 @@ struct HistoryScreen: View {
             }
         }
         .padding(.horizontal, Space.gutter)
+    }
+
+    /// The last twelve weeks, one bar each.
+    ///
+    /// `04-rules.md §7` asks for "a week strip **and** a year grid" and this
+    /// file's own header has always claimed both — only the grid existed.
+    /// `WeeklyProgress.recent` was computed for it and read by nothing.
+    ///
+    /// The grid answers "which mornings"; this answers "which weeks held
+    /// together", which is the unit the streak is actually measured in
+    /// (`§3`: weeks, not consecutive days). Complete weeks take the accent;
+    /// partial weeks are present but quiet; empty weeks are still drawn,
+    /// because a gap you can see is the point.
+    private var weekStrip: some View {
+        let week = Week.progress(history: history)
+        return VStack(alignment: .leading, spacing: Space.snug) {
+            HStack {
+                Text("Last 12 weeks")
+                    .font(TypeScale.microLabel)
+                    .foregroundStyle(Ink.tertiary)
+
+                Spacer()
+
+                if week.streak > 0 || week.longestRun > 0 {
+                    Text(runLine(week))
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(Ink.tertiary)
+                }
+            }
+
+            HStack(alignment: .bottom, spacing: 3) {
+                ForEach(week.recent, id: \.key) { summary in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(barColour(summary))
+                        .frame(height: 8 + CGFloat(min(summary.count, 7)) * 3.5)
+                        .accessibilityLabel("\(summary.key): \(summary.count) sessions")
+                }
+            }
+            .frame(height: 34, alignment: .bottom)
+        }
+        .padding(.horizontal, Space.gutter)
+    }
+
+    private func barColour(_ summary: WeekSummary) -> Color {
+        if summary.complete {
+            return DawnPalette(progress: 0.55).accent
+        }
+        // Bound to a local because `empty_count` fires on `summary.count == 0`.
+        // It is a tally of sessions, not the size of a collection, so `isEmpty`
+        // is not a thing it has — a false positive worth sidestepping rather
+        // than disabling the rule for the file.
+        let sessions = summary.count
+        return sessions > 0 ? Ink.primary.opacity(0.28) : Ink.primary.opacity(0.10)
+    }
+
+    /// Same rule as the home screen's: the longest run stays visible after the
+    /// current streak drops to zero.
+    private func runLine(_ week: WeeklyProgress) -> String {
+        let unit = week.streak == 1 ? "week" : "weeks"
+        if week.streak > 0 {
+            return "\(week.streak) \(unit) running"
+        }
+        return "Best run: \(week.longestRun) weeks"
     }
 
     /// Not "no sessions yet". The beginning of a record.

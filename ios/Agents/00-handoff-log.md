@@ -4,9 +4,295 @@ Append-only, newest at the top. One agent works this clone at a time; this file
 is the only thing standing between the next agent and re-deciding what you
 already decided.
 
-The **Landmines** field is worth more than the summary of what you built.
+The - **The threshold delay had to clear the digit ROLL, not visual fusion.** The
+  counter recolours over 0.18s but `contentTransition(.numericText)` is not
+  finished until ~0.24s. A 0.09s delay — chosen from the perceptual fusion
+  threshold — still put the sentence first. It is 0.22s.
+- **Two `matchedGeometryEffect` sources is a silent conflict.** Both the counter
+  and the ring declared the default `isSource: true`. SwiftUI does not warn —
+  the device log is clean — it just picks one, and it picked the counter, which
+  is why exactly one direction morphed. The counter is now the source
+  permanently and the ring follows. Verified that a settled Rest screen with no
+  source in the tree renders correctly.
+- **Daybreak was reviewed frame by frame and needs nothing.** It runs its
+  documented choreography exactly: the horizon draws outward from the centre
+  with nothing else on screen, then the sun rises and overshoots, the rays
+  bloom, the flash lands, the number springs in, the pips stagger, the copy
+  follows. The anticipation beat the web version lacked is real and it works.
+
+**Landmines** field is worth more than the summary of what you built.
 
 ---
+
+## 2026-08-22 · Quality pass — the Set↔Rest transition · Claude Opus 5
+
+**Workstream:** quality pass over W4/W5, on `ios-port/quality-pass`
+
+**What I did**
+- **Built the Set↔Rest transition, which did not exist.** The app swapped the
+  two screens instantly. `02-design-brief.md §7` asks for `matchedGeometryEffect`
+  by name and the W1 prototype had already proved counter→ring continuity; none
+  of it had been wired into the real screens. The rep counter and the rest ring
+  now share `WorkObject.id` in a namespace owned by `WorkoutHost`, and every step
+  change routes through one `advance(_:)` that wraps the mutation in
+  `Motion.stage`.
+- **Hoisted `DawnBackdrop` out of `SetScreen` and `RestScreen` into the host.**
+- **Added `Motion.screenSwap`,** an asymmetric fade replacing the default
+  cross-fade.
+- **Found and fixed a stray duplicate `.onAppear` on `WorkoutHost`** that set
+  `isIdleTimerDisabled = false` and called `Audio.shared.stop()` immediately on
+  arrival. The screen would have slept mid-session and the cues would have been
+  silent. Moved to `sessionEnded`. This is exactly the bug the device checklist
+  lists as "the screen never sleeps mid-session" — it would have failed, on the
+  phone, at 6am, and nothing in the simulator would ever have shown it.
+- **Added `ios/Tools/frames.swift`**, `-autoplay` and `-autorep`.
+- **Verified Reduce Motion for the first time.**
+- **Made crossing last time's number two beats instead of one.** The threshold
+  haptic is two events 45ms apart; the screen was firing one. Worse, it fired in
+  the wrong order — the sentence underneath the counter was fully legible 0.12s
+  BEFORE the digit began to move.
+- **Made the work object travel in both directions.** Set→Rest morphed;
+  Rest→Set only cross-faded.
+- **Stopped the study card's answer landing on top of the question.** Three
+  layers of legible text for ~150ms on every card reveal.
+
+- **Made a rest that reaches zero move on, and gave the last five seconds a
+  visual.** Two regressions against the web build, found by watching a 20-second
+  myo rest run out. The rest sat on "0 SEC" forever waiting for a tap, and the
+  screen did nothing over the last five seconds while the audio and the haptics
+  both ramped.
+
+- **Built the warm-up screen, which W5 deferred and nobody came back for.** Step
+  0 of both sessions is a 90-second warm-up with cues. `WorkoutHost` called
+  `goToFirstSet()` past it on every session under a comment saying "until it
+  exists" — so the app silently dropped a programmed step. And the step stayed
+  reachable: `back()` from the first set landed on it, the `Group` had no branch
+  for a timer, and it fell through to a placeholder reading **"Session complete
+  / Summary and Daybreak are W7."** A workout that had not started announcing it
+  was over, quoting a workstream number, one tap in.
+- **Fixed `minutes` flooring at 0 instead of 1.** `src/hooks/useWorkout.ts` does
+  `Math.max(1, …)`. A session finished inside thirty seconds recorded a duration
+  the web build cannot produce, in a file the web build reads back through
+  Restore. Test added.
+- **Removed `ScaffoldView`.** Dead — only its own `#Preview` referenced it — and
+  its copy said "no screens built yet", which stopped being true at W4.
+
+- **"End" had no confirmation.** The web wraps it in a `Confirm` — "End this
+  session? / Nothing will be saved — not even the sets you've already logged." —
+  and the port called `onAbandon()` straight through. One tap of a control in
+  the corner of every workout screen discarded the session, silently, no undo.
+  The acceptance test for the rule is named `…AfterAConfirm` and its comment
+  refers to "the confirmation copy"; that copy existed only in the web build.
+- **Every destructive confirmation is now an `alert`.** Having built the End
+  dialog I looked at it, and on iOS 26 `confirmationDialog` renders as a
+  translucent card over the content with **no visible cancel**. Measured on a
+  settled frame — I checked it was settled rather than mid-animation, because it
+  looks mid-animation. Restore, Erase and Delete had the same problem by
+  construction.
+- **Moved the primary action's haptic into `DawnPrimaryButton`.** Four of five
+  call sites wrote it out and Guide's Export forgot, so the one primary action
+  that opens a file picker was the one that said nothing to the hand. Tapping
+  the summary card had the mirror-image bug: its closure set state directly
+  instead of calling `reveal()`, so only the auto-reveal ever fired the haptic.
+
+### Completeness pass — Eden asked "are all the behaviours implemented?"
+
+They were not. Audited `04-rules.md` rule by rule against the port, plus every
+web component and every model property no view reads. Five gaps, one large:
+
+- **There was no weight picker at all.** `AppData.loads` was read and never
+  written. `Plates.swift`'s own header says "once the weight became adjustable
+  the breakdown had to be derived" — the maths was built for a control that
+  never shipped, and the Guide tells the user to "change it on the home screen".
+  Everything downstream was therefore dead too: the `weight-changed` celebration
+  tier and the rep control's "different weight now" could never fire, because
+  the weight could never change. Home has a picker now, bounded by
+  `Plates.maximum`, and there is a test walking the whole chain.
+- **The threshold played no tone.** `04-rules.md §1` says to give the emotional
+  centre "haptic detent, colour, motion, sound" and the port had three of four.
+  `Cue.beatIt` was composed, tested and never played; `RepDial.tsx` fires its
+  equivalent from exactly that spot.
+- **Logging a set played no tone.** `Cue.confirm`, same story.
+- **The celebration did not differ by tier.** `Celebration.milestoneBurst` and
+  `.rays` were computed, asserted by tests, and read by no view — so a lifetime
+  milestone and a plateau got identical choreography, though `04-rules.md §5`
+  has a column for each. Rays are gated on the tier now, and the burst is
+  **more light rather than confetti**: the web throws paper (`src/lib/burst.ts`)
+  and Eden's instruction is to take the behaviour, not the mechanism. Paper in a
+  sunrise would be a second visual language and the wrong one, so the sun flares
+  wider and harder instead. Measured across the three: plateau 20.1, record
+  22.5, week-complete 23.4.
+- **History had no week strip.** `§7` asks for "a week strip **and** a year
+  grid" and this file's own header always claimed both. `WeeklyProgress.recent`
+  was computed for it and read by nothing. The grid answers "which mornings";
+  the strip answers "which weeks held together", which is the unit the streak is
+  actually measured in.
+- `-tier week-complete` is new, because there was no way to reach a bursting
+  tier at all — which is how `milestoneBurst` went unrendered without anyone
+  noticing.
+
+**How to find this class of bug:** list every stored property on a model type
+and grep the view layer for a read of it. Two of `Celebration`'s seven fields
+are dead, and they are precisely the two that make the reward differ by what you
+achieved. The same sweep is how the weight picker surfaced.
+
+**Read the web source for behaviour, not just for reasoning.** Both of those
+were one grep away the whole time. `src/hooks/useCountdown.ts` wires
+`onComplete` to `onAdvance` and carries a `setInterval` beside its rAF loop
+specifically so "a rest could [not] hang forever on a phone that decided not to
+paint"; `src/components/Ring.tsx` computes an `urgency` term over the last five
+seconds and calls it peripheral warning. CLAUDE.md rule 2 says the source wins
+on *what*. On the myo rest the port was telling the user "The 20-second rest IS
+the mechanism — don't stretch it" while stretching it indefinitely.
+
+**The one bug behind three of those:** `@ViewBuilder` branch swaps do not
+animate here. `.transition(.opacity)` on a branch, with or without a delayed
+`.animation(_:value:)`, had no effect in either the rep comparison line or the
+study card — the new content just appeared, instantly, at full opacity. Both are
+now opacity on a view that never leaves the tree, which is the primitive that
+honours a delay. **If you add a third conditional that needs to animate, assume
+it will not, and measure it.**
+
+**Decisions taken**
+- **Motion is now reviewed off video, not screenshots.** Backgrounded
+  `simctl io screenshot` calls each take ~0.5s to start, so their timestamps
+  drift past whatever you are trying to catch — six of them "0.1s apart" landed
+  on six identical frames and I spent a while believing the transition was
+  broken when it was the capture that was. `simctl io recordVideo` plus
+  `AVAssetImageGenerator` with zero tolerance gives exact frames at exact times.
+  There is no ffmpeg on this machine and none is needed.
+- **The transition was tuned against two measurements, not taste.** Consecutive
+  frame difference locates it; mean luminance across it catches the failure a
+  contact strip hides. Three versions:
+
+  | Version | Furniture | Mean luma across the swap |
+  |---|---|---|
+  | Symmetric cross-fade | both screens legible at ~50% for 0.2s — mush | — |
+  | Fade-through, sky per-screen | clean | **47 → 7 → 40. A blackout.** |
+  | Fade-through, sky hoisted | clean | 50 → 22 → 40. A breath. |
+
+  The middle row is why the sky moved to the host. Fading the furniture is
+  right; fading the sky with it made the whole display blink 25+ times a
+  session.
+- **The overlap window is deliberate, not sloppy.** Zero overlap reads as a cut
+  and kills the morph — the counter has to still be there when the ring starts.
+  Insertion is delayed 0.04s over 0.30s against a 0.24s removal: enough
+  separation that the cues and buttons never stack legibly, enough overlap that
+  14 becomes 60 in one motion.
+
+**Landmines**
+- **`-autoplay` was chained and I did not notice for a while.** I had copied the
+  block into `.onChange(of: session.stepIndex)` as well as `.onAppear`, so each
+  advance scheduled the next and the app walked the session on its own. Fixed —
+  it fires once, from `onAppear`. If a future capture seems to skip a step, look
+  there first.
+- **Gave Daybreak's flash a reduced form.** Every other stage had one — the sun
+  fades up instead of rising, the rays hold still, nothing drifts on exit — and
+  the flash did not, so the calm version still threw a screen-wide 2.7×
+  luminance spike, the largest single change anywhere in the app. Now 1.3×.
+  Full motion is untouched: measured 53.9 against a 20.0 baseline before and
+  after.
+- **Reduce Motion is now verified for the swap and for Daybreak**, frame by
+  frame — it keeps every beat and drops the travel, as its header claims. The
+  sky honours it in three places (`PrototypeSky.swift`). The rep control under
+  Reduce Motion has one too now, and it needed fixing: the reduced
+  `Motion.threshold` had **no delay at all**, so the two beats collapsed back
+  into one for exactly the people who had asked for calmer. Reduce Motion means
+  less movement, not less information, and the two beats are the information.
+  It is 0.10s now — no digit roll to clear, so it only has to beat the ~80ms at
+  which two visual events fuse. Measured: 0.12s apart, against 0.26s at full
+  motion.
+- **`-autorep` originally wrapped the change in `withAnimation`, which a tap
+  does not.** It was measuring a timing the product never runs. Any harness that
+  drives the app has to take the same path a finger would or it measures itself.
+- **My first two threshold measurements had both sample bands inside the
+  counter**, so "the sentence" I was timing was the digits. Band positions now
+  come from a row scan of the actual frame. If a measurement says something
+  surprising, check what it is pointing at before believing it.
+- Daybreak's first ~100ms is a grey wash when reached by launch argument. That
+  is the white launch screen fading out, not Daybreak — arriving from a workout
+  the app is already dark. Do not "fix" it.
+- The luminance dip is 50 → 22. I believe that reads as a breath rather than a
+  flicker, but nobody has seen it on a real display in a dark room. It is on the
+  device checklist now.
+
+- **Killed a fault storm in the audio session.** Found by running a whole
+  session hands-free and reading the device log: 87 `AVAudioSession Hang Risk`
+  faults, two per second, at exactly the five countdown seconds, while
+  `TimelineView(.animation)` drives the ring.
+
+  **My first fix was correct and did nothing, and I published a wrong number
+  before catching it.** I moved `setCategory`/`setActive` off the main actor —
+  right, but not the cause. I then compared a full session's 87 against a single
+  rest's 12 and wrote "87 down to 12" into the commit, the PR and two docs.
+  Session B, with the fix in, logged **122 over 10 rests — 12.2 per rest against
+  A's 12.4.** No change at all.
+
+  The real source is `AVAudioEngine.start()`, which activates the session
+  internally on the main thread and was being retried on **every cue**, because
+  the headless simulator has no audio route (`error -10879`) so the engine never
+  starts and never stops trying. Bounding the retry to one attempt per
+  activation: **1 fault per rest.**
+
+  **Normalise before you compare.** Both sessions were sitting there; I used one
+  of them and not the other.
+- **Handled audio interruptions.** The bounded retry needed it: a phone call
+  mid-rest deactivates the session and stops the engine, and without clearing
+  the flags the retry latches and the rest of the session is silent. That is a
+  device-checklist scenario, so it would have been found — on the phone, at 6am.
+- **Added `-autorun`**, which plays a session from Home with no taps: start,
+  warm-up, every set and rest, finish, Daybreak, Summary. `07-acceptance.md`
+  asks for "a full session of A and a full session of B, start to finish, zero
+  glitches" and there had been no way to ask. It only works because the warm-up
+  and the rests now advance themselves — the flag and those fixes found each
+  other.
+
+**Looked at and found sound, so nobody re-checks them.** All four celebration
+tiers on real fixtures (first / record / plateau / weight-changed) — every
+headline states something true, every eyebrow adds to its headline, and the
+"reps" unit label still keeps "150" from reading as part of "Reps have stopped
+moving." The three reading screens at six months. The empty states, which
+`CLAUDE.md` calls the normal case on day one: History and Ledger both explain
+what the screen will *become* rather than announcing that it is empty, and
+Home's week meter deliberately says nothing at 0 of 5 — there is a comment
+explaining why, and it is right.
+
+**What the behaviour diff found, and what it cleared.** I went through every
+`useEffect`, timer and listener in `src/` against the port. Cleared: `back()` is
+guarded (the port's `move(to:)` clamps to `steps.indices`), a double-tap on the
+final Done cannot write two records (`AppRoot.finish` guards and runs to
+completion on the main actor), the status bar needs no tint because the zenith
+stays dark at every progress, and `unlockAudio` is a web-only autoplay
+workaround. Still open, and Eden's call rather than mine: the web sets an **app
+icon badge** with the sessions still owed this week (`setWeekBadge`). The native
+equivalent needs notification permission, which `05-platform.md §7` says to
+propose. **That belongs in W12.**
+
+The one deliberate divergence I left: the web's `progress` is `i / steps.length`
+and the port's is `stepIndex / (count - 1)`, so the port's dawn actually
+completes on the final step instead of stopping at 0.95. That is form, and the
+brief wants the dawn to finish.
+
+**Assertions:** 55 of 57 passing (2 skipped — both device-only)
+
+**Both sessions now run start to finish.** `-autorun` plays one from Home with
+no taps at all. A took 450s and finished on "Same as your last A / 209 reps /
+Dead level."; B took 518s and "Same as your last B / 249 reps / Dead level."
+Zero SwiftUI or layout complaints across 1,683 lines of device log. That is the
+first time this app has run end to end, and it is only possible because the
+warm-up and the rests now advance themselves.
+
+**Next:** W11 is the device pass and is still blocked on hardware — but the
+checklist is now much more specific about what to look for, and three items on
+it are new because of this pass. W12 needs Eden's yes per item, and it has one
+more candidate than it did: the web's app-icon badge.
+
+**Two things waiting on Eden, both written up above rather than decided here:**
+the app-icon badge (needs notification permission, `05-platform.md §7` says
+propose), and whether card text should scale with Dynamic Type given that
+`answer`'s 14.5pt is tuned to the seven-line stress case on a screen that cannot
+scroll.
+
 
 ## 2026-08-22 · Figures, control boundaries, accessibility verification · Claude Opus 5
 

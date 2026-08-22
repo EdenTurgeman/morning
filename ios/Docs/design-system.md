@@ -264,6 +264,59 @@ to web apps.
   scroll would break the layout rather than help. Reading screens — Guide,
   cards, History — support the accessibility sizes instead. That split is
   deliberate and is not an accessibility shortcut.
+- **One divergence inside that split, named rather than left silent.**
+  `02-design-brief.md §6` lists **cards** among the reading surfaces. Card text
+  does not currently scale, on a rest or on the summary, and there are two
+  separate reasons — only one of which is deliberate.
+
+  The deliberate one: the study card lives on the Rest screen, and that screen
+  must never scroll. At an accessibility size a seven-line answer would push the
+  timer or the controls off the bottom, and `04-rules.md §6` is unambiguous that
+  you must never miss the timer because you were thinking. So the rest card is
+  clamped with the workout.
+
+  The incidental one: `TypeScale.question` and `TypeScale.answer` are
+  `Font.system(size:)` — **fixed points, not text styles** — so they would not
+  scale even where nothing clamps them, which is the summary card. Half the
+  scale is built on text styles (`body`, `label`, `microLabel`, `action`) and
+  scales properly; `counter`, `title`, `question` and `answer` are fixed.
+
+  For counters and titles fixed is right and intended. For the summary card it
+  is not, and the fix is not free: `answer`'s 14.5pt is tuned to the seven-line
+  stress case on a screen that cannot scroll, and the nearest scaling style
+  (`.subheadline`, 15pt) is half a point larger. **Left as it is, deliberately,
+  and flagged rather than quietly changed** — moving type on the most
+  constrained screen in the app is Eden's call, not a tidy-up.
+- **Where the clamps actually are**, because "supports Dynamic Type" and "does
+  not clamp" are not the same claim:
+
+  | Screen | Scrolls | Clamp |
+  |---|---|---|
+  | Set, Rest, Warm-up | never | `.large` |
+  | Guide | yes | `…accessibility3` |
+  | History, Ledger | yes | none |
+  | Home, Summary, Backup | no | none |
+
+  The last row neither scrolls nor clamps, so it relies on the layout holding at
+  whatever the system asks for. **Measured, at
+  `UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge`:**
+
+  | Screen | Pixels changed vs default | Verdict |
+  |---|---|---|
+  | Guide | 16.1% | scales, scrolls, fine |
+  | Summary | 2.3% | nothing clipped, headroom to spare |
+  | Home | 2.0% | nothing clipped |
+
+  Home and Summary are safe — but not because they scale gracefully. They
+  barely scale at all, because their type is almost entirely fixed sizes. That
+  is the right answer for a rep counter and the wrong one for a card, which is
+  the point above.
+
+  To reproduce: append
+  `-UIPreferredContentSizeCategoryName UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge`
+  to any launch. In zsh, pass the arguments separately — an unquoted variable
+  holding the whole string is **not** word-split, and the app silently falls
+  back to Home, which is a very convincing way to measure the wrong screen.
 
 ---
 
@@ -370,10 +423,73 @@ form you have to remember to write is one you will forget to write.
 | Token | Full | Reduced | Why |
 |---|---|---|---|
 | `Motion.rep` | easeOut 0.18s | linear 0.08s | Must feel like the digit moved because you pushed it |
-| `Motion.commit` | spring 0.32s, bounce 0.24 | linear 0.01s | Something was committed; a little weight |
+| `Motion.commit` | spring 0.32s, bounce 0.24 | linear 0.01s | Something was committed; a little weight — **defined but unused in the product**, see below |
 | `Motion.stage` | easeInOut 0.44s | linear 0.12s | Set ↔ Rest, carrying the work object across |
 | `Motion.reveal` | spring 0.50s, bounce 0.12 | easeOut 0.18s | The answer arriving |
 | `Motion.timerResize` | spring 0.55s, bounce 0.10 | easeOut 0.18s | The timer yielding its space to the card |
+| `Motion.screenSwap` | out 0.24s / in 0.30s after 0.04s | opacity 0.12s | How a screen leaves and the next arrives |
+| `Motion.threshold` | easeOut 0.20s after 0.22s | linear 0.12s | The second beat of passing last time's number |
+| `Motion.answer` | easeOut 0.28s after 0.34s | easeOut 0.16s after 0.10s | The answer's ink, once the card has stopped growing |
+
+**`Motion.commit` is currently only used by the W1 lab.** Logging a set moves
+the whole work object instead, which is a bigger gesture than a pulse and does
+the same job. The token stays because it is part of the vocabulary and the next
+screen that commits something will want it — but the table above would
+otherwise be claiming behaviour the app does not have.
+
+### Every reduced form, and the one that was wrong
+
+`Motion.answer` and `Motion.threshold` both keep their **delay** under Reduce
+Motion, shortened rather than dropped. That is deliberate and it is the rule the
+others should be read against: Reduce Motion asks for less movement, not less
+information, and in both cases the gap between the two events *is* the
+information — the number then what it means, the card then the words.
+
+`threshold`'s reduced form originally had no delay at all, so the two beats
+collapsed into one frame for exactly the people who had asked for calmer. Caught
+by measuring rather than by reading it.
+
+### The three that are delays, and why each number is what it is
+
+Every one of these was measured off a 60fps capture rather than chosen, and in
+each case the first value I picked from first principles was wrong.
+
+**`screenSwap` is asymmetric because a symmetric cross-fade is mush.** Both
+screens sat near half opacity for ~0.2s, which put the Set screen's cues and
+Done button directly on top of the Rest screen's controls. The overlap window
+is deliberately non-zero, though: the work object crosses it, and the counter
+becoming the ring is the continuity worth protecting.
+
+**`threshold`'s 0.22s clears the digit ROLL, not perceptual fusion.** The
+counter recolours over 0.18s but `contentTransition(.numericText)` is not
+finished until ~0.24s. A 0.09s delay — the figure vision needs to read two
+events as separate — still had the sentence fully legible while the digit was
+mid-roll.
+
+**`answer`'s 0.34s clears the card's growth.** The layout change is the point,
+so the card still grows immediately; only the ink waits.
+
+**None of these will animate from a `@ViewBuilder` branch swap.** `.transition`
+on a branch, with or without a delayed `.animation(_:value:)`, does nothing —
+the content simply appears. Both the rep comparison line and the study card now
+use opacity on a view that never leaves the tree. If you add a fourth, assume
+it will not animate and measure it.
+
+### The sky does not participate
+
+`DawnBackdrop` belongs to `WorkoutHost`, not to the screens. Owned per-screen it
+faded with everything else and mean luminance across a Set→Rest swap went
+47 → 7 → 40 — a full blackout, 25+ times a session. Held continuous underneath,
+the same swap measures 50 → 22 → 40.
+
+### The countdown's last five seconds
+
+`urgency` ramps 0 → 1 over the final five seconds and drives the ring's glow
+(opacity 0.20 → 0.65) and its shadow (8 → 22px). Ported from
+`src/components/Ring.tsx`, which names what it is for: peripheral warning. The
+audio and the haptics both ramped over this window and the screen did nothing,
+which is backwards — the phone is 1.5m away and the ring going hot is the part
+caught out of the corner of the eye.
 
 **Fast where it's in the way, slow where it's the point.** Rep and stage
 transitions are quick because you are mid-workout. Reveal and resize are slower
@@ -409,6 +525,19 @@ colour and progress reading survives. Calmer, not broken.
 **The web app has no haptics at all** — its `buzz()` is a silent no-op on iOS.
 Every tap in the shipped app is mute to the hand, which makes this the single
 largest available improvement in felt quality.
+
+**The primary action's haptic lives in `DawnPrimaryButton`, not at its call
+sites.** It used to be written out by each caller and four of the five
+remembered; Guide's Export did not, so the one primary action that opens a file
+picker was the one that said nothing to the hand. Tapping the summary card had
+the same shape of bug from the other direction — its closure set state directly
+instead of calling `reveal()`, so only the fourteen-second auto-reveal ever
+produced the reveal haptic, and the one case where it genuinely *is* an action
+you took was the silent one.
+
+The W1 lab opts out with `haptic: false`, because it fires its own
+treatment-varying haptic and two at once would make every treatment feel
+identical.
 
 The vocabulary is data in `DesignHaptics.swift`, separate from the engine that
 plays it, so the design can be read without reading playback code.
@@ -478,6 +607,37 @@ be actively misleading.
 deactivated after with `.notifyOthersOnDeactivation` — an always-active session
 ducks music for the whole twenty minutes, which is exactly the bug Eden reported
 against the web build as *"working, and not letting me play music"*.
+
+**The session comes up when the workout opens, not when a cue plays.** A full
+hands-free session run produced this the first time a cue sounded:
+
+    AVAudioSession Hang Risk — this method can lead to UI unresponsiveness
+    if called on the main thread.
+
+`activate()` was running `setCategory` and `setActive` on the main actor on
+*every* cue — five times per rest — and the moment it landed on was the worst
+available: the last five seconds of a rest, while `TimelineView(.animation)`
+drives the ring. `07-acceptance.md` asks for no dropped frames while a timer
+runs, and this was a synchronous IPC call into `mediaserverd` in exactly that
+window.
+
+`Audio.prepare()` now runs once when a workout opens, and the session work
+happens off the main thread.
+
+**That alone changed nothing measurable, and it took a second full session to
+notice.** Session A logged 87 faults over 7 rests; session B, with the fix,
+logged 122 over 10 — 12.4 per rest against 12.2. The dominant source was never
+our own session calls. It was `AVAudioEngine.start()`, which activates the
+session internally, on the main thread, and was being retried on **every cue**
+because the headless simulator has no audio route (`error -10879`) so the engine
+never starts and never stops trying.
+
+Bounding that retry to one attempt per activation takes it to **1 fault per
+rest**. On a device the engine starts once and there should be none.
+
+An interruption — a phone call mid-rest — clears the flags so the next cue
+rebuilds session and engine, because otherwise a bounded retry latches and the
+rest of the session goes silent.
 
 **The countdown's last five seconds must be one duck, not six pumps.** Six cues
 share a release deadline that each one pushes forward, so the music dips once at
