@@ -24,6 +24,13 @@ import SwiftUI
 // ---------------------------------------------------------------------------
 
 /// A pose in normalised bay coordinates: x across the bay, y down it.
+/// The floor a movement is performed against.
+struct FigureGround {
+    let fromX: Double
+    let toX: Double
+    let y: Double
+}
+
 struct FigurePose {
     /// Centre of the head.
     var head: (Double, Double)
@@ -38,7 +45,7 @@ struct FigurePose {
     /// Where a dumbbell bar sits, if the movement is loaded.
     var dumbbells: [(Double, Double)] = []
     /// A floor line, for movements done lying down or on the hands.
-    var ground: (Double, Double, Double)?
+    var ground: FigureGround?
     /// Rotation of the torso mass, in degrees, for bent-over positions.
     var lean: Double = 0
 }
@@ -221,9 +228,9 @@ struct FigureRenderer {
         }
     }
 
-    private func drawGround(_ ground: (Double, Double, Double), into context: inout GraphicsContext) {
-        let start = cgPoint((ground.0, ground.2))
-        let end = cgPoint((ground.1, ground.2))
+    private func drawGround(_ ground: FigureGround, into context: inout GraphicsContext) {
+        let start = cgPoint((ground.fromX, ground.y))
+        let end = cgPoint((ground.toX, ground.y))
         var path = Path()
         path.move(to: start)
         path.addLine(to: end)

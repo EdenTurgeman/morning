@@ -190,7 +190,7 @@ private struct ExerciseFigure: View {
             legs: [
                 [(0.62, 0.53 + drop * 0.7), (0.75, 0.64 + drop * 0.4), (0.86, 0.76)],
             ],
-            ground: (0.16, 0.94, 0.80)
+            ground: FigureGround(fromX: 0.16, toX: 0.94, y: 0.80)
         )
     }
 
@@ -230,7 +230,7 @@ private struct ExerciseFigure: View {
                 [(0.530, 0.72), (0.542, 0.82), (0.548, 0.90)],
             ],
             dumbbells: [hand, mirrored(hand)],
-            ground: (0.10, 0.90, 0.92)
+            ground: FigureGround(fromX: 0.10, toX: 0.90, y: 0.92)
         )
     }
 
