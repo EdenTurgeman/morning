@@ -59,6 +59,13 @@ struct RepControl: View {
         Text(reps, format: .number)
             .font(TypeScale.counter())
             .monospacedDigit()
+            // A three-digit count truncated to "3…" between the two 82pt
+            // controls. Targets top out at 25 reps so three digits should never
+            // arrive honestly — but the control reports a delta and has no
+            // upper bound, so leaning on + reaches it, and a counter that
+            // ELIDES its own value is the worst possible way to find that out.
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
             .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: direction < 0))
             .foregroundStyle(isBeating ? Semantic.threshold : Ink.primary)
             .frame(minWidth: 150)

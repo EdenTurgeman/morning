@@ -28,7 +28,10 @@ struct SummaryScreen: View {
     let card: Card?
     let onDone: () -> Void
 
-    @State private var showingDaybreak = true
+    /// `-screen summary -skip-daybreak` shows what is underneath. Daybreak
+    /// waits for a tap, and no tap reaches this app in the development
+    /// environment — without this the summary is unreviewable.
+    @State private var showingDaybreak = !ProcessInfo.processInfo.arguments.contains("-skip-daybreak")
     @State private var cardRevealed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -66,6 +69,17 @@ struct SummaryScreen: View {
                     .font(TypeScale.counter(76))
                     .monospacedDigit()
                     .foregroundStyle(Ink.primary)
+
+                // The unit is not decoration here. Without it "150" sits
+                // directly above "Reps have stopped moving." and the two scan
+                // as one sentence — "150 reps have stopped moving" — which is
+                // a different and wrong claim. Daybreak has always had it; the
+                // summary underneath did not, and nobody had looked at the
+                // summary underneath.
+                Text("reps")
+                    .font(TypeScale.body)
+                    .foregroundStyle(Ink.secondary)
+                    .padding(.bottom, Space.snug)
 
                 Text(celebration.headline)
                     .font(TypeScale.title)
