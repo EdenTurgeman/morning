@@ -80,6 +80,12 @@ The **Landmines** field is worth more than the summary of what you built.
   "Go to failure" and "mechanism" — the two that matter most.
 
 **Landmines**
+- **There is no `Simulator.app` on this machine** — only the headless `simctl`
+  runtime. Screenshots and launches work; synthesized touches have nothing to be
+  delivered to, so a HOME press changes 0.9% of pixels and every tap is a no-op.
+  I nearly attributed that to a bug in the rep control. Interaction is verified
+  through the model in `SessionLifecycleAcceptanceTests`; the SCREEN for a given
+  state is reached with `-reps`, `-slot` and `-progress` instead of by tapping.
 - **A token can record a number it does not deliver.** `Ink.tertiary` was
   written down as 0.62 from measurements of a prototype that was using 0.72 in
   the places that mattered. Rebuilding the prototypes on the tokens was supposed

@@ -22,8 +22,21 @@ struct WorkoutHost: View {
     /// program is not the first set, and a screen that must never scroll has to
     /// be checked against its worst case rather than its first.
     private let slotOverride: String?
+    /// `-reps 15` sets the counter on arrival.
+    ///
+    /// This exists because there is no Simulator UI on this machine — only the
+    /// headless `simctl` runtime — so synthesized touches have nothing to be
+    /// delivered to and the threshold state cannot be reached by tapping. The
+    /// state machine is covered by the acceptance tests; this is how the SCREEN
+    /// for that state gets looked at and measured.
+    private let repsOverride: Int?
 
-    init(sessionKey: String? = nil, progressOverride: Double? = nil, slot: String? = nil) {
+    init(
+        sessionKey: String? = nil,
+        progressOverride: Double? = nil,
+        slot: String? = nil,
+        reps: Int? = nil
+    ) {
         let store = Store()
         let history = store.load().history
         let key = sessionKey ?? NextSession.proposed(from: history)
@@ -37,6 +50,7 @@ struct WorkoutHost: View {
         )
         self.progressOverride = progressOverride
         slotOverride = slot
+        repsOverride = reps
     }
 
     var body: some View {
@@ -69,6 +83,9 @@ struct WorkoutHost: View {
                 session.go(toSlot: slotOverride)
             } else if session.currentSet == nil, !session.isAtEnd {
                 session.goToFirstSet()
+            }
+            if let repsOverride {
+                session.adjustReps(by: repsOverride - session.draftReps)
             }
         }
     }

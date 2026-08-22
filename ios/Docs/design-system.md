@@ -159,10 +159,16 @@ with whatever the accent happens to be at that moment.
 
 | Token | Colour | Means |
 |---|---|---|
-| `Semantic.threshold` | `#33D399` mint | You passed last time's number |
+| `Semantic.threshold` | `#59E0AD` mint | You passed last time's number |
 | `Semantic.urgency` | `#FFC257` amber | The 20-second myo rest — which *is* the training stimulus |
 
-Mint is worth a note. Held at 2m, the words *"Beating last time's 13"* have gone
+Mint was lifted from `#33D399` after measurement: as a 92pt numeral it read
+6.03:1 — comfortably fine for text that size, but under this app's own floor.
+Ten percent more luminance clears it at 6.95:1 without the colour becoming
+anything other than mint, which is better than carrying a second documented
+exception.
+
+Mint is worth a second note. Held at 2m, the words *"Beating last time's 13"* have gone
 soft while the mint is still unmistakable. Colour outliving text is the correct
 order for this to degrade in, because the state matters more than the sentence.
 
