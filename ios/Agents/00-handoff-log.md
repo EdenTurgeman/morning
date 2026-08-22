@@ -194,6 +194,16 @@ it will not, and measure it.**
   and the rests now advance themselves — the flag and those fixes found each
   other.
 
+**Looked at and found sound, so nobody re-checks them.** All four celebration
+tiers on real fixtures (first / record / plateau / weight-changed) — every
+headline states something true, every eyebrow adds to its headline, and the
+"reps" unit label still keeps "150" from reading as part of "Reps have stopped
+moving." The three reading screens at six months. The empty states, which
+`CLAUDE.md` calls the normal case on day one: History and Ledger both explain
+what the screen will *become* rather than announcing that it is empty, and
+Home's week meter deliberately says nothing at 0 of 5 — there is a comment
+explaining why, and it is right.
+
 **What the behaviour diff found, and what it cleared.** I went through every
 `useEffect`, timer and listener in `src/` against the port. Cleared: `back()` is
 guarded (the port's `move(to:)` clamps to `steps.indices`), a double-tap on the
