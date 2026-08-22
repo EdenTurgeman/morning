@@ -194,7 +194,11 @@ private struct RestTimer: View {
             }
         }
         .frame(width: size, height: size)
-        .matchedGeometryEffect(id: WorkObject.id, in: namespace)
+        // The counter is the source and the ring follows it, permanently.
+        // Both declaring themselves the source is a conflict SwiftUI resolves
+        // silently and inconsistently — it picked the counter, so Set→Rest
+        // morphed and Rest→Set only cross-faded.
+        .matchedGeometryEffect(id: WorkObject.id, in: namespace, isSource: false)
         .animation(Motion.timerResize(reduceMotion: reduceMotion), value: compact)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(Int(ceil(remaining))) seconds remaining")
