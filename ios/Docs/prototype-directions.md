@@ -426,3 +426,35 @@ mid-session and 8.75:1 at gold. The study card's longest answer holds
 7.39–8.71:1 over the same range.
 
 This is the first real W2 token, found by measurement rather than by taste.
+
+## Verifications a simulator can actually settle
+
+Recorded because the obvious reading of "needs the device" is that nothing here
+can be checked, and that is wrong. These were all measured, not eyeballed.
+
+| Check | Method | Result |
+|---|---|---|
+| Text contrast, every zone, every progress | Glyph-row-snapping harness on rendered frames | Weakest **7.00:1** against a 6.6:1 bar |
+| Control boundaries | Component measurement, not text | Rep control **3.51:1**, Rest controls **4.10:1**, floor 3:1 |
+| Legibility at distance | Acuity-limited resample — 1 arcminute at 460 ppi | Name, count and timer hold to 2.0m |
+| Dark-room low brightness | Black-crush model at code 12 / 20 / 32 | No information lives in the crushed range; contrast holds or improves |
+| Reduce Motion | Frame diff over six seconds | **0.00%** of pixels change; structure and progress reading intact |
+| Reduce Transparency | Re-measured all text zones | Weakest 6.98:1 |
+| Dynamic Type clamp | medium vs accessibility-XXXL frame diff | 1.59%, and that is cloud drift — workout type genuinely does not scale |
+| No scrolling at longest content | Four-cue fixture after the larger glyphs and borders | Fits, controls visible |
+| Set → Rest work-object continuity | Burst capture at ~110ms through the 0.44s transition | The counter travels up and grows into the ring. Not a cross-fade |
+
+### What still genuinely needs the phone
+
+Only these, and they are the W11 list:
+
+- **Haptic quality.** Every pattern in `DesignHaptics.swift` is reasoned from
+  `05-platform.md §3` and has never been felt. Whether passing last time's
+  number is tellable from an ordinary rep *with the phone face down* is the
+  acceptance test, and it cannot be run here.
+- **120Hz frame pacing.** The app opts into ProMotion and the built Info.plist
+  is checked, but a simulator's frame timing proves nothing about a device's.
+- **Glare at 6:10am.** 10.1% of the Set frame sits at code ≥200, almost all of
+  it the primary button. Whether that is comfortable or punishing in a dark room
+  at minimum brightness is a physical question.
+- **Music ducking**, once the audio work lands in W5.
