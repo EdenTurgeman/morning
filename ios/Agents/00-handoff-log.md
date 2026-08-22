@@ -194,8 +194,23 @@ brief wants the dawn to finish.
 
 **Assertions:** 55 of 57 passing (2 skipped — both device-only)
 
-**Next:** W11 is the device pass and is still blocked on hardware. W12 needs
-Eden's yes per item. Everything else through W10 is merged.
+**Both sessions now run start to finish.** `-autorun` plays one from Home with
+no taps at all. A took 450s and finished on "Same as your last A / 209 reps /
+Dead level."; B took 518s and "Same as your last B / 249 reps / Dead level."
+Zero SwiftUI or layout complaints across 1,683 lines of device log. That is the
+first time this app has run end to end, and it is only possible because the
+warm-up and the rests now advance themselves.
+
+**Next:** W11 is the device pass and is still blocked on hardware — but the
+checklist is now much more specific about what to look for, and three items on
+it are new because of this pass. W12 needs Eden's yes per item, and it has one
+more candidate than it did: the web's app-icon badge.
+
+**Two things waiting on Eden, both written up above rather than decided here:**
+the app-icon badge (needs notification permission, `05-platform.md §7` says
+propose), and whether card text should scale with Dynamic Type given that
+`answer`'s 14.5pt is tuned to the seven-line stress case on a screen that cannot
+scroll.
 
 
 ## 2026-08-22 · Figures, control boundaries, accessibility verification · Claude Opus 5
