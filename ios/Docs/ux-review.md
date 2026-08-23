@@ -155,13 +155,17 @@ against the 1.5 m reading distance. Those are right.
 
 ## 6. Ranked, still open
 
-1. **`microLabel` at 11pt on Home's four nav links**, which are the only route
-   into four of the app's ten screens.
+1. ~~**`microLabel` at 11pt on Home's four nav links.**~~ **Fixed** — lifted to
+   `label` (12pt). Still the quietest thing on the screen, still one line with
+   room to spare, but no longer the floor of the whole type system on the only
+   route into four screens.
 2. **Home's 202pt gap** — real, but the least wrong of the six, because the low
    primary action is buying something with it.
-3. **Summary's 307pt gap.** Partly reserved space: the card answer arrives there
-   after fourteen seconds. Worth re-measuring *after* the reveal before deciding
-   it is a problem — which is exactly the mistake section 3 made.
+3. ~~**Summary's 307pt gap.**~~ **Closed by measuring it properly.** That figure
+   was taken three seconds in, before the card answer arrives. After the reveal
+   the answer occupies 112pt and the gap is **179pt** — the same range as Home,
+   already judged acceptable. The first measurement was the same mistake as
+   section 3: a number taken before checking what it was a number *of*.
 
 Rest's spacing is deliberately excluded: measured it looks like the same
 problem, but a single 237pt focal object centred in the screen is the one case

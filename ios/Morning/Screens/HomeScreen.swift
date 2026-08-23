@@ -113,7 +113,15 @@ struct HomeScreen: View {
                 HStack(spacing: Space.section) {
                     ForEach(HomeDestination.allCases, id: \.self) { destination in
                         Button(destination.title) { onOpen(destination) }
-                            .font(TypeScale.microLabel)
+                            // `label` (caption, 12pt) rather than `microLabel`
+                            // (caption2, 11pt). Still the quietest thing on the
+                            // screen and still one line — but 11pt is the floor
+                            // of the whole type system, and these four are the
+                            // only route into four of the app's ten screens.
+                            // Being deliberately quiet is right; being the
+                            // smallest text in the app is more than that asked
+                            // for.
+                            .font(TypeScale.label)
                             .foregroundStyle(Ink.tertiary)
                             .frame(minHeight: Hit.minimum)
                     }
