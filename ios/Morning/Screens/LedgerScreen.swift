@@ -129,8 +129,15 @@ struct LedgerScreen: View {
         if week.longestRun > 0 {
             let unit = week.streak == 1 ? "week" : "weeks"
             let bestUnit = week.longestRun == 1 ? "week" : "weeks"
+            // The best run is only worth naming when it is not the current one.
+            // The web prints both unconditionally and at the one-week seed that
+            // reads "1 week running. Longest run 1 week." — the same fact
+            // twice. `HomeScreen.runLine` already had the right rule; this now
+            // matches it rather than the source.
             Text(week.streak > 0
-                ? "\(week.streak) \(unit) running. Longest run \(week.longestRun) \(bestUnit)."
+                ? (week.longestRun > week.streak
+                    ? "\(week.streak) \(unit) running. Longest run \(week.longestRun) \(bestUnit)."
+                    : "\(week.streak) \(unit) running.")
                 : "Longest run \(week.longestRun) \(bestUnit).")
                 .font(TypeScale.body)
                 .foregroundStyle(Ink.tertiary)

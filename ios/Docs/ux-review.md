@@ -255,6 +255,27 @@ fit; Ledger has 89pt to spare.
 
 ---
 
+## 3e. Round five — the seeds nobody had rendered
+
+Only `empty` and `six-months` had ever been looked at. `one-week` and `one-year`
+both hold:
+
+- **`one-year`** puts 769 tonnes, 64,840 reps, 285 sessions and "84 hours" on
+  the Ledger and nothing overflows. The year grid fits the screen width exactly
+  at a full 52 weeks — the constraint `04-rules.md §7` singles out, with a
+  visible training gap around week 33 reading exactly as it should.
+- **`one-week`** shows the Ledger at 10 tonnes with a nearly-empty progress bar
+  toward 25, and the week meter at "0 of 5 · 5 to go, 6 days after today. 1
+  spare."
+
+**One thing fixed.** At `one-week` the Ledger's new closing line read *"1 week
+running. Longest run 1 week."* — the same fact twice. The web prints both
+unconditionally; `HomeScreen.runLine` already had the right rule, which is that
+the best run is only worth naming when it is not the current one. The Ledger now
+matches Home rather than the source.
+
+---
+
 ## 4. What is already good, so nobody re-opens it
 
 - **The Set screen's ordinary state.** Bands throughout, gaps 8–56pt, no void,
