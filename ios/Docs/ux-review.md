@@ -284,6 +284,27 @@ matches Home rather than the source.
 
 ---
 
+## 3f. Round six — does the Guide describe the app that exists?
+
+The Guide is user-facing instructions and it is content, ported verbatim, so
+where it and the UI disagree **the UI is what moves**. Read against the built
+app, one line disagreed:
+
+> "Go up a notch in weight — **tap the loadout on the home screen**"
+
+The weight picker added during the completeness pass hung off a small "Change"
+button beside the "Set up" label, not off the loadout. The content specifies the
+interaction; the loadout is the tap target now, and "Change" stays as a label so
+that something still says the block is tappable. It is also a ~90pt target
+instead of a 44pt one, which at 6:10am with sweaty hands is the difference that
+matters.
+
+The other reference — "if the prescribed number isn't that, change it on the
+home screen" — was simply false until this session, because there was nothing on
+the home screen to change it with.
+
+---
+
 ## 4. What is already good, so nobody re-opens it
 
 - **The Set screen's ordinary state.** Bands throughout, gaps 8–56pt, no void,

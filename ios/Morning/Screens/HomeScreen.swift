@@ -79,7 +79,25 @@ struct HomeScreen: View {
         VStack(alignment: .leading, spacing: Space.section) {
             header
 
-            loadout
+            // The whole block is the target, not just the word "Change".
+            //
+            // `guide.json` — content, and not mine to reword — says "tap the
+            // loadout on the home screen". So the loadout has to be the thing
+            // you tap. It is also a ~90pt target against a 44pt one, which at
+            // 6:10am with sweaty hands is the difference that matters.
+            Button {
+                withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
+                    editingLoad.toggle()
+                }
+            } label: {
+                loadout
+            }
+            .buttonStyle(.plain)
+            .disabled(load == nil)
+            .accessibilityLabel(
+                load.map { "Working weight \(Plates.format($0)) kilograms per handle. Change it." }
+                    ?? "Bodyweight only"
+            )
 
             if editingLoad {
                 weightPicker
@@ -173,15 +191,14 @@ struct HomeScreen: View {
 
                 Spacer()
 
+                // A label, not a control — the whole block is the control now.
+                // It stays because without it nothing says the loadout is
+                // tappable, and the Guide's instruction only helps someone who
+                // has read the Guide.
                 if load != nil {
-                    Button(editingLoad ? "Done" : "Change") {
-                        withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
-                            editingLoad.toggle()
-                        }
-                    }
-                    .font(TypeScale.microLabel)
-                    .foregroundStyle(palette.accentText)
-                    .frame(minHeight: Hit.minimum)
+                    Text(editingLoad ? "Done" : "Change")
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(palette.accentText)
                 }
             }
 
