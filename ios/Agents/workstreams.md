@@ -686,7 +686,9 @@ reps, session count, current streak, longest run, and the year grid. The two
 
 ---
 
-## W13 · Daybreak in Metal — `todo`, Eden's own piece
+## W13 · Daybreak in Metal — `done`
+
+**Eden handed it over on 2026-08-23: "Take it fully."** Shipped in PR #11.
 
 **Runs after W14.**
 
@@ -802,7 +804,7 @@ harder to review.
 
 ---
 
-## W15 · Eden's UI list — `done`, pending his review on the phone
+## W15 · Eden's UI list — `done`, merged in PR #11
 
 Eight items, given on 2026-08-23 after using the app himself. **His words are
 quoted; do not paraphrase them away.** Two are broken functionality rather than
@@ -882,7 +884,14 @@ layout is changed against a measurement instead of against the screen.
     instruction, and the one that matters: render every screen and look at it,
     rather than measuring a band and declaring it fine.
 
-## W16 · The copy pass — `todo`, and deliberately last
+## W16 · The copy pass — `part one done`, part two waiting on Eden
+
+**Full audit and before/after table: `ios/Docs/copy-pass.md`.**
+
+The finding that shapes the whole workstream: the app has 59 em-dashes in
+user-facing copy and **52 of them are Eden's own writing**, ported verbatim from
+the web build. Seven were mine. Those seven are rewritten; the 52 are listed for
+him to rule on, with the `src/` line beside each.
 
 Asked for by Eden on 2026-08-23, with an explicit ordering instruction: **this
 waits until almost everything else is finished.** Do not start it early because

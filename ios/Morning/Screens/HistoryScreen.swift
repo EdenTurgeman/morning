@@ -77,7 +77,7 @@ struct HistoryScreen: View {
             // An accidental delete is unrecoverable, so the confirmation says
             // what is about to be lost rather than "are you sure".
             if let confirming {
-                Text("\(confirming.sessionKey) on \(readable(confirming.date)) — "
+                Text("\(confirming.sessionKey) on \(readable(confirming.date)). "
                     + "\(History.reps(of: confirming)) reps. This cannot be undone.")
             }
         }
@@ -180,8 +180,8 @@ struct HistoryScreen: View {
                 .font(TypeScale.title)
                 .foregroundStyle(Ink.primary)
 
-            Text("Every session you finish lands here — the date, which one, and "
-                + "how many reps. A year of them fits on one screen.")
+            Text("Every session you finish lands here. The date, which one, how many "
+                + "reps. A year of them fits on one screen.")
                 .font(TypeScale.body)
                 .foregroundStyle(Ink.secondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -183,8 +183,8 @@ struct BackupScreen: View {
                 Text("\(data.history.count) sessions")
                     .font(TypeScale.counter(38))
                     .foregroundStyle(Ink.primary)
-                Text("Losing this loses everything the app knows about you. "
-                    + "The export is the only copy that survives losing the phone.")
+                Text("This is everything the app knows about you. The export is the "
+                    + "only copy that survives a lost phone.")
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -279,7 +279,7 @@ struct BackupScreen: View {
             Button("Erase", role: .destructive, action: onErase)
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("All \(data.history.count) sessions, permanently. Export first if you have not.")
+            Text("All \(data.history.count) sessions, permanently. Export first if you haven't.")
         }
         .alert("Could not read that file", isPresented: .constant(problem != nil)) {
             Button("OK") { problem = nil }
