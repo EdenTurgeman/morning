@@ -110,7 +110,7 @@ struct RestScreen: View {
             Spacer(minLength: Space.step)
 
             if let next {
-                NextUp(set: next)
+                NextUp(step: next)
                     .padding(.bottom, Space.step)
             }
 
@@ -277,7 +277,12 @@ private struct RestTimer: View {
 // MARK: - What is coming
 
 private struct NextUp: View {
-    let set: SetStep
+    /// Named `step`, not `set`: `set` is a contextual keyword, and referring
+    /// to it as the first token of a computed property's body parses as a
+    /// setter declaration. That cost a build error and then a fight with
+    /// swiftformat, which correctly wanted to strip the `self.` that was
+    /// working around it.
+    let step: SetStep
 
     var body: some View {
         VStack(spacing: 2) {
@@ -286,10 +291,10 @@ private struct NextUp: View {
                 .foregroundStyle(Ink.tertiary)
 
             HStack(spacing: 6) {
-                Text(set.exercise)
+                Text(step.exercise)
                     .font(TypeScale.bodyEmphasis)
                     .foregroundStyle(Ink.primary)
-                if let sub = set.sub {
+                if let sub = step.sub {
                     Text("· \(sub)")
                         .font(TypeScale.body)
                         .foregroundStyle(Ink.secondary)
@@ -304,12 +309,7 @@ private struct NextUp: View {
     }
 
     private var detail: String {
-        var parts = ["set \(set.n) of \(set.of)"]
-        if let load = set.load {
-            parts.append("\(Plates.format(load)) kg")
-        }
-        parts.append(set.target)
-        return parts.joined(separator: " · ")
+        step.summaryLine
     }
 }
 

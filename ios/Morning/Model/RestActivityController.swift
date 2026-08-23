@@ -71,7 +71,7 @@ final class RestActivityController {
                 endsAt: endsAt,
                 seconds: rest.seconds,
                 nextExercise: next?.exercise,
-                nextDetail: next.map(Self.detail(for:)),
+                nextDetail: next?.summaryLine,
                 isMyo: rest.seconds < Deck.minimumRestForCard
             )
 
@@ -142,17 +142,4 @@ final class RestActivityController {
             }
         }
     #endif
-
-    /// "set 2 of 3 · 8–15 reps", the same line the Rest screen shows under the
-    /// next exercise. Built here rather than passed in so the two cannot drift.
-    private static func detail(for set: SetStep) -> String {
-        var parts = ["set \(set.n) of \(set.of)"]
-        if let load = set.load {
-            parts.insert("\(Plates.format(load)) kg", at: 0)
-        } else if set.bodyweight {
-            parts.insert("bodyweight", at: 0)
-        }
-        parts.append("\(set.target) reps")
-        return parts.joined(separator: " · ")
-    }
 }

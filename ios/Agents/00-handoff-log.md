@@ -89,6 +89,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -342,6 +354,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -582,6 +606,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -715,6 +751,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -845,6 +893,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -978,6 +1038,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -1109,6 +1181,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -1242,6 +1326,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -1377,6 +1473,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -1531,6 +1639,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -1675,6 +1795,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -1829,6 +1961,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -1978,6 +2122,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -2116,6 +2272,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -2247,6 +2415,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -2382,6 +2562,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -2512,6 +2704,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -2649,6 +2853,18 @@ its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
 
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
+
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
 written first, so after W12 every `add-source-file.py` call quietly compiled the
@@ -2784,6 +3000,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -2948,6 +3176,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is
@@ -3201,6 +3441,18 @@ into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
 its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
 that, the one part of W12 with a visual design would have been the one part
 nobody had looked at.
+
+**And a critique round on my own W12 code found a shipped bug.** The controller
+built its own copy of the next-up detail line, under a comment claiming it was
+built there "so the two cannot drift". It had already drifted — the load before
+the set position instead of after it, and `"\(target) reps"` appended to a
+`target` that already reads "8–15 reps". **"8–15 reps reps."**
+
+Nothing could have caught it: the Lock Screen is unreachable from this machine,
+and **the preview I built to check it used hardcoded sample strings that were
+correct**, so the sample hid the bug in the code it existed to test. It is one
+`SetStep.summaryLine` now, used by both, with a test; and the preview builds its
+samples from the real compiled program.
 
 **A landmine this created, and fixed.** `add-source-file.py` picked the app's
 Sources phase as "the first of exactly two". The widget target's phase is

@@ -265,6 +265,39 @@ final class ProgramCompilerAcceptanceTests: XCTestCase {
             )
         }
     }
+
+    /// The one-line summary shared by the Rest screen and the Live Activity.
+    ///
+    /// It is a test rather than a comment because the Live Activity grew its
+    /// own copy of this and the copy was wrong in two ways at once — the load
+    /// before the set position, and "reps" appended to a `target` that already
+    /// ends in "reps". Neither was visible: the Lock Screen cannot be reached
+    /// from this machine, and the preview built to check it used a hardcoded
+    /// sample string that happened to be correct.
+    func testTheNextUpSummaryReadsTheSameEverywhereItAppears() throws {
+        let sets = StepCompiler.build(session: "A").compactMap(\.asSet)
+
+        let loaded = try XCTUnwrap(sets.first { $0.load != nil })
+        XCTAssertEqual(
+            loaded.summaryLine,
+            "set \(loaded.n) of \(loaded.of) · \(Plates.format(loaded.load ?? 0)) kg · \(loaded.target)",
+            "set position first, then the load, then the target"
+        )
+
+        let bodyweight = try XCTUnwrap(sets.first { $0.load == nil })
+        XCTAssertEqual(
+            bodyweight.summaryLine,
+            "set \(bodyweight.n) of \(bodyweight.of) · \(bodyweight.target)",
+            "no load means no load segment, not a zero"
+        )
+
+        for set in sets {
+            XCTAssertFalse(
+                set.summaryLine.hasSuffix("reps reps"),
+                "target already carries its unit: \(set.summaryLine)"
+            )
+        }
+    }
 }
 
 private extension Array {
