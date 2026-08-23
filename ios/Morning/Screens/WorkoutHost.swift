@@ -135,6 +135,7 @@ struct WorkoutHost: View {
                     isComparable: session.previousIsComparable,
                     isBeating: session.isBeatingPrevious,
                     namespace: workObject,
+                    setMarks: setMarks,
                     onAdjust: { session.adjustReps(by: $0) },
                     onLog: logSet,
                     onBack: { advance { session.back() } },
@@ -270,6 +271,15 @@ struct WorkoutHost: View {
     private var sessionProgress: Double {
         guard session.steps.count > 1 else { return 0 }
         return Double(session.stepIndex) / Double(session.steps.count - 1)
+    }
+
+    /// Every set's position in the session, 0…1, for the rail's ticks.
+    private var setMarks: [Double] {
+        guard session.steps.count > 1 else { return [] }
+        let last = Double(session.steps.count - 1)
+        return session.steps.enumerated()
+            .filter { $0.element.asSet != nil }
+            .map { Double($0.offset) / last }
     }
 
     private var setsRemaining: Int {

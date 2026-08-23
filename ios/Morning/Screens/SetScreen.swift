@@ -30,6 +30,8 @@ struct SetScreen: View {
     let isComparable: Bool
     let isBeating: Bool
     let namespace: Namespace.ID
+    /// Where each set falls in the session, 0…1. See `WorkoutChrome.setMarks`.
+    var setMarks: [Double] = []
 
     let onAdjust: (Int) -> Void
     let onLog: () -> Void
@@ -59,9 +61,13 @@ struct SetScreen: View {
 
     private func content(in available: CGFloat) -> some View {
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
-
-            metadata
+            WorkoutChrome(
+                progress: progress,
+                step: stepLabel,
+                setMarks: setMarks,
+                onBack: onBack,
+                onEnd: onEnd
+            )
 
             let bay = bayHeight(in: available)
             // "Short screen" means the bay could not have its natural height —
@@ -69,16 +75,44 @@ struct SetScreen: View {
             // things that yield, yield together.
             let cramped = (bay ?? 0) < naturalBayHeight
 
-            if let height = bay {
-                ExerciseMotionBay(treatment: .atmospheric, exercise: setStep.exercise, accent: palette.accent)
-                    .frame(height: height)
+            // ONE FIXED BLOCK above the rep control.
+            //
+            // W15 #2, and it is the one Eden was most emphatic about: *"it's
+            // position changes based on which exercise screen we're on which is
+            // bad, it should always be in the same place like the Done button"*.
+            //
+            // It moved because everything above it was intrinsically sized — a
+            // two-cue push-up pushed it high, a four-cue floor fly pushed it
+            // low, and the control you reach for with a knuckle at 6:10am was
+            // never twice in the same place. The block is a fixed height now,
+            // top-aligned, so whatever it contains the counter lands on the
+            // same line. Screens with less to say leave air, which is the price
+            // and it is worth paying.
+            //
+            // The demonstration is the thing that gives way inside it — same
+            // argument as `bayHeight`: it illustrates, everything else
+            // instructs.
+            VStack(spacing: 0) {
+                metadata
+
+                if let height = bay {
+                    ExerciseMotionBay(
+                        treatment: .atmospheric,
+                        exercise: setStep.exercise,
+                        accent: palette.accent
+                    )
+                    .frame(maxHeight: height)
                     .padding(.top, Space.step)
+                    .layoutPriority(-1)
+                }
+
+                cues
+                    .padding(.top, Space.step)
+
+                Spacer(minLength: 0)
             }
-
-            cues
-                .padding(.top, Space.step)
-
-            Spacer(minLength: Space.step)
+            .frame(height: upperBlock(in: available), alignment: .top)
+            .clipped()
 
             RepControl(
                 reps: reps,
@@ -131,37 +165,73 @@ struct SetScreen: View {
 
     // MARK: - Parts
 
+    /// Two columns, because there were four stacked lines down the left and
+    /// nothing at all down the right.
+    ///
+    /// W15 #1, in Eden's words: *"too cramped in that column… it creates a
+    /// werid thing where we have a column on text on the left side then nothing
+    /// on the right"*, and *"just the target is important"*.
+    ///
+    /// So the target moves right and becomes the second-biggest thing on the
+    /// screen after the counter — it is the number you are trying to hit, and
+    /// it was set in the same grey as the sub-label. The left column keeps what
+    /// tells you how to set up: the name, the sub, the load and the position.
+    ///
+    /// The sub-label stays rather than being cut. "lying on your back" is
+    /// redundant on a floor fly and reads as clutter, but the same field says
+    /// "deficit — hands on books" on a push-up, which is the whole setup. What
+    /// was wrong was not that it existed; it was that four lines were competing
+    /// in one column while half the width sat empty.
     private var metadata: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(setStep.exercise)
-                .font(TypeScale.title)
-                .foregroundStyle(Ink.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.82)
+        HStack(alignment: .top, spacing: Space.step) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(setStep.exercise)
+                    .font(TypeScale.title)
+                    .foregroundStyle(Ink.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
 
-            if let sub = setStep.sub {
-                Text(sub)
+                if let sub = setStep.sub {
+                    Text(sub)
+                        .font(TypeScale.body)
+                        .foregroundStyle(Ink.tertiary)
+                        .lineLimit(2)
+                }
+
+                Text(positionLine)
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.secondary)
+                    .padding(.top, 1)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(positionLine)
-                .font(TypeScale.body)
-                .foregroundStyle(Ink.secondary)
-
-            Text("Target \(setStep.target)")
-                .font(TypeScale.bodyEmphasis)
-                .foregroundStyle(Ink.secondary)
-
+            VStack(alignment: .trailing, spacing: -1) {
+                Text("TARGET")
+                    .font(TypeScale.microLabel)
+                    .tracking(1.4)
+                    .foregroundStyle(Ink.tertiary)
+                Text(setStep.target.replacingOccurrences(of: " reps", with: ""))
+                    .font(TypeScale.counter(30))
+                    .monospacedDigit()
+                    .foregroundStyle(Ink.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                Text("reps")
+                    .font(TypeScale.microLabel)
+                    .foregroundStyle(Ink.tertiary)
+            }
+            .fixedSize(horizontal: true, vertical: false)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, Space.snug)
+        .overlay(alignment: .bottomLeading) {
             if setStep.straightIntoNext == true {
                 Text("No rest after this — straight into the next one.")
                     .font(TypeScale.body)
                     .foregroundStyle(palette.accentText)
-                    .padding(.top, Space.tight)
+                    .offset(y: 20)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, Space.snug)
     }
 
     /// Load, set position and superset position on one line — three facts that
@@ -241,6 +311,19 @@ struct SetScreen: View {
         setStep.cues.count >= 4 ? 142 : 178
     }
 
+    /// Everything above the rep control, at a height that does not depend on
+    /// the exercise. Sized from what has to sit below it: the control itself
+    /// (83), the primary button (68), the footer, and the gaps between them.
+    private func upperBlock(in available: CGFloat) -> CGFloat {
+        // Piecewise, and the split is real rather than a fudge: a 667pt phone
+        // has 207pt less to spend than the 874pt one, and after W15 #4 stepped
+        // the type up the lower half needs more of what is left. One formula
+        // that fits the SE would take 32pt of breathing room off the Pro — and
+        // that room is the fix for "always too close to the text above it".
+        let lower: CGFloat = available < 760 ? 306 : 268
+        return max(240, available - lower)
+    }
+
     private func bayHeight(in available: CGFloat) -> CGFloat? {
         let base = naturalBayHeight
         // Four cues cost roughly 80pt more than two, so they get charged for it
@@ -261,6 +344,19 @@ struct SetScreen: View {
 struct WorkoutChrome: View {
     let progress: Double
     let step: String
+    /// One tick per set, at its position in the session.
+    ///
+    /// W15 #3, and it is a restoration rather than an invention: the web build
+    /// draws exactly this under its rail (`src/components/Chrome.tsx`) and the
+    /// port kept only the bar. Eden noticed — "in the prev app we had more
+    /// meaningfull markings on the progress bar that showed more context about
+    /// what's left or how many (super/not superset)".
+    ///
+    /// The ticks answer both halves of that. How many are left is countable at
+    /// a glance, and because superset partners sit adjacent with no rest
+    /// between them, their ticks bunch — so the shape of the row shows the
+    /// structure of the session without a word of explanation.
+    var setMarks: [Double] = []
     let onBack: () -> Void
     let onEnd: () -> Void
 
@@ -289,15 +385,25 @@ struct WorkoutChrome: View {
             }
 
             GeometryReader { proxy in
-                ZStack(alignment: .leading) {
+                ZStack(alignment: .topLeading) {
                     Capsule().fill(Ink.hairline)
+                        .frame(height: 3)
                     Capsule()
                         .fill(DawnPalette(progress: progress).accent)
-                        .frame(width: proxy.size.width * progress)
+                        .frame(width: proxy.size.width * progress, height: 3)
+
+                    ForEach(Array(setMarks.enumerated()), id: \.offset) { _, at in
+                        Circle()
+                            .fill(at <= progress
+                                ? DawnPalette(progress: progress).accent
+                                : Ink.primary.opacity(0.18))
+                            .frame(width: 3, height: 3)
+                            .offset(x: proxy.size.width * at - 1.5, y: 7)
+                    }
                 }
             }
-            .frame(height: 3)
+            .frame(height: 13)
         }
-        .frame(height: 72)
+        .frame(height: 82)
     }
 }

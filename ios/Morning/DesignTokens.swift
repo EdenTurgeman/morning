@@ -208,8 +208,20 @@ enum TypeScale {
     static let title = Font.system(size: 34, weight: .medium)
 
     /// Sub-label and cue text.
-    static let body = Font.subheadline
-    static let bodyEmphasis = Font.subheadline.weight(.semibold)
+    // W15 #4. Eden, after using it: "Some of the texts are a little small,
+    // should be a tad bigger."
+    //
+    // One step each: `subheadline` (15pt) → `callout` (16pt), `caption2` (11pt)
+    // → `caption` (12pt). Both are still text styles, so they still scale with
+    // Dynamic Type; this moves the floor, not the mechanism.
+    //
+    // W14 round three withdrew a finding that looked like this one, because it
+    // had been derived from measured band heights and band height does not tell
+    // you font size. That withdrawal was right about the measurement and it is
+    // not evidence about the type — he is reading it on a phone at arm's length
+    // and I was reading pixel counts.
+    static let body = Font.callout
+    static let bodyEmphasis = Font.callout.weight(.semibold)
 
     /// Study-card question.
     static let question = Font.system(size: 17, weight: .semibold)
@@ -217,7 +229,7 @@ enum TypeScale {
 
     /// Chrome, footers, units.
     static let label = Font.caption.weight(.semibold)
-    static let microLabel = Font.caption2.weight(.semibold)
+    static let microLabel = Font.caption.weight(.semibold)
 
     /// The primary action.
     static let action = Font.headline
