@@ -629,7 +629,10 @@ the only test that actually counts.
 `05-platform.md §4` and `§7` are explicit that these are to be **proposed, not
 built**. They were non-goals on the web only because they were impossible there.
 
-- **Live Activity / Dynamic Island** for the rest timer. ✅ **EDEN HAS SAID YES**
+- **Live Activity / Dynamic Island** for the rest timer. ✅ **BUILT** — see the
+  handoff log and `ios/Docs/device-checklist.md`. Lifecycle verified from the
+  device log; the presentation is unverifiable on this machine and is on the
+  device checklist. ✅ **EDEN HAD SAID YES**
   (2026-08-23), in his words: *"wire this into a live activity thing that will
   show even if my app is closed i think it would be good and i can re-open the
   app from that at the top."*

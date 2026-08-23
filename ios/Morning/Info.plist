@@ -2,6 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- W12. Without this the app can create a Live Activity and the system
+	     will silently decline it — ActivityAuthorizationInfo reports enabled,
+	     Activity.request throws, and the only sign is a log line. -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<!-- W12. Tapping the Live Activity opens morning://rest, and without a
+	     registered scheme that tap does nothing at all — which is half of what
+	     Eden asked for ("i can re-open the app from that"). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.edenturgeman.morning</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>morning</string>
+			</array>
+		</dict>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDisplayName</key>

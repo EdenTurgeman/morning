@@ -192,6 +192,7 @@ struct WorkoutHost: View {
             // development environment, and a transition nobody can trigger is
             // a transition nobody has seen.
             autorunIfAsked()
+            syncLiveActivity()
 
             if ProcessInfo.processInfo.arguments.contains("-confirm-end") {
                 Task { @MainActor in
@@ -227,13 +228,13 @@ struct WorkoutHost: View {
         .onChange(of: session.stepIndex) { _, _ in
             drawCardIfNeeded()
             autorunIfAsked()
-
-            if ProcessInfo.processInfo.arguments.contains("-confirm-end") {
-                Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(1.0))
-                    confirmingEnd = true
-                }
-            }
+        }
+        // Keyed on `endsAt`, not on the step. `+15s` moves the end date without
+        // changing the step, and the Lock Screen countdown is drawn from that
+        // date — so an extension has to restart the activity or the phone keeps
+        // counting down to the old zero.
+        .onChange(of: session.endsAt) { _, _ in
+            syncLiveActivity()
         }
     }
 
@@ -306,6 +307,20 @@ struct WorkoutHost: View {
 
     private func endSession() {
         confirmingEnd = true
+    }
+
+    /// The Lock Screen countdown follows the rest, and only the rest.
+    ///
+    /// W12, and Eden's words: "show even if my app is closed... i can re-open
+    /// the app from that". Started on arriving at a rest and ended on leaving
+    /// one, which covers skipping, extending, finishing and abandoning, because
+    /// all four move either the step or the end date.
+    private func syncLiveActivity() {
+        guard case let .rest(rest) = session.currentStep, let endsAt = session.endsAt else {
+            RestActivityController.shared.end()
+            return
+        }
+        RestActivityController.shared.start(rest: rest, endsAt: endsAt, next: session.upcomingSet)
     }
 
     /// The end of the session, and the only place the screen is allowed to

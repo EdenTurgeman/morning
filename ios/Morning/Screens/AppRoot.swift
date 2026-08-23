@@ -244,8 +244,16 @@ struct AppRoot: View {
         }
     }
 
+    /// Nothing should outlive the session that started it. `release()` already
+    /// gives back the idle timer and the audio session; the Lock Screen
+    /// countdown belongs in the same list.
+    private func releaseLiveActivity() {
+        RestActivityController.shared.end()
+    }
+
     private func release() {
         UIApplication.shared.isIdleTimerDisabled = false
         Audio.shared.stop()
+        releaseLiveActivity()
     }
 }

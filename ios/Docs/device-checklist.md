@@ -37,6 +37,40 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] Then do it again for real at 6am. **That is the only test that actually
       counts.**
 
+## The Live Activity — W12, and the only part of it a phone can judge
+
+The lifecycle **is** verified: the device log shows one activity starting when a
+rest begins, exactly one running, and it ending when the rest is over. Watch for
+it with
+
+```bash
+xcrun simctl spawn <udid> log stream --predicate 'subsystem == "com.edenturgeman.morning"'
+```
+
+What cannot be verified here is everything you can actually see, because there
+is no `Simulator.app` on the development machine — the app cannot be
+backgrounded and the Lock Screen cannot be reached. So:
+
+- [ ] **Lock the phone mid-rest.** The countdown is on the Lock Screen and it is
+      counting. It should be legible at arm's length like everything else.
+- [ ] **The Dynamic Island**, compact and expanded. The compact trailing slot is
+      44pt wide and holds a live countdown; check it does not truncate at
+      three digits.
+- [ ] **Tap it.** The app opens on the step it was counting. This is half of
+      what was asked for, and it depends on a URL scheme (`morning://rest`)
+      that nothing in the simulator exercises.
+- [ ] **Skip a rest, and extend one.** Skipping ends the activity; `+15s` ends
+      it and starts a new one, because the end date lives in the static half of
+      the attributes so the system can draw the countdown without the app
+      waking. Watch for two stacked countdowns — that exact bug happened during
+      development and only the log showed it.
+- [ ] **Force-quit mid-rest.** An activity outlives the process that started it.
+      The next rest should clear it; if a dead countdown persists, `endAll()` is
+      not finding it.
+- [ ] **Turn Live Activities off** for Morning in Settings and run a session.
+      Nothing should break — the app checks `areActivitiesEnabled` and simply
+      does not offer one.
+
 ## Interruptions — do these deliberately
 
 - [ ] Take a phone call mid-rest. The timer is still correct on return.

@@ -49,6 +49,15 @@ struct MorningApp: App {
                 }
             }
             .preferredColorScheme(.dark) // used before sunrise; dark by default
+            // Tapping the Live Activity. There is deliberately nothing to do:
+            // `AppRoot.init` already restores an in-progress session before
+            // anything is drawn, so launching IS returning to the step the
+            // countdown was counting. Handled explicitly all the same, because
+            // an unhandled `onOpenURL` is indistinguishable from a broken link
+            // the first time somebody tests it on the phone.
+            .onOpenURL { url in
+                guard url.scheme == RestActivityLink.scheme else { return }
+            }
         }
     }
 
