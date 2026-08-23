@@ -157,7 +157,7 @@ struct SummaryScreen: View {
     /// Facts, not praise. The delta is absent entirely when the working weight
     /// moved, because there is nothing honest to compare.
     private var factsRow: some View {
-        HStack(spacing: Space.section) {
+        HStack(alignment: .top, spacing: Space.gutter) {
             fact("Session", record.sessionKey)
             fact("Minutes", "\(record.minutes)")
             if let delta = celebration.delta {
@@ -174,8 +174,13 @@ struct SummaryScreen: View {
             Text(label)
                 .font(TypeScale.microLabel)
                 .foregroundStyle(Ink.tertiary)
+            // W15 #4, applied where it earns the most: these four numbers ARE
+            // the screen. "What you just did, how it compares, where the week
+            // stands" — and they were set at callout, one step above the
+            // smallest label in the app, under a 96pt rep total.
             Text(value)
-                .font(TypeScale.bodyEmphasis.monospacedDigit())
+                .font(TypeScale.counter(22))
+                .monospacedDigit()
                 .foregroundStyle(Ink.primary)
         }
     }
