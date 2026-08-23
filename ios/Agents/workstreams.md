@@ -735,7 +735,7 @@ most likely places to drop frames.
 
 ---
 
-## W14 · UI/UX review of the whole app — `in progress`, **runs before W12 and W13**
+## W14 · UI/UX review of the whole app — `done`
 
 **Five rounds done. Findings and fixes are in `ios/Docs/ux-review.md`**, which
 is the deliverable — read that rather than this section.
@@ -769,8 +769,8 @@ Asked for on 2026-08-23, and the ordering is his:
 > review the screens, buttons empty spaces, crampted spaces, undersized texts
 > and general Best practice UX.
 
-So the sequence is **completeness pass → W14 → W12 / W13**, not the numeric
-order. Do not start the Live Activity or the Metal Daybreak before this.
+The sequence he set was **completeness pass → W14 → W12 / W13**, not the
+numeric order. The first three are done; W13 is the only one left.
 
 **Scope, in his words plus what they imply:**
 
