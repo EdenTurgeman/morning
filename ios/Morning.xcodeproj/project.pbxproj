@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		751E5C69EC0433CFD7D7720C /* CountdownRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */; };
 		67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */; };
 		8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */ = {isa = PBXBuildFile; fileRef = F0102D8606AEAE1192831B3F /* Daybreak.metal */; };
 		3573D091CD4CB72641B11E28 /* AppActionsAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */; };
@@ -120,6 +121,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownRing.swift; sourceTree = "<group>"; };
 		8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalDaybreakSky.swift; sourceTree = "<group>"; };
 		F0102D8606AEAE1192831B3F /* Daybreak.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Daybreak.metal; sourceTree = "<group>"; };
 		FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActionsAcceptanceTests.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */,
 				8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */,
 				9520A59BDFA835728DA588D0 /* RestActivityViews.swift */,
 				21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */,
@@ -534,6 +537,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				751E5C69EC0433CFD7D7720C /* CountdownRing.swift in Sources */,
 				67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */,
 				8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */,
 				B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */,

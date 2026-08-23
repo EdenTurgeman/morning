@@ -854,3 +854,30 @@ polish and go first.
    problem, not a spacing one — W14 measured a 202pt void there and called it
    acceptable because the low primary action buys it. **He disagrees, and he
    uses it at 6:10am.** The measurement was not wrong; the judgement was.
+
+
+### Round two — 2026-08-23, after seeing round one on the phone
+
+**Most of these are regressions I introduced in round one.** Recorded as such:
+the fix for one complaint created three more, which is what happens when a
+layout is changed against a measurement instead of against the screen.
+
+9. **"we ruined the done button, it's pinned downstairs."** True. Stepping the
+   type up (#4) pushed everything down and the bottom clearance went from 44pt
+   to 6.3pt. I measured that it *fit* and called it verified — fitting and
+   being right are different, and 6pt under a primary action is not a margin.
+10. **"the rep number animates wildly on screen load and looks terrible."**
+    The counter runs `contentTransition(.numericText)` and prefills on appear,
+    so it rolls from 0 to the prefill every time the screen loads. It should
+    arrive at its value, not count up to it.
+11. **"its sizing and spacing from the + and - buttons are terrible."** The
+    counter carries `.frame(minWidth: 150)` between two 82pt buttons, so the
+    number floats in the middle of a gap it does not fill.
+12. **"look at the top text spacing and the movements they're all terrible."**
+    Two concrete faults in his photo: the position line wraps mid-phrase —
+    "6.25 kg · set 2 of 3 · superset 1 / of 2" — and "No rest after this"
+    **overlaps the MOVEMENT box**, because I attached it as an `.overlay` with
+    a hardcoded `.offset(y: 20)` rather than laying it out.
+13. **"please open the app and see for yourself and review this."** The standing
+    instruction, and the one that matters: render every screen and look at it,
+    rather than measuring a band and declaring it fine.
