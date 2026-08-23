@@ -79,7 +79,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -317,7 +332,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -542,7 +572,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -660,7 +705,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -776,7 +836,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -893,7 +968,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1010,7 +1100,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1128,7 +1233,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1248,7 +1368,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1386,7 +1521,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1516,7 +1666,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1654,7 +1819,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1788,7 +1968,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -1911,7 +2106,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2028,7 +2238,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2147,7 +2372,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2263,7 +2503,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2384,7 +2639,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2505,7 +2775,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2654,7 +2939,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 
@@ -2892,7 +3192,22 @@ consists of in a classic project file.
    it cannot be verified at all.
 
 **Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
-**Not verified:** everything visible. Six checks are on the device checklist.
+**Not verified:** the system's own compositing. Six checks are on the device
+checklist.
+
+**But the layout is no longer unseen.** The views moved out of the extension
+into `Morning/Screens/RestActivityViews.swift`, compiled into both targets, so
+`-screen live-activity` renders the Lock Screen presentation inside the app with
+its clock frozen. A `Widget` cannot be shown from the app; a `View` can. Without
+that, the one part of W12 with a visual design would have been the one part
+nobody had looked at.
+
+**A landmine this created, and fixed.** `add-source-file.py` picked the app's
+Sources phase as "the first of exactly two". The widget target's phase is
+written first, so after W12 every `add-source-file.py` call quietly compiled the
+new file into the **extension** instead — the file appeared in Xcode, the
+project built, and the symbol was simply not in scope. It now resolves the phase
+through the named target. **If you add a target, check that tool.**
 
 **Landmines**
 

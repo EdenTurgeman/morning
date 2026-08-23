@@ -114,6 +114,72 @@ struct ReadingReviewHost: View {
     }
 }
 
+/// The Live Activity's Lock Screen presentation, at three rest lengths.
+///
+///     -screen live-activity
+///
+/// Not the real thing — the system composites, tints and sizes the actual
+/// activity — but the layout, the type and the truncation behaviour are this
+/// view's, and without this they would be the only design in the port that
+/// nobody had ever seen. There is no `Simulator.app` here, so the app cannot be
+/// backgrounded and the Lock Screen cannot be reached.
+struct LiveActivityReviewHost: View {
+    private static let now = Date(timeIntervalSince1970: 1_770_000_000)
+
+    var body: some View {
+        VStack(spacing: Space.step) {
+            Text("Live Activity · lock screen")
+                .font(TypeScale.microLabel)
+                .foregroundStyle(Ink.tertiary)
+
+            ForEach(Array(samples.enumerated()), id: \.offset) { _, sample in
+                RestActivityLockScreen(attributes: sample, frozenAt: Self.now)
+                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 22))
+                    .frame(maxWidth: .infinity)
+            }
+
+            Spacer()
+        }
+        .padding(Space.gutter)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Surface.night)
+    }
+
+    /// The two shapes it actually has to hold — a long rest with a long
+    /// exercise name and the 20-second myo rest — plus one it never will.
+    ///
+    /// `nextExercise == nil` is unreachable: `04-rules.md §1` drops trailing
+    /// rests, so a rest always has a set after it. It is rendered here anyway
+    /// because the type allows it and "unreachable" is a claim about today's
+    /// step compiler, not about the view. It degrades to a bare countdown,
+    /// which is the right way for it to fail.
+    private var samples: [RestAttributes] {
+        [
+            RestAttributes(
+                endsAt: Self.now.addingTimeInterval(64),
+                seconds: 90,
+                nextExercise: "Bent-over row",
+                nextDetail: "6.25 kg · set 2 of 2 · 15–20 reps",
+                isMyo: false
+            ),
+            RestAttributes(
+                endsAt: Self.now.addingTimeInterval(17),
+                seconds: 20,
+                nextExercise: "Lateral raise",
+                nextDetail: "6.25 kg · set 3 of 3 · 4–5 reps",
+                isMyo: true
+            ),
+            RestAttributes(
+                endsAt: Self.now.addingTimeInterval(45),
+                seconds: 45,
+                nextExercise: nil,
+                nextDetail: nil,
+                isMyo: false
+            ),
+        ]
+    }
+}
+
 struct ReviewHost: View {
     let sessionKey: String?
     let progressOverride: Double?

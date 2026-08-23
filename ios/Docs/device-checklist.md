@@ -51,6 +51,12 @@ What cannot be verified here is everything you can actually see, because there
 is no `Simulator.app` on the development machine — the app cannot be
 backgrounded and the Lock Screen cannot be reached. So:
 
+`-screen live-activity` renders the Lock Screen presentation inside the app, at
+three rest shapes, with the clock frozen so a screenshot is reproducible. It is
+not the real thing — the system composites, tints and sizes the actual activity
+— but the layout, the type and the truncation are this view's, and without it
+they would be the only design in the port nobody had ever seen.
+
 - [ ] **Lock the phone mid-rest.** The countdown is on the Lock Screen and it is
       counting. It should be legible at arm's length like everything else.
 - [ ] **The Dynamic Island**, compact and expanded. The compact trailing slot is

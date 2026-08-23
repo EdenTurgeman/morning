@@ -29,19 +29,43 @@ def oid(*parts: str) -> str:
     return hashlib.sha1("::".join(parts).encode()).hexdigest()[:24].upper()
 
 
+# The Sources build phase each target actually owns, read out of the target
+# rather than guessed at by position.
+APP_TARGET = "Morning"
+TEST_TARGET = "MorningTests"
+
+
 def sources_phase_index(text: str, test_target: bool) -> int:
     """Where to insert into the Sources build phase.
 
-    There are two: the app target's, then the test target's. Picking the wrong
-    one compiles a test into the app, or an app file into the tests.
+    Found by NAME, via the target that owns it.
+
+    This used to take the first Sources phase in the file for the app and the
+    second for the tests, on the assumption that there were exactly two and in
+    that order. Adding the `MorningWidgets` extension broke that assumption
+    silently and in the worst way: its phase is written first, so every
+    subsequent `add-source-file.py` compiled the new file into the **widget
+    extension** and not into the app. The file appeared in Xcode, the project
+    built, and the symbol was simply not in scope.
     """
-    phases = [
-        m.end()
-        for m in re.finditer(r"isa = PBXSourcesBuildPhase;\n\t\t\tbuildActionMask = \d+;\n\t\t\tfiles = \(\n", text)
-    ]
-    if len(phases) < 2:
-        raise SystemExit(f"expected two Sources build phases, found {len(phases)}")
-    return phases[1] if test_target else phases[0]
+    wanted = TEST_TARGET if test_target else APP_TARGET
+    target = re.search(
+        r"/\* " + re.escape(wanted) + r" \*/ = \{\n\t\t\tisa = PBXNativeTarget;.*?buildPhases = \(\n(.*?)\t\t\t\);",
+        text,
+        re.S,
+    )
+    if not target:
+        raise SystemExit(f"no PBXNativeTarget named {wanted}")
+
+    for phase_id in re.findall(r"([0-9A-F]{24}) /\*", target.group(1)):
+        phase = re.search(
+            re.escape(phase_id) + r" /\* \w+ \*/ = \{\n\t\t\tisa = PBXSourcesBuildPhase;"
+            r"\n\t\t\tbuildActionMask = \d+;\n\t\t\tfiles = \(\n",
+            text,
+        )
+        if phase:
+            return phase.end()
+    raise SystemExit(f"{wanted} has no Sources build phase")
 
 
 def find_group_block(text: str, name: str) -> tuple[int, int]:

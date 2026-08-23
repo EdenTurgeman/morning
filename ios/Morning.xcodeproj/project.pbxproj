@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9520A59BDFA835728DA588D0 /* RestActivityViews.swift */; };
+		E1A00012D0C24B0F9A000012 /* RestActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9520A59BDFA835728DA588D0 /* RestActivityViews.swift */; };
 		E1A00005D0C24B0F9A000005 /* RestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A00003D0C24B0F9A000003 /* RestLiveActivity.swift */; };
 		E1A00006D0C24B0F9A000006 /* RestActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE0BB5AE216D0BD738E4832 /* RestActivity.swift */; };
 		E1A0000BD0C24B0F9A00000B /* MorningWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1A00001D0C24B0F9A000001 /* MorningWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -114,6 +116,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9520A59BDFA835728DA588D0 /* RestActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestActivityViews.swift; sourceTree = "<group>"; };
 		E1A00001D0C24B0F9A000001 /* MorningWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MorningWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1A00003D0C24B0F9A000003 /* RestLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestLiveActivity.swift; sourceTree = "<group>"; };
 		E1A00004D0C24B0F9A000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -195,6 +198,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				9520A59BDFA835728DA588D0 /* RestActivityViews.swift */,
 				21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */,
 				4E6A732CF5554EC40FA5747E /* GuideScreen.swift */,
 				BDF661806566B13880E59A82 /* LedgerScreen.swift */,
@@ -502,6 +506,7 @@
 			files = (
 				E1A00005D0C24B0F9A000005 /* RestLiveActivity.swift in Sources */,
 				E1A00006D0C24B0F9A000006 /* RestActivity.swift in Sources */,
+				E1A00012D0C24B0F9A000012 /* RestActivityViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -509,6 +514,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */,
 				A290F3B3F13F8B73BD02C7CE /* RestActivityController.swift in Sources */,
 				DD6E41178C80F5FBD8D869CE /* RestActivity.swift in Sources */,
 				48E7F30F07F7F38E63E0C55A /* WarmupScreen.swift in Sources */,

@@ -42,6 +42,8 @@ struct MorningApp: App {
                         reps: Self.value(after: "-reps").flatMap(Int.init),
                         step: Self.value(after: "-step").flatMap(Int.init)
                     )
+                } else if Self.requestedScreen == "live-activity" {
+                    LiveActivityReviewHost()
                 } else if Self.requestedScreen == "lab" {
                     PrototypeLabView()
                 } else {
