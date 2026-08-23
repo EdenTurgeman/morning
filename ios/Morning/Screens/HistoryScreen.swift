@@ -206,7 +206,7 @@ struct HistoryScreen: View {
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .font(.title3)
-                                .foregroundStyle(Color(red: 0.94, green: 0.38, blue: 0.38))
+                                .foregroundStyle(Semantic.danger)
                         }
                         .buttonStyle(.plain)
                         .frame(minWidth: 44, minHeight: Hit.minimum)

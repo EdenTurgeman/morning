@@ -98,7 +98,13 @@ struct AppRoot: View {
         case .guide:
             GuideScreen(onClose: close)
         case .backup:
-            BackupScreen(data: data, onRestore: restore, onErase: erase, onClose: close)
+            BackupScreen(
+                data: data,
+                onRestore: restore,
+                onErase: erase,
+                onClose: close,
+                onExported: stampBackup
+            )
         }
     }
 
@@ -110,6 +116,17 @@ struct AppRoot: View {
             destination = nil
         } catch {
             saveError = error.localizedDescription
+        }
+    }
+
+    /// Records that a copy left the phone. Never surfaced as an error if it
+    /// fails: the export itself already succeeded, and losing the timestamp is
+    /// not worth an alert over the file the user just saved.
+    private func stampBackup() {
+        var updated = data
+        updated.lastBackup = ISO8601DateFormatter().string(from: Date())
+        if (try? store.save(updated)) != nil {
+            data = updated
         }
     }
 

@@ -65,8 +65,17 @@ struct WarmupScreen: View {
             cues
                 .padding(.top, Space.step)
 
-            Spacer(minLength: Space.step)
-
+            // The clock follows the cues rather than floating in the middle.
+            //
+            // Measured, the first version put 192pt above it and 190pt below —
+            // 44% of the screen as air, with a 68pt clock trying to hold the
+            // centre on its own and not big enough to. Worse, the two things
+            // you read here are "what to do" and "how long", and 192pt between
+            // them is enough to stop reading them as one instruction.
+            //
+            // The void moves below, where it is paying for the bottom-pinned
+            // button — which is the arrangement every other screen in the app
+            // already uses.
             TimelineView(.animation) { context in
                 let remaining = max(0, endsAt.timeIntervalSince(context.date))
                 clock(remaining)
@@ -76,6 +85,7 @@ struct WarmupScreen: View {
                         }
                     }
             }
+            .padding(.top, Space.section)
 
             Spacer(minLength: Space.step)
 

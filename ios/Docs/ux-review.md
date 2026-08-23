@@ -71,27 +71,46 @@ against the ordinary case.
 
 ---
 
-## 3. Undersized text
+## 3. Undersized text — **the first pass of this section was wrong**
 
-The measured band height is roughly cap-to-descender, so a band of 8–10pt is a
-`caption2`/`caption` font (11–12pt) and a band of 12–14pt is `subheadline`
-(15pt).
+I derived font sizes from measured band heights, and band height does not tell
+you font size. "2×2.5 + 1×1.25" measures 10pt and "Last: A, yesterday · 209
+reps" measures 12.3pt, and **both are `TypeScale.body`** — the difference is
+that one line has descenders and the other has none. A `caption2` line without
+descenders and a `subheadline` line without descenders measure the same.
 
-**Where 10pt type is doing more work than 10pt type should:**
+So `measure-layout.py` answers "where is the content and how much air is around
+it", which is what sections 1 and 2 rest on, and it cannot answer "is this type
+too small". Corrected below by reading the scale directly instead.
 
-- **The plate breakdown on Home** — "2×2.5 + 1×1.25", measured 10pt. This is the
-  instruction you follow while loading dumbbells at 6:10am, and it is set two
-  steps smaller than the weight above it. It is arguably the single most
-  actionable line on the home screen.
-- **Every Ledger stat row** — Sessions, Reps, Time, Since, Session A, Session B
-  all measure ~10pt. They are the substance of that screen and they are smaller
-  than the navigation links on Home.
-- **"Start A instead"** at 10pt. The secondary action, but still an action.
-- **The four Home nav links** at 10.3pt. Their tap targets are a correct 44pt
-  (`Hit.minimum`), so this is a legibility question, not a reachability one.
+**What the type scale actually is**, and where each size lands:
 
-**Not a finding:** the counters, titles and headlines all measure 30–68pt and
-are sized against the 1.5 m reading distance. Those are right.
+| Token | Font | Used for |
+|---|---|---|
+| `counter(_:)` | fixed 34–92pt | rep counts, clocks, the tonnage headline |
+| `title` | fixed 34pt | exercise names, screen headlines |
+| `body` | `.subheadline` (15pt) | every sentence in the app |
+| `question` / `answer` | fixed 17 / 14.5pt | study cards |
+| `label` | `.caption` (12pt) | chrome — Back, End, screen titles |
+| `microLabel` | `.caption2` (11pt) | eyebrows, units, the week meter, nav links |
+
+**The finding that survives**, now stated properly: `microLabel` at 11pt is
+carrying more than an eyebrow font should.
+
+- **The four Home nav links** — History, All time, Guide, Backup — are
+  `microLabel`, 11pt. Their tap targets are a correct 44pt (`Hit.minimum`), so
+  this is legibility rather than reachability, but 11pt is the smallest text in
+  the system and these are the only way into four of the app's ten screens.
+- **The week meter's labels and the streak line** are `microLabel` too. "9 weeks
+  running · best 16" is the one number on Home that rewards a glance.
+
+**Withdrawn from the first pass**, having checked the source rather than the
+pixels: the plate breakdown and the Ledger stat rows are both `body` (15pt), not
+11pt. They are the same size as every other sentence in the app and there is
+nothing wrong with them.
+
+**Not a finding:** the counters, titles and headlines are 34–92pt and sized
+against the 1.5 m reading distance. Those are right.
 
 ---
 
@@ -109,16 +128,40 @@ are sized against the 1.5 m reading distance. Those are right.
 
 ---
 
-## 5. Ranked
+## 5. Fixed in this round
 
-1. **Backup's 369pt void and its stranded Erase.** Worst offender, and the fix
-   is compositional rather than a rewrite.
-2. **Ledger stopping a third of the way up the screen.**
-3. **The warm-up clock floating between two 190pt gaps.**
-4. **The plate breakdown at 10pt**, given what it is for.
-5. **Ledger stat rows at 10pt.**
-6. Home's 202pt gap — real, but the least wrong of the six, because the low
-   primary action is buying something.
+- **Backup now leads with its status.** `AppData.lastBackup` was in the schema,
+  in every seed and in the web build's own writer, and this port never wrote it
+  and never showed it — so the one screen whose entire job is "do you have a
+  copy" could not answer the question. It says "Never backed up." / "Backed up
+  today." / "Last backup N days ago." against a coloured rule, and exporting
+  stamps the date. That is a completeness gap that happened to be found by a
+  layout measurement.
+- **Erase everything sits under a hairline.** The distance from Export is the
+  safety mechanism and it stays; what changed is that the control now reads as
+  the last *section* rather than as something orphaned at the foot of a void.
+- **The Ledger closes with the run** — "9 weeks running. Longest run 16 weeks."
+  Ported from `src/screens/Ledger.tsx`, which the port had dropped. It is the
+  right thing to end a lifetime page on, and it was the only void in the app
+  with no action to justify it.
+- **The warm-up's clock follows its cues.** 192pt above and 190pt below became
+  52pt above and one void below, where it pays for the bottom-pinned button like
+  every other screen. The two things you read there — what to do, how long — now
+  read as one instruction.
+- **`Semantic.danger` exists.** `02-design-brief.md §6` asks for semantic colours
+  for success *and destruction*; success had a token and destruction did not, so
+  `HistoryScreen` carried the value inline and Backup had nothing to say "never
+  backed up" with.
+
+## 6. Ranked, still open
+
+1. **`microLabel` at 11pt on Home's four nav links**, which are the only route
+   into four of the app's ten screens.
+2. **Home's 202pt gap** — real, but the least wrong of the six, because the low
+   primary action is buying something with it.
+3. **Summary's 307pt gap.** Partly reserved space: the card answer arrives there
+   after fourteen seconds. Worth re-measuring *after* the reveal before deciding
+   it is a problem — which is exactly the mistake section 3 made.
 
 Rest's spacing is deliberately excluded: measured it looks like the same
 problem, but a single 237pt focal object centred in the screen is the one case

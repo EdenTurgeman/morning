@@ -109,7 +109,7 @@ struct ReadingReviewHost: View {
         case .history: HistoryScreen(history: data.history, onDelete: { _ in }, onClose: {})
         case .ledger: LedgerScreen(history: data.history, onClose: {})
         case .guide: GuideScreen(onClose: {})
-        case .backup: BackupScreen(data: data, onRestore: { _ in }, onErase: {}, onClose: {})
+        case .backup: BackupScreen(data: data, onRestore: { _ in }, onErase: {}, onClose: {}, onExported: {})
         }
     }
 }
