@@ -29,6 +29,7 @@ struct SetScreen: View {
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
+    let namespace: Namespace.ID
 
     let onAdjust: (Int) -> Void
     let onLog: () -> Void
@@ -42,14 +43,37 @@ struct SetScreen: View {
     }
 
     var body: some View {
+        // The one screen that must never scroll has to fit the shortest phone
+        // it can run on, and it did not. Measured on a 667pt iPhone SE: the
+        // whole chrome — Back, "Set 3 / 13", End — was pushed off the top and
+        // the Done button was cut in half by the bottom edge. You could not go
+        // back, could not end the session, and could barely reach the primary
+        // action. `TARGETED_DEVICE_FAMILY = 1` and an iOS 26 floor means the
+        // SE 3 is inside the support matrix.
+        //
+        // So the layout reads the height it was actually given.
+        GeometryReader { proxy in
+            content(in: proxy.size.height)
+        }
+    }
+
+    private func content(in available: CGFloat) -> some View {
         VStack(spacing: 0) {
             WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
 
             metadata
 
-            ExerciseMotionBay(treatment: .atmospheric, exercise: setStep.exercise, accent: palette.accent)
-                .frame(height: bayHeight)
-                .padding(.top, Space.step)
+            let bay = bayHeight(in: available)
+            // "Short screen" means the bay could not have its natural height —
+            // whether it shrank to the floor or vanished. One condition, so the
+            // things that yield, yield together.
+            let cramped = (bay ?? 0) < naturalBayHeight
+
+            if let height = bay {
+                ExerciseMotionBay(treatment: .atmospheric, exercise: setStep.exercise, accent: palette.accent)
+                    .frame(height: height)
+                    .padding(.top, Space.step)
+            }
 
             cues
                 .padding(.top, Space.step)
@@ -62,24 +86,42 @@ struct SetScreen: View {
                 isComparable: isComparable,
                 isBeating: isBeating,
                 accent: palette.accent,
+                namespace: namespace,
                 onAdjust: onAdjust
             )
 
             Spacer(minLength: Space.step)
 
             DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
-                Haptics.shared.logged()
+                // `Cue.confirm` was composed and never played. The web fires it
+                // from exactly this button (`src/screens/Workout.tsx`), and the
+                // haptic alone is not the same acknowledgement when the phone
+                // is on the floor rather than in your hand.
+                Audio.shared.play(.confirm)
                 onLog()
             }
 
-            Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
-                .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
-                .padding(.top, Space.snug)
+            // Dropped under the same condition as the bay, and deliberately
+            // not under a second threshold of its own: when there is no room
+            // for the illustration there is no room for the footnote either.
+            //
+            // It is the right thing to lose. Everything else on this screen
+            // either instructs or is the control; "13 sets to go" is
+            // orientation, and the progress rail two inches above it already
+            // says the same thing without words.
+            if !cramped {
+                Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
+                    .font(TypeScale.microLabel)
+                    .foregroundStyle(Ink.tertiary)
+                    .padding(.top, Space.snug)
+            }
         }
         .padding(.horizontal, Space.gutter)
         .safeAreaPadding(.bottom, Space.snug)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: progress))
+        // No backdrop here on purpose. The sky belongs to `WorkoutHost`, not to
+        // this screen: it is the one thing that must not blink when Set becomes
+        // Rest. Owned per-screen, it faded out and in with everything else and
+        // the whole display dipped to near-black mid-transition.
         // The workout deliberately clamps Dynamic Type. `§6` allows it: this
         // type is already at the top of the scale, and a screen that must never
         // scroll would break rather than help at accessibility sizes. Reading
@@ -175,10 +217,40 @@ struct SetScreen: View {
         intensityWords.contains { cue.contains($0) }
     }
 
-    /// Four cues need a shorter bay than two. The screen never scrolls, so
-    /// something has to give, and it is the demonstration rather than the copy.
-    private var bayHeight: CGFloat {
+    /// Four cues need a shorter bay than two, and a short phone needs a shorter
+    /// bay than a tall one. The screen never scrolls, so something has to give,
+    /// and it is the demonstration rather than the copy — every other element
+    /// here either instructs (the cues, the target) or is the control itself.
+    /// The bay is the only thing that merely *illustrates*, so it yields first
+    /// and it yields alone.
+    ///
+    /// The floor is 72pt. Below that the figure stops reading as a body and
+    /// becomes a smudge, at which point showing nothing would be honester —
+    /// but 72pt is enough to fit the worst content on the shortest supported
+    /// phone, so that trade never has to be made.
+    /// `nil` means there is no room for it at all and it is not drawn.
+    ///
+    /// That case is real rather than defensive: four cues on a 667pt phone
+    /// leaves nothing for a demonstration, and at 72pt the figure has already
+    /// stopped reading as a body. Showing a smudge would be worse than showing
+    /// nothing, and clipping the Done button to keep the smudge would be worse
+    /// than both — which is what the screen did before this.
+    /// What the bay wants, before the screen height is taken into account.
+    /// Four cues need a shorter one than two.
+    private var naturalBayHeight: CGFloat {
         setStep.cues.count >= 4 ? 142 : 178
+    }
+
+    private func bayHeight(in available: CGFloat) -> CGFloat? {
+        let base = naturalBayHeight
+        // Four cues cost roughly 80pt more than two, so they get charged for it
+        // rather than the bay absorbing the difference twice.
+        let crowding: CGFloat = setStep.cues.count >= 4 ? 80 : 0
+        let room = available - 620 - crowding
+        if room < 20 {
+            return nil
+        }
+        return min(base, max(72, room))
     }
 }
 

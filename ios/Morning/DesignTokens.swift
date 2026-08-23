@@ -155,6 +155,25 @@ enum Semantic {
     /// The 20-second myo rest, which *is* the training stimulus. Amber says
     /// urgency without saying failure.
     static let urgency = Color(red: 1.00, green: 0.76, blue: 0.34)
+
+    /// Destructive, and "you have no copy of this".
+    ///
+    /// `02-design-brief.md §6` asks for semantic colours for success **and
+    /// destruction** kept off the accent ramp. Success had a token; destruction
+    /// did not, so `HistoryScreen` carried this exact value inline for its
+    /// delete control and the Backup screen had nothing to say "never backed
+    /// up" with. One definition, two uses.
+    static let danger = Color(red: 0.94, green: 0.38, blue: 0.38)
+
+    /// The same red, as a GLYPH.
+    ///
+    /// Exactly the split the dawn palette already makes between `accent` and
+    /// `accentText`, and for the same measured reason. `danger` on the sky
+    /// comes out at **4.27:1** — fine for a 1.5pt rule or a filled icon, under
+    /// this app's 6.6:1 text floor and under WCAG AA's 4.5:1 for ordinary text.
+    /// Lifted toward white it clears both without stopping being red.
+    static let dangerText = Color(red: 0.94, green: 0.38, blue: 0.38)
+        .mix(with: .white, by: 0.34, in: .perceptual)
 }
 
 // MARK: - Surfaces

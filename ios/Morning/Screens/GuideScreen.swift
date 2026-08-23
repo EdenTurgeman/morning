@@ -106,12 +106,44 @@ struct BackupScreen: View {
     let onRestore: (AppData) -> Void
     let onErase: () -> Void
     let onClose: () -> Void
+    /// Stamps `AppData.lastBackup`. The field existed in the schema, in every
+    /// seed and in the web build's own writer, and this port never wrote it and
+    /// never showed it — so the one screen whose whole job is "do you have a
+    /// copy" could not answer the question.
+    let onExported: () -> Void
 
     @State private var exporting = false
     @State private var importing = false
     @State private var pendingRestore: AppData?
     @State private var confirmingErase = false
     @State private var problem: String?
+
+    /// Whole days since the last export, or nil if there has never been one.
+    /// `src/lib/storage.ts`'s `daysSince`.
+    private var daysSinceBackup: Int? {
+        guard let stamp = data.lastBackup,
+              let then = ISO8601DateFormatter().date(from: stamp)
+        else {
+            return nil
+        }
+        return Int(Date().timeIntervalSince(then) / 86400)
+    }
+
+    private var statusText: String {
+        guard let days = daysSinceBackup else { return "Never backed up." }
+        if days == 0 {
+            return "Backed up today."
+        }
+        return "Last backup \(days) \(days == 1 ? "day" : "days") ago."
+    }
+
+    /// Rose when there is no copy at all, the accent once it is going stale,
+    /// green while it is current. A rule rather than a filled badge: this is
+    /// status, not a control.
+    private var statusTone: Color {
+        guard let days = daysSinceBackup else { return Semantic.danger }
+        return days > 14 ? DawnPalette(progress: 0.3).accent : Semantic.threshold
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Space.section) {
@@ -128,6 +160,25 @@ struct BackupScreen: View {
                 Color.clear.frame(width: Hit.minimum, height: Hit.minimum)
             }
 
+            // The status leads, because it is the answer to the question you
+            // opened this screen with. Copy verbatim from `src/screens/Backup.tsx`.
+            HStack(spacing: Space.snug) {
+                Rectangle()
+                    .fill(statusTone)
+                    .frame(width: 2)
+                // One line. The web carries a second — "125 sessions stored on
+                // this phone" — because it has no headline number; this port has
+                // one 40pt below. My first attempt swapped that duplication for
+                // a worse one, repeating "the export is the only copy that…"
+                // from the paragraph underneath. The status is complete on its
+                // own.
+                Text(statusText)
+                    .font(TypeScale.body)
+                    .foregroundStyle(Ink.primary)
+                Spacer(minLength: 0)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+
             VStack(alignment: .leading, spacing: Space.snug) {
                 Text("\(data.history.count) sessions")
                     .font(TypeScale.counter(38))
@@ -142,6 +193,7 @@ struct BackupScreen: View {
             VStack(spacing: Space.step) {
                 DawnPrimaryButton(title: "Export", treatment: .atmospheric, accent: DawnPalette(progress: 0.3).accent) {
                     exporting = true
+                    onExported()
                 }
 
                 Button("Restore from a file") { importing = true }
@@ -154,10 +206,32 @@ struct BackupScreen: View {
 
             // Destructive, confirmed, and visually de-emphasised — it sits at
             // the bottom, in body weight, in no accent at all.
-            Button("Erase everything") { confirmingErase = true }
-                .font(TypeScale.body)
-                .foregroundStyle(Color(red: 0.94, green: 0.38, blue: 0.38).opacity(0.75))
-                .frame(maxWidth: .infinity, minHeight: Hit.minimum)
+            //
+            // The distance from Export is the safety mechanism and it stays.
+            // What changed is the rule above it: measured, this control sat
+            // alone at the foot of a 369pt void and read as orphaned rather
+            // than as de-emphasised. A hairline makes it the last SECTION
+            // instead of a stranded button, which is the ordinary iOS pattern
+            // for a destructive action and costs none of the distance.
+            VStack(spacing: Space.snug) {
+                Rectangle()
+                    .fill(Ink.hairline)
+                    .frame(height: 1)
+
+                Button("Erase everything") { confirmingErase = true }
+                    .font(TypeScale.body)
+                    // Full strength, not 0.75. Measured on the rendered frame,
+                    // the dimmed version came out at **3.07:1** — below this
+                    // app's own 6.6:1 text floor and below WCAG AA's 4.5:1 for
+                    // ordinary text. De-emphasis is right for this control and
+                    // it already has three other forms of it: it is last, it is
+                    // body weight, and it sits alone under a rule at the far end
+                    // of the screen from Export. Making the label hard to read
+                    // is not a fourth — you have to be able to read the thing
+                    // you are about to tap.
+                    .foregroundStyle(Semantic.dangerText)
+                    .frame(maxWidth: .infinity, minHeight: Hit.minimum)
+            }
         }
         .padding(.horizontal, Space.gutter)
         .safeAreaPadding(.vertical, Space.step)
@@ -178,10 +252,13 @@ struct BackupScreen: View {
         }
         // Restore CONFIRMS THE SWAP by naming both counts, because replacing
         // 120 sessions with 3 is the mistake this dialog exists to prevent.
-        .confirmationDialog(
+        // `alert`, not `confirmationDialog`, and the same reason as the End
+        // dialog in `WorkoutHost`: measured on iOS 26, the sheet renders as a
+        // translucent card with **no visible cancel**. On a control that
+        // replaces every session you have, "how do I say no" must be on screen.
+        .alert(
             "Replace your history?",
-            isPresented: .constant(pendingRestore != nil),
-            titleVisibility: .visible
+            isPresented: .constant(pendingRestore != nil)
         ) {
             Button("Replace", role: .destructive) {
                 if let pendingRestore {
@@ -196,11 +273,7 @@ struct BackupScreen: View {
                     + "You currently have \(data.history.count). This cannot be undone.")
             }
         }
-        .confirmationDialog(
-            "Erase everything?",
-            isPresented: $confirmingErase,
-            titleVisibility: .visible
-        ) {
+        .alert("Erase everything?", isPresented: $confirmingErase) {
             Button("Erase", role: .destructive, action: onErase)
             Button("Cancel", role: .cancel) {}
         } message: {

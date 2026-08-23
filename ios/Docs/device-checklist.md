@@ -23,9 +23,59 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] The screen never sleeps mid-session.
 - [ ] 120Hz with no dropped frames while a timer runs.
 - [ ] Reduce Motion produces a **calmer** app, not a broken one.
+      Verified in the simulator, frame by frame. The Set↔Rest swap collapses
+      from ~0.45s to ~0.2s and the sky stops drifting. Daybreak keeps every
+      beat and drops the travel exactly as its header claims: the sun fades up
+      in place rather than rising, the rays hold still, and the number, copy,
+      pips and hint still arrive in sequence.
+      One thing that had no reduced form and now does: the flash as the sun
+      breaks the horizon. It was a screen-wide 2.7× luminance spike under
+      Reduce Motion too — the largest single change anywhere in the app. Now
+      1.3×. **Check the moment still registers on the phone** rather than
+      disappearing; measurements cannot tell you that.
 - [ ] A full session of A and a full session of B, start to finish, zero glitches.
 - [ ] Then do it again for real at 6am. **That is the only test that actually
       counts.**
+
+## The Live Activity — W12, and the only part of it a phone can judge
+
+The lifecycle **is** verified: the device log shows one activity starting when a
+rest begins, exactly one running, and it ending when the rest is over. Watch for
+it with
+
+```bash
+xcrun simctl spawn <udid> log stream --predicate 'subsystem == "com.edenturgeman.morning"'
+```
+
+What cannot be verified here is everything you can actually see, because there
+is no `Simulator.app` on the development machine — the app cannot be
+backgrounded and the Lock Screen cannot be reached. So:
+
+`-screen live-activity` renders the Lock Screen presentation inside the app, at
+three rest shapes, with the clock frozen so a screenshot is reproducible. It is
+not the real thing — the system composites, tints and sizes the actual activity
+— but the layout, the type and the truncation are this view's, and without it
+they would be the only design in the port nobody had ever seen.
+
+- [ ] **Lock the phone mid-rest.** The countdown is on the Lock Screen and it is
+      counting. It should be legible at arm's length like everything else.
+- [ ] **The Dynamic Island**, compact and expanded. The compact trailing slot is
+      44pt wide and holds a live countdown; check it does not truncate at
+      three digits.
+- [ ] **Tap it.** The app opens on the step it was counting. This is half of
+      what was asked for, and it depends on a URL scheme (`morning://rest`)
+      that nothing in the simulator exercises.
+- [ ] **Skip a rest, and extend one.** Skipping ends the activity; `+15s` ends
+      it and starts a new one, because the end date lives in the static half of
+      the attributes so the system can draw the countdown without the app
+      waking. Watch for two stacked countdowns — that exact bug happened during
+      development and only the log showed it.
+- [ ] **Force-quit mid-rest.** An activity outlives the process that started it.
+      The next rest should clear it; if a dead countdown persists, `endAll()` is
+      not finding it.
+- [ ] **Turn Live Activities off** for Morning in Settings and run a session.
+      Nothing should break — the app checks `areActivitiesEnabled` and simply
+      does not offer one.
 
 ## Interruptions — do these deliberately
 
@@ -33,8 +83,17 @@ out under 4% brightness" is worth something; a tick is not.
 - [ ] Open Control Centre mid-set, then come back.
 - [ ] Switch to Music mid-session, play something, come back.
 - [ ] Force-quit mid-workout and relaunch: same step, same logged reps, correct
-      remaining time.
-- [ ] Let a rest timer expire while the app is backgrounded.
+      remaining time. **Both halves now verified in the simulator** — quitting
+      18s into a 60s rest and relaunching showed 39s left, derived from the
+      absolute end date rather than a tick counter; and quitting a 20s rest and
+      relaunching 30s later advanced to the next set rather than sitting on
+      "0 SEC", which is the web's behaviour and was the bug. What is left for
+      the phone is the same thing with a real suspend rather than a terminate.
+- [ ] Let a rest timer expire while the app is backgrounded. **It must have
+      moved on by itself when you come back** — a rest that reaches zero
+      advances, matching the web build. This is wired in the view rather than
+      the model, so no unit test covers it; if it regresses, this is the check
+      that catches it.
 
 ## Before any of this works: Xcode has to match the phone
 
@@ -71,15 +130,37 @@ you can just use the app, but they are still the fastest way to sit on one
 screen and stare at it.
 
 ```text
--seed six-months                     replace the history with a fixture
--screen set -progress 1.00           the Set screen at the gold end of the dawn
+STATE
+-seed empty|one-session|one-week|six-months|one-year   replace the history
+-screen set -step 0                  the warm-up, which the app now starts on
+-screen set -step 1                  the first set
+-screen set -step 15                 a carded rest
 -screen set -slot 4.0.0              the worst content in the program
 -screen set -reps 15                 the counter already past last time
--screen set -step 15                 a carded rest
--screen summary -tier plateau        one celebration tier
+-screen set -progress 1.00           the gold end of the dawn
+-screen summary -tier first|record|plateau|weight-changed|week-complete
 -screen ledger | guide | backup | history
 -screen lab                          the W1 direction lab, still runnable
+-session A|B                         which session, where a screen takes one
+
+MOVEMENT — because no tap reaches this app in the development environment
+-autorun                             play a whole session from Home, no taps
+-autoplay                            advance one step 1.4s after launch
+-autorep                             nudge the counter up one, crossing last
+                                     time's number — the threshold, in motion
+
+STATES ONLY A TAP CAN REACH
+-confirm-end                         the "End this session?" alert
+-edit-load                           Home's weight picker, open
+-skip-daybreak                       the Summary, without waiting out Daybreak
 ```
+
+Every one of these exists because the development machine has no `Simulator.app`
+— only the headless runtime — so a state you cannot reach by launch argument is
+a state nobody has ever looked at. Three defects this session were found by
+adding a flag for something previously unreachable: the End confirmation did not
+exist, the summary card's tap skipped its haptic, and `milestoneBurst` was
+rendered by nothing.
 
 ### The haptic that matters most
 
@@ -108,6 +189,35 @@ Start music in another app first, then run a rest to zero.
 - Six dips means the shared release deadline is not working — that is
   `DuckWindow`, and its logic is unit-tested, so a failure here is the session
   activation rather than the timing.
+- The session is brought up when the workout OPENS, not when the first cue
+  plays, and off the main thread. It used to be configured on every cue — five
+  times per rest, synchronously, on the main actor, during the animating
+  countdown, which the runtime flagged as a hang risk. If the first cue of a
+  session is late or clipped, that change is where to look.
+- **Listen for the very first cue of a session, and the completion chime.**
+  Session activation is now asynchronous, so a cue arriving on a cold session
+  races it by a few milliseconds. The engine still starts synchronously, so the
+  buffer is queued either way — but nothing in this app's audio has ever
+  actually been heard, and this is the one place the change could bite. The
+  chime is the exposed case: `AppRoot.finish()` stops the session and Daybreak
+  sounds 0.38s later.
+- **Check the hang-risk faults are actually gone.** Run a rest to zero with the
+  device attached and watch the console for `AVAudioSession Hang Risk`.
+
+  | | Per rest |
+  |---|---|
+  | Before anything | 12.4 (session A: 87 over 7 rests) |
+  | Session work moved off the main thread | 12.2 (session B: 122 over 10) |
+  | Engine retry bounded to one attempt | **1** |
+
+  The middle row is the useful one: moving our own session calls off the main
+  thread changed nothing, because the storm was `AVAudioEngine.start()`
+  retrying on every cue and activating the session internally each time. On the
+  simulator it can never succeed — no audio route, `error -10879`.
+
+  On a device with a real route the engine should start once and the count
+  should be **zero**. If it is not, the remaining call is inside
+  `AVAudioEngine.start()` and needs the same treatment the session got.
 - Music **stopping** rather than ducking means the session category is wrong.
   That is the exact bug Eden reported against the web build: *"working, and not
   letting me play music."*
@@ -119,6 +229,53 @@ button. Every contrast figure in `design-system.md` was measured on rendered
 frames and every one clears the floor — but none of that says whether a
 full-width bright bar is comfortable or punishing in a dark room at 6:10am with
 auto-brightness near minimum. Look at it, in the dark, and say.
+
+### The dip between Set and Rest
+
+The swap fades the outgoing screen's furniture out before the incoming screen's
+fades in, so the two never stack legibly. That costs a dip in overall
+brightness — measured on a 60fps capture, mean luminance goes 50 → 22 → 40 over
+about 0.45s, with the sky held continuous underneath so nothing blinks.
+
+On a measurement that reads as a breath. On an OLED at 6:10am with
+auto-brightness near minimum it might read as a flicker, and it happens on every
+set — 25+ times a session. If it does, the fix is a wider overlap in
+`Motion.screenSwap`, at the cost of some mush. Look at it and say.
+
+### Reading motion without a Simulator UI
+
+`ios/Tools/frames.swift` pulls exact frames out of a `simctl` recording:
+
+```bash
+xcrun simctl io <udid> recordVideo --codec=h264 --force rec.mp4 &
+xcrun simctl launch --terminate-running-process <udid> com.edenturgeman.morning -screen set -autoplay
+# …then
+swift ios/Tools/frames.swift rec.mp4 outdir 4.45 4.50 4.55
+```
+
+Do **not** review motion with backgrounded `simctl io screenshot` calls. Each
+takes about half a second to start, so six of them "0.1s apart" land wherever
+they land — usually all on the same frame, which looks exactly like a broken
+animation.
+
+Reduce Motion can be toggled headlessly, and the app picks it up on next launch:
+
+```bash
+xcrun simctl spawn <udid> defaults write com.apple.Accessibility ReduceMotionEnabled -bool true
+```
+
+### The two beats of crossing last time's number
+
+`01-product.md` calls this the emotional centre of the app, and the design is
+that the hand and the eye both get **two** beats: the number changes, then the
+fact lands. Face down it is two haptic events 45ms apart. Looking at it, the
+counter goes mint and finishes rolling, and 0.22s later "Beating last time's N"
+arrives underneath.
+
+What to check on the phone is whether those two read as one gesture or as a lag.
+The number responds within 0.04s of the tap — that is the part the finger is
+waiting on — and the sentence is deliberately behind it. If the sentence feels
+late rather than consequent, `Motion.threshold`'s delay is the dial.
 
 ### 120Hz
 
@@ -135,11 +292,29 @@ Info.plist, checked). The things most likely to drop frames, in order:
 
 Being explicit, because "it built and the tests pass" is not the same thing:
 
-- **No tap has ever reached this app.** The development machine has no
+- **No tap has ever reached this app**, and this was re-tested during W12 with
+  the simulator control tool's own `tap` action, not just assumed: the End
+  dialog was opened, "End and discard" was tapped at its measured centre, then
+  "Keep going" at its own — and the dialog was still on screen after both. There
+  is no UI session for the events to be delivered to. **Every `-auto…` flag
+  exists because of this**, and it is why a callback that is simply not wired
+  can survive: `ReviewHost` passed neither `onFinish` nor `onAbandon` for
+  several workstreams, so "End and discard" reached a `= {}` default and did
+  nothing, and no amount of looking at the screen would have shown it. The development machine has no
   `Simulator.app`, only the headless runtime, so every screen was reached by
   launch argument. Buttons, the rep control's hold-to-repeat, sheets, the file
   picker and every confirmation dialog are untested by anything but the eye.
+  `-autoplay` is the one exception and it is a stand-in: it advances one step
+  1.4s after launch so the Set→Rest transition can be recorded. It proves the
+  transition, not the button.
 - **No haptic has been felt and no cue has been heard.**
+- **Every destructive confirmation is an `alert`, not a `confirmationDialog`.**
+  Measured on iOS 26: the sheet form renders as a translucent card floating over
+  the content, with the message in low-contrast grey and **no visible cancel
+  button**. That is wrong for "End this session?" — one tap of a control in the
+  corner of every workout screen throws the whole session away — and it is wrong
+  for Erase. Check on the phone that both buttons are actually there, since this
+  is OS rendering and iOS 27 may differ again.
 - Restore and Erase have never been run. The export *format* is checked on every
   CI run against the web app's own parser; the pickers around it are not.
 

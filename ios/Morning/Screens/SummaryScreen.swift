@@ -28,8 +28,14 @@ struct SummaryScreen: View {
     let card: Card?
     let onDone: () -> Void
 
-    @State private var showingDaybreak = true
+    /// `-screen summary -skip-daybreak` shows what is underneath. Daybreak
+    /// waits for a tap, and no tap reaches this app in the development
+    /// environment — without this the summary is unreviewable.
+    @State private var showingDaybreak = !ProcessInfo.processInfo.arguments.contains("-skip-daybreak")
     @State private var cardRevealed = false
+    /// Separate from `cardRevealed`, exactly as on the rest screen: the card
+    /// takes its space first and the words arrive once it has stopped growing.
+    @State private var cardAnswerShown = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The session ended at sunrise, which is when it is actually happening.
@@ -56,6 +62,42 @@ struct SummaryScreen: View {
     }
 
     private var summary: some View {
+        // The middle scrolls; Done does not.
+        //
+        // Ported from `src/screens/Summary.tsx`, which puts the celebration in
+        // an `overflow-y-auto` and keeps the button outside it, with a comment
+        // saying "the only thing that can ever scroll out of sight is the tail
+        // of the card". This port had it all in one fixed column, and on a
+        // 667pt iPhone SE the Done button was clipped by five points once the
+        // study card revealed its answer.
+        //
+        // Measured before the reveal it looked fine — 12pt of clearance — which
+        // is the same trap this review fell into twice: a number taken before
+        // checking what it was a number of.
+        //
+        // `04-rules.md`'s no-scroll rule is about workout screens. This is the
+        // screen after one.
+        VStack(alignment: .leading, spacing: 0) {
+            ScrollView {
+                celebrationBlock
+            }
+            .scrollBounceBehavior(.basedOnSize)
+
+            DawnPrimaryButton(
+                title: "Done",
+                treatment: .atmospheric,
+                accent: DawnPalette(progress: skyProgress).accent
+            ) {
+                onDone()
+            }
+            .padding(.top, Space.step)
+        }
+        .padding(.horizontal, Space.gutter)
+        .safeAreaPadding(.vertical, Space.step)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var celebrationBlock: some View {
         VStack(alignment: .leading, spacing: Space.section) {
             VStack(alignment: .leading, spacing: Space.tight) {
                 Text(celebration.eyebrow)
@@ -66,6 +108,17 @@ struct SummaryScreen: View {
                     .font(TypeScale.counter(76))
                     .monospacedDigit()
                     .foregroundStyle(Ink.primary)
+
+                // The unit is not decoration here. Without it "150" sits
+                // directly above "Reps have stopped moving." and the two scan
+                // as one sentence — "150 reps have stopped moving" — which is
+                // a different and wrong claim. Daybreak has always had it; the
+                // summary underneath did not, and nobody had looked at the
+                // summary underneath.
+                Text("reps")
+                    .font(TypeScale.body)
+                    .foregroundStyle(Ink.secondary)
+                    .padding(.bottom, Space.snug)
 
                 Text(celebration.headline)
                     .font(TypeScale.title)
@@ -82,30 +135,23 @@ struct SummaryScreen: View {
             factsRow
 
             if let card {
-                SummaryCard(card: card, revealed: cardRevealed) { cardRevealed = true }
-                    .task(id: card.id) {
-                        // Fourteen seconds rather than the rest screen's 6.5–11:
-                        // there is no timer to beat here.
-                        try? await Task.sleep(for: .seconds(Deck.summaryRevealDelay))
-                        guard !Task.isCancelled else { return }
-                        reveal()
-                    }
+                SummaryCard(card: card, revealed: cardRevealed, answerShown: cardAnswerShown) {
+                    reveal()
+                }
+                .task(id: card.id) {
+                    cardRevealed = false
+                    cardAnswerShown = false
+                    // Fourteen seconds rather than the rest screen's 6.5–11:
+                    // there is no timer to beat here.
+                    try? await Task.sleep(for: .seconds(Deck.summaryRevealDelay))
+                    guard !Task.isCancelled else { return }
+                    reveal()
+                }
             }
 
             Spacer(minLength: Space.step)
-
-            DawnPrimaryButton(
-                title: "Done",
-                treatment: .atmospheric,
-                accent: DawnPalette(progress: skyProgress).accent
-            ) {
-                Haptics.shared.logged()
-                onDone()
-            }
         }
-        .padding(.horizontal, Space.gutter)
-        .safeAreaPadding(.vertical, Space.step)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     /// Facts, not praise. The delta is absent entirely when the working weight
@@ -140,6 +186,13 @@ struct SummaryScreen: View {
         withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
             cardRevealed = true
         }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(Motion.answerDelay(reduceMotion: reduceMotion)))
+            guard !Task.isCancelled else { return }
+            withAnimation(Motion.answer(reduceMotion: reduceMotion)) {
+                cardAnswerShown = true
+            }
+        }
     }
 }
 
@@ -147,6 +200,10 @@ struct SummaryScreen: View {
 private struct SummaryCard: View {
     let card: Card
     let revealed: Bool
+    /// See `RepControl.comparison` and `StudyCard`: a `@ViewBuilder` branch
+    /// insertion does not animate, `.transition(.opacity)` or not. The answer
+    /// was appearing instantly. Opacity on a view that holds its space does.
+    let answerShown: Bool
     let onReveal: () -> Void
 
     var body: some View {
@@ -168,7 +225,7 @@ private struct SummaryCard: View {
                         .foregroundStyle(Ink.secondary)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
-                        .transition(.opacity)
+                        .opacity(answerShown ? 1 : 0)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

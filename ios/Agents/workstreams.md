@@ -620,27 +620,58 @@ the only test that actually counts.
 
 ---
 
-## W12 · Propose the system integrations — `todo`, ask first
+## W12 · Propose the system integrations — `done`
+
+**Settled.** The Live Activity was approved and built; the other four were
+declined. See below.
 
 **Gate:** W11 done, and **Eden has said yes to each item individually.**
 
 `05-platform.md §4` and `§7` are explicit that these are to be **proposed, not
 built**. They were non-goals on the web only because they were impossible there.
 
-- **Live Activity / Dynamic Island** for the rest timer. `Text(timerInterval:)`
-  counts down on the Lock Screen with no updates from the app at all, so it costs
-  essentially nothing. Eden has asked about this specifically. It is the feature
-  most likely to make the app feel native rather than ported — and the one most
-  likely to become annoying if overdone. Prototype one-per-rest *and*
-  one-for-the-session and decide from how it feels.
-- **Home-screen widget**: the week's pips and which session is next. Small,
-  quiet, honest.
-- **HealthKit**: each session as a strength-training workout, closing the rings.
-- **Control Centre / Action Button**: starting today's session in one press is
-  plausibly the best affordance available on this hardware for a 20-minute daily
-  habit.
+- **Live Activity / Dynamic Island** for the rest timer. ✅ **BUILT** — see the
+  handoff log and `ios/Docs/device-checklist.md`. Lifecycle verified from the
+  device log; the presentation is unverifiable on this machine and is on the
+  device checklist. ✅ **EDEN HAD SAID YES**
+  (2026-08-23), in his words: *"wire this into a live activity thing that will
+  show even if my app is closed i think it would be good and i can re-open the
+  app from that at the top."*
 
-Each of these is a new target, added in Xcode once it is agreed.
+  So the requirements are his, not inferred:
+  1. The rest timer is visible **with the app closed** — Lock Screen and
+     Dynamic Island, not just in-app.
+  2. **Tapping it reopens the app**, landing on the step it is counting.
+
+  `Text(timerInterval:)` counts down on the Lock Screen with no updates from the
+  app at all, so it costs essentially nothing — which matters, because the rest
+  timer already derives from an absolute `endsAt` and a Live Activity wants
+  exactly that. `ActivityKit`, a Widget Extension target, and
+  `NSSupportsLiveActivities` in Info.plist.
+
+  Still open and worth deciding from how it feels rather than up front:
+  one-per-rest or one-for-the-session. One per rest is truer to the timer;
+  one for the session is quieter and survives the gaps between rests. Prototype
+  both.
+
+  **He asked for it "after we're done"**, so it is still queued behind the
+  completeness pass — but it is no longer gated on his approval.
+- ❌ **Home-screen widget** — the week's pips and which session is next.
+- ❌ **HealthKit** — each session as a strength-training workout.
+- ❌ **Control Centre / Action Button** — starting today's session in one press.
+- ❌ **App icon badge** — the sessions still owed this week, which the web build
+  sets via `setWeekBadge` and this port does not.
+
+**All four declined by Eden on 2026-08-23**, in one line: *"No need for healthkit
+and control center and widget. app icon badge is unenceserry aswell."*
+
+Recorded rather than deleted, and recorded as a **decision** rather than as an
+oversight. Two of them will look like gaps to whoever reads the source next —
+the badge especially, because the web build does it and its absence therefore
+reads as a regression rather than as a choice. It is a choice. **Do not
+re-propose these.**
+
+The one that was agreed is built. Nothing else here is.
 
 ---
 
@@ -652,3 +683,119 @@ whether the native one wins. The acceptance test when it lands is that five
 derived numbers match the web app's Ledger on the same device: tonnage, total
 reps, session count, current streak, longest run, and the year grid. The two
 `testPhase2` tests in `DataAcceptanceTests` are that workstream's entry point.
+
+---
+
+## W13 · Daybreak in Metal — `todo`, Eden's own piece
+
+**Runs after W14.**
+
+**Gate:** none from a rules point of view — `02-design-brief.md §7` already
+anticipates it ("Material and light. Metal shaders through SwiftUI's
+`.colorEffect`"). The real gate is that **Eden wants to work on this one
+himself**, so do not quietly ship a version and present it as done.
+
+Asked for on 2026-08-23, in his words:
+
+> I want to find the time to work on the Workout done rising sun animation, i
+> want to work on it with SwiftUI + Metal to create something beautiful and GPU
+> accelerated, something unique that is both a rising sun and interesting and
+> non standard.
+
+**What exists today.** `Screens/Daybreak.swift` is a `TimelineView(.animation)`
+driving a `Canvas`, everything derived from one elapsed value off an absolute
+start date. Reviewed frame by frame during the quality pass and it does run its
+documented choreography exactly — the horizon drawing outward before anything
+else, the sun overshooting and settling, the rays blooming, the flash, the
+number, the staggered pips. It is correct. It is also, by construction,
+*conventional*: a filled circle, a radial gradient and some drawn rays.
+
+**What "non standard" has to survive.** Three things are load-bearing and any
+Metal version has to keep them, because they were each expensive to get right:
+
+1. **One clock.** Every stage reads from a single elapsed value, which is what
+   makes it impossible for two stages to desynchronise. A shader with its own
+   time source alongside SwiftUI's would reintroduce exactly that.
+2. **The beats, and their reduced forms.** The stage timings in the header
+   comment are not decoration — the anticipation beat before anything moves is
+   the one the web build lacked. Under Reduce Motion the sun fades up instead of
+   rising, the rays hold still, and the flash is scaled from 2.7× to 1.3× of
+   baseline luminance. A shader still has to have a calm version.
+3. **It is a sunrise, not a fireworks display.** The app is not gamified and the
+   reward is being told something true. The animation can be as beautiful as it
+   likes; it must not start congratulating.
+
+**Worth knowing before starting.** `CloudTexture` already bakes value-noise fBm
+into a tiling `CGImage` on the CPU — that is the obvious first thing a shader
+subsumes. `.colorEffect`, `.distortionEffect` and `.layerEffect` all take a
+Metal `[[stitchable]]` function and need no separate render pass. The 120Hz
+target and the "no dropped frames while a timer runs" acceptance item apply here
+too, and Daybreak is already listed in the device checklist as one of the three
+most likely places to drop frames.
+
+---
+
+## W14 · UI/UX review of the whole app — `done`
+
+**Five rounds done. Findings and fixes are in `ios/Docs/ux-review.md`**, which
+is the deliverable — read that rather than this section.
+
+1. Vertical rhythm — voids and crowding.
+2. Horizontal alignment — clean, 23pt gutter everywhere.
+3. Contrast, including on everything rounds 1–2 added.
+4. **Device size**, which found the worst defect in the review: the Set screen
+   did not fit a 667pt iPhone SE, losing its chrome off the top and half the
+   Done button off the bottom.
+5. The `one-week` and `one-year` seeds, which nobody had rendered.
+
+Landscape is not applicable — the app is portrait-locked and iPhone-only.
+Motion was covered by the quality pass that preceded this workstream, frame by
+frame off 60fps captures.
+
+**Two items left open, both Eden's judgement rather than mine:** whether card
+text should scale with Dynamic Type (`answer`'s 14.5pt is tuned to the
+seven-line stress case on a screen that cannot scroll), and Home's 202pt gap,
+which the low primary action arguably buys.
+
+**A `SE3-uxcheck` simulator was created on this machine** for round four. Delete
+it freely; the review has the one-line `simctl create` to bring it back, and any
+future addition to the Set screen or the Summary has to be checked there rather
+than on a Pro.
+
+Asked for on 2026-08-23, and the ordering is his:
+
+> After ur done with the base alignments, before moving on to the live activity
+> and other things, i want you to run through a ui/ux review on the entire app,
+> review the screens, buttons empty spaces, crampted spaces, undersized texts
+> and general Best practice UX.
+
+The sequence he set was **completeness pass → W14 → W12 / W13**, not the
+numeric order. The first three are done; W13 is the only one left.
+
+**Scope, in his words plus what they imply:**
+
+- **Every screen.** Home, Warm-up, Set, Rest, Summary, Daybreak, History,
+  Ledger, Guide, Backup — including their empty, one-week and six-month states.
+- **Buttons.** Size, placement, reachability, hit targets, what is primary
+  versus quiet, and whether anything reads as tappable that is not.
+- **Empty space.** Home has a large gap between the week meter and Start;
+  Warm-up has one between the cues and the clock. Both are currently defended as
+  "the sky is the point" — that defence should be tested rather than assumed.
+- **Cramped space.** The Set screen is the one that has to hold the most and
+  never scroll; the four-cue stress case is where it gets tight.
+- **Undersized text.** Half the type scale is fixed points rather than text
+  styles (`counter`, `title`, `question`, `answer`). Sizes were chosen against
+  the 1.5 m reading distance, but `answer` at 14.5pt and `microLabel` at caption2
+  are the two most likely to be too small in practice.
+- **General best practice.** Ordinary iOS conventions the port may have skipped
+  because it was ported from a web layout.
+
+**Method that worked for the motion pass**, and should be reused: render the
+real screen with `-screen …`, measure it, and only then judge it. Do not review
+from the code. `ios/Tools/measure-contrast.py` and `ios/Tools/frames.swift` are
+both set up for it, and every state is reachable by launch argument.
+
+**Do not fold fixes into the completeness pass.** Eden asked for these as two
+separate passes, and the reason is sound: a completeness gap is "the app does
+not do this", a UI issue is "it does it badly", and mixing them makes both
+harder to review.

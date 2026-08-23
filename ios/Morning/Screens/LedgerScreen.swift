@@ -50,6 +50,7 @@ struct LedgerScreen: View {
                         if let next = Milestones.next(after: ledger) {
                             nextThreshold(next)
                         }
+                        runLine
                     }
                     .padding(.horizontal, Space.gutter)
                     .padding(.bottom, Space.section)
@@ -110,6 +111,38 @@ struct LedgerScreen: View {
             + "that session was actually done at."
         guard bodyweight > 0 else { return base }
         return base + " \(Milestones.format(bodyweight)) of them were bodyweight — they count as reps, not as kilos."
+    }
+
+    /// The closing line, ported from `src/screens/Ledger.tsx`.
+    ///
+    /// The port stopped at the next threshold and left the bottom third of the
+    /// screen empty — measured, 309pt with nothing pinned to it, the only void
+    /// in the app with no action to justify it. The web closes with the run,
+    /// which is the right thing to end a lifetime page on: everything above is
+    /// what you moved, and this is how long you have kept doing it.
+    ///
+    /// `04-rules.md §3`: the longest run stays visible after the current streak
+    /// drops to zero, because that is exactly when people stop.
+    @ViewBuilder
+    private var runLine: some View {
+        let week = Week.progress(history: history)
+        if week.longestRun > 0 {
+            let unit = week.streak == 1 ? "week" : "weeks"
+            let bestUnit = week.longestRun == 1 ? "week" : "weeks"
+            // The best run is only worth naming when it is not the current one.
+            // The web prints both unconditionally and at the one-week seed that
+            // reads "1 week running. Longest run 1 week." — the same fact
+            // twice. `HomeScreen.runLine` already had the right rule; this now
+            // matches it rather than the source.
+            Text(week.streak > 0
+                ? (week.longestRun > week.streak
+                    ? "\(week.streak) \(unit) running. Longest run \(week.longestRun) \(bestUnit)."
+                    : "\(week.streak) \(unit) running.")
+                : "Longest run \(week.longestRun) \(bestUnit).")
+                .font(TypeScale.body)
+                .foregroundStyle(Ink.tertiary)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
     }
 
     private var facts: some View {

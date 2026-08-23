@@ -251,6 +251,66 @@ final class SessionLifecycleAcceptanceTests: XCTestCase {
         XCTAssertEqual(finished.sessionKey, "A")
     }
 
+    /// `src/hooks/useWorkout.ts` computes minutes as `Math.max(1, ...)`. The
+    /// port had `max(0, ...)`, so a session finished inside thirty seconds
+    /// recorded a duration the web build cannot produce — in a file the web
+    /// build reads back through Restore.
+    func testAVeryShortSessionStillRecordsOneMinute() {
+        let store = Store(directory: directory)
+        let session = WorkoutSession(sessionKey: "A", store: store)
+        session.goToFirstSet()
+        session.adjustReps(by: 1)
+
+        // Finished the instant it started.
+        let finished = session.finish(now: Date(timeIntervalSince1970: Double(session.startedAt) / 1000))
+
+        XCTAssertEqual(finished.minutes, 1, "no session lasts zero minutes")
+    }
+
+    /// The whole weight-change chain, which was unreachable until Home got a
+    /// picker: `AppData.loads` was read and never written, so the working
+    /// weight could never move, so a session could never be recorded at a
+    /// different one, so the rep control's "different weight now" and the
+    /// `weight-changed` celebration tier could never fire.
+    func testChangingTheWorkingWeightMakesTheNextComparisonHonest() throws {
+        let store = Store(directory: directory)
+
+        // Yesterday, at 7.5.
+        var data = store.load()
+        data.history = [record(key: "A", at: 1000, log: ["0.0.0": 12], kg: 7.5)]
+        data.loads = ["A": 7.5]
+        try store.save(data)
+
+        // Home's picker moves it up one plate step.
+        let heavier = 7.5 + Plates.step
+        data.loads?["A"] = heavier
+        try store.save(data)
+        XCTAssertEqual(store.load().loads?["A"], heavier, "the new weight did not persist")
+
+        // Today's session starts at the new weight.
+        let session = WorkoutSession(
+            sessionKey: "A",
+            kg: store.load().loads?["A"],
+            history: store.load().history,
+            store: store
+        )
+        session.goToFirstSet()
+
+        XCTAssertFalse(
+            session.previousIsComparable,
+            "last time's reps were at a different weight and must not read as a target"
+        )
+
+        session.adjustReps(by: 1)
+        let finished = session.finish()
+        XCTAssertEqual(finished.kg, heavier, "the session recorded the weight it was actually done at")
+
+        // And the celebration says so rather than reporting a meaningless delta.
+        let celebration = Celebrations.forSession(finished, history: data.history + [finished])
+        XCTAssertEqual(celebration.tier, .weightChanged)
+        XCTAssertNil(celebration.delta, "a delta across a weight change is not a comparison")
+    }
+
     // MARK: - Helpers
 
     private func record(

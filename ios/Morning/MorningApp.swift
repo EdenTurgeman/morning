@@ -42,6 +42,8 @@ struct MorningApp: App {
                         reps: Self.value(after: "-reps").flatMap(Int.init),
                         step: Self.value(after: "-step").flatMap(Int.init)
                     )
+                } else if Self.requestedScreen == "live-activity" {
+                    LiveActivityReviewHost()
                 } else if Self.requestedScreen == "lab" {
                     PrototypeLabView()
                 } else {
@@ -49,6 +51,15 @@ struct MorningApp: App {
                 }
             }
             .preferredColorScheme(.dark) // used before sunrise; dark by default
+            // Tapping the Live Activity. There is deliberately nothing to do:
+            // `AppRoot.init` already restores an in-progress session before
+            // anything is drawn, so launching IS returning to the step the
+            // countdown was counting. Handled explicitly all the same, because
+            // an unhandled `onOpenURL` is indistinguishable from a broken link
+            // the first time somebody tests it on the phone.
+            .onOpenURL { url in
+                guard url.scheme == RestActivityLink.scheme else { return }
+            }
         }
     }
 
@@ -94,27 +105,4 @@ struct MorningApp: App {
             }
         #endif
     }
-}
-
-/// The original placeholder remains useful for confirming a minimal project
-/// launch while the W1 prototype lab is the active root.
-struct ScaffoldView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Morning")
-                .font(.largeTitle.weight(.semibold))
-            Text("Scaffold only — no screens built yet.")
-                .foregroundStyle(.secondary)
-            Divider()
-            Text("Start at CLAUDE.md, then ios/Agents/00-handoff-log.md.")
-                .font(.footnote)
-                .foregroundStyle(.tertiary)
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
-
-#Preview {
-    ScaffoldView()
 }

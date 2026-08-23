@@ -25,12 +25,26 @@ import SwiftUI
  *    a perfectly healthy 9.71:1. The symbol was doing all the work.
  * ======================================================================== */
 
+/// The one object the workout carries from screen to screen.
+///
+/// `02-design-brief.md §7` asks for `matchedGeometryEffect` so a screen's
+/// content BECOMES the next screen's rather than cross-fading, and the W1
+/// prototype demonstrated it as the counter turning into the rest ring. The
+/// real screens then shipped without it and swapped instantly — this is that
+/// gap closed.
+enum WorkObject {
+    static let id = "work-object"
+}
+
 struct RepControl: View {
     let reps: Int
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
     let accent: Color
+    /// The work object's namespace. The counter is the thing that travels: it
+    /// becomes the rest timer, and the rest timer becomes it again.
+    let namespace: Namespace.ID
     /// Reports a delta. Never an absolute — see the header.
     let onAdjust: (Int) -> Void
 
@@ -50,6 +64,9 @@ struct RepControl: View {
                 .foregroundStyle(Ink.tertiary)
 
             comparison
+                // The counter has already changed by the time this arrives.
+                // See `Motion.threshold`.
+                .animation(Motion.threshold(reduceMotion: reduceMotion), value: isBeating)
         }
     }
 
@@ -59,9 +76,17 @@ struct RepControl: View {
         Text(reps, format: .number)
             .font(TypeScale.counter())
             .monospacedDigit()
+            // A three-digit count truncated to "3…" between the two 82pt
+            // controls. Targets top out at 25 reps so three digits should never
+            // arrive honestly — but the control reports a delta and has no
+            // upper bound, so leaning on + reaches it, and a counter that
+            // ELIDES its own value is the worst possible way to find that out.
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
             .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: direction < 0))
             .foregroundStyle(isBeating ? Semantic.threshold : Ink.primary)
             .frame(minWidth: 150)
+            .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: reps)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: isBeating)
             .accessibilityLabel("\(reps) reps")
@@ -69,6 +94,14 @@ struct RepControl: View {
     }
 
     /// One line, and it only ever says something true.
+    ///
+    /// The comparable case keeps BOTH sentences in the tree and crossfades them
+    /// on opacity, rather than swapping `@ViewBuilder` branches. That is not
+    /// tidiness — a branch swap here does not animate. Measured off a 60fps
+    /// capture, the beating sentence went 0% to 97% legible in a single frame
+    /// and 0.12s BEFORE the digit began to move, with both `.transition` and a
+    /// delayed `.animation(_:value:)` on it. Opacity on a view that never
+    /// leaves the tree is the primitive that honours a delay reliably.
     @ViewBuilder
     private var comparison: some View {
         if let previous {
@@ -78,17 +111,21 @@ struct RepControl: View {
                 Text("Last time: \(previous.reps) at \(Plates.format(previous.kg ?? 0)) kg — different weight now")
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.tertiary)
-            } else if isBeating {
-                Text("Beating last time's \(previous.reps)")
-                    .font(TypeScale.bodyEmphasis)
-                    .foregroundStyle(Semantic.threshold)
             } else {
-                // Equal or below, prefilled from last time: the number IS last
-                // time's number, so repeating it underneath would say it twice.
-                Text("Last time: \(previous.reps)")
-                    .font(TypeScale.body)
-                    .foregroundStyle(Ink.tertiary)
-                    .opacity(reps == previous.reps ? 0 : 1)
+                ZStack {
+                    // Equal or below, prefilled from last time: the number IS
+                    // last time's number, so repeating it underneath would say
+                    // it twice.
+                    Text("Last time: \(previous.reps)")
+                        .font(TypeScale.body)
+                        .foregroundStyle(Ink.tertiary)
+                        .opacity(isBeating || reps == previous.reps ? 0 : 1)
+
+                    Text("Beating last time's \(previous.reps)")
+                        .font(TypeScale.bodyEmphasis)
+                        .foregroundStyle(Semantic.threshold)
+                        .opacity(isBeating ? 1 : 0)
+                }
             }
         } else {
             Text("First time — just go to failure")
@@ -115,8 +152,15 @@ struct RepControl: View {
         // The threshold is two events 45ms apart; a rep is one. Rhythm rather
         // than volume, because that is what the hand can tell apart with the
         // phone face down on the floor.
+        //
+        // And a tone, which was missing. `04-rules.md §1` is explicit that
+        // passing last time's number is the emotional centre and to "give it
+        // everything: haptic detent, colour, motion, sound" — the port had
+        // three of the four. `Cue.beatIt` was composed, tested, and never
+        // played; `src/components/RepDial.tsx` fires its equivalent right here.
         if wouldCross {
             Haptics.shared.threshold()
+            Audio.shared.play(.beatIt)
         } else {
             Haptics.shared.rep()
         }

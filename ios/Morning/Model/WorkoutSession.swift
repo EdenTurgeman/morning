@@ -71,6 +71,14 @@ final class WorkoutSession {
         // Step 0 is the warm-up timer. Arming it here rather than only in
         // `move(to:)` is the difference between a countdown and a frozen 90.
         endsAt = Self.endsAt(for: steps.first, now: now)
+        // And write it NOW, not on the first step change.
+        //
+        // `persist()` was only reached from `move(to:)`, so a session existed in
+        // memory and nowhere else until you advanced off the warm-up. Force-quit
+        // during those ninety seconds and the workout was simply gone —
+        // `04-rules.md §1` says a workout in progress survives a force-quit, and
+        // for the first minute and a half of every session it did not.
+        persist()
     }
 
     /// Restores a session that was interrupted. Must land on the same step with
@@ -252,7 +260,13 @@ final class WorkoutSession {
         if let set = currentSet {
             log[set.slot] = draftReps
         }
-        let minutes = max(0, Int((Double(Int(now.timeIntervalSince1970 * 1000) - startedAt) / 60000).rounded()))
+        // Floor of ONE, not zero. `src/hooks/useWorkout.ts` does
+        // `Math.max(1, ...)` and the port did `max(0, ...)`, so a session
+        // finished inside thirty seconds recorded "0 minutes" here and "1
+        // minute" on the web. That is a value outside the range the web build
+        // can produce, in a file the web build reads back.
+        let elapsed = Double(Int(now.timeIntervalSince1970 * 1000) - startedAt) / 60000
+        let minutes = max(1, Int(elapsed.rounded()))
         return SessionRecord(
             date: Self.localDateString(now, calendar: calendar),
             sessionKey: sessionKey,

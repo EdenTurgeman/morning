@@ -1,0 +1,372 @@
+# UI/UX review — W14
+
+Every figure here was measured on a rendered frame with
+`ios/Tools/measure-layout.py`, not read off the source. That tool scans a
+screenshot for horizontal bands carrying content and reports each band's height
+and the gap above it, in **points** — the units the design system is written in,
+rather than the 3× pixels a screenshot flatters everything with.
+
+Reproduce any row below with:
+
+```bash
+python3 ios/Tools/measure-layout.py ios/build/ux/<screen>.png
+```
+
+Screens captured at the six-month seed unless noted.
+
+---
+
+## 1. Empty space
+
+Eden named this first, and it is the largest single pattern in the app. Six of
+the ten screens carry a void of 190pt or more.
+
+| Screen | Largest gap | Share of the 874pt screen |
+|---|---|---|
+| **Backup** | 369pt | 42% |
+| **Ledger** | 309pt (trailing, nothing below it) | 35% |
+| **Summary** | 307pt | 35% |
+| **Warm-up** | 192 + 190pt, either side of the clock | 44% combined |
+| **Rest** | 166 + 170pt, either side of the ring | 38% combined |
+| **Home** | 202pt | 23% |
+
+**They are not all the same problem.** Three kinds:
+
+**a. A focal object floating in the middle** — Rest and Warm-up. The rest ring is
+237pt of content with ~168pt of air on each side, and that is close to correct:
+one object, centred, nothing competing. The warm-up is the same shape with a
+much smaller object — a 68pt clock with 190pt above and below it — and there it
+reads as unresolved rather than composed, because the clock is not big enough to
+hold the middle of a screen on its own.
+
+**b. Content top-aligned, action bottom-pinned, void between** — Home, Summary,
+Backup. Pinning the primary action low is right and deliberate: the phone is in
+one hand and the thumb reaches the bottom third. The void is the cost of that,
+and at 202pt (Home) it is acceptable; at 369pt (Backup) it is not, and it leaves
+"Erase everything" stranded alone at the very bottom of an empty screen.
+`04-rules.md §8` asks for erase to be "visually de-emphasised", which it is —
+but *isolated in a void* is a different thing from de-emphasised, and it
+arguably draws the eye rather than releasing it.
+
+**c. Content simply stops** — Ledger. 309pt of nothing below the last row, with
+no bottom-pinned action to justify it. This is the weakest of the three: the
+screen ends and then continues for another third of its height.
+
+---
+
+## 2. Cramped space
+
+Only one screen is tight, and it is the one that has to be.
+
+`-screen set -slot 4.0.0` is the worst content in the program — four cues and a
+long name. Measured, its bands run: 30pt name, 54pt metadata, 114pt cue block,
+83pt rep control, 68pt button, with gaps of **8, 9, 12, 12, 15, 15, 15, 19pt**
+between them.
+
+It fits, and nothing scrolls, which is the rule. But every gap on that screen is
+under 20pt where the ordinary Set screen breathes at 29–56pt. The cue block
+absorbs the difference. **Nothing to fix — but this is the layout that breaks
+first**, and any addition to the Set screen has to be checked here rather than
+against the ordinary case.
+
+---
+
+## 3. Undersized text — **the first pass of this section was wrong**
+
+I derived font sizes from measured band heights, and band height does not tell
+you font size. "2×2.5 + 1×1.25" measures 10pt and "Last: A, yesterday · 209
+reps" measures 12.3pt, and **both are `TypeScale.body`** — the difference is
+that one line has descenders and the other has none. A `caption2` line without
+descenders and a `subheadline` line without descenders measure the same.
+
+So `measure-layout.py` answers "where is the content and how much air is around
+it", which is what sections 1 and 2 rest on, and it cannot answer "is this type
+too small". Corrected below by reading the scale directly instead.
+
+**What the type scale actually is**, and where each size lands:
+
+| Token | Font | Used for |
+|---|---|---|
+| `counter(_:)` | fixed 34–92pt | rep counts, clocks, the tonnage headline |
+| `title` | fixed 34pt | exercise names, screen headlines |
+| `body` | `.subheadline` (15pt) | every sentence in the app |
+| `question` / `answer` | fixed 17 / 14.5pt | study cards |
+| `label` | `.caption` (12pt) | chrome — Back, End, screen titles |
+| `microLabel` | `.caption2` (11pt) | eyebrows, units, the week meter, nav links |
+
+**The finding that survives**, now stated properly: `microLabel` at 11pt is
+carrying more than an eyebrow font should.
+
+- **The four Home nav links** — History, All time, Guide, Backup — are
+  `microLabel`, 11pt. Their tap targets are a correct 44pt (`Hit.minimum`), so
+  this is legibility rather than reachability, but 11pt is the smallest text in
+  the system and these are the only way into four of the app's ten screens.
+- **The week meter's labels and the streak line** are `microLabel` too. "9 weeks
+  running · best 16" is the one number on Home that rewards a glance.
+
+**Withdrawn from the first pass**, having checked the source rather than the
+pixels: the plate breakdown and the Ledger stat rows are both `body` (15pt), not
+11pt. They are the same size as every other sentence in the app and there is
+nothing wrong with them.
+
+**Not a finding:** the counters, titles and headlines are 34–92pt and sized
+against the 1.5 m reading distance. Those are right.
+
+---
+
+## 3b. Round two — the horizontal axis
+
+Round one used a vertical instrument and could only see vertical problems. The
+classic thing it cannot see is a ragged left edge, so round two measured the
+left and right extent of every band.
+
+**The first attempt at this did not work either**, and for a reason worth
+writing down: thresholding on horizontal *variance* reported that every band on
+every screen ran the full 402pt width. That is the sky. Stars and cloud texture
+carry enough variance that a row of empty sky looks identical to a row of type.
+Switching to an absolute brightness threshold separates them, because type and
+button fills are far brighter than the texture.
+
+**The result is clean.** Every screen in the app — workout and reading alike —
+sets its content at a **22.7–24.3pt left gutter**. Bulleted cue text sits at
+**37pt**, which is the bullet plus its spacing, and is identical on the Set
+screen and the Warm-up. Centred items are centred. There is no ragged edge
+anywhere.
+
+One deliberate exception: the Backup status line starts at 34.3pt, inset from
+its 2pt coloured rule at the gutter. That is the standard shape of a left-ruled
+callout and matches what the web build does with `border-l-2`.
+
+---
+
+## 3c. Round three — contrast, including on the things this review added
+
+Rounds one and two added a weight picker, a backup status block, a week strip
+and a run line without measuring any of them against the design system's 6.6:1
+text floor. `measure-contrast.py` could not check them: it works from a
+hand-maintained zone table, so anything newly added is invisible to it until
+somebody remembers to add a row. `measure-layout.py --contrast` now measures
+whatever bands the layout scan already found, so a new control is checked the
+first time it renders.
+
+**One real failure, fixed.** "Erase everything" was `Semantic.danger` at 0.75
+opacity and measured **3.07:1** — under this app's 6.6:1 floor and under WCAG
+AA's 4.5:1 for ordinary text. It is the label on the only control that destroys
+everything, and de-emphasis had been taken as far as illegibility. Full strength
+gave 4.27:1, still short, so `Semantic.dangerText` now exists: the same red
+lifted 34% toward white, exactly the split the palette already makes between
+`accent` and `accentText`. **7.16:1.**
+
+**Two things the new probe cannot do**, established by cross-checking it against
+the validated tool rather than by trusting it:
+
+- **It understates thin small text.** It takes the 98.5th percentile of a band
+  as the glyph core, and on a 10pt line few enough pixels are glyph that the
+  percentile never reaches it. It reported the Rest screen's next-up line at
+  4.38:1; `measure-contrast.py`, aimed properly, says **8.25:1**.
+- **It cannot measure a filled button at all** — a bright fill with a dark label
+  reports 1.00:1, because the band's median and its brightest pixel are both the
+  fill.
+
+So it is a smoke detector, good for catching a 2× miss like the Erase label.
+`measure-contrast.py` remains the measurement.
+
+**And the measurement had a stale window.** Cross-checking turned up that
+`measure-contrast.py`'s `rest / timer seconds` zone had drifted off its element:
+the window sat at y 940–1180 while the digits render at 1160–1400, so it was
+measuring the ring's upper arc and the sky above it. It reported **3.71:1 for
+the largest, brightest, whitest thing on the screen**. Re-anchored, the timer
+measures **10.90:1** and the whole Rest screen spans 8.25–13.94:1.
+
+A window that misses its element does not produce a small error. It produces a
+confident wrong answer about the one screen you stare at for a minute — and the
+tool's own footer has always said to check for exactly this.
+
+---
+
+## 3d. Round four — device size, and the one that was actually broken
+
+Every frame in this review, and every frame in the port before it, was rendered
+on one phone: an iPhone 16 Pro at **874pt**. `TARGETED_DEVICE_FAMILY = 1` and an
+iOS 26 floor put every iPhone back to the **SE 3rd generation at 667pt** inside
+the support matrix, and nothing had ever looked at one.
+
+**The Set screen — the one screen that must never scroll — did not fit it.**
+
+Measured on a 667pt SE, the ordinary Set screen and the worst-content one both
+overflowed at *both ends*: the entire workout chrome — Back, "Set 13 / 14", End
+— was pushed off the top, and the Done button was cut in half by the bottom
+edge. On that phone you could not go back, could not end the session, and could
+barely reach the primary action. It is the most serious layout defect found
+anywhere in this review and it was invisible on the only device anyone had
+rendered.
+
+**What yields, and why it is the right thing to lose.** The bay now reads the
+height it was given. Everything else on the Set screen either instructs (the
+cues, the target, the load) or *is* the control; the demonstration is the only
+element that merely illustrates, so it shrinks first and it shrinks alone. Below
+72pt the figure stops reading as a body, so under that it is not drawn at all —
+showing a smudge would be worse than showing nothing, and clipping Done to keep
+the smudge is worse than both.
+
+The "13 sets to go" footer goes with it, under the **same** condition rather
+than a second threshold of its own: when there is no room for the illustration
+there is no room for the footnote either, and the progress rail two inches above
+already says the same thing without words.
+
+| | 874pt (16 Pro) | 844pt (17e) | 667pt (SE 3) |
+|---|---|---|---|
+| Before | 44pt clear | fits | **chrome and Done clipped** |
+| After | 44pt clear — byte-identical | fits | **9pt clear** |
+
+The tall-screen layout is unchanged, which is the point: the bay is at its full
+178pt wherever there is room for 178pt.
+
+**The transition was re-checked afterwards, and survived.** Making the Set
+screen responsive meant wrapping it in a `GeometryReader`, and `SetScreen` is
+half of the `matchedGeometryEffect` pair that carries the work object into the
+Rest screen. A geometry container around one half of a matched pair is exactly
+the kind of change that silently breaks it. Re-captured at 60fps: the ring is
+still born small at the counter's position and travels up into place, and the
+luminance across the swap is 50 → 23 → 41, unchanged.
+
+**And the Summary was clipped too, but only after fourteen seconds.** Measured
+on the SE it had 12pt of clearance — fine. Measured again after the study card
+reveals its answer, the Done button was cut off by five points. That is the
+third time in this review a number was taken before the content it measured had
+arrived.
+
+`src/screens/Summary.tsx` already solves it: the celebration sits in an
+`overflow-y-auto` with the button outside, and a comment saying "the only thing
+that can ever scroll out of sight is the tail of the card". This port had it all
+in one fixed column. Ported. `04-rules.md`'s no-scroll rule is about workout
+screens, and this is the screen after one.
+
+| Summary, card revealed | 874pt | 667pt |
+|---|---|---|
+| Before | 46pt clear | **Done clipped by 5pt** |
+| After | 46pt clear — unchanged | 12pt clear, card scrolls |
+
+**Reproduce it.** The SE is not a default simulator; create one with
+
+```bash
+xcrun simctl create "SE3" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation
+```
+
+and render `-screen set -slot 4.0.0`. **Any future addition to the Set screen has
+to be checked there**, not on a Pro — and any addition to the Summary has to be
+checked there *after the card reveals*, which is twenty seconds of waiting and
+the only way to see the real height.
+
+Rest, Warm-up, Home, Backup, Ledger and Guide were all checked at 667pt and all
+fit; Ledger has 89pt to spare.
+
+**Validated across a whole session, not two screenshots.** `-autorun` was run
+end to end on the 667pt SE, because different exercises carry different numbers
+of cues and a fix checked against one slot proves nothing about the others.
+Sampled through: "Set 4 / 13 · Overhead press" with its extra "No rest after
+this" line, a compressed 72pt bay, both cues, the rep control and Done — all
+present, nothing clipped, footer correctly absent. The rests render at every
+stage of the dawn.
+
+---
+
+## 3e. Round five — the seeds nobody had rendered
+
+Only `empty` and `six-months` had ever been looked at. `one-week` and `one-year`
+both hold:
+
+- **`one-year`** puts 769 tonnes, 64,840 reps, 285 sessions and "84 hours" on
+  the Ledger and nothing overflows. The year grid fits the screen width exactly
+  at a full 52 weeks — the constraint `04-rules.md §7` singles out, with a
+  visible training gap around week 33 reading exactly as it should.
+- **`one-week`** shows the Ledger at 10 tonnes with a nearly-empty progress bar
+  toward 25, and the week meter at "0 of 5 · 5 to go, 6 days after today. 1
+  spare."
+
+**One thing fixed.** At `one-week` the Ledger's new closing line read *"1 week
+running. Longest run 1 week."* — the same fact twice. The web prints both
+unconditionally; `HomeScreen.runLine` already had the right rule, which is that
+the best run is only worth naming when it is not the current one. The Ledger now
+matches Home rather than the source.
+
+---
+
+## 3f. Round six — does the Guide describe the app that exists?
+
+The Guide is user-facing instructions and it is content, ported verbatim, so
+where it and the UI disagree **the UI is what moves**. Read against the built
+app, one line disagreed:
+
+> "Go up a notch in weight — **tap the loadout on the home screen**"
+
+The weight picker added during the completeness pass hung off a small "Change"
+button beside the "Set up" label, not off the loadout. The content specifies the
+interaction; the loadout is the tap target now, and "Change" stays as a label so
+that something still says the block is tappable. It is also a ~90pt target
+instead of a 44pt one, which at 6:10am with sweaty hands is the difference that
+matters.
+
+The other reference — "if the prescribed number isn't that, change it on the
+home screen" — was simply false until this session, because there was nothing on
+the home screen to change it with.
+
+---
+
+## 4. What is already good, so nobody re-opens it
+
+- **The Set screen's ordinary state.** Bands throughout, gaps 8–56pt, no void,
+  everything on one screen, nothing scrolling. It is the most constrained layout
+  in the app and the best-composed one.
+- **History.** 15pt gaps between rows, 25pt rows, a rule between each. Dense
+  without being tight, and it scrolls, so length is not a constraint.
+- **Guide.** Paragraph blocks of 120–182pt separated by 35pt, headings at 14–18pt.
+  Correct reading rhythm.
+- **Hit targets.** Every control checked carries `Hit.minimum` (44pt) or larger;
+  the rep steppers are 82pt and the primary buttons 68pt.
+- **Horizontal alignment**, measured across all ten screens. See 3b.
+
+---
+
+## 5. Fixed in this round
+
+- **Backup now leads with its status.** `AppData.lastBackup` was in the schema,
+  in every seed and in the web build's own writer, and this port never wrote it
+  and never showed it — so the one screen whose entire job is "do you have a
+  copy" could not answer the question. It says "Never backed up." / "Backed up
+  today." / "Last backup N days ago." against a coloured rule, and exporting
+  stamps the date. That is a completeness gap that happened to be found by a
+  layout measurement.
+- **Erase everything sits under a hairline.** The distance from Export is the
+  safety mechanism and it stays; what changed is that the control now reads as
+  the last *section* rather than as something orphaned at the foot of a void.
+- **The Ledger closes with the run** — "9 weeks running. Longest run 16 weeks."
+  Ported from `src/screens/Ledger.tsx`, which the port had dropped. It is the
+  right thing to end a lifetime page on, and it was the only void in the app
+  with no action to justify it.
+- **The warm-up's clock follows its cues.** 192pt above and 190pt below became
+  52pt above and one void below, where it pays for the bottom-pinned button like
+  every other screen. The two things you read there — what to do, how long — now
+  read as one instruction.
+- **`Semantic.danger` exists.** `02-design-brief.md §6` asks for semantic colours
+  for success *and destruction*; success had a token and destruction did not, so
+  `HistoryScreen` carried the value inline and Backup had nothing to say "never
+  backed up" with.
+
+## 6. Ranked, still open
+
+1. ~~**`microLabel` at 11pt on Home's four nav links.**~~ **Fixed** — lifted to
+   `label` (12pt). Still the quietest thing on the screen, still one line with
+   room to spare, but no longer the floor of the whole type system on the only
+   route into four screens.
+2. **Home's 202pt gap** — real, but the least wrong of the six, because the low
+   primary action is buying something with it.
+3. ~~**Summary's 307pt gap.**~~ **Closed by measuring it properly.** That figure
+   was taken three seconds in, before the card answer arrives. After the reveal
+   the answer occupies 112pt and the gap is **179pt** — the same range as Home,
+   already judged acceptable. The first measurement was the same mistake as
+   section 3: a number taken before checking what it was a number *of*.
+
+Rest's spacing is deliberately excluded: measured it looks like the same
+problem, but a single 237pt focal object centred in the screen is the one case
+where the air is the composition.

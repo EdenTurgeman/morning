@@ -26,6 +26,29 @@ struct TimerStep: Equatable {
     let cues: [String]
 }
 
+extension SetStep {
+    /// "set 2 of 3 · 6.25 kg · 8–15 reps" — the one-line summary of what is
+    /// coming, shared by the Rest screen and the Live Activity.
+    ///
+    /// It lives here because it did not, and the two drifted immediately. The
+    /// Live Activity grew its own copy with the load first instead of the set
+    /// position, and appending "reps" to a `target` that already ends in
+    /// "reps" — "8–15 reps reps". Neither showed up: the Lock Screen cannot be
+    /// reached from this machine, and the review preview I built for it used
+    /// hardcoded sample strings that were correct, so the sample masked the
+    /// bug in the code it existed to check.
+    var summaryLine: String {
+        var parts = ["set \(n) of \(of)"]
+        if let load {
+            parts.append("\(Plates.format(load)) kg")
+        }
+        // `target` already reads "8–15 reps". Appending the unit is how the
+        // Live Activity's own copy of this produced "8–15 reps reps".
+        parts.append(target)
+        return parts.joined(separator: " · ")
+    }
+}
+
 /// Position within a superset round — "superset 1 of 2".
 struct SupersetPosition: Equatable {
     let index: Int
