@@ -131,7 +131,28 @@ through the named target. **If you add a target, check that tool.**
 
 ## 2026-08-22 · Quality pass — the Set↔Rest transition · Claude Opus 5
 
-**Workstream:** quality pass over W4/W5, on `ios-port/quality-pass`
+**Workstream:** four pieces on one branch, `ios-port/quality-pass` — a quality
+pass over W4–W10, a completeness pass, **W14** (the UI/UX review) and **W12**
+(the Live Activity). Eden set that order himself.
+
+**This entry is long. Read it in this order:**
+
+| If you want | Go to |
+|---|---|
+| What broke and got fixed | *What I did*, immediately below |
+| Whether the port is behaviourally complete | *Completeness pass* |
+| Screen-by-screen UI findings | **`ios/Docs/ux-review.md`**, not this file |
+| The Live Activity | *W12*, and the device checklist |
+| **What will bite you** | *Landmines*, near the end |
+| What is already checked, so you don't redo it | *Looked at and found sound* |
+
+**The one thing to take from all of it:** nearly every real defect here was found
+by making something observable that was not — a launch argument for a state no
+tap could reach, a frame extractor for motion, a log line for a Lock Screen, a
+667pt simulator, a sweep for model properties no view reads. And **three times
+the instrument was wrong before the code was**, each time producing a confident
+wrong answer. If you add a tool, check it against something you already know.
+
 
 **What I did**
 - **Built the Set↔Rest transition, which did not exist.** The app swapped the
