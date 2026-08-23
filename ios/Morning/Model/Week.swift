@@ -233,13 +233,13 @@ enum WeekNudge {
         if !progress.canRestToday {
             return progress.daysLeft == 1
                 ? "Last day. This one makes the week."
-                : "Train today or the week's gone — \(progress.remaining) left, \(progress.daysLeft) days."
+                : "Train today or the week's gone. \(progress.remaining) left, \(progress.daysLeft) days."
         }
 
         // There is room to skip. Name the days it would cost you.
         let needed = Array(progress.daysAhead.suffix(progress.remaining))
         if needed.count == progress.daysAhead.count, !needed.isEmpty {
-            return "Rest today and you still make \(progress.target) — but you'd need \(list(needed))."
+            return "Rest today and you still make \(progress.target), but you'd need \(list(needed))."
         }
 
         let spare = progress.daysAhead.count - progress.remaining

@@ -194,7 +194,7 @@ let program: [Session] = [
                 cues: [
                     "20 arm circles forward, 20 back",
                     "10 half-effort push-ups",
-                    "10 towel dislocates — grip a towel wide, sweep it overhead and behind you",
+                    "10 towel dislocates: grip a towel wide, sweep it overhead and behind you",
                 ]
             )),
             .straight(Straight(
@@ -247,7 +247,7 @@ let program: [Session] = [
                         cues: [
                             "Hinge to 45°, flat back",
                             "Pull to your hips and squeeze",
-                            "Shoulder insurance — don't skip it",
+                            "Shoulder insurance. Don't skip it",
                         ]
                     ),
                     Movement(
@@ -280,7 +280,7 @@ let program: [Session] = [
             )),
             .straight(Straight(
                 exercise: "Push-up",
-                sub: "deficit — hands on books",
+                sub: "deficit, hands on books",
                 sets: 3,
                 rest: 60,
                 bodyweight: true,
@@ -331,7 +331,7 @@ let program: [Session] = [
                 cues: [
                     "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
                     "Stop when you can't get 4 clean reps",
-                    "The 20-second rest IS the mechanism — don't stretch it",
+                    "The 20-second rest IS the mechanism. Don't stretch it",
                 ]
             )),
             .straight(Straight(
@@ -342,7 +342,7 @@ let program: [Session] = [
                 load: 5,
                 target: "15–25 reps",
                 cues: [
-                    "Elbows slightly bent and locked there — a fly, not a press",
+                    "Elbows slightly bent and locked there: a fly, not a press",
                     "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
                     "Past 25 clean reps? Slow the lowering to 4s. Go to failure",
                 ]

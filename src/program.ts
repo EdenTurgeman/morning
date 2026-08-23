@@ -60,7 +60,7 @@ export const PROGRAM = {
         cues: [
           "20 arm circles forward, 20 back",
           "10 half-effort push-ups",
-          "10 towel dislocates — grip a towel wide, sweep it overhead and behind you",
+          "10 towel dislocates: grip a towel wide, sweep it overhead and behind you",
         ],
       },
       {
@@ -116,7 +116,7 @@ export const PROGRAM = {
             cues: [
               "Hinge to 45°, flat back",
               "Pull to your hips and squeeze",
-              "Shoulder insurance — don't skip it",
+              "Shoulder insurance. Don't skip it",
             ],
           },
           {
@@ -152,7 +152,7 @@ export const PROGRAM = {
         // books, then feet elevated, then the ladder in the Guide.
         kind: "straight",
         exercise: "Push-up",
-        sub: "deficit — hands on books",
+        sub: "deficit, hands on books",
         sets: 3,
         rest: 60,
         bodyweight: true,
@@ -205,7 +205,7 @@ export const PROGRAM = {
         cues: [
           "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
           "Stop when you can't get 4 clean reps",
-          "The 20-second rest IS the mechanism — don't stretch it",
+          "The 20-second rest IS the mechanism. Don't stretch it",
         ],
       },
       {
@@ -232,7 +232,7 @@ export const PROGRAM = {
         // what makes it hard, not the load.
         target: "15–25 reps",
         cues: [
-          "Elbows slightly bent and locked there — a fly, not a press",
+          "Elbows slightly bent and locked there: a fly, not a press",
           "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
           "Past 25 clean reps? Slow the lowering to 4s. Go to failure",
         ],
@@ -246,31 +246,31 @@ export const PROGRAM = {
 export const GUIDE = [
   {
     heading: "The one rule",
-    body: "Every working set goes to failure or one rep short. Your load stays fixed for weeks at a time, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.) — light loads stopped short grow almost nothing (2.8%).",
+    body: "Every working set goes to failure or one rep short. Your load stays fixed for weeks at a time, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.). Light loads stopped short grow almost nothing (2.8%).",
   },
   {
     heading: "Beat reps, not weight",
-    body: "The number under each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the ladder. Set the weight to something you can genuinely take to failure — if the prescribed number isn't that, change it on the home screen. Reps at a weight you can't finish aren't a measurement of anything.",
+    body: "The number under each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the ladder. Set the weight to something you can genuinely take to failure. If the prescribed number isn't that, change it on the home screen. Reps at a weight you can't finish aren't a measurement of anything.",
   },
   {
     heading: "Why B looks lopsided",
-    body: "With 5 kg in each hand there is almost nothing you can train hard except small muscles, so B is a delt and chest-isolation day while A carries the compounds. It used to be 57% lateral raises, which pushed side delts past ~20 sets a week — the point where extra volume stops paying — while your pecs had one movement and no isolation at all. The myo block came down to 3 sets and the floor fly took the difference.",
+    body: "With 5 kg in each hand there is almost nothing you can train hard except small muscles, so B is a delt and chest-isolation day while A carries the compounds. It used to be 57% lateral raises, which pushed side delts past ~20 sets a week, the point where extra volume stops paying, while your pecs had one movement and no isolation at all. The myo block came down to 3 sets and the floor fly took the difference.",
   },
   {
     heading: "Progression ladder",
-    body: "1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Go up a notch in weight — tap the loadout on the home screen; the smallest step is 1.25 kg a side, and reps restart from a fresh baseline.  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups.",
+    body: "1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Go up a notch in weight: tap the loadout on the home screen; the smallest step is 1.25 kg a side, and reps restart from a fresh baseline.  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups.",
   },
   {
-    heading: "Protein — 120 g/day",
-    body: "2.0 g/kg, roughly 30 g across four meals — make one of them within a couple of hours of finishing. Anywhere in 105–140 g is fine.",
+    heading: "Protein: 120 g/day",
+    body: "2.0 g/kg, roughly 30 g across four meals. Make one of them within a couple of hours of finishing. Anywhere in 105–140 g is fine.",
   },
   {
-    heading: "Calories — +250/day",
+    heading: "Calories: +250/day",
     body: "You're lean and already burning through cycling and yoga. Target +150–250 g on the scale per week. If the weekly average is flat, eat more. This is the bottleneck, not the training.",
   },
   {
-    heading: "Creatine — 5 g/day",
-    body: "Any time of day, no loading needed. The only supplement worth the money. Expect +1–1.5 kg in the first fortnight from intracellular water — that's fullness, not fat.",
+    heading: "Creatine: 5 g/day",
+    body: "Any time of day, no loading needed. The only supplement worth the money. Expect +1–1.5 kg in the first fortnight from intracellular water. That's fullness, not fat.",
   },
   {
     heading: "Fasted is fine",

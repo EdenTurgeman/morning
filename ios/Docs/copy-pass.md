@@ -116,3 +116,65 @@ register the product asked for and mostly already had.
 Accessibility labels. There are 23 of them, they are never seen, and VoiceOver
 phrasing follows different rules from visible copy. Worth its own pass if the
 app is ever used with VoiceOver; not worth folding into this one.
+
+---
+
+## Part two, done — Eden chose "all 59, everywhere" (2026-08-23)
+
+Every em-dash in user-facing copy is gone. Forty rewrites, applied to **every
+file that carries each string at once** so the iOS app, the port's content
+sources, the golden test fixtures, the web build and the prototype cannot drift
+apart:
+
+`Program.swift` · `Celebration.swift` · `Week.swift` · four screens ·
+`cards.json` · `guide.json` · `MorningTests/Fixtures/{compiled-steps,program}.json` ·
+`ios-port/content/*.json` · `src/program.ts` · `src/lib/{cards,celebration,week}.ts` ·
+`src/screens/Workout.tsx` · `src/components/RepDial.tsx` · `prototype/index.html`
+
+**The rule I applied:** replace the dash with the punctuation the sentence
+actually wanted, and keep every other word. A dash was standing in for a full
+stop, a colon or a pair of commas; picking the right one is a smaller change
+than rewriting, and it keeps his voice.
+
+**En-dashes stay.** "8–15 reps", "4–5s", "20–80%", "+1–1.5 kg" are number
+ranges and a hyphen there would be wrong. He objected to em-dashes; these are a
+different mark doing a different job.
+
+### The changes
+
+| Where | Before → After |
+|---|---|
+| Warm-up cue | 10 towel dislocates **—** grip a towel wide → **:** grip a towel wide |
+| Overhead press cue | Shoulder insurance **—** don't skip it → **.** Don't skip it |
+| Push-up sub | deficit **—** hands on books → deficit**,** hands on books |
+| Myo cue | The 20-second rest IS the mechanism **—** don't stretch it → **.** Don't stretch it |
+| Floor fly cue | Elbows slightly bent and locked there **—** a fly, not a press → **:** a fly |
+| Superset line | No rest after this **—** straight into the next one. → **.** Straight into |
+| Warm-up button | Done **—** start lifting → **Start lifting** |
+| Discard warning | Nothing will be saved **—** not even → **.** Not even |
+| Rep control | First time **—** just go to failure → **First time here. Go to failure** |
+| Rep control | Last time: 12 at 6.25 kg **—** different weight now → **Different weight now.** Last time: 12 at 6.25 kg |
+| Week nudge | Train today or the week's gone **—** 3 left → **.** 3 left |
+| Week nudge | you still make 5 **—** but you'd need → 5**,** but you'd need |
+| Celebration, 2 weeks | becoming a habit **—** and where most → habit**,** and where most |
+| Celebration, 52 weeks | Nothing to add **—** just don't stop. → Nothing to add**.** Just don't stop. |
+| Celebration, clean sweep | matched last time **—** every single one → **.** Every single one |
+| Celebration, weight up | a fresh baseline **—** beat it next time. → **.** Beat it next time. |
+| Guide ×4 headings | Protein **—** 120 g/day → Protein**:** 120 g/day (and Calories, Creatine) |
+| Guide ×5 bodies | dash → full stop, colon or comma as the clause wanted |
+| Cards ×16 answers | dash → full stop, colon or comma as the clause wanted |
+
+**The weight-changed line is the one that changed most, and for a reason
+beyond punctuation.** It read "Last time: 12 at 6.25 kg — different weight now",
+which buries the important part at the end. The important part is that the
+comparison does not hold. It leads now.
+
+**"Done — start lifting" lost half of itself.** The "Done —" said what the
+button does to the warm-up, which a button does by existing. "Start lifting"
+says what happens next.
+
+### One left, deliberately
+
+`cards.json` still contains one em-dash: *"The study deck. Port verbatim — the
+copy is the product."* It is the file's own header note, not a card. Nobody
+sees it.

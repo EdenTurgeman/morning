@@ -86,11 +86,9 @@ export function RepDial({ value, onStep, previous, previousKg }: Props) {
       <div className="mt-3 text-center text-[1rem]">
         {previous !== null && previousKg !== undefined ? (
           <span className="text-muted">
-            Last time:{" "}
+            Different weight now. Last time:{" "}
             <b className="tnum font-semibold text-ink">{previous}</b>{" "}
-            <span className="text-dim">
-              at {formatKg(previousKg)} kg — different weight now
-            </span>
+            <span className="text-dim">at {formatKg(previousKg)} kg</span>
           </span>
         ) : previous !== null ? (
           <span className={beating ? "text-emerald" : "text-muted"}>
@@ -104,7 +102,7 @@ export function RepDial({ value, onStep, previous, previousKg }: Props) {
             )}
           </span>
         ) : (
-          <span className="text-muted">First time — just go to failure</span>
+          <span className="text-muted">First time here. Go to failure</span>
         )}
       </div>
     </div>

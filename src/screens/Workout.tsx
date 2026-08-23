@@ -81,7 +81,7 @@ export function Workout(props: Props) {
         open={confirmEnd}
         onOpenChange={setConfirmEnd}
         title="End this session?"
-        description="Nothing will be saved — not even the sets you've already logged."
+        description="Nothing will be saved. Not even the sets you've already logged."
         confirmLabel="End and discard"
         cancelLabel="Keep going"
         destructive
@@ -121,7 +121,7 @@ function TimerStepView({
       </div>
 
       <Button variant="primary" onClick={() => onAdvance()}>
-        Done — start lifting
+        Start lifting
       </Button>
     </div>
   );
@@ -208,7 +208,7 @@ function SetStepView({
 
         {step.straightIntoNext && (
           <p className="mt-1.5 text-[0.86rem] text-[var(--accent)]">
-            No rest after this — straight into the next one.
+            No rest after this. Straight into the next one.
           </p>
         )}
       </div>
