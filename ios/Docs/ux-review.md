@@ -184,6 +184,55 @@ tool's own footer has always said to check for exactly this.
 
 ---
 
+## 3d. Round four — device size, and the one that was actually broken
+
+Every frame in this review, and every frame in the port before it, was rendered
+on one phone: an iPhone 16 Pro at **874pt**. `TARGETED_DEVICE_FAMILY = 1` and an
+iOS 26 floor put every iPhone back to the **SE 3rd generation at 667pt** inside
+the support matrix, and nothing had ever looked at one.
+
+**The Set screen — the one screen that must never scroll — did not fit it.**
+
+Measured on a 667pt SE, the ordinary Set screen and the worst-content one both
+overflowed at *both ends*: the entire workout chrome — Back, "Set 13 / 14", End
+— was pushed off the top, and the Done button was cut in half by the bottom
+edge. On that phone you could not go back, could not end the session, and could
+barely reach the primary action. It is the most serious layout defect found
+anywhere in this review and it was invisible on the only device anyone had
+rendered.
+
+**What yields, and why it is the right thing to lose.** The bay now reads the
+height it was given. Everything else on the Set screen either instructs (the
+cues, the target, the load) or *is* the control; the demonstration is the only
+element that merely illustrates, so it shrinks first and it shrinks alone. Below
+72pt the figure stops reading as a body, so under that it is not drawn at all —
+showing a smudge would be worse than showing nothing, and clipping Done to keep
+the smudge is worse than both.
+
+The "13 sets to go" footer goes with it, under the **same** condition rather
+than a second threshold of its own: when there is no room for the illustration
+there is no room for the footnote either, and the progress rail two inches above
+already says the same thing without words.
+
+| | 874pt (16 Pro) | 844pt (17e) | 667pt (SE 3) |
+|---|---|---|---|
+| Before | 44pt clear | fits | **chrome and Done clipped** |
+| After | 44pt clear — byte-identical | fits | **9pt clear** |
+
+The tall-screen layout is unchanged, which is the point: the bay is at its full
+178pt wherever there is room for 178pt.
+
+**Reproduce it.** The SE is not a default simulator; create one with
+
+```bash
+xcrun simctl create "SE3" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation
+```
+
+and render `-screen set -slot 4.0.0`. **Any future addition to the Set screen has
+to be checked there**, not on a Pro.
+
+---
+
 ## 4. What is already good, so nobody re-opens it
 
 - **The Set screen's ordinary state.** Bands throughout, gaps 8–56pt, no void,
