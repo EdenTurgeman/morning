@@ -40,7 +40,10 @@ struct RestScreen: View {
     let next: SetStep?
     let card: Card?
     let isMyo: Bool
-    let namespace: Namespace.ID
+    /// The rail's ticks. See `WorkoutChrome.setMarks` — passed on every screen
+    /// in the workout, because a rail that changes shape between them reads as
+    /// a bug.
+    let setMarks: [Double]
 
     let onExtend: () -> Void
     let onSkip: () -> Void
@@ -59,6 +62,9 @@ struct RestScreen: View {
     @State private var lastSpokenSecond: Int?
     /// Fires once per rest. `endsAt` resets it.
     @State private var completed = false
+    /// When the answer is due. The thinking bar fills against this rather than
+    /// against an animation, so the two cannot disagree. See `StudyCard`.
+    @State private var revealAt: Date?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var palette: DawnPalette {
@@ -67,26 +73,43 @@ struct RestScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
+            WorkoutChrome(progress: progress, step: stepLabel, setMarks: setMarks, onBack: onBack, onEnd: onEnd)
 
-            Spacer(minLength: Space.step)
-
-            TimelineView(.animation) { context in
-                let remaining = max(0, endsAt.timeIntervalSince(context.date))
-                RestTimer(
-                    remaining: remaining,
-                    total: Double(seconds),
-                    compact: card != nil && revealed,
-                    accent: palette.accent,
-                    namespace: namespace
-                )
-                .onChange(of: Int(ceil(remaining))) { _, value in
-                    speak(secondsLeft: value)
-                    if value <= 0 {
-                        finish()
+            // CENTRED IN ITS OWN BAND.
+            //
+            // W15 #15: *"the counter isn't centered in it's section at the top,
+            // the spacing is weird between the elements."* Measured off his
+            // photo, the rail-to-ring gap was ~150px and the ring-to-card gap
+            // ~50px.
+            //
+            // The cause was two `Spacer(minLength:)`s splitting the leftover
+            // space evenly — one above the ring and one below the card. The
+            // upper one pushed the ring DOWN while the card stayed pinned right
+            // under it, so the ring drifted to the bottom of the space it was
+            // supposed to sit in the middle of. One flexible band, and the gap
+            // below the card is fixed.
+            GeometryReader { proxy in
+                TimelineView(.animation) { context in
+                    let remaining = max(0, endsAt.timeIntervalSince(context.date))
+                    CountdownRing(
+                        remaining: remaining,
+                        total: Double(seconds),
+                        // The band is what is left between the chrome and the
+                        // card, so this shrinks only as far as the answer
+                        // actually forces it to.
+                        diameter: min(proxy.size.width, proxy.size.height) - Space.gutter,
+                        accent: palette.accent
+                    )
+                    .onChange(of: Int(ceil(remaining))) { _, value in
+                        speak(secondsLeft: value)
+                        if value <= 0 {
+                            finish()
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if isMyo {
                 // The 20-second rest IS the training stimulus, not a
@@ -100,14 +123,22 @@ struct RestScreen: View {
             }
 
             if let card {
-                StudyCard(card: card, revealed: revealed, answerShown: answerShown, accent: palette.accent) {
+                StudyCard(
+                    card: card,
+                    revealed: revealed,
+                    answerShown: answerShown,
+                    accent: palette.accent,
+                    thinkingTime: Deck.revealDelay(forRestOf: seconds),
+                    revealAt: revealAt
+                ) {
                     // Tapping only brings the answer forward.
                     reveal()
                 }
                 .padding(.top, Space.step)
             }
 
-            Spacer(minLength: Space.step)
+            Spacer(minLength: Space.section)
+                .layoutPriority(-1)
 
             if let next {
                 NextUp(step: next)
@@ -144,8 +175,13 @@ struct RestScreen: View {
             revealed = false
             answerShown = false
             lastSpokenSecond = nil
-            guard card != nil else { return }
-            try? await Task.sleep(for: .seconds(Deck.revealDelay(forRestOf: seconds)))
+            guard card != nil else {
+                revealAt = nil
+                return
+            }
+            let delay = Deck.revealDelay(forRestOf: seconds)
+            revealAt = Date().addingTimeInterval(delay)
+            try? await Task.sleep(for: .seconds(delay))
             guard !Task.isCancelled else { return }
             reveal()
         }
@@ -197,82 +233,8 @@ struct RestScreen: View {
 
 // MARK: - The clock
 
-private struct RestTimer: View {
-    let remaining: TimeInterval
-    let total: Double
-    let compact: Bool
-    let accent: Color
-    let namespace: Namespace.ID
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private var size: CGFloat {
-        compact ? 136 : 232
-    }
-
-    private var fraction: Double {
-        total > 0 ? min(1, max(0, remaining / total)) : 0
-    }
-
-    /// 0 until five seconds remain, then ramps to 1 at zero.
-    ///
-    /// Ported from `src/components/Ring.tsx`, which calls it what it is:
-    /// peripheral warning. The phone is on the floor 1.5m away and you are not
-    /// necessarily reading the digits — the ring getting hot is the part you
-    /// catch out of the corner of your eye. The port had the audio ramp and the
-    /// haptic ramp and no visual one at all.
-    private var urgency: Double {
-        remaining <= 5 ? 1 - max(0, remaining) / 5 : 0
-    }
-
-    var body: some View {
-        ZStack {
-            // The glow pad behind the ring. Same 0.20→0.65 range as the web.
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [accent, accent.opacity(0)],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: size * 0.70
-                    )
-                )
-                .opacity(0.20 + urgency * 0.45)
-                .blur(radius: 12)
-
-            Circle()
-                .stroke(Ink.hairline, lineWidth: compact ? 4 : 5)
-
-            Circle()
-                .trim(from: 0, to: fraction)
-                .stroke(accent, style: StrokeStyle(lineWidth: compact ? 4 : 5, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .shadow(color: accent.opacity(0.55), radius: 8 + urgency * 14)
-
-            VStack(spacing: -2) {
-                Text(Int(ceil(remaining)), format: .number)
-                    .font(compact ? TypeScale.counterCompact : TypeScale.counter(82))
-                    .monospacedDigit()
-                    .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: true))
-                    .foregroundStyle(Ink.primary)
-
-                Text("SEC")
-                    .font(TypeScale.label)
-                    .tracking(1.2)
-                    .foregroundStyle(Ink.secondary)
-            }
-        }
-        .frame(width: size, height: size)
-        // The counter is the source and the ring follows it, permanently.
-        // Both declaring themselves the source is a conflict SwiftUI resolves
-        // silently and inconsistently — it picked the counter, so Set→Rest
-        // morphed and Rest→Set only cross-faded.
-        .matchedGeometryEffect(id: WorkObject.id, in: namespace, isSource: false)
-        .animation(Motion.timerResize(reduceMotion: reduceMotion), value: compact)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(Int(ceil(remaining))) seconds remaining")
-    }
-}
+// `CountdownRing` moved to its own file so the warm-up can use the same one.
+// See `Screens/CountdownRing.swift`.
 
 // MARK: - What is coming
 
@@ -322,6 +284,12 @@ private struct StudyCard: View {
     /// the card grows on schedule, but stays invisible until this follows.
     let answerShown: Bool
     let accent: Color
+    /// How long the reader gets before the answer arrives. The bar fills over
+    /// exactly this, so the two cannot disagree about how much time is left.
+    let thinkingTime: TimeInterval
+    /// The moment the answer is due, set by the Rest screen when the rest
+    /// begins. `nil` until then.
+    let revealAt: Date?
     let onReveal: () -> Void
 
     var body: some View {
@@ -339,14 +307,36 @@ private struct StudyCard: View {
 
                 // The thinking bar fills, then becomes the rule the answer sits
                 // under. One element doing both jobs.
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Ink.hairline)
-                        .frame(height: 1)
-                    Rectangle()
-                        .fill(revealed ? Ink.hairline : accent)
-                        .frame(width: revealed ? nil : 92, height: revealed ? 1 : 2)
+                //
+                // It never filled. It was a fixed 92pt rectangle — the comment
+                // above described behaviour the code did not have, for as long
+                // as the component has existed, and Eden reported it the first
+                // time he watched one: "doesn't run or count down at all".
+                //
+                // `02-design-brief.md §9` singles this out as the app's example
+                // of motion carrying meaning. A bar that does not move carries
+                // none.
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Rectangle()
+                            .fill(Ink.hairline)
+                            .frame(height: 1)
+
+                        if revealed {
+                            Rectangle()
+                                .fill(Ink.hairline)
+                                .frame(width: proxy.size.width, height: 1)
+                        } else {
+                            TimelineView(.animation) { context in
+                                Rectangle()
+                                    .fill(accent)
+                                    .frame(width: proxy.size.width * filled(at: context.date), height: 2)
+                            }
+                        }
+                    }
+                    .frame(maxHeight: .infinity, alignment: .center)
                 }
+                .frame(height: 2)
 
                 if revealed {
                     Text(card.a)
@@ -366,5 +356,32 @@ private struct StudyCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(revealed ? "\(card.q) \(card.a)" : "\(card.q). Reveal answer.")
+    }
+
+    /// How much of the thinking time has gone, 0…1.
+    ///
+    /// READ OFF A CLOCK, because the animation version did not run.
+    ///
+    /// It was `withAnimation(.linear(duration: thinkingTime)) { thinking = 1 }`
+    /// in `onAppear`, and measured across a 16-second capture of a real rest
+    /// the bar was never on screen at all: nothing at 4.5s, 7.5s or 10.5s, then
+    /// the full-width rule at 12.0s once the answer arrived. `thinking` stayed
+    /// at 0, so the bar had zero width, so there was no bar. That is exactly
+    /// what Eden reported — *"doesn't run or count down at all"* — and it is
+    /// the second fix this component has had for the same complaint.
+    ///
+    /// An implicit animation is a side effect that either happens or does not,
+    /// and there is no way to look at a screenshot and tell which. A fraction
+    /// of two dates is a value: if the bar is in the wrong place, the number is
+    /// wrong, and the number can be printed. Every other timer in this app
+    /// already works this way — that is what `endsAt` is for — and this was the
+    /// one that did not.
+    ///
+    /// Linear, because it is a clock. Anything eased would misreport how much
+    /// thinking time is left, which is the one thing it is for.
+    private func filled(at now: Date) -> Double {
+        guard let revealAt, thinkingTime > 0 else { return 0 }
+        let remaining = revealAt.timeIntervalSince(now)
+        return min(1, max(0, 1 - remaining / thinkingTime))
     }
 }

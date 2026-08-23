@@ -799,3 +799,195 @@ both set up for it, and every state is reachable by launch argument.
 separate passes, and the reason is sound: a completeness gap is "the app does
 not do this", a UI issue is "it does it badly", and mixing them makes both
 harder to review.
+
+---
+
+## W15 · Eden's UI list — `done`, pending his review on the phone
+
+Eight items, given on 2026-08-23 after using the app himself. **His words are
+quoted; do not paraphrase them away.** Two are broken functionality rather than
+polish and go first.
+
+### Broken
+
+7. **"The done button after the rising sun animation doesn't do anything."**
+   The Summary's Done. `SummaryReviewHost` passes `onDone: {}` — the same
+   unwired-callback bug as "End and discard", in the same file, found the same
+   way. Check the real `AppRoot` path too before assuming it is only the
+   harness.
+6. **"The animation of the question answer bar that counts down until it shows
+   me the answer doesn't run or count down at all."** The study card's thinking
+   bar. `02-design-brief.md §9` calls it one element doing two jobs — it fills
+   over the thinking time and then becomes the rule the answer sits under. If it
+   does not fill, it is doing one job badly.
+
+### Layout and hierarchy
+
+1. **The Set screen's header column.** *"too cramped in that column, there's
+   uneeded text there about the weight 'lying your back', just the target is
+   important, and it creates a werid thing where we have a column on text on the
+   left side then nothing on the right."* Four stacked lines — name, sub, load ·
+   set position, target — all left-aligned with the whole right half empty.
+   **The sub-label may be droppable; the target is what matters.** Content rules
+   say cues and targets are fixed, but nothing says every field must be on
+   screen at once.
+2. **The rep control moves between exercises.** *"it's position changes based on
+   which exercise screen we're on which is bad, it should always be in the same
+   place like the Done button."* It is currently pushed by whatever the header
+   and cues need. It should be pinned. Also *"always too close to the text
+   above it"*.
+3. **The progress rail is thin on information.** *"in the prev app we had more
+   meaningfull markings on the progress bar that showed more context about
+   what's left or how many (super/not superset)."* Go and look at what the web
+   build's rail actually drew before designing a replacement.
+4. **"Some of the texts are a little small, should be a tad bigger."** Note that
+   W14 round three withdrew a similar finding for being measured wrongly — read
+   `ios/Docs/ux-review.md §3` first, then take his judgement over the
+   measurement, because he is the one holding the phone.
+5. **The warm-up screen.** *"doesn't have the same countdown as other screens,
+   and it's spaced really badly, the text spacing is bad, the text is small and
+   should be formatted better with better spacing and the countdown is in an odd
+   position."* It uses a plain `m:ss` where every other timer is a ring.
+8. **Home.** *"suuuper dull, doesn't really entice me to do a workout, it's
+   mostly empty, emphesising the weights and the 'this week' counter is small
+   and dull and really dull UX."* This is the biggest one and it is a design
+   problem, not a spacing one — W14 measured a 202pt void there and called it
+   acceptable because the low primary action buys it. **He disagrees, and he
+   uses it at 6:10am.** The measurement was not wrong; the judgement was.
+
+
+### Round two — 2026-08-23, after seeing round one on the phone
+
+**Most of these are regressions I introduced in round one.** Recorded as such:
+the fix for one complaint created three more, which is what happens when a
+layout is changed against a measurement instead of against the screen.
+
+9. **"we ruined the done button, it's pinned downstairs."** True. Stepping the
+   type up (#4) pushed everything down and the bottom clearance went from 44pt
+   to 6.3pt. I measured that it *fit* and called it verified — fitting and
+   being right are different, and 6pt under a primary action is not a margin.
+10. **"the rep number animates wildly on screen load and looks terrible."**
+    The counter runs `contentTransition(.numericText)` and prefills on appear,
+    so it rolls from 0 to the prefill every time the screen loads. It should
+    arrive at its value, not count up to it.
+11. **"its sizing and spacing from the + and - buttons are terrible."** The
+    counter carries `.frame(minWidth: 150)` between two 82pt buttons, so the
+    number floats in the middle of a gap it does not fill.
+12. **"look at the top text spacing and the movements they're all terrible."**
+    Two concrete faults in his photo: the position line wraps mid-phrase —
+    "6.25 kg · set 2 of 3 · superset 1 / of 2" — and "No rest after this"
+    **overlaps the MOVEMENT box**, because I attached it as an `.overlay` with
+    a hardcoded `.offset(y: 20)` rather than laying it out.
+13. **"please open the app and see for yourself and review this."** The standing
+    instruction, and the one that matters: render every screen and look at it,
+    rather than measuring a band and declaring it fine.
+
+## W16 · The copy pass — `todo`, and deliberately last
+
+Asked for by Eden on 2026-08-23, with an explicit ordering instruction: **this
+waits until almost everything else is finished.** Do not start it early because
+it looks easy.
+
+> "i want to go over the texts in the app, think of their ux, copy and what they
+> say, i hate em-dashes and text that sounds like it's super AI generated, this
+> goes for ALL text in the app. so this task is a copy ux/ui pass."
+
+Three things to carry into it.
+
+**Em-dashes are out.** They are all over this app and most of them are mine:
+"No rest after this — straight into the next one.", "Push-up — deficit — hands
+on books", "First time — just go to failure", "different weight now". Rewrite
+rather than swap the punctuation for a comma — a sentence that needed a dash
+usually wanted to be two sentences or a shorter one.
+
+**"Sounds AI generated" is the real brief.** The tell is not any single word, it
+is the register: hedged, balanced, faintly promotional, every sentence the same
+length. This app is one person's, at 6:10am. Read every string out loud and cut
+the ones you would not say.
+
+**There is a live conflict to settle with Eden before touching half of it.**
+`CLAUDE.md` rule 3 and `ios-port/README.md` both say content is fixed and
+verbatim — exercise names, cues, targets, card text, Guide text, celebration
+copy — and that it is *"not yours to improve"*. So split the audit in two and
+put the second half to him rather than deciding it:
+
+- **Mine, rewrite freely:** UI labels, section headings, empty states, the week
+  nudge, the "no rest" line, accessibility strings, button titles, error copy,
+  everything in `Screens/`.
+- **Ported content, needs Eden's word:** `cards.json`, `guide.json`, the
+  celebration tiers in `04-rules.md`, and every cue and sub-label in
+  `Program.swift`. He wrote these for himself, so "sounds AI generated" may not
+  even apply — but he said ALL text, so ask, do not assume either way.
+
+Deliverable: one pass, screen by screen, with the before/after for every string
+in a table he can veto line by line.
+
+### Round three — 2026-08-23, two design pointers from the phone
+
+14. **The Set screen header on a myo set.** *"the whole top is sooo cluttered
+    and ellipsising a lot, so much of that info is unecessary and should be
+    distilled and minimized."* His photo shows the myo lateral raise: the name
+    truncated to "Lateral rai…", the sub on its own line, the position line
+    wrapping to "6.25 kg · set 1 / of 3", and on the right **"TARGET / all-out
+    to failure / reps"** — a whole sentence set at `counter(30)`, which is what
+    stole the width from everything else, plus the word "reps" hung under a
+    target that is not a count.
+
+    The two-column header assumed every target is a short numeric range. Four
+    of the five blocks have one; the myo block's target is prose.
+
+15. **The Rest screen's ring.** *"the counter isn't centered in it's section at
+    the top, the spacing is weird between the elements."* Measured off his
+    photo: rail to ring ≈ 150px of air, ring to the card ≈ 50px. The ring sits
+    low in the band it is supposed to be centred in.
+
+
+### Where round three left it
+
+All sixteen items are closed. Every one was checked on screen rather than
+against a band table, which is the instruction that produced most of the fixes:
+
+| # | Item | Closed by |
+|---|---|---|
+| 1 | Set header cramped, empty right side | Two columns, then distilled again in #14 |
+| 2 | Rep control moves between exercises | Flexible upper block + fixed `RepControl.height` |
+| 3 | Progress rail thin on information | One tick per set; superset partners bunch |
+| 4 | Texts a little small | Type step-up, then the Summary's four facts |
+| 5 | Warm-up screen | Shares `CountdownRing` with Rest |
+| 6 | Thinking bar never counts down | Reads a clock: 69pt→358pt over 7.19s vs 7.2s computed |
+| 7 | Summary's Done does nothing | Was the review host; the app path was wired |
+| 8 | Home dull and empty | Rebuilt around what the session IS |
+| 9 | Done button pinned downstairs | Arithmetic replaced by layout; 6.7pt → 79.7pt |
+| 10 | Counter rolls on screen load | Per-set identity (the first fix did nothing) |
+| 11 | Rep cluster sizing and spacing | 104pt number, fixed 138pt slot, 12pt gaps |
+| 12 | Overlapping line, mid-phrase wrap | Laid out instead of overlaid; "superset 1/2" |
+| 13 | Open the app and look | Every screen rendered and read, both phones |
+| 14 | Myo header cluttered, ellipsising | Big right column is for numbers only |
+| 15 | Rest ring not centred | One flexible band instead of two Spacers |
+| 16 | Rail changes style on rests | `setMarks` is no longer defaulted |
+| — | Counter jumps on arrival | `matchedGeometryEffect` removed — see below |
+
+**One thing was deleted rather than fixed, and it is the one to check with him.**
+The work object — the counter becoming the rest ring and back — is
+`02-design-brief.md §7` and the W1 prototype's centrepiece. Eden asked for it
+gone twice after watching it. `RepControl.swift` carries the note on how to put
+it back.
+
+**One brief requirement was narrowed rather than met.** `§8` lists the
+sub-label among what must be on the Set screen. It now appears only where the
+same exercise occurs twice in a session. He called it unnecessary twice.
+
+
+## Device scope — settled 2026-08-23
+
+**iPhone 16 Pro only.** Eden: *"No need for this to work super well on phone SE
+just 16 pro."*
+
+The project's `TARGETED_DEVICE_FAMILY` and the iOS 26 floor technically admit an
+SE 3, and a good deal of this session was spent measuring 375x667 — the Set
+screen's `ViewThatFits`, Home's scroll fallback, the bay's drop threshold all
+have SE reasoning in their comments. **That work stays**, because flexible
+layout costs nothing and pays again at the accessibility text sizes. But it is
+no longer something to verify against, and an SE regression is not a defect.
+
+Verify at 402x874. Do not boot a scratch SE for it.

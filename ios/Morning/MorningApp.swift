@@ -42,6 +42,8 @@ struct MorningApp: App {
                         reps: Self.value(after: "-reps").flatMap(Int.init),
                         step: Self.value(after: "-step").flatMap(Int.init)
                     )
+                } else if Self.requestedScreen == "metal" {
+                    MetalDaybreakReviewHost()
                 } else if Self.requestedScreen == "live-activity" {
                     LiveActivityReviewHost()
                 } else if Self.requestedScreen == "lab" {
@@ -50,6 +52,12 @@ struct MorningApp: App {
                     AppRoot()
                 }
             }
+            // Pays the Metal pipeline's compile at launch rather than on the
+            // first frame that wants it. At the app's root rather than on
+            // `AppRoot`, because the review hosts bypass `AppRoot` entirely and
+            // `-screen summary` is exactly where the cost showed up.
+            // See `MetalDaybreakWarmup`.
+            .overlay(alignment: .topLeading) { MetalDaybreakWarmup() }
             .preferredColorScheme(.dark) // used before sunrise; dark by default
             // Tapping the Live Activity. There is deliberately nothing to do:
             // `AppRoot.init` already restores an in-progress session before

@@ -25,16 +25,31 @@ import SwiftUI
  *    a perfectly healthy 9.71:1. The symbol was doing all the work.
  * ======================================================================== */
 
-/// The one object the workout carries from screen to screen.
-///
-/// `02-design-brief.md §7` asks for `matchedGeometryEffect` so a screen's
-/// content BECOMES the next screen's rather than cross-fading, and the W1
-/// prototype demonstrated it as the counter turning into the rest ring. The
-/// real screens then shipped without it and swapped instantly — this is that
-/// gap closed.
-enum WorkObject {
-    static let id = "work-object"
-}
+/* ---------------------------------------------------------------------------
+ *  THE WORK OBJECT, REMOVED
+ *  ---------------------------------------------------------------------------
+ *  There used to be a `matchedGeometryEffect` here with the id "work-object":
+ *  the counter was the permanent source and the rest ring followed it, so the
+ *  timer grew out of the number you had just logged and shrank back into the
+ *  next one. `02-design-brief.md §7` asks for exactly that, and the W1
+ *  direction prototype demonstrated it.
+ *
+ *  It is gone because Eden asked for it gone, twice, having watched it on the
+ *  phone: *"the rep number animates wildly on screen load"*, then *"once you
+ *  enter an exercise screen, the middle rep number animates jumps a little,
+ *  there's absolutly no reason for that. let's kill that."*
+ *
+ *  He is describing it accurately. Traced across a 30fps capture of a rest
+ *  ending: at 22.99s the digit sits high and right where the ring's number was,
+ *  at 23.09s it is low and LEFT of the counter's slot, and it only settles at
+ *  23.16s. Two hundred milliseconds of a large number sliding diagonally across
+ *  the screen, at the exact moment you look down to read what to do next.
+ *
+ *  The idea reads better in a prototype than it does at 6:10am. Restoring it
+ *  means putting `.matchedGeometryEffect(id:in:)` back on `counter` and
+ *  `.matchedGeometryEffect(id:in:isSource: false)` back on `CountdownRing`,
+ *  with a `@Namespace` on `WorkoutHost` — but ask him first.
+ * ------------------------------------------------------------------------- */
 
 struct RepControl: View {
     let reps: Int
@@ -42,39 +57,72 @@ struct RepControl: View {
     let isComparable: Bool
     let isBeating: Bool
     let accent: Color
-    /// The work object's namespace. The counter is the thing that travels: it
-    /// becomes the rest timer, and the rest timer becomes it again.
-    let namespace: Namespace.ID
+    /// Identifies the set on screen. Changes exactly when the step does.
+    ///
+    /// It exists to tell the two reasons the number can change apart. See the
+    /// `transaction` on `counter`.
+    var stepKey: String = ""
     /// Reports a delta. Never an absolute — see the header.
     let onAdjust: (Int) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var direction = 1
 
+    /// ONE HEIGHT, ALWAYS.
+    ///
+    /// W15 #2 asked for the counter to stop moving between exercises, and the
+    /// screen above this now hands it whatever space is left over — which only
+    /// pins it if this control is the same height every time. It was not: the
+    /// comparison line wraps to two lines when the weight has changed ("Last
+    /// time: 12 at 6.25 kg — different weight now") and to one when it has not,
+    /// so the counter sat 19pt higher on some sets than others.
+    static let height: CGFloat = 150
+
     var body: some View {
         VStack(spacing: Space.snug) {
-            HStack(spacing: Space.gutter) {
+            // The three parts are ONE control, and they have to look like it.
+            //
+            // W15 #11: *"its sizing and spacing from the + and - buttons are
+            // terrible"*. They were 22pt apart with a 150pt counter slot
+            // between them, which put each 82pt button hard against the screen
+            // gutter and left ~40pt of nothing on either side of the digits —
+            // two big empty boxes with a small number stranded between them.
+            //
+            // Closer together, and the number is bigger than the buttons now
+            // rather than smaller. The slot is a FIXED width, not a minimum, so
+            // going from 9 reps to 10 cannot shove the buttons outwards.
+            HStack(spacing: Space.step) {
                 RepStepper(symbol: "−", label: "One rep fewer") { adjust(-1) }
-                counter
+
+                // The caption belongs to the number, not to the row. Nine
+                // points under the digits instead of under the whole cluster.
+                VStack(spacing: -4) {
+                    counter
+                    Text("Reps")
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(Ink.tertiary)
+                }
+
                 RepStepper(symbol: "+", label: "One rep more") { adjust(1) }
             }
 
-            Text("Reps")
-                .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
-
             comparison
+                // One line, whatever it says. See `height`.
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(height: 20)
                 // The counter has already changed by the time this arrives.
                 // See `Motion.threshold`.
                 .animation(Motion.threshold(reduceMotion: reduceMotion), value: isBeating)
         }
+        .frame(height: Self.height)
     }
 
     // MARK: - Parts
 
     private var counter: some View {
         Text(reps, format: .number)
-            .font(TypeScale.counter())
+            .font(TypeScale.counter(104))
             .monospacedDigit()
             // A three-digit count truncated to "3…" between the two 82pt
             // controls. Targets top out at 25 reps so three digits should never
@@ -85,10 +133,31 @@ struct RepControl: View {
             .minimumScaleFactor(0.5)
             .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: direction < 0))
             .foregroundStyle(isBeating ? Semantic.threshold : Ink.primary)
-            .frame(minWidth: 150)
-            .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: reps)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: isBeating)
+            // A NEW SET IS A NEW NUMBER, not a change to the old one.
+            //
+            // Identity, because nothing weaker works here. The first attempt
+            // was `.transaction(value: stepKey) { $0.animation = nil }` on the
+            // outside of this chain, and a filmstrip off a 60fps capture shows
+            // it doing nothing: at 5.48s the digits are still cross-dissolving
+            // 24 into 22 across a step change. `.animation(_:value:)` sets the
+            // animation for everything below it and an outer transaction
+            // cannot reach past it.
+            //
+            // Moving the animation to the tap site would work and would break
+            // something else — `-autorep` drives the counter without
+            // `withAnimation` precisely so the harness animates the way the
+            // product does, and its comment says so.
+            //
+            // So the digit gets a new identity per set. `contentTransition`
+            // interpolates between two values of ONE view; two views do not
+            // interpolate at all. `.identity` because the default for an
+            // identity change is a cross-fade, and a fade is a quieter version
+            // of the same wrong idea.
+            .transition(.identity)
+            .id(stepKey)
+            .frame(width: 138)
             .accessibilityLabel("\(reps) reps")
             .accessibilityValue(accessibilityComparison)
     }

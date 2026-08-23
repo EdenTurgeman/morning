@@ -18,6 +18,15 @@ import SwiftUI
 struct SummaryReviewHost: View {
     let tier: String?
 
+    /// Done has to do something here.
+    ///
+    /// It did not: this host passed `onDone: {}`. Eden's words — "the done
+    /// button after the rising sun animation doesn't do anything" — and it is
+    /// the *second* time the same bug has been found in this file the same way,
+    /// after "End and discard". A review host that wires its callbacks to
+    /// nothing cannot tell you whether the app's are wired either.
+    @State private var done = false
+
     var body: some View {
         let history = Store().load().history
         let (record, celebration) = example(from: history)
@@ -26,8 +35,22 @@ struct SummaryReviewHost: View {
             celebration: celebration,
             week: Week.progress(history: history),
             card: Cards.all.first,
-            onDone: {}
+            onDone: { done = true }
         )
+        .overlay {
+            if done {
+                VStack(spacing: Space.snug) {
+                    Text("Done")
+                        .font(TypeScale.title)
+                        .foregroundStyle(Ink.primary)
+                    Text("Review only — the app returns to Home here.")
+                        .font(TypeScale.body)
+                        .foregroundStyle(Ink.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Surface.night)
+            }
+        }
     }
 
     private static func dateString(_ date: Date) -> String {

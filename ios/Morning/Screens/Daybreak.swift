@@ -152,88 +152,21 @@ struct Daybreak: View {
     // MARK: - The sunrise
 
     private func sunrise(at elapsed: TimeInterval) -> some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            // The horizon sits LOW. The sun has to clear it beneath the copy,
-            // not rise into it — the first attempt put the sun directly behind
-            // the rep total and the headline, which is the one thing the
-            // moment must not do to its own numbers.
-            let horizonY = size.height * 0.82
-
-            ZStack {
-                // 0.12 — anticipation. The horizon draws outward from the
-                // centre before anything else has happened.
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            colors: [.clear, Semantic.urgency.opacity(0.7), .clear],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: size.width * ramp(elapsed, from: beats.horizon, over: 0.5), height: 1.5)
-                    .position(x: size.width / 2, y: horizonY)
-
-                // 0.70 — rays bloom outward. Scale and opacity, never rotation.
-                //
-                // Gated on the TIER. `04-rules.md §5` has a column for rays and
-                // a column for confetti, tier by tier, and the port read
-                // neither — so a lifetime milestone and a plateau got identical
-                // choreography. Seven of the eleven tiers earn rays; the four
-                // that do not are `weight-changed`, `plateau`, `matched` and
-                // `done`, all of which are honest-but-flat outcomes that should
-                // not be dressed up.
-                Rays(accent: Semantic.urgency)
-                    .frame(width: size.width * 1.9, height: size.width * 1.9)
-                    .position(x: size.width / 2, y: horizonY)
-                    .scaleEffect((0.6 + 0.4 * ramp(elapsed, from: beats.rays, over: 0.9)) * burstScale)
-                    .opacity(celebration.rays ? ramp(elapsed, from: beats.rays, over: 0.7) * 0.38 * burstGain : 0)
-                    // The rays fan up behind the copy, so they are held back
-                    // where the copy is and let go below it.
-                    .mask {
-                        LinearGradient(
-                            stops: [
-                                .init(color: .black.opacity(0.25), location: 0),
-                                .init(color: .black.opacity(0.55), location: 0.62),
-                                .init(color: .black, location: 0.86),
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    }
-
-                // 0.38 — the sun rises, overshooting slightly and settling.
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.white, Semantic.urgency, Semantic.urgency.opacity(0.4)],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 120
-                        )
-                    )
-                    .frame(width: 124, height: 124)
-                    .position(x: size.width / 2, y: horizonY - sunLift(elapsed) + breath(elapsed))
-                    .opacity(ramp(elapsed, from: beats.sun, over: 0.4))
-
-                // 0.90 — a brief warm flash at the moment it breaks the horizon.
-                //
-                // Scaled right down under Reduce Motion. Every other stage here
-                // already has a reduced form — the sun fades up instead of
-                // rising, the rays hold still, nothing drifts on exit — and this
-                // one did not, so the calmer version still threw a screen-wide
-                // luminance spike. Measured off a capture: mean luminance goes
-                // 20 → 54 in about 0.2s, which is the largest single change
-                // anywhere in the app. Someone who has asked for calmer has
-                // asked for that too.
-                Rectangle()
-                    .fill(Semantic.urgency)
-                    .opacity(flash(elapsed) * (reduceMotion ? 0.06 : 0.22) * burstGain)
-                    .ignoresSafeArea()
-            }
-        }
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
+        // W13. Everything that used to be drawn here — the horizon rectangle,
+        // the ray fan, the gradient sun, the flash overlay — is now computed
+        // per pixel by `Shaders/Daybreak.metal`, which builds an atmosphere and
+        // lets the sunrise fall out of it rather than assembling one from
+        // shapes. The header on that file argues the case.
+        //
+        // The contract is unchanged and that is the point: one elapsed value
+        // in, no clock of its own, and `calm` carrying the reduced form. The
+        // beats are the same beats, at the same seconds.
+        //
+        // The burst still scales the light, because a lifetime milestone has to
+        // be visibly bigger than an ordinary morning — `04-rules.md §5`.
+        MetalDaybreakSky(elapsed: elapsed, reduceMotion: reduceMotion)
+            .brightness(burstGain > 1 ? 0.05 : 0)
+            .saturation(burstScale)
     }
 
     /// The milestone burst, in this app's own material rather than confetti.

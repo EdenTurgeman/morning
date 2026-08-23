@@ -29,7 +29,11 @@ struct SetScreen: View {
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
-    let namespace: Namespace.ID
+    /// Where each set falls in the session, 0…1. See `WorkoutChrome.setMarks`.
+    var setMarks: [Double] = []
+    /// True when this exercise appears more than once in the session, so its
+    /// sub-label is the only thing telling the two apart. See `factLine`.
+    var subDisambiguates = false
 
     let onAdjust: (Int) -> Void
     let onLog: () -> Void
@@ -43,42 +47,55 @@ struct SetScreen: View {
     }
 
     var body: some View {
-        // The one screen that must never scroll has to fit the shortest phone
-        // it can run on, and it did not. Measured on a 667pt iPhone SE: the
-        // whole chrome — Back, "Set 3 / 13", End — was pushed off the top and
-        // the Done button was cut in half by the bottom edge. You could not go
-        // back, could not end the session, and could barely reach the primary
-        // action. `TARGETED_DEVICE_FAMILY = 1` and an iOS 26 floor means the
-        // SE 3 is inside the support matrix.
+        // NOTHING HERE IS A MEASURED CONSTANT ANY MORE, and that is the fix.
         //
-        // So the layout reads the height it was actually given.
-        GeometryReader { proxy in
-            content(in: proxy.size.height)
-        }
-    }
-
-    private func content(in available: CGFloat) -> some View {
+        // The previous version computed the height of everything above the rep
+        // control as `available - 268`, from a comment that added up the parts
+        // below it. The sum was wrong by 35pt — it counted the 82pt stepper row
+        // as the whole rep control and forgot the caption and the comparison
+        // line under it — so on a 16 Pro the stack was 35pt taller than the
+        // screen and the overflow went where overflow goes: **the Done button
+        // ended up 6.7pt from the bottom edge**, sitting on the home indicator.
+        // Measured, after I had called the same layout verified.
+        //
+        // W15 #9, in Eden's words: *"we ruined the done button, it's pinned
+        // downstairs"*.
+        //
+        // So the arithmetic is gone. The block above the control is the only
+        // flexible thing in the stack and takes whatever is left over, which
+        // means it is impossible for the total to exceed the screen and the
+        // control still lands on the same line on every exercise — the thing
+        // W15 #2 asked for. That only holds because `RepControl` is a fixed
+        // height now; see the note on `RepControl.height`.
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
+            WorkoutChrome(
+                progress: progress,
+                step: stepLabel,
+                setMarks: setMarks,
+                onBack: onBack,
+                onEnd: onEnd
+            )
 
-            metadata
-
-            let bay = bayHeight(in: available)
-            // "Short screen" means the bay could not have its natural height —
-            // whether it shrank to the floor or vanished. One condition, so the
-            // things that yield, yield together.
-            let cramped = (bay ?? 0) < naturalBayHeight
-
-            if let height = bay {
-                ExerciseMotionBay(treatment: .atmospheric, exercise: setStep.exercise, accent: palette.accent)
-                    .frame(height: height)
-                    .padding(.top, Space.step)
+            // The demonstration is what gives way, and `ViewThatFits` is what
+            // decides — not a threshold I guessed at per device.
+            //
+            // The screen never scrolls, so on a short phone something has to
+            // go, and it is the bay: every other element here either instructs
+            // (the cues, the target) or is the control itself. The bay is the
+            // only thing that merely *illustrates*.
+            //
+            // The first candidate asks for at least 120pt of bay. Below that
+            // the figure stops reading as a body and becomes a smudge, so if it
+            // cannot have 120 it does not appear at all — which is honester
+            // than a smear, and much honester than clipping the Done button to
+            // keep one.
+            ViewThatFits(in: .vertical) {
+                upper(withBay: true)
+                upper(withBay: false)
             }
-
-            cues
-                .padding(.top, Space.step)
-
-            Spacer(minLength: Space.step)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .clipped()
+            .layoutPriority(-1)
 
             RepControl(
                 reps: reps,
@@ -86,11 +103,13 @@ struct SetScreen: View {
                 isComparable: isComparable,
                 isBeating: isBeating,
                 accent: palette.accent,
-                namespace: namespace,
+                stepKey: stepLabel,
                 onAdjust: onAdjust
             )
-
-            Spacer(minLength: Space.step)
+            // W15 #2's other half: *"the number and button of reps is always
+            // too close to the text above it"*. The block above is flexible, so
+            // this gap is not taken from anywhere — the figure gives it up.
+            .padding(.top, Space.section)
 
             DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
                 // `Cue.confirm` was composed and never played. The web fires it
@@ -100,24 +119,17 @@ struct SetScreen: View {
                 Audio.shared.play(.confirm)
                 onLog()
             }
+            .padding(.top, Space.step)
 
-            // Dropped under the same condition as the bay, and deliberately
-            // not under a second threshold of its own: when there is no room
-            // for the illustration there is no room for the footnote either.
-            //
-            // It is the right thing to lose. Everything else on this screen
-            // either instructs or is the control; "13 sets to go" is
-            // orientation, and the progress rail two inches above it already
-            // says the same thing without words.
-            if !cramped {
-                Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
-                    .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
-                    .padding(.top, Space.snug)
-            }
+            Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
+                .font(TypeScale.microLabel)
+                .foregroundStyle(Ink.tertiary)
+                .padding(.top, Space.snug)
         }
         .padding(.horizontal, Space.gutter)
-        .safeAreaPadding(.bottom, Space.snug)
+        // 22, not 9. Nine points put the primary action of the whole app
+        // directly on top of the home indicator; see the note on `body`.
+        .safeAreaPadding(.bottom, Space.gutter)
         // No backdrop here on purpose. The sky belongs to `WorkoutHost`, not to
         // this screen: it is the one thing that must not blink when Set becomes
         // Rest. Owned per-screen, it faded out and in with everything else and
@@ -129,45 +141,149 @@ struct SetScreen: View {
         .dynamicTypeSize(.large)
     }
 
-    // MARK: - Parts
+    /// Everything above the rep control.
+    ///
+    /// The bay is `layoutPriority(-1)` and the trailing spacer `-2`, so the
+    /// slack goes into the FIGURE before it goes into empty space. Before this
+    /// the order was the other way round by default and a 16 Pro showed a
+    /// 161pt figure above 120pt of nothing.
+    private func upper(withBay: Bool) -> some View {
+        VStack(spacing: 0) {
+            metadata
 
-    private var metadata: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(setStep.exercise)
-                .font(TypeScale.title)
-                .foregroundStyle(Ink.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.82)
-
-            if let sub = setStep.sub {
-                Text(sub)
-                    .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+            if withBay {
+                ExerciseMotionBay(
+                    treatment: .atmospheric,
+                    exercise: setStep.exercise,
+                    accent: palette.accent
+                )
+                .frame(minHeight: 120, maxHeight: 300)
+                .padding(.top, Space.step)
+                .layoutPriority(-1)
             }
 
-            Text(positionLine)
-                .font(TypeScale.body)
-                .foregroundStyle(Ink.secondary)
+            cues
+                .padding(.top, Space.step)
 
-            Text("Target \(setStep.target)")
-                .font(TypeScale.bodyEmphasis)
-                .foregroundStyle(Ink.secondary)
+            Spacer(minLength: 0)
+                .layoutPriority(-2)
+        }
+    }
 
-            if setStep.straightIntoNext == true {
-                Text("No rest after this — straight into the next one.")
+    // MARK: - Parts
+
+    /// DISTILLED, because it was four lines fighting one sentence.
+    ///
+    /// W15 #14, on the myo set: *"the whole top is sooo cluttered and
+    /// ellipsising a lot, so much of that info is unecessary and should be
+    /// distilled and minimized."* His photo shows the name cut to "Lateral
+    /// rai…", the position line broken across "6.25 kg · set 1 / of 3", and the
+    /// right-hand column reading **"TARGET / all-out to failure / reps"**.
+    ///
+    /// One assumption caused all of it: that a target is always a short numeric
+    /// range. Four of the five blocks have one. The myo block's first set is
+    /// prose, set at `counter(30)` it needed ~200pt, and it took that width
+    /// from the exercise name — which is why the name was the thing ellipsised.
+    ///
+    /// So the big right-hand column is now for numbers only, and a prose target
+    /// goes down the left where a sentence belongs. And "reps" is only hung
+    /// under a target that counts reps; "all-out to failure reps" is not
+    /// English.
+    private var metadata: some View {
+        HStack(alignment: .top, spacing: Space.step) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(setStep.exercise)
+                    .font(TypeScale.title)
+                    .foregroundStyle(Ink.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.62)
+
+                Text(factLine)
                     .font(TypeScale.body)
-                    .foregroundStyle(palette.accentText)
-                    .padding(.top, Space.tight)
+                    .foregroundStyle(Ink.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let prose = proseTarget {
+                    Text("Target: \(prose)")
+                        .font(TypeScale.bodyEmphasis)
+                        .foregroundStyle(Ink.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                // LAID OUT, not overlaid.
+                //
+                // W15 #12. This was an `.overlay(alignment: .bottomLeading)`
+                // with a hardcoded `.offset(y: 20)`, which is not a position —
+                // it is a guess about how tall the lines above it are. On a
+                // superset the guess was short and in Eden's photo the sentence
+                // printed **through the top edge of the MOVEMENT box**.
+                if setStep.straightIntoNext == true {
+                    Text("No rest after this — straight into the next one.")
+                        .font(TypeScale.body)
+                        .foregroundStyle(palette.accentText)
+                        .padding(.top, Space.tight)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let count = countedTarget {
+                VStack(alignment: .trailing, spacing: -1) {
+                    Text("TARGET")
+                        .font(TypeScale.microLabel)
+                        .tracking(1.4)
+                        .foregroundStyle(Ink.tertiary)
+                    Text(count)
+                        .font(TypeScale.counter(30))
+                        .monospacedDigit()
+                        .foregroundStyle(Ink.primary)
+                        .lineLimit(1)
+                    Text("reps")
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(Ink.tertiary)
+                }
+                .fixedSize(horizontal: true, vertical: false)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, Space.snug)
     }
 
-    /// Load, set position and superset position on one line — three facts that
-    /// are each too small to earn a line of their own.
-    private var positionLine: String {
+    /// "8–15", or nil when the target is a sentence rather than a count.
+    ///
+    /// A digit is the test, and it is the honest one: every counted target in
+    /// the program is a numeric range and the only prose one is "all-out to
+    /// failure".
+    private var countedTarget: String? {
+        let target = setStep.target
+        guard target.contains(where: \.isNumber) else { return nil }
+        return target.replacingOccurrences(of: " reps", with: "")
+    }
+
+    private var proseTarget: String? {
+        countedTarget == nil ? setStep.target : nil
+    }
+
+    /// ONE line of setup facts, where there were two.
+    ///
+    /// The sub-label survives only where it distinguishes this set from another
+    /// set of the same exercise in the session — the same rule Home's outline
+    /// uses. Eden has now twice called the sub-label unnecessary here: *"there's
+    /// uneeded text there about the weight 'lying your back'"* and *"so much of
+    /// that info is unecessary"*. But "myo-reps" is the only thing separating
+    /// the myo lateral raise from the one in the superset above it, and
+    /// dropping it everywhere left session B showing the same exercise twice
+    /// with no explanation.
+    ///
+    /// `02-design-brief.md §8` does list the sub-label among what must be on
+    /// screen. This narrows it rather than removing it, and the setup detail it
+    /// drops — "deficit — hands on books", "lying on your back" — is said again
+    /// by the cues six lines below.
+    private var factLine: String {
         var parts: [String] = []
+        if subDisambiguates, let sub = setStep.sub {
+            parts.append(sub)
+        }
         if let load = setStep.load {
             parts.append("\(Plates.format(load)) kg")
         } else if setStep.bodyweight {
@@ -175,7 +291,7 @@ struct SetScreen: View {
         }
         parts.append("set \(setStep.n) of \(setStep.of)")
         if let superset = setStep.superset {
-            parts.append("superset \(superset.index) of \(superset.of)")
+            parts.append("superset \(superset.index)/\(superset.of)")
         }
         return parts.joined(separator: " · ")
     }
@@ -216,42 +332,6 @@ struct SetScreen: View {
     private func carriesEffect(_ cue: String) -> Bool {
         intensityWords.contains { cue.contains($0) }
     }
-
-    /// Four cues need a shorter bay than two, and a short phone needs a shorter
-    /// bay than a tall one. The screen never scrolls, so something has to give,
-    /// and it is the demonstration rather than the copy — every other element
-    /// here either instructs (the cues, the target) or is the control itself.
-    /// The bay is the only thing that merely *illustrates*, so it yields first
-    /// and it yields alone.
-    ///
-    /// The floor is 72pt. Below that the figure stops reading as a body and
-    /// becomes a smudge, at which point showing nothing would be honester —
-    /// but 72pt is enough to fit the worst content on the shortest supported
-    /// phone, so that trade never has to be made.
-    /// `nil` means there is no room for it at all and it is not drawn.
-    ///
-    /// That case is real rather than defensive: four cues on a 667pt phone
-    /// leaves nothing for a demonstration, and at 72pt the figure has already
-    /// stopped reading as a body. Showing a smudge would be worse than showing
-    /// nothing, and clipping the Done button to keep the smudge would be worse
-    /// than both — which is what the screen did before this.
-    /// What the bay wants, before the screen height is taken into account.
-    /// Four cues need a shorter one than two.
-    private var naturalBayHeight: CGFloat {
-        setStep.cues.count >= 4 ? 142 : 178
-    }
-
-    private func bayHeight(in available: CGFloat) -> CGFloat? {
-        let base = naturalBayHeight
-        // Four cues cost roughly 80pt more than two, so they get charged for it
-        // rather than the bay absorbing the difference twice.
-        let crowding: CGFloat = setStep.cues.count >= 4 ? 80 : 0
-        let room = available - 620 - crowding
-        if room < 20 {
-            return nil
-        }
-        return min(base, max(72, room))
-    }
 }
 
 // MARK: - Chrome
@@ -261,6 +341,26 @@ struct SetScreen: View {
 struct WorkoutChrome: View {
     let progress: Double
     let step: String
+    /// One tick per set, at its position in the session.
+    ///
+    /// W15 #3, and it is a restoration rather than an invention: the web build
+    /// draws exactly this under its rail (`src/components/Chrome.tsx`) and the
+    /// port kept only the bar. Eden noticed — "in the prev app we had more
+    /// meaningfull markings on the progress bar that showed more context about
+    /// what's left or how many (super/not superset)".
+    ///
+    /// The ticks answer both halves of that. How many are left is countable at
+    /// a glance, and because superset partners sit adjacent with no rest
+    /// between them, their ticks bunch — so the shape of the row shows the
+    /// structure of the session without a word of explanation.
+    ///
+    /// NOT defaulted. It was, and only `SetScreen` passed it — so the rail grew
+    /// ticks on a set and lost them again on every rest and on the warm-up.
+    /// Eden: *"when you switch to the rest screens the progress bar at the top
+    /// changes to the old style before our recent changes, i don't link any
+    /// inconsistancies like this"*. A default value is what let three call
+    /// sites disagree, so there is no default now.
+    let setMarks: [Double]
     let onBack: () -> Void
     let onEnd: () -> Void
 
@@ -289,15 +389,25 @@ struct WorkoutChrome: View {
             }
 
             GeometryReader { proxy in
-                ZStack(alignment: .leading) {
+                ZStack(alignment: .topLeading) {
                     Capsule().fill(Ink.hairline)
+                        .frame(height: 3)
                     Capsule()
                         .fill(DawnPalette(progress: progress).accent)
-                        .frame(width: proxy.size.width * progress)
+                        .frame(width: proxy.size.width * progress, height: 3)
+
+                    ForEach(Array(setMarks.enumerated()), id: \.offset) { _, at in
+                        Circle()
+                            .fill(at <= progress
+                                ? DawnPalette(progress: progress).accent
+                                : Ink.primary.opacity(0.18))
+                            .frame(width: 3, height: 3)
+                            .offset(x: proxy.size.width * at - 1.5, y: 7)
+                    }
                 }
             }
-            .frame(height: 3)
+            .frame(height: 13)
         }
-        .frame(height: 72)
+        .frame(height: 82)
     }
 }

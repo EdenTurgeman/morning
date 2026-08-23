@@ -31,7 +31,10 @@ struct WarmupScreen: View {
     let endsAt: Date
     let progress: Double
     let stepLabel: String
-    let namespace: Namespace.ID
+    /// The rail's ticks. See `WorkoutChrome.setMarks` — passed on every screen
+    /// in the workout, because a rail that changes shape between them reads as
+    /// a bug.
+    let setMarks: [Double]
 
     let onDone: () -> Void
     let onBack: () -> Void
@@ -47,9 +50,20 @@ struct WarmupScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
+            WorkoutChrome(progress: progress, step: stepLabel, setMarks: setMarks, onBack: onBack, onEnd: onEnd)
 
-            VStack(alignment: .leading, spacing: 2) {
+            // W15 #5, all four of Eden's complaints about this screen:
+            // "doesn't have the same countdown as other screens… it's spaced
+            // really badly, the text spacing is bad, the text is small and
+            // should be formatted better with better spacing and the countdown
+            // is in an odd position."
+            //
+            // The countdown is now the same `CountdownRing` every other timed
+            // step uses, centred where the rest screen puts its ring — so the
+            // two screens that both count down finally look related. The copy
+            // gets real spacing instead of 2pt, and the cues get their own
+            // rhythm rather than being crushed under the headline.
+            VStack(alignment: .leading, spacing: Space.tight) {
                 Text(step.title)
                     .font(TypeScale.title)
                     .foregroundStyle(Ink.primary)
@@ -63,29 +77,24 @@ struct WarmupScreen: View {
             .padding(.top, Space.snug)
 
             cues
-                .padding(.top, Space.step)
+                .padding(.top, Space.section)
 
-            // The clock follows the cues rather than floating in the middle.
-            //
-            // Measured, the first version put 192pt above it and 190pt below —
-            // 44% of the screen as air, with a 68pt clock trying to hold the
-            // centre on its own and not big enough to. Worse, the two things
-            // you read here are "what to do" and "how long", and 192pt between
-            // them is enough to stop reading them as one instruction.
-            //
-            // The void moves below, where it is paying for the bottom-pinned
-            // button — which is the arrangement every other screen in the app
-            // already uses.
+            Spacer(minLength: Space.step)
+
             TimelineView(.animation) { context in
                 let remaining = max(0, endsAt.timeIntervalSince(context.date))
-                clock(remaining)
-                    .onChange(of: Int(ceil(remaining))) { _, value in
-                        if value <= 0 {
-                            finish()
-                        }
+                CountdownRing(
+                    remaining: remaining,
+                    total: Double(step.seconds),
+                    accent: palette.accent,
+                    caption: "SEC"
+                )
+                .onChange(of: Int(ceil(remaining))) { _, value in
+                    if value <= 0 {
+                        finish()
                     }
+                }
             }
-            .padding(.top, Space.section)
 
             Spacer(minLength: Space.step)
 
@@ -128,22 +137,6 @@ struct WarmupScreen: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    /// `src/lib/format.ts`: bare seconds under a minute, `m:ss` above it.
-    ///
-    /// Carries the work object, so the warm-up's clock becomes the first set's
-    /// rep counter rather than the two screens swapping.
-    private func clock(_ remaining: TimeInterval) -> some View {
-        let whole = Int(ceil(max(0, remaining)))
-        let text = whole < 60 ? "\(whole)" : "\(whole / 60):\(String(format: "%02d", whole % 60))"
-        return Text(text)
-            .font(TypeScale.counter())
-            .monospacedDigit()
-            .foregroundStyle(Ink.primary)
-            .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: true))
-            .matchedGeometryEffect(id: WorkObject.id, in: namespace, isSource: false)
-            .accessibilityLabel("\(whole) seconds left in the warm-up")
     }
 
     // MARK: - Behaviour
