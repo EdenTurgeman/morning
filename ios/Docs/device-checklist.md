@@ -90,17 +90,37 @@ you can just use the app, but they are still the fastest way to sit on one
 screen and stare at it.
 
 ```text
--seed six-months                     replace the history with a fixture
--screen set -progress 1.00           the Set screen at the gold end of the dawn
+STATE
+-seed empty|one-session|one-week|six-months|one-year   replace the history
 -screen set -step 0                  the warm-up, which the app now starts on
--autorun                             play a whole session from Home, no taps
+-screen set -step 1                  the first set
+-screen set -step 15                 a carded rest
 -screen set -slot 4.0.0              the worst content in the program
 -screen set -reps 15                 the counter already past last time
--screen set -step 15                 a carded rest
--screen summary -tier plateau        one celebration tier
+-screen set -progress 1.00           the gold end of the dawn
+-screen summary -tier first|record|plateau|weight-changed|week-complete
 -screen ledger | guide | backup | history
 -screen lab                          the W1 direction lab, still runnable
+-session A|B                         which session, where a screen takes one
+
+MOVEMENT — because no tap reaches this app in the development environment
+-autorun                             play a whole session from Home, no taps
+-autoplay                            advance one step 1.4s after launch
+-autorep                             nudge the counter up one, crossing last
+                                     time's number — the threshold, in motion
+
+STATES ONLY A TAP CAN REACH
+-confirm-end                         the "End this session?" alert
+-edit-load                           Home's weight picker, open
+-skip-daybreak                       the Summary, without waiting out Daybreak
 ```
+
+Every one of these exists because the development machine has no `Simulator.app`
+— only the headless runtime — so a state you cannot reach by launch argument is
+a state nobody has ever looked at. Three defects this session were found by
+adding a flag for something previously unreachable: the End confirmation did not
+exist, the summary card's tap skipped its haptic, and `milestoneBurst` was
+rendered by nothing.
 
 ### The haptic that matters most
 
