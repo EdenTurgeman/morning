@@ -3584,3 +3584,21 @@ it), and the Set screen's sub-label now appears only where it disambiguates
   measured on a 402x874 iPhone 16 Pro and a 375x667 SE in the simulator.
 - Taps still cannot be synthesised on this machine. Every interactive path is
   reached through a launch flag; the flags are listed in `ReviewHost.swift`.
+
+  **Re-tested on 2026-08-23 via the iOS Simulator MCP tools, which I had not
+  tried before**, in case they took a different path from `simctl`. They do not.
+  `control{action:"tap"}` returns `Tapped at (340, 226)` and the screen does not
+  change — verified by luma against the springboard wallpaper, at both plausible
+  coordinate frames, and again after `control{action:"attach"}` confirmed the
+  panel was live and reported the coordinate space as 402x874. The screenshot
+  half of the same tool works fine.
+
+  So the tool reports success for input it never delivers, which is worse than
+  failing, and it is exactly the trap this log has warned about twice: an
+  instrument that answers confidently without measuring anything. Eden's own
+  taps in his panel do work. Mine do not, by any route tried.
+
+  **There is no Claude-XcodePreviews integration configured here** and none
+  installed. `.claude/launch.json` is the web dev server only. The iOS loop is
+  `xcodebuild` to `ios/build/dd`, `simctl install`, `simctl launch` with flags,
+  `simctl io screenshot`, and `ios/Tools/frames.swift` for motion.

@@ -20,6 +20,7 @@ binding. `ios-port/02-design-brief.md` is the main one.
 
 | File | What it settles |
 |---|---|
+| `spec.md` | **What the app must do.** Behaviour only, no UI. The one to read if you are changing or rebuilding anything. |
 | `ios-port/README.md` | The working agreement. Four rules. Read them literally. |
 | `ios-port/01-product.md` | One user, one iPhone, 6:10am, sweaty hands. Justifies every UI decision. |
 | `ios-port/02-design-brief.md` | **The main document.** Visual direction, the research method, the quality bar. |
@@ -150,10 +151,14 @@ Every one of these has already cost someone something.
   every delta is meaningless. Say so honestly; do not show a comparison that
   isn't one.
 - **Bodyweight reps are 0 kg of tonnage** but still count as reps.
-- **`spec.md` is gitignored** ("it describes the person this was built for"), so
-  the `ios-port/` docs reference a file you cannot read. Everything binding from
-  it has been carried into `ios-port/`. If something seems to be missing, ask
-  Eden rather than guessing.
+- **`spec.md` is now the functional specification and it IS tracked.** It was
+  gitignored, and absent from every clone, because the original described the
+  person this was built for. The one in the repo now describes only what the app
+  must *do* — no UI, no UX, no screens — and it exists so the interface can be
+  rebuilt from scratch without reverse-engineering the behaviour out of the old
+  one. **Read it before changing behaviour, and update it in the same commit
+  when behaviour changes.** Anything personal goes in `spec.private.md`, which
+  is still ignored.
 
 ## Definition of done, for any screen
 

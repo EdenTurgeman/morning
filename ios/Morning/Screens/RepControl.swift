@@ -74,7 +74,7 @@ struct RepControl: View {
     /// screen above this now hands it whatever space is left over — which only
     /// pins it if this control is the same height every time. It was not: the
     /// comparison line wraps to two lines when the weight has changed ("Last
-    /// time: 12 at 6.25 kg — different weight now") and to one when it has not,
+    /// weight now. Last time: 12 at 6.25 kg") and to one when it has not,
     /// so the counter sat 19pt higher on some sets than others.
     static let height: CGFloat = 150
 
@@ -177,7 +177,7 @@ struct RepControl: View {
             if !isComparable {
                 // Reps are only comparable at the same weight. Saying so is the
                 // honest move; quietly implying a target is not.
-                Text("Last time: \(previous.reps) at \(Plates.format(previous.kg ?? 0)) kg — different weight now")
+                Text("Different weight now. Last time: \(previous.reps) at \(Plates.format(previous.kg ?? 0)) kg")
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.tertiary)
             } else {
@@ -197,7 +197,7 @@ struct RepControl: View {
                 }
             }
         } else {
-            Text("First time — just go to failure")
+            Text("First time here. Go to failure")
                 .font(TypeScale.body)
                 .foregroundStyle(Ink.tertiary)
         }

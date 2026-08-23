@@ -15,7 +15,12 @@ struct DawnBackdrop: View {
             ZStack {
                 switch treatment {
                 case .atmospheric:
-                    AtmosphericSky(progress: progress, palette: palette)
+                    // W18. Was `AtmosphericSky` — eight composited SwiftUI
+                    // layers. It is one Metal pass now; `Shaders/Sky.metal`
+                    // argues the case. `AtmosphericSky` stays in the file
+                    // because the direction lab still renders it, and because a
+                    // side-by-side is the only honest way to judge the swap.
+                    MetalSky(progress: progress)
 
                 case .precise:
                     Color(red: 0.018, green: 0.02, blue: 0.032)

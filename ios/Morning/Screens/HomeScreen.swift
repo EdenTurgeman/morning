@@ -217,7 +217,9 @@ struct HomeScreen: View {
     /// last did, which is the fact that makes "next" make sense.
     private var subtitle: String {
         guard let lastSession, let date = History.localDate(of: lastSession) else {
-            return "First session. Session \(nextSession) to start."
+            // The panel below already says SESSION A in 38pt type. Saying it twice,
+            // 90pt apart, is not orientation.
+            return "Nothing logged yet."
         }
         let days = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
         let when = switch days {
@@ -366,7 +368,7 @@ struct HomeScreen: View {
 
         return blocks.map { block in
             guard let sub = block.sub, counts[block.name, default: 0] > 1 else { return block.name }
-            return "\(block.name) — \(sub)"
+            return "\(block.name) · \(sub)"
         }
     }
 

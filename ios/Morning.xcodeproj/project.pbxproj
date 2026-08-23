@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		680E8993B223510149110216 /* MetalSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9BDC0A5625606FFCF3E40B /* MetalSky.swift */; };
+		EB88854B1AA248535A4A88BB /* Sky.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3AA0D9AB1EB9A7965A335B02 /* Sky.metal */; };
 		751E5C69EC0433CFD7D7720C /* CountdownRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */; };
 		67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */; };
 		8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */ = {isa = PBXBuildFile; fileRef = F0102D8606AEAE1192831B3F /* Daybreak.metal */; };
@@ -121,6 +123,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2A9BDC0A5625606FFCF3E40B /* MetalSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalSky.swift; sourceTree = "<group>"; };
+		3AA0D9AB1EB9A7965A335B02 /* Sky.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Sky.metal; sourceTree = "<group>"; };
 		A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownRing.swift; sourceTree = "<group>"; };
 		8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalDaybreakSky.swift; sourceTree = "<group>"; };
 		F0102D8606AEAE1192831B3F /* Daybreak.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Daybreak.metal; sourceTree = "<group>"; };
@@ -199,6 +203,7 @@
 		C951ED9F061EAF54D1762EF8 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				3AA0D9AB1EB9A7965A335B02 /* Sky.metal */,
 				F0102D8606AEAE1192831B3F /* Daybreak.metal */,
 			);
 			path = Shaders;
@@ -216,6 +221,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				2A9BDC0A5625606FFCF3E40B /* MetalSky.swift */,
 				A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */,
 				8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */,
 				9520A59BDFA835728DA588D0 /* RestActivityViews.swift */,
@@ -537,6 +543,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				680E8993B223510149110216 /* MetalSky.swift in Sources */,
+				EB88854B1AA248535A4A88BB /* Sky.metal in Sources */,
 				751E5C69EC0433CFD7D7720C /* CountdownRing.swift in Sources */,
 				67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */,
 				8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */,

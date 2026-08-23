@@ -176,12 +176,12 @@ export function weekNudge(p: WeeklyProgress): string | null {
   if (!p.canRestToday)
     return p.daysLeft === 1
       ? "Last day. This one makes the week."
-      : `Train today or the week's gone — ${p.remaining} left, ${p.daysLeft} days.`;
+      : `Train today or the week's gone. ${p.remaining} left, ${p.daysLeft} days.`;
 
   // There is room to skip. Name the days it would cost you.
   const needed = p.daysAhead.slice(-p.remaining);
   if (needed.length === p.daysAhead.length && needed.length > 0)
-    return `Rest today and you still make ${p.target} — but you'd need ${listOf(needed)}.`;
+    return `Rest today and you still make ${p.target}, but you'd need ${listOf(needed)}.`;
 
   const spare = p.daysAhead.length - p.remaining;
   return `${p.remaining} to go, ${p.daysLeft - 1} days after today. ${spare} spare.`;
