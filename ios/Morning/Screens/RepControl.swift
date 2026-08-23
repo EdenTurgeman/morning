@@ -121,28 +121,32 @@ struct RepControl: View {
             .minimumScaleFactor(0.5)
             .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: direction < 0))
             .foregroundStyle(isBeating ? Semantic.threshold : Ink.primary)
-            .frame(width: 138)
-            .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: reps)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: isBeating)
-            // A NEW SET IS NOT A REP.
+            // A NEW SET IS A NEW NUMBER, not a change to the old one.
             //
-            // W15 #10: *"the rep number animates wildly on screen load"*. Both
-            // things that change this number went through the same animation,
-            // so arriving at a set prefilled with 22 after logging one at 8
-            // rolled every digit from 8 to 22 — a slot machine, at 104pt,
-            // on the frame the screen appeared.
+            // Identity, because nothing weaker works here. The first attempt
+            // was `.transaction(value: stepKey) { $0.animation = nil }` on the
+            // outside of this chain, and a filmstrip off a 60fps capture shows
+            // it doing nothing: at 5.48s the digits are still cross-dissolving
+            // 24 into 22 across a step change. `.animation(_:value:)` sets the
+            // animation for everything below it and an outer transaction
+            // cannot reach past it.
             //
-            // A tap should move the digit: that is how you see a mistap. A step
-            // change should not: the number was never 8 on this set, it has
-            // always been 22, and animating between two different sets' values
-            // states a relationship that does not exist.
+            // Moving the animation to the tap site would work and would break
+            // something else — `-autorep` drives the counter without
+            // `withAnimation` precisely so the harness animates the way the
+            // product does, and its comment says so.
             //
-            // `transaction(value:)` strips the animation only on the update
-            // where the key changed, which is exactly that distinction and the
-            // only one available here — the change arrives from outside, inside
-            // the host's screen-swap transaction.
-            .transaction(value: stepKey) { $0.animation = nil }
+            // So the digit gets a new identity per set. `contentTransition`
+            // interpolates between two values of ONE view; two views do not
+            // interpolate at all. `.identity` because the default for an
+            // identity change is a cross-fade, and a fade is a quieter version
+            // of the same wrong idea.
+            .transition(.identity)
+            .id(stepKey)
+            .frame(width: 138)
+            .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .accessibilityLabel("\(reps) reps")
             .accessibilityValue(accessibilityComparison)
     }
