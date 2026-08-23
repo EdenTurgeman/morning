@@ -734,16 +734,30 @@ most likely places to drop frames.
 
 ## W14 · UI/UX review of the whole app — `in progress`, **runs before W12 and W13**
 
-**Three rounds done. Findings and fixes are in `ios/Docs/ux-review.md`**, which
-is the deliverable — read that rather than this section. Round one measured
-vertical rhythm, round two horizontal alignment, round three contrast. Two items
-are left open there and both are Eden's judgement rather than mine: whether card
-text should scale with Dynamic Type, and Home's 202pt gap.
+**Five rounds done. Findings and fixes are in `ios/Docs/ux-review.md`**, which
+is the deliverable — read that rather than this section.
 
-Rounds still worth running: **motion under real use** (the review looked at
-static frames), **the one-week and one-year seeds** (only empty and six-months
-were checked), and **landscape/large-device behaviour**, which nothing has ever
-looked at.
+1. Vertical rhythm — voids and crowding.
+2. Horizontal alignment — clean, 23pt gutter everywhere.
+3. Contrast, including on everything rounds 1–2 added.
+4. **Device size**, which found the worst defect in the review: the Set screen
+   did not fit a 667pt iPhone SE, losing its chrome off the top and half the
+   Done button off the bottom.
+5. The `one-week` and `one-year` seeds, which nobody had rendered.
+
+Landscape is not applicable — the app is portrait-locked and iPhone-only.
+Motion was covered by the quality pass that preceded this workstream, frame by
+frame off 60fps captures.
+
+**Two items left open, both Eden's judgement rather than mine:** whether card
+text should scale with Dynamic Type (`answer`'s 14.5pt is tuned to the
+seven-line stress case on a screen that cannot scroll), and Home's 202pt gap,
+which the low primary action arguably buys.
+
+**A `SE3-uxcheck` simulator was created on this machine** for round four. Delete
+it freely; the review has the one-line `simctl create` to bring it back, and any
+future addition to the Set screen or the Summary has to be checked there rather
+than on a Pro.
 
 Asked for on 2026-08-23, and the ordering is his:
 
