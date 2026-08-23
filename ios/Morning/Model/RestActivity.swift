@@ -34,14 +34,12 @@ import Foundation
 /// one — and keeping it static means the system can render the whole countdown
 /// without the app waking up to push a single update.
 nonisolated struct RestAttributes: Codable, Hashable {
-    /// Filled by the state, which for this activity never actually changes.
-    struct State: Codable, Hashable {
-        /// Present so the type is not empty. The countdown needs no state.
-        var placeholder: Int = 0
-    }
+    /// `ActivityAttributes` requires a `ContentState`, and this activity has
+    /// none: the countdown is drawn from `endsAt`, which never changes for a
+    /// given rest. Empty on purpose rather than carrying a placeholder.
+    struct State: Codable, Hashable {}
 
     let endsAt: Date
-    let seconds: Int
     /// "Push-up", or nil at the end of a session.
     let nextExercise: String?
     /// "set 2 of 3 · 8–15 reps"

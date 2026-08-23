@@ -69,7 +69,6 @@ final class RestActivityController {
 
             let attributes = RestAttributes(
                 endsAt: endsAt,
-                seconds: rest.seconds,
                 nextExercise: next?.exercise,
                 nextDetail: next?.summaryLine,
                 isMyo: rest.seconds < Deck.minimumRestForCard

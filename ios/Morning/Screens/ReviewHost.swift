@@ -155,13 +155,12 @@ struct LiveActivityReviewHost: View {
     /// which is the right way for it to fail.
     /// A real set out of the compiled program, so the detail line is whatever
     /// the app would actually show.
-    private func sample(from key: String, myo: Bool, endsIn: TimeInterval, seconds: Int) -> RestAttributes {
+    private func sample(from key: String, myo: Bool, endsIn: TimeInterval) -> RestAttributes {
         let steps = StepCompiler.build(session: key)
         let sets = steps.compactMap(\.asSet)
         let set = (myo ? sets.last : sets.first { $0.load != nil }) ?? sets.first
         return RestAttributes(
             endsAt: Self.now.addingTimeInterval(endsIn),
-            seconds: seconds,
             nextExercise: set?.exercise,
             nextDetail: set?.summaryLine,
             isMyo: myo
@@ -174,11 +173,10 @@ struct LiveActivityReviewHost: View {
             // version of this used hardcoded strings — and they were *correct*,
             // which meant the preview showed a line the code could not produce
             // and hid the bug it existed to find.
-            sample(from: "B", myo: false, endsIn: 64, seconds: 90),
-            sample(from: "B", myo: true, endsIn: 17, seconds: 20),
+            sample(from: "B", myo: false, endsIn: 64),
+            sample(from: "B", myo: true, endsIn: 17),
             RestAttributes(
                 endsAt: Self.now.addingTimeInterval(45),
-                seconds: 45,
                 nextExercise: nil,
                 nextDetail: nil,
                 isMyo: false
