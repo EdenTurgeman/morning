@@ -100,7 +100,13 @@ struct RestScreen: View {
             }
 
             if let card {
-                StudyCard(card: card, revealed: revealed, answerShown: answerShown, accent: palette.accent) {
+                StudyCard(
+                    card: card,
+                    revealed: revealed,
+                    answerShown: answerShown,
+                    accent: palette.accent,
+                    thinkingTime: Deck.revealDelay(forRestOf: seconds)
+                ) {
                     // Tapping only brings the answer forward.
                     reveal()
                 }
@@ -322,7 +328,12 @@ private struct StudyCard: View {
     /// the card grows on schedule, but stays invisible until this follows.
     let answerShown: Bool
     let accent: Color
+    /// How long the reader gets before the answer arrives. The bar fills over
+    /// exactly this, so the two cannot disagree about how much time is left.
+    let thinkingTime: TimeInterval
     let onReveal: () -> Void
+
+    @State private var thinking: Double = 0
 
     var body: some View {
         Button(action: onReveal) {
@@ -339,14 +350,30 @@ private struct StudyCard: View {
 
                 // The thinking bar fills, then becomes the rule the answer sits
                 // under. One element doing both jobs.
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Ink.hairline)
-                        .frame(height: 1)
-                    Rectangle()
-                        .fill(revealed ? Ink.hairline : accent)
-                        .frame(width: revealed ? nil : 92, height: revealed ? 1 : 2)
+                //
+                // It never filled. It was a fixed 92pt rectangle — the comment
+                // above described behaviour the code did not have, for as long
+                // as the component has existed, and Eden reported it the first
+                // time he watched one: "doesn't run or count down at all".
+                //
+                // `02-design-brief.md §9` singles this out as the app's example
+                // of motion carrying meaning. A bar that does not move carries
+                // none.
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Rectangle()
+                            .fill(Ink.hairline)
+                            .frame(height: 1)
+                        Rectangle()
+                            .fill(revealed ? Ink.hairline : accent)
+                            .frame(
+                                width: revealed ? proxy.size.width : proxy.size.width * thinking,
+                                height: revealed ? 1 : 2
+                            )
+                    }
+                    .frame(maxHeight: .infinity, alignment: .center)
                 }
+                .frame(height: 2)
 
                 if revealed {
                     Text(card.a)
@@ -366,5 +393,10 @@ private struct StudyCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(revealed ? "\(card.q) \(card.a)" : "\(card.q). Reveal answer.")
+        .onAppear {
+            // Linear, because it is a clock. Anything eased would misreport how
+            // much thinking time is left, which is the one thing it is for.
+            withAnimation(.linear(duration: thinkingTime)) { thinking = 1 }
+        }
     }
 }
