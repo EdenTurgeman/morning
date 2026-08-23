@@ -261,6 +261,14 @@ the only way to see the real height.
 Rest, Warm-up, Home, Backup, Ledger and Guide were all checked at 667pt and all
 fit; Ledger has 89pt to spare.
 
+**Validated across a whole session, not two screenshots.** `-autorun` was run
+end to end on the 667pt SE, because different exercises carry different numbers
+of cues and a fix checked against one slot proves nothing about the others.
+Sampled through: "Set 4 / 13 · Overhead press" with its extra "No rest after
+this" line, a compressed 72pt bay, both cues, the rep control and Done — all
+present, nothing clipped, footer correctly absent. The rests render at every
+stage of the dawn.
+
 ---
 
 ## 3e. Round five — the seeds nobody had rendered
