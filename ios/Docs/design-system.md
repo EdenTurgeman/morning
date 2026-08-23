@@ -167,6 +167,15 @@ There is now **no text on any screen, at any progress, below 7.00:1** against a
 
 ### Semantic colour, kept off the ramp
 
+**`danger` and `dangerText` are a pair, for the same measured reason as `accent`
+and `accentText`.** The red on the night sky is 4.27:1 — right for a 1.5pt rule
+or a filled icon, under this app's 6.6:1 text floor *and* under WCAG AA's 4.5:1,
+so it must not carry a glyph. `dangerText` is the same red lifted 34% toward
+white: **7.16:1**. "Erase everything" shipped at `danger.opacity(0.75)` and
+measured 3.07:1 — de-emphasis taken as far as illegibility, on the label of the
+one control that destroys everything.
+
+
 `§6` requires these to live outside the accent ramp so they can never collide
 with whatever the accent happens to be at that moment.
 

@@ -75,6 +75,39 @@ def bands(path, scale=3.0, min_ink=0.12, ink_floor=95):  # ink_floor: std-dev th
     return merged, height
 
 
+def luminance(value):
+    """WCAG relative luminance for one 8-bit channel-equal grey."""
+    c = value / 255
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def contrast_of(path, start, end):
+    """Ink-against-its-own-background ratio for one band.
+
+    `measure-contrast.py` needs a hand-maintained zone table per screen, which
+    means anything newly added to a screen is invisible to it until someone
+    remembers to add a row. This takes the band the layout scan already found
+    and measures it directly, so a new control is checked the first time it is
+    rendered rather than the first time somebody updates a table.
+
+    The glyph cores are the brightest few percent of the band and the backdrop
+    is its median — taking the darkest pixels instead would measure against the
+    corner of the sky rather than against what the text actually sits on.
+    """
+    image = Image.open(path).convert("L")
+    width, _ = image.size
+    pixels = image.load()
+    values = sorted(
+        pixels[x, y] for y in range(start, end) for x in range(0, width, 2)
+    )
+    if len(values) < 40:
+        return None
+    ink = values[int(len(values) * 0.985)]
+    back = values[len(values) // 2]
+    high, low = luminance(max(ink, back)), luminance(min(ink, back))
+    return (high + 0.05) / (low + 0.05)
+
+
 def main():
     args = sys.argv[1:]
     if not args:
@@ -97,9 +130,16 @@ def main():
             flag += "  ← large gap"
         elif 0 < gap < 6 and previous_end:
             flag += "  ← tight"
-        print(
-            f"  {start / scale:6.0f}–{end / scale:<7.0f}  {band_pt:7.1f}  {gap:9.1f}{flag}"
-        )
+        if "--contrast" in args:
+            ratio = contrast_of(path, start, end)
+            shown = f"{ratio:5.2f}:1" if ratio else "    —  "
+            if ratio and ratio < 6.6:
+                shown += "  ← under the 6.6:1 floor"
+            print(f"  {start / scale:6.0f}–{end / scale:<7.0f}  {band_pt:7.1f}  {shown}")
+        else:
+            print(
+                f"  {start / scale:6.0f}–{end / scale:<7.0f}  {band_pt:7.1f}  {gap:9.1f}{flag}"
+            )
         previous_end = end
     trailing = (height - previous_end) / scale
     print(f"  {'':>16}  {'':>8}  {trailing:9.1f}  ← below the last band")

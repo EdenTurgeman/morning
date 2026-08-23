@@ -82,8 +82,14 @@ ZONES = {
     ],
     # Windows stop short of the controls: their border out-inks the text.
     "rest": [
-        ("timer   seconds", 940, 1180, 300, 910, "primary"),
-        ("label   SEC", 1195, 1250, 430, 780, "tertiary"),
+        # Re-anchored during W14. The old window (940–1180) sat on the ring's
+        # upper arc and the sky above the digits, catching the very top of them
+        # at best, and reported white-on-night type as 3.71:1 — a failing grade
+        # for the largest, brightest thing on the screen. A window that misses
+        # its element does not produce a small error, it produces a confident
+        # wrong answer, and the tool's own footer says to check exactly this.
+        ("timer   seconds", 1150, 1400, 300, 910, "primary"),
+        ("label   SEC", 1420, 1470, 430, 780, "tertiary"),
         ("label   Next", 2150, 2200, 30, 1180, "tertiary"),
         ("next    exercise", 2175, 2230, 30, 1180, "secondary"),
         ("next    meta line", 2240, 2292, 30, 1180, "tertiary"),

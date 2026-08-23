@@ -139,6 +139,51 @@ callout and matches what the web build does with `border-l-2`.
 
 ---
 
+## 3c. Round three — contrast, including on the things this review added
+
+Rounds one and two added a weight picker, a backup status block, a week strip
+and a run line without measuring any of them against the design system's 6.6:1
+text floor. `measure-contrast.py` could not check them: it works from a
+hand-maintained zone table, so anything newly added is invisible to it until
+somebody remembers to add a row. `measure-layout.py --contrast` now measures
+whatever bands the layout scan already found, so a new control is checked the
+first time it renders.
+
+**One real failure, fixed.** "Erase everything" was `Semantic.danger` at 0.75
+opacity and measured **3.07:1** — under this app's 6.6:1 floor and under WCAG
+AA's 4.5:1 for ordinary text. It is the label on the only control that destroys
+everything, and de-emphasis had been taken as far as illegibility. Full strength
+gave 4.27:1, still short, so `Semantic.dangerText` now exists: the same red
+lifted 34% toward white, exactly the split the palette already makes between
+`accent` and `accentText`. **7.16:1.**
+
+**Two things the new probe cannot do**, established by cross-checking it against
+the validated tool rather than by trusting it:
+
+- **It understates thin small text.** It takes the 98.5th percentile of a band
+  as the glyph core, and on a 10pt line few enough pixels are glyph that the
+  percentile never reaches it. It reported the Rest screen's next-up line at
+  4.38:1; `measure-contrast.py`, aimed properly, says **8.25:1**.
+- **It cannot measure a filled button at all** — a bright fill with a dark label
+  reports 1.00:1, because the band's median and its brightest pixel are both the
+  fill.
+
+So it is a smoke detector, good for catching a 2× miss like the Erase label.
+`measure-contrast.py` remains the measurement.
+
+**And the measurement had a stale window.** Cross-checking turned up that
+`measure-contrast.py`'s `rest / timer seconds` zone had drifted off its element:
+the window sat at y 940–1180 while the digits render at 1160–1400, so it was
+measuring the ring's upper arc and the sky above it. It reported **3.71:1 for
+the largest, brightest, whitest thing on the screen**. Re-anchored, the timer
+measures **10.90:1** and the whole Rest screen spans 8.25–13.94:1.
+
+A window that misses its element does not produce a small error. It produces a
+confident wrong answer about the one screen you stare at for a minute — and the
+tool's own footer has always said to check for exactly this.
+
+---
+
 ## 4. What is already good, so nobody re-opens it
 
 - **The Set screen's ordinary state.** Bands throughout, gaps 8–56pt, no void,

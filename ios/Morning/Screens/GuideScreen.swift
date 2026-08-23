@@ -220,7 +220,16 @@ struct BackupScreen: View {
 
                 Button("Erase everything") { confirmingErase = true }
                     .font(TypeScale.body)
-                    .foregroundStyle(Semantic.danger.opacity(0.75))
+                    // Full strength, not 0.75. Measured on the rendered frame,
+                    // the dimmed version came out at **3.07:1** — below this
+                    // app's own 6.6:1 text floor and below WCAG AA's 4.5:1 for
+                    // ordinary text. De-emphasis is right for this control and
+                    // it already has three other forms of it: it is last, it is
+                    // body weight, and it sits alone under a rule at the far end
+                    // of the screen from Export. Making the label hard to read
+                    // is not a fourth — you have to be able to read the thing
+                    // you are about to tap.
+                    .foregroundStyle(Semantic.dangerText)
                     .frame(maxWidth: .infinity, minHeight: Hit.minimum)
             }
         }
