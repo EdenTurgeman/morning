@@ -48,6 +48,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -253,6 +286,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -445,6 +511,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -530,6 +629,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -612,6 +744,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -697,6 +862,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -780,6 +978,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -865,6 +1096,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -952,6 +1216,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -1058,6 +1355,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1154,6 +1484,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -1260,6 +1623,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1361,6 +1757,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1451,6 +1880,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1534,6 +1996,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -1621,6 +2116,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1703,6 +2231,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -1792,6 +2353,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
 
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1879,6 +2473,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -1995,6 +2622,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 
@@ -2200,6 +2860,39 @@ Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
 **If you add a tool to this repo, cross-check it against a known answer before
 you believe it.** Every one of the above was caught that way and none of them
 by reading the code.
+
+### W12 — the rest-timer Live Activity
+
+Built, because Eden said yes to it explicitly and sequenced it after the UI
+review. A new `MorningWidgets` app-extension target, added by
+`ios/Tools/add-widget-target.py` — eleven co-ordinated additions across nine
+pbxproj sections plus two edits to the host. **Use the script rather than
+hand-editing**; it is idempotent and it is the record of what a widget target
+consists of in a classic project file.
+
+**Three failures worth carrying forward, in the order they appeared:**
+
+1. **Swift 6 conformance isolation, where the error points at the wrong fix
+   twice.** With `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, the conformance to
+   `ActivityAttributes` is main-actor-isolated and `Activity.end` is concurrent.
+   Hopping the *call* to the main actor does not help — it is the conformance
+   that is isolated. `nonisolated extension` parses and does nothing. What works
+   is `extension T: nonisolated P` **and** `nonisolated struct T`: a conformance
+   cannot be nonisolated while its type is not.
+2. **`CFBundleExecutable`.** `GENERATE_INFOPLIST_FILE` is off for this project,
+   so the extension's Info.plist is hand-written — and without that one key the
+   extension builds and signs cleanly and then the **host app** refuses to
+   install.
+3. **Two activities for one rest.** `syncLiveActivity()` fires from both
+   `onAppear` and the `endsAt` change; `end()` was async and had not finished
+   before the second request. On a Lock Screen that is two identical countdowns
+   stacked. **Only the log showed it** — which is why the controller logs its
+   successes and its running count, not just its failures. A feature whose
+   output lives somewhere this machine cannot reach has to be made observable or
+   it cannot be verified at all.
+
+**Verified:** `starting, 20s` / `started, now 1 running` / `ending, 1 running`.
+**Not verified:** everything visible. Six checks are on the device checklist.
 
 **Landmines**
 

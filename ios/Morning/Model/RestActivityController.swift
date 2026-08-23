@@ -100,9 +100,8 @@ final class RestActivityController {
                     // invisible without this — which is the whole problem with
                     // a feature whose output lives on a Lock Screen this
                     // machine cannot reach.
-                    log.notice(
-                        "live activity started, now \(Activity<RestAttributes>.activities.count, privacy: .public) running"
-                    )
+                    let count = Activity<RestAttributes>.activities.count
+                    log.notice("live activity started, now \(count, privacy: .public) running")
                 } catch {
                     // Swallowed on purpose. See the header.
                     log.error("live activity did not start: \(error.localizedDescription, privacy: .public)")
