@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */; };
+		8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */ = {isa = PBXBuildFile; fileRef = F0102D8606AEAE1192831B3F /* Daybreak.metal */; };
 		3573D091CD4CB72641B11E28 /* AppActionsAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */; };
 		B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C34B443B09E40AF92143EAA /* AppModel.swift */; };
 		8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9520A59BDFA835728DA588D0 /* RestActivityViews.swift */; };
@@ -118,6 +120,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalDaybreakSky.swift; sourceTree = "<group>"; };
+		F0102D8606AEAE1192831B3F /* Daybreak.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Daybreak.metal; sourceTree = "<group>"; };
 		FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActionsAcceptanceTests.swift; sourceTree = "<group>"; };
 		9C34B443B09E40AF92143EAA /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		9520A59BDFA835728DA588D0 /* RestActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestActivityViews.swift; sourceTree = "<group>"; };
@@ -190,6 +194,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		C951ED9F061EAF54D1762EF8 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				F0102D8606AEAE1192831B3F /* Daybreak.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
 		E1A00002D0C24B0F9A000002 /* MorningWidgets */ = {
 			isa = PBXGroup;
 			children = (
@@ -202,6 +214,7 @@
 		75B691A625410BD958A812BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */,
 				9520A59BDFA835728DA588D0 /* RestActivityViews.swift */,
 				21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */,
 				4E6A732CF5554EC40FA5747E /* GuideScreen.swift */,
@@ -268,6 +281,7 @@
 		449C7FBA832FA356A9500DA8 /* Morning */ = {
 			isa = PBXGroup;
 			children = (
+				C951ED9F061EAF54D1762EF8 /* Shaders */,
 				75B691A625410BD958A812BF /* Screens */,
 				46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */,
 				FE8697A0CCA60B175CC76533 /* DesignHaptics.swift */,
@@ -520,6 +534,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */,
+				8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */,
 				B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */,
 				8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */,
 				A290F3B3F13F8B73BD02C7CE /* RestActivityController.swift in Sources */,

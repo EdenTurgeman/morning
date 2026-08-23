@@ -122,6 +122,17 @@ def add(text: str, rel: str, test_target: bool = False) -> str:
 
     # 1. PBXBuildFile
     anchor = "/* Begin PBXBuildFile section */\n"
+    # By extension, not always Swift. A `.metal` file registered as
+    # `sourcecode.swift` is added to the target, appears in Xcode, and is
+    # never compiled into the metallib — so `ShaderLibrary` cannot find the
+    # function and the failure is at runtime, not at build time.
+    file_type = {
+        ".swift": "sourcecode.swift",
+        ".metal": "sourcecode.metal",
+        ".m": "sourcecode.c.objc",
+        ".c": "sourcecode.c.c",
+    }.get(Path(name).suffix, "sourcecode.swift")
+
     entry = f"\t\t{build_id} /* {name} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_id} /* {name} */; }};\n"
     text = text.replace(anchor, anchor + entry, 1)
 
@@ -132,7 +143,7 @@ def add(text: str, rel: str, test_target: bool = False) -> str:
     anchor = "/* Begin PBXFileReference section */\n"
     entry = (
         f"\t\t{file_id} /* {name} */ = {{isa = PBXFileReference; "
-        f"lastKnownFileType = sourcecode.swift; path = {name}; sourceTree = \"<group>\"; }};\n"
+        f"lastKnownFileType = {file_type}; path = {name}; sourceTree = \"<group>\"; }};\n"
     )
     text = text.replace(anchor, anchor + entry, 1)
 

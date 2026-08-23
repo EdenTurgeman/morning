@@ -799,3 +799,58 @@ both set up for it, and every state is reachable by launch argument.
 separate passes, and the reason is sound: a completeness gap is "the app does
 not do this", a UI issue is "it does it badly", and mixing them makes both
 harder to review.
+
+---
+
+## W15 · Eden's UI list — `todo`
+
+Eight items, given on 2026-08-23 after using the app himself. **His words are
+quoted; do not paraphrase them away.** Two are broken functionality rather than
+polish and go first.
+
+### Broken
+
+7. **"The done button after the rising sun animation doesn't do anything."**
+   The Summary's Done. `SummaryReviewHost` passes `onDone: {}` — the same
+   unwired-callback bug as "End and discard", in the same file, found the same
+   way. Check the real `AppRoot` path too before assuming it is only the
+   harness.
+6. **"The animation of the question answer bar that counts down until it shows
+   me the answer doesn't run or count down at all."** The study card's thinking
+   bar. `02-design-brief.md §9` calls it one element doing two jobs — it fills
+   over the thinking time and then becomes the rule the answer sits under. If it
+   does not fill, it is doing one job badly.
+
+### Layout and hierarchy
+
+1. **The Set screen's header column.** *"too cramped in that column, there's
+   uneeded text there about the weight 'lying your back', just the target is
+   important, and it creates a werid thing where we have a column on text on the
+   left side then nothing on the right."* Four stacked lines — name, sub, load ·
+   set position, target — all left-aligned with the whole right half empty.
+   **The sub-label may be droppable; the target is what matters.** Content rules
+   say cues and targets are fixed, but nothing says every field must be on
+   screen at once.
+2. **The rep control moves between exercises.** *"it's position changes based on
+   which exercise screen we're on which is bad, it should always be in the same
+   place like the Done button."* It is currently pushed by whatever the header
+   and cues need. It should be pinned. Also *"always too close to the text
+   above it"*.
+3. **The progress rail is thin on information.** *"in the prev app we had more
+   meaningfull markings on the progress bar that showed more context about
+   what's left or how many (super/not superset)."* Go and look at what the web
+   build's rail actually drew before designing a replacement.
+4. **"Some of the texts are a little small, should be a tad bigger."** Note that
+   W14 round three withdrew a similar finding for being measured wrongly — read
+   `ios/Docs/ux-review.md §3` first, then take his judgement over the
+   measurement, because he is the one holding the phone.
+5. **The warm-up screen.** *"doesn't have the same countdown as other screens,
+   and it's spaced really badly, the text spacing is bad, the text is small and
+   should be formatted better with better spacing and the countdown is in an odd
+   position."* It uses a plain `m:ss` where every other timer is a ring.
+8. **Home.** *"suuuper dull, doesn't really entice me to do a workout, it's
+   mostly empty, emphesising the weights and the 'this week' counter is small
+   and dull and really dull UX."* This is the biggest one and it is a design
+   problem, not a spacing one — W14 measured a 202pt void there and called it
+   acceptable because the low primary action buys it. **He disagrees, and he
+   uses it at 6:10am.** The measurement was not wrong; the judgement was.
