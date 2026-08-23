@@ -20,6 +20,34 @@ The - **The threshold delay had to clear the digit ROLL, not visual fusion.** Th
   bloom, the flash lands, the number springs in, the pips stagger, the copy
   follows. The anticipation beat the web version lacked is real and it works.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -197,6 +225,34 @@ it will not, and measure it.**
   separation that the cues and buttons never stack legibly, enough overlap that
   14 becomes 60 in one motion.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -361,6 +417,34 @@ scroll.
 - Control surfaces stay quiet (~1.3:1 against the sky) and the **boundary**
   carries the contrast. The design goal was "quiet", not "invisible".
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -418,6 +502,34 @@ exists.
   sessions with 3 is the mistake that dialog exists to prevent.
 - **iCloud was not built.** `05-platform.md §6` says propose, not assume.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -472,6 +584,34 @@ in it needs the hardware this clone has never had.
 - Month labels omitted. At ~5pt cells they crowd what they label.
 - Empty shows the grid EMPTY rather than hiding it, so the shape of what is
   coming is visible from day one.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -529,6 +669,34 @@ deliberately out of v1.
 - The summary is mounted UNDER Daybreak, as the web build does, so dismissing
   the celebration reveals numbers that are already there.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -584,6 +752,34 @@ deliberately out of v1.
   exception was wrong. `accentFill` lifts the accent 12% for fills that carry a
   label; every screen now clears the floor at every progress, weakest 7.00:1.
 - Finishing saves the record BEFORE clearing the in-progress file.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -641,6 +837,34 @@ deliberately out of v1.
 - The card is drawn on step CHANGE, never inside `body`.
 - No ring-switch question for Eden: `technical-decisions.md` already records
   that he chose countdown reliability over the silent switch.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -700,6 +924,34 @@ deliberately out of v1.
 - Cue emphasis uses `intensityWords`, already transcribed in `Program.swift`.
   My first version guessed at "contains a shouted word" and silently missed
   "Go to failure" and "mechanism" — the two that matter most.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -778,6 +1030,34 @@ rest-skipping in `WorkoutHost` as the first thing it does.
 - `previousSet` returns the weight, not just the reps, because the caller cannot
   decide whether it is a target without it.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -846,6 +1126,34 @@ rest-skipping in `WorkoutHost` as the first thing it does.
 - Precise and Tactile are frozen comparison artifacts. They keep their own
   literals and the gentler scrim, and they do not constrain the system.
 - **W1's device gate is carried to W11, not waived.** See the landmine below.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -924,6 +1232,34 @@ rest-skipping in `WorkoutHost` as the first thing it does.
 - Still no third-party animation dependency. Native `MeshGradient`, `Canvas`,
   `TimelineView` and baked `CGImage` tiles cover all of it.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -997,6 +1333,34 @@ periods, contrast bars) are the first tokens it should absorb.
   Rive or Lottie still needs a demonstrated final asset/state-machine advantage
   before it can enter the project.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1059,6 +1423,34 @@ states and card flow. Keep W1 open until he explicitly chooses; do not start W2.
 - W1 remains a three-direction comparison. This pass does not choose for Eden
   and does not start W2.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1114,6 +1506,34 @@ phone and wait for his W1 direction decision. Do not begin W2 beforehand.
   later support accessibility sizes.
 - Skip confirms but does not play the zero pattern. Automatic expiry does.
 - ProMotion support is a committed product setting, not a profiler-only tweak.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -1173,6 +1593,34 @@ phone and wait for his W1 direction decision. Do not begin W2 beforehand.
   evaluate the product's emotional centre.
 - Success remains a semantic state rather than borrowing the current Dawn hue.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1227,6 +1675,34 @@ distance contrast, then ask Eden to choose the execution to formalize in W2.
 - Tactile glass is limited to buttons. The rep/timer object remains an opaque,
   high-contrast content object.
 - Study cards use stable question → rule → answer geometry, not a 3D flip.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -1288,6 +1764,34 @@ Eden.
 - Countdown audio uses `.playback + .duckOthers`, always audible, with one duck
   from five through zero. Eden chose this over silent-switch compliance.
 
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
+
 **Landmines**
 
 - **One `-autorun` session finished in ~3 minutes instead of ~7, and I could not
@@ -1347,6 +1851,34 @@ native Dawn treatments with real motion and Core Haptics.
 - Both targets explicitly remain iPhone-only and disable Mac/Catalyst support.
 - Generated build products stay under `ios/build` and are excluded from
   formatting; generated Swift is never rewritten.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -1435,6 +1967,34 @@ execution rather than copying the web layout.
 - **No screens, no design system content.** `ios-port/README.md` is explicit that
   design comes before building, and a scaffolded screen is a design decision made
   by the wrong party.
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 
@@ -1612,6 +2172,34 @@ Copy this for your entry.
 
 **Decisions taken**
 - <chose X over Y because Z>
+
+### W14 — the UI/UX review Eden asked for
+
+Three rounds, in `ios/Docs/ux-review.md`. Fixed: Backup's status block (which
+turned out to be a completeness gap — `lastBackup` was written by nothing and
+shown by nothing), the Ledger's missing closing run line, the warm-up's clock
+floating between two 190pt gaps, Home's nav links at the floor of the type
+scale, `Semantic.danger`/`dangerText`, and "Erase everything" at 3.07:1.
+
+**Three of my own measurements in that review were wrong, and each was wrong the
+same way** — a number taken before checking what it was a number *of*:
+
+1. Font sizes derived from band heights. Band height is glyph-dependent:
+   `body` measures 10pt on a line with no descenders and 12.3pt on one with
+   them. Two findings withdrawn.
+2. Summary's "307pt void", measured three seconds in, before the card answer
+   arrives. It is 179pt once it does.
+3. A horizontal-extent probe that said every band on every screen ran the full
+   width. That is the sky — stars carry as much variance as type.
+
+**And the validated contrast tool had the same disease.** Its `rest / timer`
+window sat at y940–1180 while the digits render at 1160–1400, so it measured the
+ring's arc and reported **3.71:1 for the largest, whitest thing in the app**.
+Re-anchored: 10.90:1. The Set screen's zones were checked and are fine.
+
+**If you add a tool to this repo, cross-check it against a known answer before
+you believe it.** Every one of the above was caught that way and none of them
+by reading the code.
 
 **Landmines**
 

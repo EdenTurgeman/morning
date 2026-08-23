@@ -732,7 +732,18 @@ most likely places to drop frames.
 
 ---
 
-## W14 · UI/UX review of the whole app — `todo`, **runs before W12 and W13**
+## W14 · UI/UX review of the whole app — `in progress`, **runs before W12 and W13**
+
+**Three rounds done. Findings and fixes are in `ios/Docs/ux-review.md`**, which
+is the deliverable — read that rather than this section. Round one measured
+vertical rhythm, round two horizontal alignment, round three contrast. Two items
+are left open there and both are Eden's judgement rather than mine: whether card
+text should scale with Dynamic Type, and Home's 202pt gap.
+
+Rounds still worth running: **motion under real use** (the review looked at
+static frames), **the one-week and one-year seeds** (only empty and six-months
+were checked), and **landscape/large-device behaviour**, which nothing has ever
+looked at.
 
 Asked for on 2026-08-23, and the ordering is his:
 
