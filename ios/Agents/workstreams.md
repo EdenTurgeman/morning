@@ -976,3 +976,18 @@ it back.
 **One brief requirement was narrowed rather than met.** `§8` lists the
 sub-label among what must be on the Set screen. It now appears only where the
 same exercise occurs twice in a session. He called it unnecessary twice.
+
+
+## Device scope — settled 2026-08-23
+
+**iPhone 16 Pro only.** Eden: *"No need for this to work super well on phone SE
+just 16 pro."*
+
+The project's `TARGETED_DEVICE_FAMILY` and the iOS 26 floor technically admit an
+SE 3, and a good deal of this session was spent measuring 375x667 — the Set
+screen's `ViewThatFits`, Home's scroll fallback, the bay's drop threshold all
+have SE reasoning in their comments. **That work stays**, because flexible
+layout costs nothing and pays again at the accessibility text sizes. But it is
+no longer something to verify against, and an SE regression is not a defect.
+
+Verify at 402x874. Do not boot a scratch SE for it.

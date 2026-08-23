@@ -88,20 +88,26 @@ struct RestScreen: View {
             // under it, so the ring drifted to the bottom of the space it was
             // supposed to sit in the middle of. One flexible band, and the gap
             // below the card is fixed.
-            TimelineView(.animation) { context in
-                let remaining = max(0, endsAt.timeIntervalSince(context.date))
-                CountdownRing(
-                    remaining: remaining,
-                    total: Double(seconds),
-                    compact: card != nil && revealed,
-                    accent: palette.accent
-                )
-                .onChange(of: Int(ceil(remaining))) { _, value in
-                    speak(secondsLeft: value)
-                    if value <= 0 {
-                        finish()
+            GeometryReader { proxy in
+                TimelineView(.animation) { context in
+                    let remaining = max(0, endsAt.timeIntervalSince(context.date))
+                    CountdownRing(
+                        remaining: remaining,
+                        total: Double(seconds),
+                        // The band is what is left between the chrome and the
+                        // card, so this shrinks only as far as the answer
+                        // actually forces it to.
+                        diameter: min(proxy.size.width, proxy.size.height) - Space.gutter,
+                        accent: palette.accent
+                    )
+                    .onChange(of: Int(ceil(remaining))) { _, value in
+                        speak(secondsLeft: value)
+                        if value <= 0 {
+                            finish()
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 

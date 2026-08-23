@@ -173,7 +173,69 @@ def resolve(bound, height):
     return height + bound if bound < 0 else bound
 
 
+def locate_glyphs(rgb, y_from, y_to, x0, x1, min_height=60):
+    """Find the tallest band of near-white ink in a region.
+
+    The rest timer is the one element on any screen whose vertical position is
+    not fixed: it centres in whatever space is left between the chrome and the
+    study card, so a 20-second myo rest and a 45-second rest with a card put it
+    in two different places, and re-centring it moved both. Three separate
+    hardcoded windows have now measured the sky beside those digits and reported
+    it as a contrast failure for the largest text in the app.
+
+    So this one is found rather than assumed. Returns None if there is no such
+    band, which is a real answer too.
+    """
+    band = rgb[y_from:y_to, x0:x1].mean(axis=2)
+    rows = np.where((band > 200).sum(axis=1) > 24)[0]
+    if len(rows) == 0:
+        return None
+    runs, start, prev = [], rows[0], rows[0]
+    for y in rows[1:]:
+        if y - prev > 12:
+            runs.append((start, prev))
+            start = y
+        prev = y
+    runs.append((start, prev))
+    tallest = max(runs, key=lambda r: r[1] - r[0])
+    if tallest[1] - tallest[0] < min_height:
+        return None
+    return y_from + tallest[0], y_from + tallest[1]
+
+
+def widen(lum, y0, y1, x0, x1, limit=200):
+    """Grow a window until the ink inside it stops touching the edges.
+
+    THE INSTRUMENT HAS BEEN WRONG THREE TIMES NOW, always the same way: a
+    hardcoded window drifts off its element after a layout change and reports a
+    confident number for whatever it landed on instead. It said 3.71:1 for
+    white-on-night in W14, and 5.45:1 for the same digits again after the rest
+    ring was re-centred — both times for the largest, brightest thing on screen.
+
+    A window that misses its element does not produce a small error. So the
+    window is a hint about where to start looking, and this follows the ink.
+    """
+    height = lum.shape[0]
+    for _ in range(limit // 10):
+        snapped = snap(lum, y0, y1, x0, x1)
+        if snapped is None:
+            # Nothing at all here — search outwards before giving up.
+            if y1 - y0 > 600:
+                return y0, y1
+            y0, y1 = max(0, y0 - 40), min(height, y1 + 40)
+            continue
+        top, bottom = snapped
+        if top > y0 and bottom < y1:
+            return y0, y1
+        if top <= y0:
+            y0 = max(0, y0 - 10)
+        if bottom >= y1:
+            y1 = min(height, y1 + 10)
+    return y0, y1
+
+
 def measure_text(lum, y0, y1, x0, x1):
+    y0, y1 = widen(lum, y0, y1, x0, x1)
     snapped = snap(lum, y0, y1, x0, x1)
     if snapped is None:
         return None
@@ -212,7 +274,14 @@ def main():
 
     levels = {}
     height = lum.shape[0]
+    found = locate_glyphs(image, int(height * 0.20), int(height * 0.62), 300, 910) if screen == "rest" else None
+
     for name, y0, y1, x0, x1, level in ZONES[screen]:
+        if found is not None and name.startswith("timer"):
+            y0, y1 = found[0] - 12, found[1] + 12
+        elif found is not None and name == "label   SEC":
+            # Directly under the digits, wherever those turned out to be.
+            y0, y1 = found[1] + 6, found[1] + 70
         result = measure_text(lum, resolve(y0, height), resolve(y1, height), x0, x1)
         if result is None:
             print(f"{name:30s}   no ink found — the window is wrong")
