@@ -222,6 +222,10 @@ case is the longest exercise name with four cues.
 - The working weight, or that it is bodyweight.
 - Which set this is of how many, and the position within a superset round.
 - The form cues, **with the ones carrying the training effect emphasised**.
+- **Whether this set is an all-out one.** The program marks these; a set you are
+  meant to take past failure has to be distinguishable from one you are not,
+  before you start it rather than after. *(Currently unimplemented: the flag is
+  compiled into every step and nothing reads it. The web build showed a badge.)*
 - The target rep range — which may be a range like "8–15" or a sentence like
   "all-out to failure", and the layout must survive both.
 - The rep counter, pre-filled (§5).
@@ -598,19 +602,27 @@ diffing the ledger with and without that session.
 
 Exactly **one** headline fires — the highest thing actually earned:
 
-| # | Tier | Fires when |
-|---|---|---|
-| 1 | lifetime milestone | A ledger threshold was crossed |
-| 2 | clean sweep | Every comparable set beat last time (≥3 sets, same weight) |
-| 3 | weight changed | Working weight differs from the last same-letter session |
-| 4 | streak milestone | Week completed **and** streak hits 2/4/8/12/26/52 |
-| 5 | week complete | The week just reached 5 |
-| 6 | record | Beat the best ever on this letter |
-| 7 | first | First session ever logged |
-| 8 | plateau | Third same-letter session on an identical total |
-| 9 | improved | More reps than last time |
-| 10 | matched | Exactly equal |
-| 11 | done | Anything else, including down on last time |
+| # | Tier | Fires when | Bigger | Rays |
+|---|---|---|:--:|:--:|
+| 1 | lifetime milestone | A ledger threshold was crossed | ● | ● |
+| 2 | clean sweep | Every comparable set beat last time (≥3 sets, same weight) | ● | ● |
+| 3 | weight changed | Working weight differs from the last same-letter session | | |
+| 4 | streak milestone | Week completed **and** streak hits 2/4/8/12/26/52 | ● | ● |
+| 5 | week complete | The week just reached 5 | ● | ● |
+| 6 | record | Beat the best ever on this letter | | ● |
+| 7 | first | First session ever logged | | ● |
+| 8 | plateau | Third same-letter session on an identical total | | |
+| 9 | improved | More reps than last time | | |
+| 10 | matched | Exactly equal | | |
+| 11 | done | Anything else, including down on last time | | |
+
+**The two emphasis columns are load-bearing and are currently not implemented.**
+"Bigger" is the milestone burst and it works. "Rays" does not: the celebration
+computes the flag for every tier and nothing reads it, so a plateau gets exactly
+the same radiance as a personal best. Whatever form the completion moment takes
+after a redesign, **it has to be able to be visibly quieter for the bottom five
+tiers than for the top four.** That distinction is the entire reason the tiers
+exist.
 
 - **Reps are comparable only at the same weight.** "+18 reps" for dropping 2.5 kg
   a side is not progress, and "dead level" at a heavier weight is not a plateau.

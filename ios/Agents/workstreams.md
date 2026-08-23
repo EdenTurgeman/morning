@@ -1000,3 +1000,74 @@ layout costs nothing and pays again at the accessibility text sizes. But it is
 no longer something to verify against, and an SE regression is not a defect.
 
 Verify at 402x874. Do not boot a scratch SE for it.
+
+## W17 · The functionality audit — 2026-08-23
+
+Asked for directly: *"is there any more functionality that's not design that
+isn't working or that we have yet to implement?"*
+
+Method: not from memory. Checked every screen and lib module in the web build
+against its iOS counterpart, swept for stubs and unwired callbacks, and — the
+one that actually found things — looked for **model state that no view reads**.
+A field computed and never rendered is functionality that was specified,
+written, tested, and then quietly dropped on the floor.
+
+### Genuinely not implemented — two
+
+1. **`Celebration.rays` is dead.** Computed for all eleven tiers, zero readers.
+   `04-rules.md §5` gives rays to tiers 1, 2, 4, 5, 6 and 7 and withholds them
+   from 3, 8, 9, 10 and 11 — so a plateau should look visibly quieter than a
+   personal best. The Metal shader's ray beat fires unconditionally, so every
+   celebration currently looks identical in that respect. The milestone burst,
+   the other half of the same rule, *is* wired.
+
+2. **`SetStep.intense` is dead.** Compiled into every step from the program's
+   `intense` flag; nothing reads it. The web build renders a **MYO badge** beside
+   the exercise name (`src/screens/Workout.tsx:198`). A set you are meant to take
+   past failure should be distinguishable before you start it.
+
+Both are now written into `spec.md` — §3.3 and §9 — so the UI rebuild picks them
+up rather than inheriting the same omission. **Not fixed here on purpose:** both
+live in view files a design agent is currently rewriting, and fixing them now
+would be a merge conflict for no gain.
+
+### A divergence worth a decision — one
+
+3. **Home has no lifetime line.** The web shows a tappable "314.0 tonnes moved ·
+   27,447 reps ›" that opens the Ledger (`src/screens/Home.tsx:88`). iOS reaches
+   the Ledger through the footer instead. `02-design-brief.md §8` does not list
+   lifetime figures among Home's contents, but `06-data.md §1` describes Home's
+   empty state as having "no lifetime figures", which implies it has them
+   otherwise. Nothing is unreachable either way — this is one fact sitting a tap
+   deeper than it used to. Eden's call.
+
+### Deferred by an explicit decision — not gaps
+
+- **History import.** Phase 2 by `06-data.md §6`; v1 ships from zero. The two
+  skipped acceptance assertions are both this and say so.
+- **Widget, HealthKit, Control Center, app-icon badge, notifications.** Declined
+  by Eden on 2026-08-23. The Live Activity was the one approved and is built.
+
+### Dead code, harmless
+
+- `Deck.progress` and `Deck.reset` have no callers. The web does not surface
+  deck progress either, so this is an unused utility rather than a missing
+  feature.
+
+### Verified working, for the record
+
+Screen parity is complete: all seven web screens have iOS counterparts. Audio
+ducks rather than stops (`.mixWithOthers` + `.duckOthers`). The Live Activity is
+ended on finish, on abandon and at app root. Per-set targets override block
+targets, which is what makes the myo block's first set read "all-out to failure"
+and its second "4–5 reps". The year grid scales intensity to the user's own
+range. A failed save surfaces an alert rather than dropping the session. Restore
+validates and rejects a file with no sessions. `WorkoutSession`'s public surface
+is a superset of the web's `useWorkout`. 68 acceptance assertions pass against 62
+specified items, across eight areas with no area uncovered.
+
+### Cannot be checked here — W11
+
+120Hz under a running timer, real haptics, airplane mode, legibility at 1.5m in
+a dark room, the screen not sleeping, and music ducking on real hardware. These
+need Eden's phone and are the whole of W11.
