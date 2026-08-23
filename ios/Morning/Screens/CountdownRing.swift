@@ -21,7 +21,6 @@ struct CountdownRing: View {
     let total: Double
     var compact: Bool = false
     let accent: Color
-    let namespace: Namespace.ID
     /// Shown under the number. "SEC" on a rest; the warm-up says what it is.
     var caption: String = "SEC"
 
@@ -84,11 +83,6 @@ struct CountdownRing: View {
             }
         }
         .frame(width: size, height: size)
-        // The counter is the source and the ring follows it, permanently.
-        // Both declaring themselves the source is a conflict SwiftUI resolves
-        // silently and inconsistently — it picked the counter, so Set→Rest
-        // morphed and Rest→Set only cross-faded.
-        .matchedGeometryEffect(id: WorkObject.id, in: namespace, isSource: false)
         .animation(Motion.timerResize(reduceMotion: reduceMotion), value: compact)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(Int(ceil(remaining))) seconds remaining")

@@ -42,10 +42,6 @@ struct WorkoutHost: View {
     /// result.
     private let startAtFirstSet: Bool
 
-    /// The namespace the work object travels in. One per host, so the counter
-    /// and the timer are the same object to SwiftUI.
-    @Namespace private var workObject
-
     /// "End" discards the whole session, so it asks first. See `endSession`.
     ///
     /// `-confirm-end` opens it shortly after launch. A confirmation dialog
@@ -101,7 +97,7 @@ struct WorkoutHost: View {
                     // beneath it already says "Warm-up". Saying it twice, 40pt
                     // apart, is not orientation.
                     stepLabel: "",
-                    namespace: workObject,
+                    setMarks: setMarks,
                     onDone: { advance { session.advance() } },
                     onBack: { advance { session.back() } },
                     onEnd: endSession
@@ -116,7 +112,7 @@ struct WorkoutHost: View {
                     next: session.upcomingSet,
                     card: drawnCards[session.stepIndex],
                     isMyo: rest.seconds < Deck.minimumRestForCard,
-                    namespace: workObject,
+                    setMarks: setMarks,
                     onExtend: { session.extendRest(by: 15) },
                     onSkip: { advance { session.skipRest() } },
                     onComplete: { advance { session.skipRest() } },
@@ -134,8 +130,8 @@ struct WorkoutHost: View {
                     previous: session.previous,
                     isComparable: session.previousIsComparable,
                     isBeating: session.isBeatingPrevious,
-                    namespace: workObject,
                     setMarks: setMarks,
+                    subDisambiguates: repeatedExercises.contains(set.exercise),
                     onAdjust: { session.adjustReps(by: $0) },
                     onLog: logSet,
                     onBack: { advance { session.back() } },
@@ -271,6 +267,25 @@ struct WorkoutHost: View {
     private var sessionProgress: Double {
         guard session.steps.count > 1 else { return 0 }
         return Double(session.stepIndex) / Double(session.steps.count - 1)
+    }
+
+    /// Exercises that appear in more than one block of this session.
+    ///
+    /// Session B has a lateral raise in the superset and another as the myo
+    /// block, and with the sub-label dropped from the header they were two
+    /// identical screens. See `SetScreen.factLine`.
+    private var repeatedExercises: Set<String> {
+        var counts: [String: Int] = [:]
+        var seen: Set<String> = []
+        for step in session.steps {
+            guard let set = step.asSet else { continue }
+            // Per BLOCK, not per set: three sets of one exercise are not a
+            // repeat of anything.
+            let block = set.slot.split(separator: ".").first.map(String.init) ?? set.slot
+            guard seen.insert("\(block)|\(set.exercise)").inserted else { continue }
+            counts[set.exercise, default: 0] += 1
+        }
+        return Set(counts.filter { $0.value > 1 }.keys)
     }
 
     /// Every set's position in the session, 0…1, for the rail's ticks.

@@ -25,16 +25,31 @@ import SwiftUI
  *    a perfectly healthy 9.71:1. The symbol was doing all the work.
  * ======================================================================== */
 
-/// The one object the workout carries from screen to screen.
-///
-/// `02-design-brief.md §7` asks for `matchedGeometryEffect` so a screen's
-/// content BECOMES the next screen's rather than cross-fading, and the W1
-/// prototype demonstrated it as the counter turning into the rest ring. The
-/// real screens then shipped without it and swapped instantly — this is that
-/// gap closed.
-enum WorkObject {
-    static let id = "work-object"
-}
+/* ---------------------------------------------------------------------------
+ *  THE WORK OBJECT, REMOVED
+ *  ---------------------------------------------------------------------------
+ *  There used to be a `matchedGeometryEffect` here with the id "work-object":
+ *  the counter was the permanent source and the rest ring followed it, so the
+ *  timer grew out of the number you had just logged and shrank back into the
+ *  next one. `02-design-brief.md §7` asks for exactly that, and the W1
+ *  direction prototype demonstrated it.
+ *
+ *  It is gone because Eden asked for it gone, twice, having watched it on the
+ *  phone: *"the rep number animates wildly on screen load"*, then *"once you
+ *  enter an exercise screen, the middle rep number animates jumps a little,
+ *  there's absolutly no reason for that. let's kill that."*
+ *
+ *  He is describing it accurately. Traced across a 30fps capture of a rest
+ *  ending: at 22.99s the digit sits high and right where the ring's number was,
+ *  at 23.09s it is low and LEFT of the counter's slot, and it only settles at
+ *  23.16s. Two hundred milliseconds of a large number sliding diagonally across
+ *  the screen, at the exact moment you look down to read what to do next.
+ *
+ *  The idea reads better in a prototype than it does at 6:10am. Restoring it
+ *  means putting `.matchedGeometryEffect(id:in:)` back on `counter` and
+ *  `.matchedGeometryEffect(id:in:isSource: false)` back on `CountdownRing`,
+ *  with a `@Namespace` on `WorkoutHost` — but ask him first.
+ * ------------------------------------------------------------------------- */
 
 struct RepControl: View {
     let reps: Int
@@ -42,9 +57,6 @@ struct RepControl: View {
     let isComparable: Bool
     let isBeating: Bool
     let accent: Color
-    /// The work object's namespace. The counter is the thing that travels: it
-    /// becomes the rest timer, and the rest timer becomes it again.
-    let namespace: Namespace.ID
     /// Identifies the set on screen. Changes exactly when the step does.
     ///
     /// It exists to tell the two reasons the number can change apart. See the
@@ -146,7 +158,6 @@ struct RepControl: View {
             .transition(.identity)
             .id(stepKey)
             .frame(width: 138)
-            .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .accessibilityLabel("\(reps) reps")
             .accessibilityValue(accessibilityComparison)
     }

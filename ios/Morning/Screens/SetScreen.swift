@@ -29,9 +29,11 @@ struct SetScreen: View {
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
-    let namespace: Namespace.ID
     /// Where each set falls in the session, 0…1. See `WorkoutChrome.setMarks`.
     var setMarks: [Double] = []
+    /// True when this exercise appears more than once in the session, so its
+    /// sub-label is the only thing telling the two apart. See `factLine`.
+    var subDisambiguates = false
 
     let onAdjust: (Int) -> Void
     let onLog: () -> Void
@@ -101,7 +103,6 @@ struct SetScreen: View {
                 isComparable: isComparable,
                 isBeating: isBeating,
                 accent: palette.accent,
-                namespace: namespace,
                 stepKey: stepLabel,
                 onAdjust: onAdjust
             )
@@ -171,57 +172,51 @@ struct SetScreen: View {
 
     // MARK: - Parts
 
-    /// Two columns, because there were four stacked lines down the left and
-    /// nothing at all down the right.
+    /// DISTILLED, because it was four lines fighting one sentence.
     ///
-    /// W15 #1, in Eden's words: *"too cramped in that column… it creates a
-    /// werid thing where we have a column on text on the left side then nothing
-    /// on the right"*, and *"just the target is important"*.
+    /// W15 #14, on the myo set: *"the whole top is sooo cluttered and
+    /// ellipsising a lot, so much of that info is unecessary and should be
+    /// distilled and minimized."* His photo shows the name cut to "Lateral
+    /// rai…", the position line broken across "6.25 kg · set 1 / of 3", and the
+    /// right-hand column reading **"TARGET / all-out to failure / reps"**.
     ///
-    /// So the target moves right and becomes the second-biggest thing on the
-    /// screen after the counter — it is the number you are trying to hit, and
-    /// it was set in the same grey as the sub-label. The left column keeps what
-    /// tells you how to set up: the name, the sub, the load and the position.
+    /// One assumption caused all of it: that a target is always a short numeric
+    /// range. Four of the five blocks have one. The myo block's first set is
+    /// prose, set at `counter(30)` it needed ~200pt, and it took that width
+    /// from the exercise name — which is why the name was the thing ellipsised.
     ///
-    /// The sub-label stays rather than being cut. "lying on your back" is
-    /// redundant on a floor fly and reads as clutter, but the same field says
-    /// "deficit — hands on books" on a push-up, which is the whole setup. What
-    /// was wrong was not that it existed; it was that four lines were competing
-    /// in one column while half the width sat empty.
+    /// So the big right-hand column is now for numbers only, and a prose target
+    /// goes down the left where a sentence belongs. And "reps" is only hung
+    /// under a target that counts reps; "all-out to failure reps" is not
+    /// English.
     private var metadata: some View {
         HStack(alignment: .top, spacing: Space.step) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(setStep.exercise)
                     .font(TypeScale.title)
                     .foregroundStyle(Ink.primary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.72)
+                    .minimumScaleFactor(0.62)
 
-                if let sub = setStep.sub {
-                    Text(sub)
-                        .font(TypeScale.body)
-                        .foregroundStyle(Ink.tertiary)
-                        .lineLimit(2)
-                }
-
-                Text(positionLine)
+                Text(factLine)
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.secondary)
-                    .padding(.top, 1)
-                    // Wrap, never truncate. On a 375pt SE the target column
-                    // takes enough width that this rendered as "6.25 kg · set 3
-                    // of 3 · superse…" — and which of two superset halves you
-                    // are on is not a detail an ellipsis may eat.
                     .fixedSize(horizontal: false, vertical: true)
+
+                if let prose = proseTarget {
+                    Text("Target: \(prose)")
+                        .font(TypeScale.bodyEmphasis)
+                        .foregroundStyle(Ink.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 // LAID OUT, not overlaid.
                 //
                 // W15 #12. This was an `.overlay(alignment: .bottomLeading)`
                 // with a hardcoded `.offset(y: 20)`, which is not a position —
-                // it is a guess about how tall the four lines above it are. On
-                // a superset the sub-label wraps, the guess is 20pt short, and
-                // in Eden's photo the sentence is printed **through the top
-                // edge of the MOVEMENT box**.
+                // it is a guess about how tall the lines above it are. On a
+                // superset the guess was short and in Eden's photo the sentence
+                // printed **through the top edge of the MOVEMENT box**.
                 if setStep.straightIntoNext == true {
                     Text("No rest after this — straight into the next one.")
                         .font(TypeScale.body)
@@ -232,31 +227,63 @@ struct SetScreen: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(alignment: .trailing, spacing: -1) {
-                Text("TARGET")
-                    .font(TypeScale.microLabel)
-                    .tracking(1.4)
-                    .foregroundStyle(Ink.tertiary)
-                Text(setStep.target.replacingOccurrences(of: " reps", with: ""))
-                    .font(TypeScale.counter(30))
-                    .monospacedDigit()
-                    .foregroundStyle(Ink.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                Text("reps")
-                    .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
+            if let count = countedTarget {
+                VStack(alignment: .trailing, spacing: -1) {
+                    Text("TARGET")
+                        .font(TypeScale.microLabel)
+                        .tracking(1.4)
+                        .foregroundStyle(Ink.tertiary)
+                    Text(count)
+                        .font(TypeScale.counter(30))
+                        .monospacedDigit()
+                        .foregroundStyle(Ink.primary)
+                        .lineLimit(1)
+                    Text("reps")
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(Ink.tertiary)
+                }
+                .fixedSize(horizontal: true, vertical: false)
             }
-            .fixedSize(horizontal: true, vertical: false)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, Space.snug)
     }
 
-    /// Load, set position and superset position on one line — three facts that
-    /// are each too small to earn a line of their own.
-    private var positionLine: String {
+    /// "8–15", or nil when the target is a sentence rather than a count.
+    ///
+    /// A digit is the test, and it is the honest one: every counted target in
+    /// the program is a numeric range and the only prose one is "all-out to
+    /// failure".
+    private var countedTarget: String? {
+        let target = setStep.target
+        guard target.contains(where: \.isNumber) else { return nil }
+        return target.replacingOccurrences(of: " reps", with: "")
+    }
+
+    private var proseTarget: String? {
+        countedTarget == nil ? setStep.target : nil
+    }
+
+    /// ONE line of setup facts, where there were two.
+    ///
+    /// The sub-label survives only where it distinguishes this set from another
+    /// set of the same exercise in the session — the same rule Home's outline
+    /// uses. Eden has now twice called the sub-label unnecessary here: *"there's
+    /// uneeded text there about the weight 'lying your back'"* and *"so much of
+    /// that info is unecessary"*. But "myo-reps" is the only thing separating
+    /// the myo lateral raise from the one in the superset above it, and
+    /// dropping it everywhere left session B showing the same exercise twice
+    /// with no explanation.
+    ///
+    /// `02-design-brief.md §8` does list the sub-label among what must be on
+    /// screen. This narrows it rather than removing it, and the setup detail it
+    /// drops — "deficit — hands on books", "lying on your back" — is said again
+    /// by the cues six lines below.
+    private var factLine: String {
         var parts: [String] = []
+        if subDisambiguates, let sub = setStep.sub {
+            parts.append(sub)
+        }
         if let load = setStep.load {
             parts.append("\(Plates.format(load)) kg")
         } else if setStep.bodyweight {
@@ -264,11 +291,6 @@ struct SetScreen: View {
         }
         parts.append("set \(setStep.n) of \(setStep.of)")
         if let superset = setStep.superset {
-            // "superset 1/2", not "superset 1 of 2".
-            //
-            // W15 #12: with the long form the line ran to "6.25 kg · set 2 of
-            // 3 · superset 1 / of 2" — a wrap that breaks the phrase in the
-            // middle and reads as a bug. Four characters shorter fits it.
             parts.append("superset \(superset.index)/\(superset.of)")
         }
         return parts.joined(separator: " · ")
@@ -331,7 +353,14 @@ struct WorkoutChrome: View {
     /// a glance, and because superset partners sit adjacent with no rest
     /// between them, their ticks bunch — so the shape of the row shows the
     /// structure of the session without a word of explanation.
-    var setMarks: [Double] = []
+    ///
+    /// NOT defaulted. It was, and only `SetScreen` passed it — so the rail grew
+    /// ticks on a set and lost them again on every rest and on the warm-up.
+    /// Eden: *"when you switch to the rest screens the progress bar at the top
+    /// changes to the old style before our recent changes, i don't link any
+    /// inconsistancies like this"*. A default value is what let three call
+    /// sites disagree, so there is no default now.
+    let setMarks: [Double]
     let onBack: () -> Void
     let onEnd: () -> Void
 

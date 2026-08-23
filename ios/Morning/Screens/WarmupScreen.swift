@@ -31,7 +31,10 @@ struct WarmupScreen: View {
     let endsAt: Date
     let progress: Double
     let stepLabel: String
-    let namespace: Namespace.ID
+    /// The rail's ticks. See `WorkoutChrome.setMarks` — passed on every screen
+    /// in the workout, because a rail that changes shape between them reads as
+    /// a bug.
+    let setMarks: [Double]
 
     let onDone: () -> Void
     let onBack: () -> Void
@@ -47,7 +50,7 @@ struct WarmupScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
+            WorkoutChrome(progress: progress, step: stepLabel, setMarks: setMarks, onBack: onBack, onEnd: onEnd)
 
             // W15 #5, all four of Eden's complaints about this screen:
             // "doesn't have the same countdown as other screens… it's spaced
@@ -84,7 +87,6 @@ struct WarmupScreen: View {
                     remaining: remaining,
                     total: Double(step.seconds),
                     accent: palette.accent,
-                    namespace: namespace,
                     caption: "SEC"
                 )
                 .onChange(of: Int(ceil(remaining))) { _, value in

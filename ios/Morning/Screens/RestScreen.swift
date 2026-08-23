@@ -40,7 +40,10 @@ struct RestScreen: View {
     let next: SetStep?
     let card: Card?
     let isMyo: Bool
-    let namespace: Namespace.ID
+    /// The rail's ticks. See `WorkoutChrome.setMarks` — passed on every screen
+    /// in the workout, because a rail that changes shape between them reads as
+    /// a bug.
+    let setMarks: [Double]
 
     let onExtend: () -> Void
     let onSkip: () -> Void
@@ -59,6 +62,9 @@ struct RestScreen: View {
     @State private var lastSpokenSecond: Int?
     /// Fires once per rest. `endsAt` resets it.
     @State private var completed = false
+    /// When the answer is due. The thinking bar fills against this rather than
+    /// against an animation, so the two cannot disagree. See `StudyCard`.
+    @State private var revealAt: Date?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var palette: DawnPalette {
@@ -67,18 +73,28 @@ struct RestScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, onBack: onBack, onEnd: onEnd)
+            WorkoutChrome(progress: progress, step: stepLabel, setMarks: setMarks, onBack: onBack, onEnd: onEnd)
 
-            Spacer(minLength: Space.step)
-
+            // CENTRED IN ITS OWN BAND.
+            //
+            // W15 #15: *"the counter isn't centered in it's section at the top,
+            // the spacing is weird between the elements."* Measured off his
+            // photo, the rail-to-ring gap was ~150px and the ring-to-card gap
+            // ~50px.
+            //
+            // The cause was two `Spacer(minLength:)`s splitting the leftover
+            // space evenly — one above the ring and one below the card. The
+            // upper one pushed the ring DOWN while the card stayed pinned right
+            // under it, so the ring drifted to the bottom of the space it was
+            // supposed to sit in the middle of. One flexible band, and the gap
+            // below the card is fixed.
             TimelineView(.animation) { context in
                 let remaining = max(0, endsAt.timeIntervalSince(context.date))
                 CountdownRing(
                     remaining: remaining,
                     total: Double(seconds),
                     compact: card != nil && revealed,
-                    accent: palette.accent,
-                    namespace: namespace
+                    accent: palette.accent
                 )
                 .onChange(of: Int(ceil(remaining))) { _, value in
                     speak(secondsLeft: value)
@@ -87,6 +103,7 @@ struct RestScreen: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if isMyo {
                 // The 20-second rest IS the training stimulus, not a
@@ -105,7 +122,8 @@ struct RestScreen: View {
                     revealed: revealed,
                     answerShown: answerShown,
                     accent: palette.accent,
-                    thinkingTime: Deck.revealDelay(forRestOf: seconds)
+                    thinkingTime: Deck.revealDelay(forRestOf: seconds),
+                    revealAt: revealAt
                 ) {
                     // Tapping only brings the answer forward.
                     reveal()
@@ -113,7 +131,8 @@ struct RestScreen: View {
                 .padding(.top, Space.step)
             }
 
-            Spacer(minLength: Space.step)
+            Spacer(minLength: Space.section)
+                .layoutPriority(-1)
 
             if let next {
                 NextUp(step: next)
@@ -150,8 +169,13 @@ struct RestScreen: View {
             revealed = false
             answerShown = false
             lastSpokenSecond = nil
-            guard card != nil else { return }
-            try? await Task.sleep(for: .seconds(Deck.revealDelay(forRestOf: seconds)))
+            guard card != nil else {
+                revealAt = nil
+                return
+            }
+            let delay = Deck.revealDelay(forRestOf: seconds)
+            revealAt = Date().addingTimeInterval(delay)
+            try? await Task.sleep(for: .seconds(delay))
             guard !Task.isCancelled else { return }
             reveal()
         }
@@ -257,9 +281,10 @@ private struct StudyCard: View {
     /// How long the reader gets before the answer arrives. The bar fills over
     /// exactly this, so the two cannot disagree about how much time is left.
     let thinkingTime: TimeInterval
+    /// The moment the answer is due, set by the Rest screen when the rest
+    /// begins. `nil` until then.
+    let revealAt: Date?
     let onReveal: () -> Void
-
-    @State private var thinking: Double = 0
 
     var body: some View {
         Button(action: onReveal) {
@@ -290,12 +315,18 @@ private struct StudyCard: View {
                         Rectangle()
                             .fill(Ink.hairline)
                             .frame(height: 1)
-                        Rectangle()
-                            .fill(revealed ? Ink.hairline : accent)
-                            .frame(
-                                width: revealed ? proxy.size.width : proxy.size.width * thinking,
-                                height: revealed ? 1 : 2
-                            )
+
+                        if revealed {
+                            Rectangle()
+                                .fill(Ink.hairline)
+                                .frame(width: proxy.size.width, height: 1)
+                        } else {
+                            TimelineView(.animation) { context in
+                                Rectangle()
+                                    .fill(accent)
+                                    .frame(width: proxy.size.width * filled(at: context.date), height: 2)
+                            }
+                        }
                     }
                     .frame(maxHeight: .infinity, alignment: .center)
                 }
@@ -319,10 +350,32 @@ private struct StudyCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(revealed ? "\(card.q) \(card.a)" : "\(card.q). Reveal answer.")
-        .onAppear {
-            // Linear, because it is a clock. Anything eased would misreport how
-            // much thinking time is left, which is the one thing it is for.
-            withAnimation(.linear(duration: thinkingTime)) { thinking = 1 }
-        }
+    }
+
+    /// How much of the thinking time has gone, 0…1.
+    ///
+    /// READ OFF A CLOCK, because the animation version did not run.
+    ///
+    /// It was `withAnimation(.linear(duration: thinkingTime)) { thinking = 1 }`
+    /// in `onAppear`, and measured across a 16-second capture of a real rest
+    /// the bar was never on screen at all: nothing at 4.5s, 7.5s or 10.5s, then
+    /// the full-width rule at 12.0s once the answer arrived. `thinking` stayed
+    /// at 0, so the bar had zero width, so there was no bar. That is exactly
+    /// what Eden reported — *"doesn't run or count down at all"* — and it is
+    /// the second fix this component has had for the same complaint.
+    ///
+    /// An implicit animation is a side effect that either happens or does not,
+    /// and there is no way to look at a screenshot and tell which. A fraction
+    /// of two dates is a value: if the bar is in the wrong place, the number is
+    /// wrong, and the number can be printed. Every other timer in this app
+    /// already works this way — that is what `endsAt` is for — and this was the
+    /// one that did not.
+    ///
+    /// Linear, because it is a clock. Anything eased would misreport how much
+    /// thinking time is left, which is the one thing it is for.
+    private func filled(at now: Date) -> Double {
+        guard let revealAt, thinkingTime > 0 else { return 0 }
+        let remaining = revealAt.timeIntervalSince(now)
+        return min(1, max(0, 1 - remaining / thinkingTime))
     }
 }
