@@ -3506,3 +3506,81 @@ through the named target. **If you add a target, check that tool.**
 
 **Next:** <the next workstream, and anything its agent needs from you>
 ```
+
+---
+
+## 2026-08-23 · W13 Metal daybreak, W15 rounds one to three
+
+**Branch** `ios-port/w13-metal-daybreak` → [PR #11](https://github.com/EdenTurgeman/morning/pull/11). CI green.
+
+### The one thing to take from this entry
+
+Eden used the app on his phone three times during the session and sent a list
+each time. **Round one's fixes caused most of round two.** Every regression had
+the same shape: I changed a layout against a measurement, measured that it fit,
+and called it verified — while the screen looked wrong.
+
+The Done button is the clearest case. `upperBlock(in:) = available - 268`, where
+268 came from a comment adding up what sits below the rep control. The sum was
+wrong by 35pt — it counted the 82pt stepper row as the whole control and forgot
+the caption and the comparison line under it. The stack was taller than the
+screen, the overflow went downwards, and Done ended up 6.7pt from the bottom
+edge sitting on the home indicator. My band table said everything fitted.
+
+The fix was not a better constant. It was deleting the arithmetic: the block
+above the control is the only flexible thing in the stack now, `ViewThatFits`
+decides whether the demonstration appears, and the control cannot move because
+everything below it is fixed. **If a layout needs a magic number, the layout is
+wrong.**
+
+### The second thing: an implicit animation is not a verifiable thing
+
+Two motion bugs this session, same root cause.
+
+The study card's thinking bar ran `withAnimation(.linear(duration:))` in
+`onAppear` and never moved. Measured across a 16-second capture of a real rest:
+no bar at 4.5s, 7.5s or 10.5s, then the full-width rule at 12.0s. The width
+stayed at zero, so there was no bar at all. It reads a clock now — 69pt at 4.5s
+rising to 358pt at 10.5s, which is 7.19s against a computed reveal delay of 7.2s.
+
+The counter rolled like a slot machine on every step change. My first fix,
+`.transaction(value: stepKey) { $0.animation = nil }`, **did nothing, and I
+committed it.** `.animation(_:value:)` sets the animation for everything below
+it and an outer transaction cannot reach past it. A filmstrip showed the digits
+still cross-dissolving 24 into 22. The working fix is per-set identity: two
+views do not interpolate at all.
+
+A `withAnimation` either happens or it does not and no screenshot can tell you
+which. A fraction of two dates is a value you can print. Every other timer in
+this app already worked that way; these two were the exceptions.
+
+### What changed
+
+**W13.** `Shaders/Daybreak.metal` — the sky's colour from scattering against
+altitude, the sun as an emissive body, and the rays as occlusion: each pixel
+marches toward the sun through a cloud field and accumulates surviving light.
+One clock, `calm` as a parameter. The ground was a flat near-black plate and
+read as the image being cropped, so it takes the low sky's light now and falls
+away with depth. Pipeline compile paid at app root — without it the first frame
+went from 3.3s to 5.2s and the whole choreography played behind the launch
+screen.
+
+**W15.** Sixteen items, table in `workstreams.md`. Home is the largest: it now
+says what the session is — name, length, set count, movements in order — from
+`Session.name` and `Session.minutes`, which had been in `Program.swift` unread
+since transcription. The plate maths is one row above the button it belongs to.
+
+**Two decisions that need Eden's word, both recorded in `workstreams.md`:** the
+work object's `matchedGeometryEffect` is deleted (he asked twice; §7 asks for
+it), and the Set screen's sub-label now appears only where it disambiguates
+(§8 lists it unconditionally; he called it unnecessary twice).
+
+### Open
+
+- **W16, the copy pass.** Filed and deliberately last, at his instruction. Half
+  the app's strings are content the brief calls fixed and verbatim, and he said
+  ALL text — that conflict goes to him rather than being decided quietly.
+- **W11, the device pass.** Still blocked on his hardware. Everything here was
+  measured on a 402x874 iPhone 16 Pro and a 375x667 SE in the simulator.
+- Taps still cannot be synthesised on this machine. Every interactive path is
+  reached through a launch flag; the flags are listed in `ReviewHost.swift`.

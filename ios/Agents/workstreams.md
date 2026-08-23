@@ -802,7 +802,7 @@ harder to review.
 
 ---
 
-## W15 · Eden's UI list — `todo`
+## W15 · Eden's UI list — `done`, pending his review on the phone
 
 Eight items, given on 2026-08-23 after using the app himself. **His words are
 quoted; do not paraphrase them away.** Two are broken functionality rather than
@@ -940,3 +940,39 @@ in a table he can veto line by line.
     the top, the spacing is weird between the elements."* Measured off his
     photo: rail to ring ≈ 150px of air, ring to the card ≈ 50px. The ring sits
     low in the band it is supposed to be centred in.
+
+
+### Where round three left it
+
+All sixteen items are closed. Every one was checked on screen rather than
+against a band table, which is the instruction that produced most of the fixes:
+
+| # | Item | Closed by |
+|---|---|---|
+| 1 | Set header cramped, empty right side | Two columns, then distilled again in #14 |
+| 2 | Rep control moves between exercises | Flexible upper block + fixed `RepControl.height` |
+| 3 | Progress rail thin on information | One tick per set; superset partners bunch |
+| 4 | Texts a little small | Type step-up, then the Summary's four facts |
+| 5 | Warm-up screen | Shares `CountdownRing` with Rest |
+| 6 | Thinking bar never counts down | Reads a clock: 69pt→358pt over 7.19s vs 7.2s computed |
+| 7 | Summary's Done does nothing | Was the review host; the app path was wired |
+| 8 | Home dull and empty | Rebuilt around what the session IS |
+| 9 | Done button pinned downstairs | Arithmetic replaced by layout; 6.7pt → 79.7pt |
+| 10 | Counter rolls on screen load | Per-set identity (the first fix did nothing) |
+| 11 | Rep cluster sizing and spacing | 104pt number, fixed 138pt slot, 12pt gaps |
+| 12 | Overlapping line, mid-phrase wrap | Laid out instead of overlaid; "superset 1/2" |
+| 13 | Open the app and look | Every screen rendered and read, both phones |
+| 14 | Myo header cluttered, ellipsising | Big right column is for numbers only |
+| 15 | Rest ring not centred | One flexible band instead of two Spacers |
+| 16 | Rail changes style on rests | `setMarks` is no longer defaulted |
+| — | Counter jumps on arrival | `matchedGeometryEffect` removed — see below |
+
+**One thing was deleted rather than fixed, and it is the one to check with him.**
+The work object — the counter becoming the rest ring and back — is
+`02-design-brief.md §7` and the W1 prototype's centrepiece. Eden asked for it
+gone twice after watching it. `RepControl.swift` carries the note on how to put
+it back.
+
+**One brief requirement was narrowed rather than met.** `§8` lists the
+sub-label among what must be on the Set screen. It now appears only where the
+same exercise occurs twice in a session. He called it unnecessary twice.
