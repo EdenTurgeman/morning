@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3573D091CD4CB72641B11E28 /* AppActionsAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */; };
+		B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C34B443B09E40AF92143EAA /* AppModel.swift */; };
 		8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9520A59BDFA835728DA588D0 /* RestActivityViews.swift */; };
 		E1A00012D0C24B0F9A000012 /* RestActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9520A59BDFA835728DA588D0 /* RestActivityViews.swift */; };
 		E1A00005D0C24B0F9A000005 /* RestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A00003D0C24B0F9A000003 /* RestLiveActivity.swift */; };
@@ -116,6 +118,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActionsAcceptanceTests.swift; sourceTree = "<group>"; };
+		9C34B443B09E40AF92143EAA /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		9520A59BDFA835728DA588D0 /* RestActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestActivityViews.swift; sourceTree = "<group>"; };
 		E1A00001D0C24B0F9A000001 /* MorningWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MorningWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1A00003D0C24B0F9A000003 /* RestLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestLiveActivity.swift; sourceTree = "<group>"; };
@@ -219,6 +223,7 @@
 		00B7138305DB7E908846968E /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				9C34B443B09E40AF92143EAA /* AppModel.swift */,
 				C0977299E0787E9F0DE6583D /* RestActivityController.swift */,
 				7AE0BB5AE216D0BD738E4832 /* RestActivity.swift */,
 				70145487336A7308CD333E60 /* Celebration.swift */,
@@ -308,6 +313,7 @@
 		89D71EDE641A6F0A47E51CC1 /* Acceptance */ = {
 			isa = PBXGroup;
 			children = (
+				FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */,
 				EBD349C71D10ED7172AC1B85 /* CelebrationAcceptanceTests.swift */,
 				A9E09AB74F9D6BB9ADD2B984 /* DataAcceptanceTests.swift */,
 				B926210B4DC5C23339F7676B /* LedgerAcceptanceTests.swift */,
@@ -514,6 +520,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */,
 				8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */,
 				A290F3B3F13F8B73BD02C7CE /* RestActivityController.swift in Sources */,
 				DD6E41178C80F5FBD8D869CE /* RestActivity.swift in Sources */,
@@ -563,6 +570,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3573D091CD4CB72641B11E28 /* AppActionsAcceptanceTests.swift in Sources */,
 				E872A9E953257A1010305C73 /* DuckWindowTests.swift in Sources */,
 				8CF93CAE58C61E7A2851AA9B /* CelebrationAcceptanceTests.swift in Sources */,
 				46EFBD6F3C41E0C542DAB648 /* DataAcceptanceTests.swift in Sources */,

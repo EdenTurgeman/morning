@@ -71,6 +71,14 @@ final class WorkoutSession {
         // Step 0 is the warm-up timer. Arming it here rather than only in
         // `move(to:)` is the difference between a countdown and a frozen 90.
         endsAt = Self.endsAt(for: steps.first, now: now)
+        // And write it NOW, not on the first step change.
+        //
+        // `persist()` was only reached from `move(to:)`, so a session existed in
+        // memory and nowhere else until you advanced off the warm-up. Force-quit
+        // during those ninety seconds and the workout was simply gone —
+        // `04-rules.md §1` says a workout in progress survives a force-quit, and
+        // for the first minute and a half of every session it did not.
+        persist()
     }
 
     /// Restores a session that was interrupted. Must land on the same step with

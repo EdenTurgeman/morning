@@ -17,60 +17,38 @@ import UIKit
  * ======================================================================== */
 
 struct AppRoot: View {
-    @State private var store = Store()
-    @State private var data: AppData
-    @State private var session: WorkoutSession?
-    @State private var saveError: String?
+    /// Every action the app can perform lives in `AppModel`, where a test can
+    /// reach it. See that file's header — this view used to own eight private
+    /// methods that nothing could call.
+    @State private var model = AppModel(release: {
+        UIApplication.shared.isIdleTimerDisabled = false
+        Audio.shared.stop()
+        RestActivityController.shared.end()
+    })
     @State private var destination: HomeDestination?
-    /// The session just finished, held so the summary can show it. Cleared when
-    /// the summary is dismissed.
-    @State private var finished: FinishedSession?
-
-    /// What the summary needs after a session ends.
-    struct FinishedSession {
-        let record: SessionRecord
-        let celebration: Celebration
-        let card: Card?
-    }
-
-    init() {
-        let store = Store()
-        _store = State(initialValue: store)
-        _data = State(initialValue: store.load())
-        // Resume before anything is drawn, so an interrupted session never
-        // flashes Home on its way back to where it was.
-        _session = State(initialValue: store.loadInProgress().flatMap { saved in
-            WorkoutSession(
-                restoring: saved,
-                kg: store.load().loads?[saved.sessionKey],
-                history: store.load().history,
-                store: store
-            )
-        })
-    }
 
     var body: some View {
         Group {
-            if let finished {
+            if let finished = model.finished {
                 SummaryScreen(
                     record: finished.record,
                     celebration: finished.celebration,
-                    week: Week.progress(history: data.history),
+                    week: Week.progress(history: model.data.history),
                     card: finished.card,
-                    onDone: { self.finished = nil }
+                    onDone: model.dismissSummary
                 )
-            } else if let session {
-                WorkoutHost(session: session, onFinish: finish, onAbandon: abandon)
+            } else if let session = model.session {
+                WorkoutHost(session: session, onFinish: model.finish, onAbandon: model.abandon)
             } else {
                 HomeScreen(
-                    nextSession: nextKey,
-                    otherSession: nextKey == "A" ? "B" : "A",
-                    load: load(for: nextKey),
-                    progress: Week.progress(history: data.history),
-                    lastSession: data.history.max { $0.timestamp < $1.timestamp },
-                    onStart: start,
+                    nextSession: model.nextKey,
+                    otherSession: model.nextKey == "A" ? "B" : "A",
+                    load: model.load(for: model.nextKey),
+                    progress: Week.progress(history: model.data.history),
+                    lastSession: model.data.history.max { $0.timestamp < $1.timestamp },
+                    onStart: model.start,
                     onOpen: { destination = $0 },
-                    onLoadChange: { setLoad($0, for: nextKey) }
+                    onLoadChange: { model.setLoad($0, for: model.nextKey) }
                 )
                 .sheet(item: $destination) { which in
                     reading(which)
@@ -78,12 +56,12 @@ struct AppRoot: View {
             }
         }
         .onAppear { autorunIfAsked() }
-        .alert("Could not save", isPresented: .constant(saveError != nil)) {
-            Button("OK") { saveError = nil }
+        .alert("Could not save", isPresented: .constant(model.saveError != nil)) {
+            Button("OK") { model.saveError = nil }
         } message: {
             // Surfaced, never swallowed. A session that vanished silently is
             // the one thing this app must never do.
-            Text(saveError ?? "")
+            Text(model.saveError ?? "")
         }
     }
 
@@ -92,61 +70,20 @@ struct AppRoot: View {
         let close = { destination = nil }
         switch which {
         case .history:
-            HistoryScreen(history: data.history, onDelete: delete, onClose: close)
+            HistoryScreen(history: model.data.history, onDelete: model.delete, onClose: close)
         case .ledger:
-            LedgerScreen(history: data.history, onClose: close)
+            LedgerScreen(history: model.data.history, onClose: close)
         case .guide:
             GuideScreen(onClose: close)
         case .backup:
             BackupScreen(
-                data: data,
-                onRestore: restore,
-                onErase: erase,
+                data: model.data,
+                onRestore: { model.restore($0); destination = nil },
+                onErase: { model.erase(); destination = nil },
                 onClose: close,
-                onExported: stampBackup
+                onExported: model.stampBackup
             )
         }
-    }
-
-    /// Replaces the history wholesale, after the caller has confirmed the swap.
-    private func restore(_ incoming: AppData) {
-        do {
-            try store.save(incoming)
-            data = incoming
-            destination = nil
-        } catch {
-            saveError = error.localizedDescription
-        }
-    }
-
-    /// Records that a copy left the phone. Never surfaced as an error if it
-    /// fails: the export itself already succeeded, and losing the timestamp is
-    /// not worth an alert over the file the user just saved.
-    private func stampBackup() {
-        var updated = data
-        updated.lastBackup = ISO8601DateFormatter().string(from: Date())
-        if (try? store.save(updated)) != nil {
-            data = updated
-        }
-    }
-
-    private func erase() {
-        do {
-            try store.save(.empty)
-            try store.saveInProgress(nil)
-            data = .empty
-            destination = nil
-        } catch {
-            saveError = error.localizedDescription
-        }
-    }
-
-    private var nextKey: String {
-        NextSession.proposed(from: data.history)
-    }
-
-    private func load(for key: String) -> Double? {
-        data.loads?[key] ?? program.first { $0.key == key }?.defaultLoad
     }
 
     /// `-autorun` plays a whole session from Home, hands-free, and it starts
@@ -157,103 +94,13 @@ struct AppRoot: View {
     /// on this machine there was no way to ask until now.
     private func autorunIfAsked() {
         let args = ProcessInfo.processInfo.arguments
-        guard args.contains("-autorun"), session == nil, finished == nil else { return }
+        guard args.contains("-autorun"), model.session == nil, model.finished == nil else { return }
         let key = args.firstIndex(of: "-session")
-            .flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } ?? nextKey
+            .flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } ?? model.nextKey
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(1.5))
-            guard session == nil else { return }
-            start(key)
+            guard model.session == nil else { return }
+            model.start(key)
         }
-    }
-
-    /// The working weight for one session key.
-    ///
-    /// Written to `AppData.loads`, which the port has always read and never
-    /// written. Recorded against each finished session's `kg` as well, so
-    /// changing it never retroactively rewrites what was lifted last month —
-    /// `04-rules.md §4`.
-    private func setLoad(_ kg: Double, for key: String) {
-        var updated = data
-        var loads = updated.loads ?? [:]
-        loads[key] = kg
-        updated.loads = loads
-        do {
-            try store.save(updated)
-            data = updated
-        } catch {
-            saveError = error.localizedDescription
-        }
-    }
-
-    private func start(_ key: String) {
-        session = WorkoutSession(
-            sessionKey: key,
-            kg: load(for: key),
-            history: data.history,
-            store: store
-        )
-    }
-
-    private func finish() {
-        guard let session else { return }
-        let record = session.finish()
-
-        var updated = data
-        updated.history.append(record)
-        do {
-            // Order matters: the record first, the in-progress file second.
-            try store.save(updated)
-            try store.saveInProgress(nil)
-            data = updated
-        } catch {
-            saveError = error.localizedDescription
-            return
-        }
-
-        self.session = nil
-        release()
-
-        // The celebration is computed from the history WITH this session in it,
-        // because a lifetime threshold fires by diffing the ledger with and
-        // without — it has to be able to see both.
-        finished = FinishedSession(
-            record: record,
-            celebration: Celebrations.forSession(record, history: updated.history),
-            card: Deck.draw()
-        )
-    }
-
-    private func abandon() {
-        session?.abandon()
-        session = nil
-        release()
-    }
-
-    /// Deletion keys off `ts`, the record's identity — never an index, which
-    /// would delete the wrong session the moment the list is sorted differently
-    /// from the file.
-    private func delete(_ record: SessionRecord) {
-        var updated = data
-        updated.history.removeAll { $0.timestamp == record.timestamp }
-        do {
-            try store.save(updated)
-            data = updated
-        } catch {
-            saveError = error.localizedDescription
-        }
-    }
-
-    /// Nothing should outlive the session that started it. `release()` already
-    /// gives back the idle timer and the audio session; the Lock Screen
-    /// countdown belongs in the same list.
-    private func releaseLiveActivity() {
-        RestActivityController.shared.end()
-    }
-
-    private func release() {
-        UIApplication.shared.isIdleTimerDisabled = false
-        Audio.shared.stop()
-        releaseLiveActivity()
     }
 }

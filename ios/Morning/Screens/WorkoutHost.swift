@@ -64,8 +64,15 @@ struct WorkoutHost: View {
 
     init(
         session: WorkoutSession,
-        onFinish: @escaping () -> Void = {},
-        onAbandon: @escaping () -> Void = {},
+        // NO DEFAULTS. They are what let `ReviewHost` omit both for several
+        // workstreams, which meant "End and discard" ran an empty closure and
+        // did nothing — and nothing on screen could show it, because a callback
+        // that is not wired looks exactly like one that is. Eden found it by
+        // tapping the button.
+        //
+        // Required parameters make that a compile error instead.
+        onFinish: @escaping () -> Void,
+        onAbandon: @escaping () -> Void,
         progressOverride: Double? = nil,
         slot: String? = nil,
         reps: Int? = nil,

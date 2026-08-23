@@ -620,9 +620,10 @@ the only test that actually counts.
 
 ---
 
-## W12 · Propose the system integrations — `todo`, ask first
+## W12 · Propose the system integrations — `done`
 
-**Runs after W14.** Eden asked for the UI/UX review before the Live Activity.
+**Settled.** The Live Activity was approved and built; the other four were
+declined. See below.
 
 **Gate:** W11 done, and **Eden has said yes to each item individually.**
 
@@ -655,23 +656,22 @@ built**. They were non-goals on the web only because they were impossible there.
 
   **He asked for it "after we're done"**, so it is still queued behind the
   completeness pass — but it is no longer gated on his approval.
-- **Home-screen widget**: the week's pips and which session is next. Small,
-  quiet, honest.
-- **HealthKit**: each session as a strength-training workout, closing the rings.
-- **Control Centre / Action Button**: starting today's session in one press is
-  plausibly the best affordance available on this hardware for a 20-minute daily
-  habit.
-- **App icon badge with the sessions still owed this week.** Added during the
-  quality pass, from reading the web source rather than the brief: `src/App.tsx`
-  calls `setWeekBadge(week.remaining)`, with a comment saying installed iOS web
-  apps have supported it since 16.4 so "the badge answers 'am I behind?' without
-  opening anything". **The web build already does this and the port does not**,
-  which makes it a regression rather than a new feature — but the native
-  equivalent needs notification permission, and `05-platform.md §7` puts
-  anything needing that behind a yes. Cheapest item on this list and the only
-  one that restores something already shipped.
+- ❌ **Home-screen widget** — the week's pips and which session is next.
+- ❌ **HealthKit** — each session as a strength-training workout.
+- ❌ **Control Centre / Action Button** — starting today's session in one press.
+- ❌ **App icon badge** — the sessions still owed this week, which the web build
+  sets via `setWeekBadge` and this port does not.
 
-Each of these is a new target, added in Xcode once it is agreed.
+**All four declined by Eden on 2026-08-23**, in one line: *"No need for healthkit
+and control center and widget. app icon badge is unenceserry aswell."*
+
+Recorded rather than deleted, and recorded as a **decision** rather than as an
+oversight. Two of them will look like gaps to whoever reads the source next —
+the badge especially, because the web build does it and its absence therefore
+reads as a regression rather than as a choice. It is a choice. **Do not
+re-propose these.**
+
+The one that was agreed is built. Nothing else here is.
 
 ---
 
