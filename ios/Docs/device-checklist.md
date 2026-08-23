@@ -292,7 +292,15 @@ Info.plist, checked). The things most likely to drop frames, in order:
 
 Being explicit, because "it built and the tests pass" is not the same thing:
 
-- **No tap has ever reached this app.** The development machine has no
+- **No tap has ever reached this app**, and this was re-tested during W12 with
+  the simulator control tool's own `tap` action, not just assumed: the End
+  dialog was opened, "End and discard" was tapped at its measured centre, then
+  "Keep going" at its own — and the dialog was still on screen after both. There
+  is no UI session for the events to be delivered to. **Every `-auto…` flag
+  exists because of this**, and it is why a callback that is simply not wired
+  can survive: `ReviewHost` passed neither `onFinish` nor `onAbandon` for
+  several workstreams, so "End and discard" reached a `= {}` default and did
+  nothing, and no amount of looking at the screen would have shown it. The development machine has no
   `Simulator.app`, only the headless runtime, so every screen was reached by
   launch argument. Buttons, the rep control's hold-to-repeat, sheets, the file
   picker and every confirmation dialog are untested by anything but the eye.

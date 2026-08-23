@@ -186,6 +186,16 @@ struct LiveActivityReviewHost: View {
 }
 
 struct ReviewHost: View {
+    /// End and Done have to actually do something here.
+    ///
+    /// They did not. This host passed neither `onFinish` nor `onAbandon`, so
+    /// both fell back to `WorkoutHost`'s `= {}` defaults — which meant that
+    /// reaching the End dialog the documented way, `-screen set -confirm-end`,
+    /// and tapping "End and discard" did **nothing at all**. Same for Done on
+    /// the last set. The wiring was right in the app and absent in the tool
+    /// built to check it, which is the worst arrangement of the two.
+    @State private var ended: String?
+
     let sessionKey: String?
     let progressOverride: Double?
     let slot: String?
@@ -196,20 +206,35 @@ struct ReviewHost: View {
         let store = Store()
         let data = store.load()
         let key = sessionKey ?? NextSession.proposed(from: data.history)
-        WorkoutHost(
-            session: WorkoutSession(
-                sessionKey: key,
-                kg: data.loads?[key] ?? program.first { $0.key == key }?.defaultLoad,
-                history: data.history,
-                store: store
-            ),
-            progressOverride: progressOverride,
-            slot: slot,
-            reps: reps,
-            step: step,
-            // `-screen set` means the Set screen. The app itself starts on the
-            // warm-up; see `WorkoutHost.startAtFirstSet`.
-            startAtFirstSet: true
-        )
+        if let ended {
+            VStack(spacing: Space.snug) {
+                Text(ended)
+                    .font(TypeScale.title)
+                    .foregroundStyle(Ink.primary)
+                Text("Review only — the app returns to Home here.")
+                    .font(TypeScale.body)
+                    .foregroundStyle(Ink.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(DawnBackdrop(treatment: .atmospheric, progress: 0.2))
+        } else {
+            WorkoutHost(
+                session: WorkoutSession(
+                    sessionKey: key,
+                    kg: data.loads?[key] ?? program.first { $0.key == key }?.defaultLoad,
+                    history: data.history,
+                    store: store
+                ),
+                onFinish: { ended = "Finished" },
+                onAbandon: { ended = "Ended and discarded" },
+                progressOverride: progressOverride,
+                slot: slot,
+                reps: reps,
+                step: step,
+                // `-screen set` means the Set screen. The app itself starts on the
+                // warm-up; see `WorkoutHost.startAtFirstSet`.
+                startAtFirstSet: true
+            )
+        }
     }
 }

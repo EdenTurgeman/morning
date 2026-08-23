@@ -194,6 +194,20 @@ struct WorkoutHost: View {
             autorunIfAsked()
             syncLiveActivity()
 
+            // `-autoabandon` fires what the "End and discard" button fires.
+            //
+            // The tap itself cannot be synthesised here, but the wiring behind
+            // it can be — and the wiring is what was broken: `ReviewHost` never
+            // passed `onAbandon`, so the button reached a `= {}` default and
+            // did nothing. Reasoning about a closure is not the same as running
+            // it.
+            if ProcessInfo.processInfo.arguments.contains("-autoabandon") {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(2.0))
+                    onAbandon()
+                }
+            }
+
             if ProcessInfo.processInfo.arguments.contains("-confirm-end") {
                 Task { @MainActor in
                     try? await Task.sleep(for: .seconds(1.0))
