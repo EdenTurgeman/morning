@@ -45,36 +45,72 @@ struct RepControl: View {
     /// The work object's namespace. The counter is the thing that travels: it
     /// becomes the rest timer, and the rest timer becomes it again.
     let namespace: Namespace.ID
+    /// Identifies the set on screen. Changes exactly when the step does.
+    ///
+    /// It exists to tell the two reasons the number can change apart. See the
+    /// `transaction` on `counter`.
+    var stepKey: String = ""
     /// Reports a delta. Never an absolute — see the header.
     let onAdjust: (Int) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var direction = 1
 
+    /// ONE HEIGHT, ALWAYS.
+    ///
+    /// W15 #2 asked for the counter to stop moving between exercises, and the
+    /// screen above this now hands it whatever space is left over — which only
+    /// pins it if this control is the same height every time. It was not: the
+    /// comparison line wraps to two lines when the weight has changed ("Last
+    /// time: 12 at 6.25 kg — different weight now") and to one when it has not,
+    /// so the counter sat 19pt higher on some sets than others.
+    static let height: CGFloat = 150
+
     var body: some View {
         VStack(spacing: Space.snug) {
-            HStack(spacing: Space.gutter) {
+            // The three parts are ONE control, and they have to look like it.
+            //
+            // W15 #11: *"its sizing and spacing from the + and - buttons are
+            // terrible"*. They were 22pt apart with a 150pt counter slot
+            // between them, which put each 82pt button hard against the screen
+            // gutter and left ~40pt of nothing on either side of the digits —
+            // two big empty boxes with a small number stranded between them.
+            //
+            // Closer together, and the number is bigger than the buttons now
+            // rather than smaller. The slot is a FIXED width, not a minimum, so
+            // going from 9 reps to 10 cannot shove the buttons outwards.
+            HStack(spacing: Space.step) {
                 RepStepper(symbol: "−", label: "One rep fewer") { adjust(-1) }
-                counter
+
+                // The caption belongs to the number, not to the row. Nine
+                // points under the digits instead of under the whole cluster.
+                VStack(spacing: -4) {
+                    counter
+                    Text("Reps")
+                        .font(TypeScale.microLabel)
+                        .foregroundStyle(Ink.tertiary)
+                }
+
                 RepStepper(symbol: "+", label: "One rep more") { adjust(1) }
             }
 
-            Text("Reps")
-                .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
-
             comparison
+                // One line, whatever it says. See `height`.
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(height: 20)
                 // The counter has already changed by the time this arrives.
                 // See `Motion.threshold`.
                 .animation(Motion.threshold(reduceMotion: reduceMotion), value: isBeating)
         }
+        .frame(height: Self.height)
     }
 
     // MARK: - Parts
 
     private var counter: some View {
         Text(reps, format: .number)
-            .font(TypeScale.counter())
+            .font(TypeScale.counter(104))
             .monospacedDigit()
             // A three-digit count truncated to "3…" between the two 82pt
             // controls. Targets top out at 25 reps so three digits should never
@@ -85,10 +121,28 @@ struct RepControl: View {
             .minimumScaleFactor(0.5)
             .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: direction < 0))
             .foregroundStyle(isBeating ? Semantic.threshold : Ink.primary)
-            .frame(minWidth: 150)
+            .frame(width: 138)
             .matchedGeometryEffect(id: WorkObject.id, in: namespace)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: reps)
             .animation(Motion.rep(reduceMotion: reduceMotion), value: isBeating)
+            // A NEW SET IS NOT A REP.
+            //
+            // W15 #10: *"the rep number animates wildly on screen load"*. Both
+            // things that change this number went through the same animation,
+            // so arriving at a set prefilled with 22 after logging one at 8
+            // rolled every digit from 8 to 22 — a slot machine, at 104pt,
+            // on the frame the screen appeared.
+            //
+            // A tap should move the digit: that is how you see a mistap. A step
+            // change should not: the number was never 8 on this set, it has
+            // always been 22, and animating between two different sets' values
+            // states a relationship that does not exist.
+            //
+            // `transaction(value:)` strips the animation only on the update
+            // where the key changed, which is exactly that distinction and the
+            // only one available here — the change arrives from outside, inside
+            // the host's screen-swap transaction.
+            .transaction(value: stepKey) { $0.animation = nil }
             .accessibilityLabel("\(reps) reps")
             .accessibilityValue(accessibilityComparison)
     }

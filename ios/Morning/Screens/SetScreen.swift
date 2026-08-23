@@ -45,21 +45,26 @@ struct SetScreen: View {
     }
 
     var body: some View {
-        // The one screen that must never scroll has to fit the shortest phone
-        // it can run on, and it did not. Measured on a 667pt iPhone SE: the
-        // whole chrome — Back, "Set 3 / 13", End — was pushed off the top and
-        // the Done button was cut in half by the bottom edge. You could not go
-        // back, could not end the session, and could barely reach the primary
-        // action. `TARGETED_DEVICE_FAMILY = 1` and an iOS 26 floor means the
-        // SE 3 is inside the support matrix.
+        // NOTHING HERE IS A MEASURED CONSTANT ANY MORE, and that is the fix.
         //
-        // So the layout reads the height it was actually given.
-        GeometryReader { proxy in
-            content(in: proxy.size.height)
-        }
-    }
-
-    private func content(in available: CGFloat) -> some View {
+        // The previous version computed the height of everything above the rep
+        // control as `available - 268`, from a comment that added up the parts
+        // below it. The sum was wrong by 35pt — it counted the 82pt stepper row
+        // as the whole rep control and forgot the caption and the comparison
+        // line under it — so on a 16 Pro the stack was 35pt taller than the
+        // screen and the overflow went where overflow goes: **the Done button
+        // ended up 6.7pt from the bottom edge**, sitting on the home indicator.
+        // Measured, after I had called the same layout verified.
+        //
+        // W15 #9, in Eden's words: *"we ruined the done button, it's pinned
+        // downstairs"*.
+        //
+        // So the arithmetic is gone. The block above the control is the only
+        // flexible thing in the stack and takes whatever is left over, which
+        // means it is impossible for the total to exceed the screen and the
+        // control still lands on the same line on every exercise — the thing
+        // W15 #2 asked for. That only holds because `RepControl` is a fixed
+        // height now; see the note on `RepControl.height`.
         VStack(spacing: 0) {
             WorkoutChrome(
                 progress: progress,
@@ -69,50 +74,26 @@ struct SetScreen: View {
                 onEnd: onEnd
             )
 
-            let bay = bayHeight(in: available)
-            // "Short screen" means the bay could not have its natural height —
-            // whether it shrank to the floor or vanished. One condition, so the
-            // things that yield, yield together.
-            let cramped = (bay ?? 0) < naturalBayHeight
-
-            // ONE FIXED BLOCK above the rep control.
+            // The demonstration is what gives way, and `ViewThatFits` is what
+            // decides — not a threshold I guessed at per device.
             //
-            // W15 #2, and it is the one Eden was most emphatic about: *"it's
-            // position changes based on which exercise screen we're on which is
-            // bad, it should always be in the same place like the Done button"*.
+            // The screen never scrolls, so on a short phone something has to
+            // go, and it is the bay: every other element here either instructs
+            // (the cues, the target) or is the control itself. The bay is the
+            // only thing that merely *illustrates*.
             //
-            // It moved because everything above it was intrinsically sized — a
-            // two-cue push-up pushed it high, a four-cue floor fly pushed it
-            // low, and the control you reach for with a knuckle at 6:10am was
-            // never twice in the same place. The block is a fixed height now,
-            // top-aligned, so whatever it contains the counter lands on the
-            // same line. Screens with less to say leave air, which is the price
-            // and it is worth paying.
-            //
-            // The demonstration is the thing that gives way inside it — same
-            // argument as `bayHeight`: it illustrates, everything else
-            // instructs.
-            VStack(spacing: 0) {
-                metadata
-
-                if let height = bay {
-                    ExerciseMotionBay(
-                        treatment: .atmospheric,
-                        exercise: setStep.exercise,
-                        accent: palette.accent
-                    )
-                    .frame(maxHeight: height)
-                    .padding(.top, Space.step)
-                    .layoutPriority(-1)
-                }
-
-                cues
-                    .padding(.top, Space.step)
-
-                Spacer(minLength: 0)
+            // The first candidate asks for at least 120pt of bay. Below that
+            // the figure stops reading as a body and becomes a smudge, so if it
+            // cannot have 120 it does not appear at all — which is honester
+            // than a smear, and much honester than clipping the Done button to
+            // keep one.
+            ViewThatFits(in: .vertical) {
+                upper(withBay: true)
+                upper(withBay: false)
             }
-            .frame(height: upperBlock(in: available), alignment: .top)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .clipped()
+            .layoutPriority(-1)
 
             RepControl(
                 reps: reps,
@@ -121,10 +102,13 @@ struct SetScreen: View {
                 isBeating: isBeating,
                 accent: palette.accent,
                 namespace: namespace,
+                stepKey: stepLabel,
                 onAdjust: onAdjust
             )
-
-            Spacer(minLength: Space.step)
+            // W15 #2's other half: *"the number and button of reps is always
+            // too close to the text above it"*. The block above is flexible, so
+            // this gap is not taken from anywhere — the figure gives it up.
+            .padding(.top, Space.section)
 
             DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
                 // `Cue.confirm` was composed and never played. The web fires it
@@ -134,24 +118,17 @@ struct SetScreen: View {
                 Audio.shared.play(.confirm)
                 onLog()
             }
+            .padding(.top, Space.step)
 
-            // Dropped under the same condition as the bay, and deliberately
-            // not under a second threshold of its own: when there is no room
-            // for the illustration there is no room for the footnote either.
-            //
-            // It is the right thing to lose. Everything else on this screen
-            // either instructs or is the control; "13 sets to go" is
-            // orientation, and the progress rail two inches above it already
-            // says the same thing without words.
-            if !cramped {
-                Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
-                    .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
-                    .padding(.top, Space.snug)
-            }
+            Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
+                .font(TypeScale.microLabel)
+                .foregroundStyle(Ink.tertiary)
+                .padding(.top, Space.snug)
         }
         .padding(.horizontal, Space.gutter)
-        .safeAreaPadding(.bottom, Space.snug)
+        // 22, not 9. Nine points put the primary action of the whole app
+        // directly on top of the home indicator; see the note on `body`.
+        .safeAreaPadding(.bottom, Space.gutter)
         // No backdrop here on purpose. The sky belongs to `WorkoutHost`, not to
         // this screen: it is the one thing that must not blink when Set becomes
         // Rest. Owned per-screen, it faded out and in with everything else and
@@ -161,6 +138,35 @@ struct SetScreen: View {
         // scroll would break rather than help at accessibility sizes. Reading
         // screens support them instead.
         .dynamicTypeSize(.large)
+    }
+
+    /// Everything above the rep control.
+    ///
+    /// The bay is `layoutPriority(-1)` and the trailing spacer `-2`, so the
+    /// slack goes into the FIGURE before it goes into empty space. Before this
+    /// the order was the other way round by default and a 16 Pro showed a
+    /// 161pt figure above 120pt of nothing.
+    private func upper(withBay: Bool) -> some View {
+        VStack(spacing: 0) {
+            metadata
+
+            if withBay {
+                ExerciseMotionBay(
+                    treatment: .atmospheric,
+                    exercise: setStep.exercise,
+                    accent: palette.accent
+                )
+                .frame(minHeight: 120, maxHeight: 300)
+                .padding(.top, Space.step)
+                .layoutPriority(-1)
+            }
+
+            cues
+                .padding(.top, Space.step)
+
+            Spacer(minLength: 0)
+                .layoutPriority(-2)
+        }
     }
 
     // MARK: - Parts
@@ -202,6 +208,27 @@ struct SetScreen: View {
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.secondary)
                     .padding(.top, 1)
+                    // Wrap, never truncate. On a 375pt SE the target column
+                    // takes enough width that this rendered as "6.25 kg · set 3
+                    // of 3 · superse…" — and which of two superset halves you
+                    // are on is not a detail an ellipsis may eat.
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // LAID OUT, not overlaid.
+                //
+                // W15 #12. This was an `.overlay(alignment: .bottomLeading)`
+                // with a hardcoded `.offset(y: 20)`, which is not a position —
+                // it is a guess about how tall the four lines above it are. On
+                // a superset the sub-label wraps, the guess is 20pt short, and
+                // in Eden's photo the sentence is printed **through the top
+                // edge of the MOVEMENT box**.
+                if setStep.straightIntoNext == true {
+                    Text("No rest after this — straight into the next one.")
+                        .font(TypeScale.body)
+                        .foregroundStyle(palette.accentText)
+                        .padding(.top, Space.tight)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -224,14 +251,6 @@ struct SetScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, Space.snug)
-        .overlay(alignment: .bottomLeading) {
-            if setStep.straightIntoNext == true {
-                Text("No rest after this — straight into the next one.")
-                    .font(TypeScale.body)
-                    .foregroundStyle(palette.accentText)
-                    .offset(y: 20)
-            }
-        }
     }
 
     /// Load, set position and superset position on one line — three facts that
@@ -245,7 +264,12 @@ struct SetScreen: View {
         }
         parts.append("set \(setStep.n) of \(setStep.of)")
         if let superset = setStep.superset {
-            parts.append("superset \(superset.index) of \(superset.of)")
+            // "superset 1/2", not "superset 1 of 2".
+            //
+            // W15 #12: with the long form the line ran to "6.25 kg · set 2 of
+            // 3 · superset 1 / of 2" — a wrap that breaks the phrase in the
+            // middle and reads as a bug. Four characters shorter fits it.
+            parts.append("superset \(superset.index)/\(superset.of)")
         }
         return parts.joined(separator: " · ")
     }
@@ -285,55 +309,6 @@ struct SetScreen: View {
     /// job and a second hue at 6am is noise.
     private func carriesEffect(_ cue: String) -> Bool {
         intensityWords.contains { cue.contains($0) }
-    }
-
-    /// Four cues need a shorter bay than two, and a short phone needs a shorter
-    /// bay than a tall one. The screen never scrolls, so something has to give,
-    /// and it is the demonstration rather than the copy — every other element
-    /// here either instructs (the cues, the target) or is the control itself.
-    /// The bay is the only thing that merely *illustrates*, so it yields first
-    /// and it yields alone.
-    ///
-    /// The floor is 72pt. Below that the figure stops reading as a body and
-    /// becomes a smudge, at which point showing nothing would be honester —
-    /// but 72pt is enough to fit the worst content on the shortest supported
-    /// phone, so that trade never has to be made.
-    /// `nil` means there is no room for it at all and it is not drawn.
-    ///
-    /// That case is real rather than defensive: four cues on a 667pt phone
-    /// leaves nothing for a demonstration, and at 72pt the figure has already
-    /// stopped reading as a body. Showing a smudge would be worse than showing
-    /// nothing, and clipping the Done button to keep the smudge would be worse
-    /// than both — which is what the screen did before this.
-    /// What the bay wants, before the screen height is taken into account.
-    /// Four cues need a shorter one than two.
-    private var naturalBayHeight: CGFloat {
-        setStep.cues.count >= 4 ? 142 : 178
-    }
-
-    /// Everything above the rep control, at a height that does not depend on
-    /// the exercise. Sized from what has to sit below it: the control itself
-    /// (83), the primary button (68), the footer, and the gaps between them.
-    private func upperBlock(in available: CGFloat) -> CGFloat {
-        // Piecewise, and the split is real rather than a fudge: a 667pt phone
-        // has 207pt less to spend than the 874pt one, and after W15 #4 stepped
-        // the type up the lower half needs more of what is left. One formula
-        // that fits the SE would take 32pt of breathing room off the Pro — and
-        // that room is the fix for "always too close to the text above it".
-        let lower: CGFloat = available < 760 ? 306 : 268
-        return max(240, available - lower)
-    }
-
-    private func bayHeight(in available: CGFloat) -> CGFloat? {
-        let base = naturalBayHeight
-        // Four cues cost roughly 80pt more than two, so they get charged for it
-        // rather than the bay absorbing the difference twice.
-        let crowding: CGFloat = setStep.cues.count >= 4 ? 80 : 0
-        let room = available - 620 - crowding
-        if room < 20 {
-            return nil
-        }
-        return min(base, max(72, room))
     }
 }
 
