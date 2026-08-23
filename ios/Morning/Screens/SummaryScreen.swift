@@ -62,6 +62,42 @@ struct SummaryScreen: View {
     }
 
     private var summary: some View {
+        // The middle scrolls; Done does not.
+        //
+        // Ported from `src/screens/Summary.tsx`, which puts the celebration in
+        // an `overflow-y-auto` and keeps the button outside it, with a comment
+        // saying "the only thing that can ever scroll out of sight is the tail
+        // of the card". This port had it all in one fixed column, and on a
+        // 667pt iPhone SE the Done button was clipped by five points once the
+        // study card revealed its answer.
+        //
+        // Measured before the reveal it looked fine — 12pt of clearance — which
+        // is the same trap this review fell into twice: a number taken before
+        // checking what it was a number of.
+        //
+        // `04-rules.md`'s no-scroll rule is about workout screens. This is the
+        // screen after one.
+        VStack(alignment: .leading, spacing: 0) {
+            ScrollView {
+                celebrationBlock
+            }
+            .scrollBounceBehavior(.basedOnSize)
+
+            DawnPrimaryButton(
+                title: "Done",
+                treatment: .atmospheric,
+                accent: DawnPalette(progress: skyProgress).accent
+            ) {
+                onDone()
+            }
+            .padding(.top, Space.step)
+        }
+        .padding(.horizontal, Space.gutter)
+        .safeAreaPadding(.vertical, Space.step)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var celebrationBlock: some View {
         VStack(alignment: .leading, spacing: Space.section) {
             VStack(alignment: .leading, spacing: Space.tight) {
                 Text(celebration.eyebrow)
@@ -114,18 +150,8 @@ struct SummaryScreen: View {
             }
 
             Spacer(minLength: Space.step)
-
-            DawnPrimaryButton(
-                title: "Done",
-                treatment: .atmospheric,
-                accent: DawnPalette(progress: skyProgress).accent
-            ) {
-                onDone()
-            }
         }
-        .padding(.horizontal, Space.gutter)
-        .safeAreaPadding(.vertical, Space.step)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     /// Facts, not praise. The delta is absent entirely when the working weight

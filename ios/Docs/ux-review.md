@@ -222,6 +222,23 @@ already says the same thing without words.
 The tall-screen layout is unchanged, which is the point: the bay is at its full
 178pt wherever there is room for 178pt.
 
+**And the Summary was clipped too, but only after fourteen seconds.** Measured
+on the SE it had 12pt of clearance — fine. Measured again after the study card
+reveals its answer, the Done button was cut off by five points. That is the
+third time in this review a number was taken before the content it measured had
+arrived.
+
+`src/screens/Summary.tsx` already solves it: the celebration sits in an
+`overflow-y-auto` with the button outside, and a comment saying "the only thing
+that can ever scroll out of sight is the tail of the card". This port had it all
+in one fixed column. Ported. `04-rules.md`'s no-scroll rule is about workout
+screens, and this is the screen after one.
+
+| Summary, card revealed | 874pt | 667pt |
+|---|---|---|
+| Before | 46pt clear | **Done clipped by 5pt** |
+| After | 46pt clear — unchanged | 12pt clear, card scrolls |
+
 **Reproduce it.** The SE is not a default simulator; create one with
 
 ```bash
@@ -229,7 +246,12 @@ xcrun simctl create "SE3" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-ge
 ```
 
 and render `-screen set -slot 4.0.0`. **Any future addition to the Set screen has
-to be checked there**, not on a Pro.
+to be checked there**, not on a Pro — and any addition to the Summary has to be
+checked there *after the card reveals*, which is twenty seconds of waiting and
+the only way to see the real height.
+
+Rest, Warm-up, Home, Backup, Ledger and Guide were all checked at 667pt and all
+fit; Ledger has 89pt to spare.
 
 ---
 
