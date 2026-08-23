@@ -316,3 +316,27 @@ enum Scrim {
         .init(color: Surface.ink.opacity(0.38), location: 1),
     ]
 }
+
+/// Fills the screen when the content fits and scrolls when it does not.
+///
+/// The reading screens are not inside a workout, so unlike Set and Rest they
+/// may scroll — but a screen that scrolls when it does not need to is a screen
+/// whose primary action can be dragged out of reach for no reason.
+///
+/// Both halves are load-bearing and both were found the same way. Home needed
+/// the scroll on a 375x667 SE, where the session panel pushed the title off the
+/// top and the History/All time/Guide/Backup row off the bottom — losing the
+/// only route into four screens. Backup needed it at accessibility text sizes,
+/// where a plain `VStack` overflowed in BOTH directions and printed "Never
+/// backed up." underneath the Dynamic Island.
+struct FillOrScroll: ViewModifier {
+    func body(content: Content) -> some View {
+        GeometryReader { proxy in
+            ScrollView {
+                content
+                    .frame(minHeight: proxy.size.height, alignment: .topLeading)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+    }
+}

@@ -74,6 +74,10 @@ struct HomeScreen: View {
     }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Home is not inside a workout, so it supports the accessibility sizes
+    /// rather than clamping the way Set and Rest do. The session panel is the
+    /// part that needs to know: see `upNext`.
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         // THE ORDER OF THIS SCREEN IS THE ARGUMENT.
@@ -237,12 +241,24 @@ struct HomeScreen: View {
     /// four boxes.
     private var upNext: some View {
         VStack(alignment: .leading, spacing: Space.snug) {
-            HStack(alignment: .firstTextBaseline) {
+            // Side by side normally, stacked at the accessibility sizes.
+            //
+            // Measured at accessibility-XXXL: the two ends of this row squeezed
+            // each other into two columns four characters wide and the label
+            // came out as "UP NEXT · SES-SION B", hyphenated. Neither half is
+            // long; they just cannot both be on one line at that size.
+            let stacked = typeSize.isAccessibilitySize
+            AnyLayout(stacked
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
+                : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
+            ) {
                 Text("UP NEXT · SESSION \(nextSession)")
                     .font(TypeScale.microLabel)
                     .tracking(1.5)
                     .foregroundStyle(Ink.tertiary)
-                Spacer()
+                if !stacked {
+                    Spacer()
+                }
                 Text(sessionSummary)
                     .font(TypeScale.microLabel)
                     .foregroundStyle(Ink.tertiary)
@@ -262,8 +278,13 @@ struct HomeScreen: View {
                         Text(line)
                             .font(TypeScale.bodyEmphasis)
                             .foregroundStyle(Ink.secondary)
-                            .lineLimit(1)
+                            // Wrap rather than truncate. At accessibility sizes
+                            // one line turned "Lateral raise + Rear-delt fly"
+                            // into "Lateral raise + R…", which hides half of
+                            // what the superset is.
+                            .lineLimit(2)
                             .minimumScaleFactor(0.8)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
@@ -540,18 +561,5 @@ private struct WeekMeter: View {
                 : "\(progress.streak) \(weeks) running"
         }
         return "Best run: \(progress.longestRun) weeks"
-    }
-}
-
-/// Fills the screen when the content fits and scrolls when it does not.
-private struct FillOrScroll: ViewModifier {
-    func body(content: Content) -> some View {
-        GeometryReader { proxy in
-            ScrollView {
-                content
-                    .frame(minHeight: proxy.size.height, alignment: .topLeading)
-            }
-            .scrollBounceBehavior(.basedOnSize)
-        }
     }
 }

@@ -198,6 +198,7 @@ struct BackupScreen: View {
 
                 Button("Restore from a file") { importing = true }
                     .font(TypeScale.body)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(Ink.secondary)
                     .frame(minHeight: Hit.minimum)
             }
@@ -234,6 +235,7 @@ struct BackupScreen: View {
             }
         }
         .padding(.horizontal, Space.gutter)
+        .modifier(FillOrScroll())
         .safeAreaPadding(.vertical, Space.step)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(DawnBackdrop(treatment: .atmospheric, progress: 0.30))
