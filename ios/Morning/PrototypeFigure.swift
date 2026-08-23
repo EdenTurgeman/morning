@@ -246,7 +246,22 @@ struct FigureRenderer {
         context.fill(Path(ellipseIn: rect), with: .color(color))
     }
 
+    /// A pose coordinate, in pixels.
+    ///
+    /// **Both axes scale by HEIGHT, and x is centred.** They used to scale
+    /// independently — x by width, y by height — which meant the figure was
+    /// stretched horizontally by whatever the bay's aspect happened to be. That
+    /// was survivable while the bay was a fixed 178pt; W15 made its height
+    /// flexible, so the same figure is now a different shape on a screen with
+    /// four cues than on one with two, and the shoulders visibly widen and
+    /// narrow between exercises.
+    ///
+    /// Scaling both by `unit` also makes a normalised distance a real distance,
+    /// which is what lets `elbow(from:to:)` solve at all.
     private func cgPoint(_ coordinate: (Double, Double)) -> CGPoint {
-        CGPoint(x: size.width * coordinate.0, y: size.height * coordinate.1)
+        CGPoint(
+            x: size.width / 2 + (coordinate.0 - 0.5) * unit,
+            y: coordinate.1 * unit
+        )
     }
 }
