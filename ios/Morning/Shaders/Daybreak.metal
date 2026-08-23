@@ -236,9 +236,22 @@ static inline float3 skyColour(float elevation, float rise) {
     // ---- The break ---------------------------------------------------------
     col += float3(1.0, 0.74, 0.42) * flash * mix(0.22, 0.06, calm);
 
-    // Below the horizon is ground, not sky: it takes only what the sun spills.
+    // Below the horizon is ground, not sky.
+    //
+    // It used to be a flat plate of 0.02 grey with a little halo spill, and on
+    // screen that read as the IMAGE BEING CROPPED: a bright orange sunrise
+    // stopping dead along a straight line 18% up from the bottom, with "Tap to
+    // continue" floating in the black underneath it.
+    //
+    // Ground under a dawn is not black. It is lit by the sky it faces, most
+    // brightly right at the horizon, falling away toward the viewer — so that
+    // is what this is: the low sky's own colour and the sun's spill, reflected
+    // at about a third, fading with depth. Same near-black at the bottom edge,
+    // but arrived at rather than declared.
     float ground = smoothstep(kHorizonY, kHorizonY + 0.004, uv.y);
-    float3 earth = float3(0.020, 0.016, 0.038) + sunCol * halo * 0.18 * rise;
+    float depth = saturate((uv.y - kHorizonY) / max(1.0 - kHorizonY, 0.001));
+    float3 horizonLight = skyColour(0.02, rise * 0.85) + sunCol * halo * 0.55 * rise;
+    float3 earth = mix(horizonLight * 0.34, float3(0.014, 0.012, 0.030), pow(depth, 0.55));
     col = mix(col, earth, ground);
 
     return half4(half3(col), 1.0h);

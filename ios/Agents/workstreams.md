@@ -881,3 +881,43 @@ layout is changed against a measurement instead of against the screen.
 13. **"please open the app and see for yourself and review this."** The standing
     instruction, and the one that matters: render every screen and look at it,
     rather than measuring a band and declaring it fine.
+
+## W16 · The copy pass — `todo`, and deliberately last
+
+Asked for by Eden on 2026-08-23, with an explicit ordering instruction: **this
+waits until almost everything else is finished.** Do not start it early because
+it looks easy.
+
+> "i want to go over the texts in the app, think of their ux, copy and what they
+> say, i hate em-dashes and text that sounds like it's super AI generated, this
+> goes for ALL text in the app. so this task is a copy ux/ui pass."
+
+Three things to carry into it.
+
+**Em-dashes are out.** They are all over this app and most of them are mine:
+"No rest after this — straight into the next one.", "Push-up — deficit — hands
+on books", "First time — just go to failure", "different weight now". Rewrite
+rather than swap the punctuation for a comma — a sentence that needed a dash
+usually wanted to be two sentences or a shorter one.
+
+**"Sounds AI generated" is the real brief.** The tell is not any single word, it
+is the register: hedged, balanced, faintly promotional, every sentence the same
+length. This app is one person's, at 6:10am. Read every string out loud and cut
+the ones you would not say.
+
+**There is a live conflict to settle with Eden before touching half of it.**
+`CLAUDE.md` rule 3 and `ios-port/README.md` both say content is fixed and
+verbatim — exercise names, cues, targets, card text, Guide text, celebration
+copy — and that it is *"not yours to improve"*. So split the audit in two and
+put the second half to him rather than deciding it:
+
+- **Mine, rewrite freely:** UI labels, section headings, empty states, the week
+  nudge, the "no rest" line, accessibility strings, button titles, error copy,
+  everything in `Screens/`.
+- **Ported content, needs Eden's word:** `cards.json`, `guide.json`, the
+  celebration tiers in `04-rules.md`, and every cue and sub-label in
+  `Program.swift`. He wrote these for himself, so "sounds AI generated" may not
+  even apply — but he said ALL text, so ask, do not assume either way.
+
+Deliverable: one pass, screen by screen, with the before/after for every string
+in a table he can veto line by line.
