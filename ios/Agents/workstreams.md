@@ -921,3 +921,22 @@ put the second half to him rather than deciding it:
 
 Deliverable: one pass, screen by screen, with the before/after for every string
 in a table he can veto line by line.
+
+### Round three — 2026-08-23, two design pointers from the phone
+
+14. **The Set screen header on a myo set.** *"the whole top is sooo cluttered
+    and ellipsising a lot, so much of that info is unecessary and should be
+    distilled and minimized."* His photo shows the myo lateral raise: the name
+    truncated to "Lateral rai…", the sub on its own line, the position line
+    wrapping to "6.25 kg · set 1 / of 3", and on the right **"TARGET / all-out
+    to failure / reps"** — a whole sentence set at `counter(30)`, which is what
+    stole the width from everything else, plus the word "reps" hung under a
+    target that is not a count.
+
+    The two-column header assumed every target is a short numeric range. Four
+    of the five blocks have one; the myo block's target is prose.
+
+15. **The Rest screen's ring.** *"the counter isn't centered in it's section at
+    the top, the spacing is weird between the elements."* Measured off his
+    photo: rail to ring ≈ 150px of air, ring to the card ≈ 50px. The ring sits
+    low in the band it is supposed to be centred in.
