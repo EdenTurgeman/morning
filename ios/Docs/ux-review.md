@@ -222,6 +222,14 @@ already says the same thing without words.
 The tall-screen layout is unchanged, which is the point: the bay is at its full
 178pt wherever there is room for 178pt.
 
+**The transition was re-checked afterwards, and survived.** Making the Set
+screen responsive meant wrapping it in a `GeometryReader`, and `SetScreen` is
+half of the `matchedGeometryEffect` pair that carries the work object into the
+Rest screen. A geometry container around one half of a matched pair is exactly
+the kind of change that silently breaks it. Re-captured at 60fps: the ring is
+still born small at the counter's position and travels up into place, and the
+luminance across the swap is 50 → 23 → 41, unchanged.
+
 **And the Summary was clipped too, but only after fourteen seconds.** Measured
 on the SE it had 12pt of clearance — fine. Measured again after the study card
 reveals its answer, the Done button was cut off by five points. That is the
