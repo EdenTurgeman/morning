@@ -114,6 +114,31 @@ against the 1.5 m reading distance. Those are right.
 
 ---
 
+## 3b. Round two — the horizontal axis
+
+Round one used a vertical instrument and could only see vertical problems. The
+classic thing it cannot see is a ragged left edge, so round two measured the
+left and right extent of every band.
+
+**The first attempt at this did not work either**, and for a reason worth
+writing down: thresholding on horizontal *variance* reported that every band on
+every screen ran the full 402pt width. That is the sky. Stars and cloud texture
+carry enough variance that a row of empty sky looks identical to a row of type.
+Switching to an absolute brightness threshold separates them, because type and
+button fills are far brighter than the texture.
+
+**The result is clean.** Every screen in the app — workout and reading alike —
+sets its content at a **22.7–24.3pt left gutter**. Bulleted cue text sits at
+**37pt**, which is the bullet plus its spacing, and is identical on the Set
+screen and the Warm-up. Centred items are centred. There is no ragged edge
+anywhere.
+
+One deliberate exception: the Backup status line starts at 34.3pt, inset from
+its 2pt coloured rule at the gutter. That is the standard shape of a left-ruled
+callout and matches what the web build does with `border-l-2`.
+
+---
+
 ## 4. What is already good, so nobody re-opens it
 
 - **The Set screen's ordinary state.** Bands throughout, gaps 8–56pt, no void,
@@ -125,6 +150,7 @@ against the 1.5 m reading distance. Those are right.
   Correct reading rhythm.
 - **Hit targets.** Every control checked carries `Hit.minimum` (44pt) or larger;
   the rep steppers are 82pt and the primary buttons 68pt.
+- **Horizontal alignment**, measured across all ten screens. See 3b.
 
 ---
 
