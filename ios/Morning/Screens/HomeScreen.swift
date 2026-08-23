@@ -76,15 +76,50 @@ struct HomeScreen: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Space.section) {
+        // THE ORDER OF THIS SCREEN IS THE ARGUMENT.
+        //
+        // W15 #8, and it is the only item on Eden's list that is a design
+        // problem rather than a spacing one: *"suuuper dull, doesn't really
+        // entice me to do a workout, it's mostly empty, emphesising the weights
+        // and the 'this week' counter is small and dull and really dull UX."*
+        //
+        // He is right about all three, and they are one fault. `§8` says Home
+        // answers "what am I doing and what do I set up?" in under two seconds
+        // — and this screen only ever answered the second half. The largest
+        // thing on it was a plate configuration at 38pt; the answer to "what am
+        // I doing" was the letter B, inside the start button. So the most
+        // prominent element was setup for a session the screen never described,
+        // and 240pt of the middle was empty underneath it.
+        //
+        // Nothing here is invented content. `Session.name` ("Light") and
+        // `Session.minutes` ("~19 min") have been in `Program.swift` since it
+        // was transcribed and no screen has ever shown them, and the movement
+        // list is the session's own structure. It is a hierarchy change: what
+        // you are about to do goes where the plate maths was, the plate maths
+        // becomes one line next to the button it belongs to, and the week gets
+        // read from across a room instead of squinted at.
+        //
+        // Still not gamified. No points, no badges, no streak economy, nothing
+        // congratulating anybody. Bigger type on a true number is emphasis, not
+        // a reward.
+        VStack(alignment: .leading, spacing: Space.gutter) {
             header
 
-            // The whole block is the target, not just the word "Change".
+            upNext
+
+            WeekMeter(progress: progress, hasHistory: lastSession != nil, accent: palette.accent)
+
+            Spacer(minLength: Space.step)
+
+            // The loadout sits with the start control now, because that is the
+            // order the two things actually happen in: read the weight, load
+            // the handles, press the button. As the hero it was answering a
+            // question nobody asks until they are already committed.
             //
+            // The whole row is the target, not just the word "Change".
             // `guide.json` — content, and not mine to reword — says "tap the
-            // loadout on the home screen". So the loadout has to be the thing
-            // you tap. It is also a ~90pt target against a 44pt one, which at
-            // 6:10am with sweaty hands is the difference that matters.
+            // loadout on the home screen", so the loadout has to be the thing
+            // you tap, and a ~60pt target beats a 44pt one at 6:10am.
             Button {
                 withAnimation(Motion.reveal(reduceMotion: reduceMotion)) {
                     editingLoad.toggle()
@@ -102,10 +137,6 @@ struct HomeScreen: View {
             if editingLoad {
                 weightPicker
             }
-
-            WeekMeter(progress: progress, hasHistory: lastSession != nil, accent: palette.accent)
-
-            Spacer(minLength: Space.step)
 
             VStack(spacing: Space.step) {
                 DawnPrimaryButton(
@@ -147,8 +178,20 @@ struct HomeScreen: View {
             }
         }
         .padding(.horizontal, Space.gutter)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        // SCROLLS ONLY WHEN IT MUST.
+        //
+        // The header of this file has always said Home may scroll, unlike Set
+        // and Rest — and until the session panel arrived it never needed to. On
+        // a 375x667 SE it now does: measured, the title was cut off the top and
+        // the History/All time/Guide/Backup row was off the bottom entirely,
+        // which loses the only route into four screens.
+        //
+        // `minHeight` plus `.basedOnSize` means a 16 Pro gets a fixed page that
+        // cannot be dragged, and the SE gets a scroll. Not a compromise for the
+        // phone Eden actually holds.
+        .modifier(FillOrScroll())
         .safeAreaPadding(.vertical, Space.step)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(DawnBackdrop(treatment: .atmospheric, progress: skyProgress))
     }
 
@@ -181,46 +224,163 @@ struct HomeScreen: View {
         return "Last: \(lastSession.sessionKey), \(when) · \(History.reps(of: lastSession)) reps"
     }
 
-    /// The answer to "what do I set up" is plates, not a weight.
-    private var loadout: some View {
-        VStack(alignment: .leading, spacing: Space.tight) {
-            HStack {
-                Text("Set up")
+    /// WHAT YOU ARE ABOUT TO DO.
+    ///
+    /// The thing this screen never said. `Session.name` and `Session.minutes`
+    /// are program content that has been sitting in `Program.swift` unread
+    /// since it was transcribed, and the movement outline is the session's own
+    /// block structure — a superset is one line because that is how it is
+    /// performed, which also explains the bunched ticks on the workout rail.
+    ///
+    /// One panel, not a stack of them. `§8` notes Home is "currently a stack of
+    /// cards; it does not have to be", and the fix for an empty screen is not
+    /// four boxes.
+    private var upNext: some View {
+        VStack(alignment: .leading, spacing: Space.snug) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("UP NEXT · SESSION \(nextSession)")
+                    .font(TypeScale.microLabel)
+                    .tracking(1.5)
+                    .foregroundStyle(Ink.tertiary)
+                Spacer()
+                Text(sessionSummary)
                     .font(TypeScale.microLabel)
                     .foregroundStyle(Ink.tertiary)
-
-                Spacer()
-
-                // A label, not a control — the whole block is the control now.
-                // It stays because without it nothing says the loadout is
-                // tappable, and the Guide's instruction only helps someone who
-                // has read the Guide.
-                if load != nil {
-                    Text(editingLoad ? "Done" : "Change")
-                        .font(TypeScale.microLabel)
-                        .foregroundStyle(palette.accentText)
-                }
             }
 
-            if let load {
-                // Hidden while the picker is open: the picker shows the same
-                // number and the same plate breakdown, and two of each is one
-                // too many.
-                if !editingLoad {
+            Text(session(for: nextSession)?.name ?? "Session \(nextSession)")
+                .font(TypeScale.counter(38))
+                .foregroundStyle(Ink.primary)
+
+            if !outline.isEmpty {
+                Divider()
+                    .overlay(Ink.hairline)
+                    .padding(.vertical, 2)
+
+                VStack(alignment: .leading, spacing: Space.snug) {
+                    ForEach(Array(outline.enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(TypeScale.bodyEmphasis)
+                            .foregroundStyle(Ink.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, Space.gutter - 4)
+        .padding(.vertical, Space.gutter - 4)
+        .background(
+            LinearGradient(
+                colors: [Color.black.opacity(0.26), Color.black.opacity(0.12)],
+                startPoint: .top,
+                endPoint: .bottom
+            ),
+            in: RoundedRectangle(cornerRadius: 22)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.75)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    /// "~19 min · 14 sets". Both halves are facts the app already holds and
+    /// neither was on screen.
+    private var sessionSummary: String {
+        var parts: [String] = []
+        if let minutes = session(for: nextSession)?.minutes {
+            parts.append(minutes)
+        }
+        let sets = StepCompiler.countSets(StepCompiler.build(session: nextSession, kg: load))
+        parts.append("\(sets) sets")
+        return parts.joined(separator: " · ")
+    }
+
+    /// One line per block, in the order performed. A superset is one line with
+    /// its partners joined, because that is one round of work.
+    private var outline: [String] {
+        guard let session = session(for: nextSession) else { return [] }
+
+        let blocks: [(name: String, sub: String?)] = session.blocks.compactMap { block in
+            switch block {
+            case .warmup:
+                // The warm-up is not a movement, and listing it would put
+                // "Warm-up" at the top of a list whose whole job is to say what
+                // the session IS.
+                nil
+            case let .straight(straight):
+                (straight.exercise, straight.sub)
+            case let .superset(superset):
+                (superset.items.map(\.exercise).joined(separator: " + "), nil)
+            }
+        }
+
+        // THE SUB-LABEL SURVIVES ONLY WHERE IT TELLS TWO LINES APART.
+        //
+        // Dropping it everywhere was right for "Push-up — deficit — hands on
+        // books" (W15 #1: Eden called that text *"uneeded"* on a screen with
+        // far more room for it) and wrong for session B, where "Lateral raise"
+        // appears in the superset AND again as the myo block — the list read as
+        // if it had a duplicate in it, which is worse than a long line.
+        //
+        // So: setup detail goes, disambiguation stays.
+        // Counted per EXERCISE, not per line. Session B's clash is between a
+        // superset line reading "Lateral raise + Rear-delt fly" and a straight
+        // block reading "Lateral raise" — two different strings, so counting
+        // whole lines found no duplicate and the list still showed the same
+        // movement twice with nothing telling them apart.
+        var counts: [String: Int] = [:]
+        for block in session.blocks {
+            switch block {
+            case .warmup: break
+            case let .straight(straight): counts[straight.exercise, default: 0] += 1
+            case let .superset(superset):
+                for item in superset.items {
+                    counts[item.exercise, default: 0] += 1
+                }
+            }
+        }
+
+        return blocks.map { block in
+            guard let sub = block.sub, counts[block.name, default: 0] > 1 else { return block.name }
+            return "\(block.name) — \(sub)"
+        }
+    }
+
+    /// The answer to "what do I set up" is plates, not a weight — but it is one
+    /// line, not the headline. See the note on `body`.
+    private var loadout: some View {
+        HStack(alignment: .center, spacing: Space.step) {
+            VStack(alignment: .leading, spacing: 1) {
+                if let load {
                     Text("\(Plates.format(load)) kg per handle")
-                        .font(TypeScale.counter(38))
+                        .font(TypeScale.action)
                         .foregroundStyle(Ink.primary)
 
                     Text(Plates.breakdown(for: load) ?? "not loadable with the plates you own")
                         .font(TypeScale.body)
-                        .foregroundStyle(Ink.secondary)
+                        .foregroundStyle(Ink.tertiary)
+                } else {
+                    Text("Bodyweight only")
+                        .font(TypeScale.action)
+                        .foregroundStyle(Ink.primary)
                 }
-            } else {
-                Text("Bodyweight only")
-                    .font(TypeScale.counter(38))
-                    .foregroundStyle(Ink.primary)
+            }
+
+            Spacer(minLength: 0)
+
+            // A label, not a control — the whole row is the control. It stays
+            // because without it nothing says the loadout is tappable, and the
+            // Guide's instruction only helps someone who has read the Guide.
+            if load != nil {
+                Text(editingLoad ? "Done" : "Change")
+                    .font(TypeScale.label)
+                    .foregroundStyle(palette.accentText)
             }
         }
+        .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
     }
 
     /// Lighter / heavier, one plate step at a time.
@@ -306,22 +466,43 @@ private struct WeekMeter: View {
     let accent: Color
 
     var body: some View {
+        // W15 #8's third clause: *"the 'this week' counter is small and dull"*.
+        //
+        // It was three lines of 11pt grey and a row of 6pt hairlines. Every
+        // number on it is true and worth reading — how many sessions are in the
+        // week, how many weeks the run has lasted, what the best run was — and
+        // all of them were set at the quietest size in the type system, under a
+        // 38pt plate configuration.
+        //
+        // So the count is read from across the room, the pips have weight, and
+        // the run line is body copy rather than a footnote. No new facts, no
+        // new copy, and still nothing that congratulates.
         VStack(alignment: .leading, spacing: Space.snug) {
-            HStack {
-                Text("This week")
+            HStack(alignment: .firstTextBaseline) {
+                Text("THIS WEEK")
                     .font(TypeScale.microLabel)
+                    .tracking(1.5)
                     .foregroundStyle(Ink.tertiary)
                 Spacer()
-                Text("\(progress.done) of \(progress.target)")
-                    .font(TypeScale.microLabel.monospacedDigit())
-                    .foregroundStyle(Ink.tertiary)
+                // "2" carries, "of 5" is the scale it is read against — one
+                // fact, two weights, rather than two greys the same size.
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text("\(progress.done)")
+                        .font(TypeScale.counter(30))
+                        .monospacedDigit()
+                        .foregroundStyle(progress.done > 0 ? Ink.primary : Ink.tertiary)
+                    Text("of \(progress.target)")
+                        .font(TypeScale.body)
+                        .monospacedDigit()
+                        .foregroundStyle(Ink.tertiary)
+                }
             }
 
             HStack(spacing: 6) {
                 ForEach(0 ..< progress.target, id: \.self) { index in
                     Capsule()
                         .fill(index < progress.done ? accent : Ink.hairline)
-                        .frame(height: 6)
+                        .frame(height: 10)
                 }
             }
 
@@ -342,8 +523,8 @@ private struct WeekMeter: View {
 
             if progress.streak > 0 || progress.longestRun > 0 {
                 Text(runLine)
-                    .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
+                    .font(TypeScale.body)
+                    .foregroundStyle(Ink.secondary)
             }
         }
     }
@@ -359,5 +540,18 @@ private struct WeekMeter: View {
                 : "\(progress.streak) \(weeks) running"
         }
         return "Best run: \(progress.longestRun) weeks"
+    }
+}
+
+/// Fills the screen when the content fits and scrolls when it does not.
+private struct FillOrScroll: ViewModifier {
+    func body(content: Content) -> some View {
+        GeometryReader { proxy in
+            ScrollView {
+                content
+                    .frame(minHeight: proxy.size.height, alignment: .topLeading)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
     }
 }
