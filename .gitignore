@@ -1,5 +1,8 @@
-# The product spec stays local — it describes the person this was built for.
-spec.md
+# spec.md IS tracked. It is the app's functional specification — what the app
+# must do, with no UI or UX decisions in it — and a specification nobody else
+# can read is not a specification. It contains nothing about the person this was
+# built for; anything that does goes in the file below and stays local.
+spec.private.md
 
 node_modules/
 dist/

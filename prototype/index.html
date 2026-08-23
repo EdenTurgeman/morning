@@ -109,7 +109,7 @@ const PROGRAM = {
     loadout:[["Dumbbells","10 kg each"],["  per handle","4×1.25 + 2×2.5"],["Backpack","empty"]],
     blocks:[
       {t:"warmup",secs:90,title:"Warm-up",
-       cues:["20 arm circles forward, 20 back","10 half-effort push-ups","10 towel dislocates — grip a towel wide, sweep it overhead and behind you"]},
+       cues:["20 arm circles forward, 20 back","10 half-effort push-ups","10 towel dislocates: grip a towel wide, sweep it overhead and behind you"]},
       {t:"straight",ex:"Push-up",sub:"feet elevated",sets:3,rest:60,target:"8–15 reps",bw:true,
        cues:["3s down · 1s PAUSE at the bottom · fast up","Elbows 45° from your torso, glutes squeezed","Go to failure, or one rep short"]},
       {t:"super",sets:3,rest:45,items:[
@@ -119,7 +119,7 @@ const PROGRAM = {
          cues:["3 seconds lowering","FULL arm extension at the bottom of every rep","That bottom inch is the whole exercise"]}]},
       {t:"super",sets:2,rest:45,items:[
         {ex:"Bent-over row",sub:"",w:10,target:"15–20 reps",
-         cues:["Hinge to 45°, flat back","Pull to your hips and squeeze","Shoulder insurance — don't skip it"]},
+         cues:["Hinge to 45°, flat back","Pull to your hips and squeeze","Shoulder insurance. Don't skip it"]},
         {ex:"Hammer curl",sub:"",w:10,target:"12–20 reps",
          cues:["Palms facing each other","Full stretch at the bottom"]}]}
     ]
@@ -139,19 +139,19 @@ const PROGRAM = {
          cues:["Hinge until almost parallel to the floor","Open your arms wide like a curtain, squeeze the blades"]}]},
       {t:"straight",ex:"Lateral raise",sub:"myo-reps",sets:5,rest:20,w:5,
        targets:["all-out to failure","4–5 reps","4–5 reps","4–5 reps","4–5 reps"],
-       cues:["Set 1 is all-out. Then 20s rest, 4–5 reps, repeat","Stop when you can't get 4 clean reps","The 20-second rest IS the mechanism — don't stretch it"],
+       cues:["Set 1 is all-out. Then 20s rest, 4–5 reps, repeat","Stop when you can't get 4 clean reps","The 20-second rest IS the mechanism. Don't stretch it"],
        hard:true}
     ]
   }
 };
 
 const GUIDE = [
- {h:"The one rule",p:"Every working set goes to failure or one rep short. Your load is fixed, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.) — light loads stopped short grow almost nothing (2.8%)."},
+ {h:"The one rule",p:"Every working set goes to failure or one rep short. Your load is fixed, so effort is your only variable. Light loads taken to failure grow muscle as well as heavy ones (7.8% vs 8.1% CSA in Lasevicius et al.). Light loads stopped short grow almost nothing (2.8%)."},
  {h:"Beat reps, not weight",p:"The grey number next to each set is what you did last time. That's your target. Match it three sessions running and it's time to move up the progression ladder."},
  {h:"Progression ladder",p:"1. Add reps.  2. Slow the eccentric to 4–5s and add a 2s pause in the stretch.  3. Add post-failure partials in the bottom third.  4. Change the loadout (B → 7.5 kg dumbbells, 5 kg pack).  5. Switch to a no-ceiling variant: pike push-ups, Z-press, archer push-ups, chin-ups."},
- {h:"Protein — 120 g/day",p:"2.0 g/kg, roughly 30 g across four meals. Anywhere in 105–140 g is fine."},
- {h:"Calories — +250/day",p:"You're lean and already burning through cycling and yoga. Target +150–250 g on the scale per week. If the weekly average is flat, eat more. This is the bottleneck, not the training."},
- {h:"Creatine — 5 g/day",p:"Any time of day, no loading needed. The only supplement worth the money. Expect +1–1.5 kg in the first fortnight from intracellular water — that's fullness, not fat."},
+ {h:"Protein: 120 g/day",p:"2.0 g/kg, roughly 30 g across four meals. Anywhere in 105–140 g is fine."},
+ {h:"Calories: +250/day",p:"You're lean and already burning through cycling and yoga. Target +150–250 g on the scale per week. If the weekly average is flat, eat more. This is the bottleneck, not the training."},
+ {h:"Creatine: 5 g/day",p:"Any time of day, no loading needed. The only supplement worth the money. Expect +1–1.5 kg in the first fortnight from intracellular water. That's fullness, not fat."},
  {h:"Fasted is fine",p:"Total daily intake beats timing. Don't rebuild your morning around a pre-workout meal. A coffee 20 minutes before does more for this session than food will."},
  {h:"The two ways this fails",p:"① You don't go to failure, because 5 or 10 kg doesn't feel like it deserves that much effort.  ② You don't eat more."}
 ];
@@ -372,7 +372,7 @@ function stepTimer(s){
     if(W.left<=0){ beep(2); advance(); }
   },1000);
 
-  const b=$(`<button class="btn pri" style="margin-top:20px">Done — start lifting</button>`);
+  const b=$(`<button class="btn pri" style="margin-top:20px">Start lifting</button>`);
   b.onclick=advance; w.appendChild(b);
   return w;
 }
@@ -407,7 +407,7 @@ function stepSet(s){
   w.appendChild(st);
 
   w.appendChild($(`<div class="center muted sm" style="margin-bottom:16px">${
-    prev!=null ? `Last time: <b style="color:var(--ink)">${prev}</b> — beat it` : "First time — just go to failure"
+    prev!=null ? `Last time: <b style="color:var(--ink)">${prev}</b> — beat it` : "First time here. Go to failure"
   }</div>`));
 
   const b=$(`<button class="btn pri">Done</button>`);

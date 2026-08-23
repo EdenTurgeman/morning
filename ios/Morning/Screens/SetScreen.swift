@@ -218,7 +218,7 @@ struct SetScreen: View {
                 // superset the guess was short and in Eden's photo the sentence
                 // printed **through the top edge of the MOVEMENT box**.
                 if setStep.straightIntoNext == true {
-                    Text("No rest after this — straight into the next one.")
+                    Text("No rest after this. Straight into the next one.")
                         .font(TypeScale.body)
                         .foregroundStyle(palette.accentText)
                         .padding(.top, Space.tight)
@@ -277,7 +277,7 @@ struct SetScreen: View {
     ///
     /// `02-design-brief.md §8` does list the sub-label among what must be on
     /// screen. This narrows it rather than removing it, and the setup detail it
-    /// drops — "deficit — hands on books", "lying on your back" — is said again
+    /// drops — "deficit, hands on books", "lying on your back" — is said again
     /// by the cues six lines below.
     private var factLine: String {
         var parts: [String] = []

@@ -98,7 +98,7 @@ struct WarmupScreen: View {
 
             Spacer(minLength: Space.step)
 
-            DawnPrimaryButton(title: "Done — start lifting", treatment: .atmospheric, accent: palette.accent) {
+            DawnPrimaryButton(title: "Start lifting", treatment: .atmospheric, accent: palette.accent) {
                 finish()
             }
         }

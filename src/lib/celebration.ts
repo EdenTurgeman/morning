@@ -48,7 +48,7 @@ export interface Celebration {
 const MILESTONES: Record<number, { headline: string; body: string }> = {
   2: {
     headline: "Past the first drop-off.",
-    body: "The first week is willpower. The second is where it starts becoming a habit — and where most people have already stopped.",
+    body: "The first week is willpower. The second is where it starts becoming a habit, and where most people have already stopped.",
   },
   4: {
     headline: "A month of mornings.",
@@ -68,7 +68,7 @@ const MILESTONES: Record<number, { headline: string; body: string }> = {
   },
   52: {
     headline: "A year of mornings.",
-    body: "Fifty-two weeks. Nothing to add — just don't stop.",
+    body: "Fifty-two weeks. Nothing to add. Just don't stop.",
   },
 };
 
@@ -142,7 +142,7 @@ export function celebrationFor(
         tier: "clean-sweep",
         eyebrow: `${slots.length} of ${slots.length} sets improved`,
         headline: "Clean sweep.",
-        body: `Not one set matched last time — every single one went up. On a fixed load that is as good as this program gets.`,
+        body: `Not one set matched last time. Every single one went up. On a fixed load that is as good as this program gets.`,
         confetti: true,
         rays: true,
       };
@@ -159,7 +159,7 @@ export function celebrationFor(
       eyebrow: `Now at ${record.kg} kg`,
       headline: heavier ? "Heavier than last time." : "Lighter than last time.",
       body: heavier
-        ? `You were at ${previous.kg} kg. Reps aren't comparable across a weight change, so this session starts a fresh baseline — beat it next time.`
+        ? `You were at ${previous.kg} kg. Reps aren't comparable across a weight change, so this session starts a fresh baseline. Beat it next time.`
         : `You were at ${previous.kg} kg. Dropping to a weight you can actually take to failure is the right call; reps start a fresh baseline here.`,
       confetti: false,
       rays: false,

@@ -43,7 +43,7 @@ struct SummaryReviewHost: View {
                     Text("Done")
                         .font(TypeScale.title)
                         .foregroundStyle(Ink.primary)
-                    Text("Review only — the app returns to Home here.")
+                    Text("Review only. The app returns to Home here.")
                         .font(TypeScale.body)
                         .foregroundStyle(Ink.secondary)
                 }
@@ -234,7 +234,7 @@ struct ReviewHost: View {
                 Text(ended)
                     .font(TypeScale.title)
                     .foregroundStyle(Ink.primary)
-                Text("Review only — the app returns to Home here.")
+                Text("Review only. The app returns to Home here.")
                     .font(TypeScale.body)
                     .foregroundStyle(Ink.secondary)
             }

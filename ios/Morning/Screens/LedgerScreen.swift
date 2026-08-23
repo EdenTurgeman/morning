@@ -107,10 +107,10 @@ struct LedgerScreen: View {
 
     private var provenance: String {
         let bodyweight = ledger.bodyweightReps
-        let base = "\(Milestones.format(ledger.reps)) reps, each moving two dumbbells at the weight "
-            + "that session was actually done at."
+        let base = "\(Milestones.format(ledger.reps)) reps, each moving two dumbbells at "
+            + "whatever that session's weight was."
         guard bodyweight > 0 else { return base }
-        return base + " \(Milestones.format(bodyweight)) of them were bodyweight — they count as reps, not as kilos."
+        return base + " \(Milestones.format(bodyweight)) were bodyweight, so they count as reps but not as kilos."
     }
 
     /// The closing line, ported from `src/screens/Ledger.tsx`.
@@ -209,8 +209,8 @@ struct LedgerScreen: View {
                 .font(TypeScale.title)
                 .foregroundStyle(Ink.primary)
 
-            Text("This screen adds up every rep you ever log and tells you what it "
-                + "came to. One session from now it starts being worth reading.")
+            Text("Every rep you ever log adds up here. One session from now it "
+                + "starts being worth reading.")
                 .font(TypeScale.body)
                 .foregroundStyle(Ink.secondary)
                 .fixedSize(horizontal: false, vertical: true)

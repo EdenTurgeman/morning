@@ -162,7 +162,7 @@ struct WorkoutHost: View {
             Button("End and discard", role: .destructive) { onAbandon() }
             Button("Keep going", role: .cancel) {}
         } message: {
-            Text("Nothing will be saved — not even the sets you've already logged.")
+            Text("Nothing will be saved. Not even the sets you've already logged.")
         }
         // One sky, behind everything, for the whole session. Screens fade
         // across it; it never fades itself. This is also what makes the dawn

@@ -114,7 +114,7 @@ struct RestScreen: View {
             if isMyo {
                 // The 20-second rest IS the training stimulus, not a
                 // convenience. Amber says urgency without saying failure.
-                Text("The 20-second rest IS the mechanism — don't stretch it")
+                Text("The 20-second rest IS the mechanism. Don't stretch it")
                     .font(TypeScale.bodyEmphasis)
                     .foregroundStyle(Semantic.urgency)
                     .multilineTextAlignment(.center)

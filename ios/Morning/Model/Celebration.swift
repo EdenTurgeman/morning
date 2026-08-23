@@ -65,7 +65,7 @@ struct Celebration: Equatable {
 private let streakMilestones: [Int: (headline: String, body: String)] = [
     2: (
         "Past the first drop-off.",
-        "The first week is willpower. The second is where it starts becoming a habit — "
+        "The first week is willpower. The second is where it starts becoming a habit, "
             + "and where most people have already stopped."
     ),
     4: (
@@ -87,7 +87,7 @@ private let streakMilestones: [Int: (headline: String, body: String)] = [
     ),
     52: (
         "A year of mornings.",
-        "Fifty-two weeks. Nothing to add — just don't stop."
+        "Fifty-two weeks. Nothing to add. Just don't stop."
     ),
 ]
 
@@ -164,7 +164,7 @@ enum Celebrations {
                     tier: .cleanSweep,
                     eyebrow: "\(slots.count) of \(slots.count) sets improved",
                     headline: "Clean sweep.",
-                    body: "Not one set matched last time — every single one went up. "
+                    body: "Not one set matched last time. Every single one went up. "
                         + "On a fixed load that is as good as this program gets.",
                     milestoneBurst: true,
                     rays: true,
@@ -184,7 +184,7 @@ enum Celebrations {
                 headline: heavier ? "Heavier than last time." : "Lighter than last time.",
                 body: heavier
                     ? "You were at \(was) kg. Reps aren't comparable across a weight change, "
-                    + "so this session starts a fresh baseline — beat it next time."
+                    + "so this session starts a fresh baseline. Beat it next time."
                     : "You were at \(was) kg. Dropping to a weight you can actually take to failure "
                     + "is the right call; reps start a fresh baseline here.",
                 milestoneBurst: false,
