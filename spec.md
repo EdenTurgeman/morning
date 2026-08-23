@@ -401,6 +401,47 @@ way to say no.
 
 ---
 
+### 3.13 How the surfaces connect
+
+Reachability is behaviour; the transitions between them are yours.
+
+```
+Home ──start──► Warm-up ──► Set ⇄ Rest ──► … ──► Completion ──► Summary ──► Home
+ │                 └──────── back one step at a time ────────┘
+ │                 └──────── end, confirmed, discards ───────► Home
+ ├──► History ──► back to Home
+ ├──► Lifetime totals ──► back to Home
+ ├──► Guide ──► back to Home
+ └──► Backup ──► back to Home
+
+Lock Screen / Dynamic Island ──tap──► the step the countdown was counting
+```
+
+- The four reading surfaces are **peers of Home**, not of each other, and each
+  returns to Home. There is no tab bar and no deep hierarchy; the app has one
+  home and one flow.
+- **Launching mid-session goes straight back into the session**, at the step it
+  was on, with the rest deadline intact. The Live Activity's tap target is
+  therefore just "open the app".
+- The Summary is not reachable except by finishing a session.
+- There is no settings surface. The only preference the app has is the working
+  weight, and it lives with the thing it configures.
+
+---
+
+### 3.14 Platform constraints
+
+| | |
+|---|---|
+| Device | **iPhone 16 Pro.** Other sizes are not a target and an SE regression is not a defect. |
+| Orientation | Portrait only. |
+| Network | None, ever. Airplane mode is indistinguishable from normal. |
+| Dynamic Type | The three workout surfaces **deliberately clamp** — type there is already at the top of the scale and a surface that must never scroll would break rather than help at accessibility sizes. Every other surface supports the full range, scrolling when it must. |
+| Reduce Motion | Every animated sequence has a calmer form. Never a static or broken one. |
+| Persistence | Local only. No account, no sync, no server. |
+
+---
+
 ## 4. The program
 
 Two sessions, **A** ("Heavy", ~16 min) and **B** ("Light", ~19 min), alternating.
