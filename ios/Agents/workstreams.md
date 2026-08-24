@@ -1140,3 +1140,43 @@ to cover the gap.
   figures, or the sky's six progresses, on one screen.
 - Frame-rate smoothness cannot be measured meaningfully on the simulator; the
   120Hz claim in the brief needs W11 and a real phone.
+
+### Round two — the overhead press and the hammer curl
+
+Eden, after seeing round one: *"The overhead press animation is terrible, let's
+re design it and the hammer curl aswell."*
+
+**The press** had the hand 0.09 from the shoulder on an arm 0.29 long at the
+bottom — folded to under a third — so the solver put the elbows above the
+wrists, the bells sat through the head, and the whole movement rendered as a
+crushed "M" that barely travelled. Rebuilt from the geometry a dumbbell press
+actually has: upper arm down and out, forearm back up and out, bells at ear
+height and clear of the skull, which puts the hand 0.177 from the shoulder and
+the elbow at a right angle.
+
+Two things that only showed up in a **phase sweep**, which is a new review mode
+(`-screen figures -movement "Overhead press"`) and the reason both were found:
+
+- **A fixed bend sign rotates with the arm.** "Outside" at the bottom becomes
+  "inside" by the top, so the elbows swung in and the arms drew a diamond over
+  the head at 60%. `armOutward` picks the solution further from the midline per
+  frame instead — the solver already computes both.
+- **A straight hand path converges the whole way.** A press goes UP the sides
+  and only comes IN at the top, so the horizontal travel is `pow(phase, 2.2)`
+  against a linear rise. Also widened the lockout: at 0.448 the two bells were
+  0.104 apart and each is 0.104 across, so they met and the top of the press was
+  one solid bar.
+
+**The curl and hammer curl are drawn from the side now**, which is what the web
+build has always done and its own comment explains: from the front a curl's
+forearm rotates in a plane perpendicular to the screen, so the honest projection
+is foreshortening and this renderer has no depth. Swinging across the body
+instead — the first version — drew a cross-body curl with both bells out
+horizontal at waist height.
+
+From the side the grip becomes a **real** difference rather than a caption.
+Supinated, the bar runs across the body and you see it end-on, so it reads as a
+stub; neutral, it lies in the plane of the movement and the whole dumbbell
+swings with the forearm. `FigureWeight` gained an angle and a foreshortening for
+this. Session A programmes both curls back to back and until now they were the
+same picture.

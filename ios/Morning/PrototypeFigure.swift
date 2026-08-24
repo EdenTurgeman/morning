@@ -31,6 +31,29 @@ struct FigureGround {
     let y: Double
 }
 
+/// A dumbbell, and which way the bar is pointing.
+///
+/// The angle exists for exactly one reason and it is a real one: a hammer curl
+/// IS a curl, done with the palms facing each other. The path of the hand is
+/// identical, the muscles worked are not, and the only thing a drawing can show
+/// is the grip — bar across the hand for a curl, bar along the forearm for a
+/// hammer. The web build has always drawn both (`barAcross` and `barAlong` in
+/// `Figure.tsx`); this port drew every bar horizontal, so the two movements
+/// were indistinguishable.
+struct FigureWeight {
+    var at: (Double, Double)
+    /// Radians, clockwise from horizontal. 0 is a bar across the body.
+    var angle: Double = 0
+    /// How much of the bar's length is visible, 0…1.
+    ///
+    /// A bar pointing at the viewer is not a shorter bar, but on a flat drawing
+    /// it is the same picture — and that is the entire difference between a
+    /// curl and a hammer curl seen from the side. Supinated, the bar runs
+    /// across the body and you see it end-on; neutral, it lies in the plane of
+    /// the movement and you see all of it.
+    var foreshortening: Double = 1
+}
+
 struct FigurePose {
     /// Centre of the head.
     var head: (Double, Double)
@@ -43,7 +66,7 @@ struct FigurePose {
     /// Hip → knee → foot.
     var legs: [[(Double, Double)]] = []
     /// Where a dumbbell bar sits, if the movement is loaded.
-    var dumbbells: [(Double, Double)] = []
+    var dumbbells: [FigureWeight] = []
     /// A floor line, for movements done lying down or on the hands.
     var ground: FigureGround?
     /// Rotation of the torso mass, in degrees, for bent-over positions.
@@ -84,7 +107,7 @@ struct FigureRenderer {
         }
 
         for bar in pose.dumbbells {
-            drawDumbbell(at: bar, into: &context)
+            drawDumbbell(bar, into: &context)
         }
     }
 
@@ -200,31 +223,38 @@ struct FigureRenderer {
         }
     }
 
-    private func drawDumbbell(at location: (Double, Double), into context: inout GraphicsContext) {
-        let centre = cgPoint(location)
-        let half = 0.052 * unit
+    private func drawDumbbell(_ weight: FigureWeight, into context: inout GraphicsContext) {
+        let centre = cgPoint(weight.at)
+        let half = 0.052 * unit * max(0.18, weight.foreshortening)
         let barHalf = 0.011 * unit
         let plate = 0.030 * unit
 
-        var bar = Path()
-        bar.addRoundedRect(
-            in: CGRect(x: centre.x - half, y: centre.y - barHalf, width: half * 2, height: barHalf * 2),
-            cornerSize: CGSize(width: barHalf, height: barHalf)
-        )
-        context.fill(bar, with: .color(.white.opacity(0.9)))
+        // Drawn at the origin and rotated into place, so the bar can point
+        // along the forearm for a neutral grip. See `FigureWeight.angle`.
+        context.drawLayer { layer in
+            layer.translateBy(x: centre.x, y: centre.y)
+            layer.rotate(by: .radians(weight.angle))
 
-        // Plates, so it reads as a loaded dumbbell rather than a held rod.
-        for side in [-1.0, 1.0] {
-            let rect = CGRect(
-                x: centre.x + side * half - barHalf * 1.5,
-                y: centre.y - plate,
-                width: barHalf * 3,
-                height: plate * 2
+            var bar = Path()
+            bar.addRoundedRect(
+                in: CGRect(x: -half, y: -barHalf, width: half * 2, height: barHalf * 2),
+                cornerSize: CGSize(width: barHalf, height: barHalf)
             )
-            context.fill(
-                Path(roundedRect: rect, cornerSize: CGSize(width: barHalf, height: barHalf)),
-                with: .color(.white.opacity(0.9))
-            )
+            layer.fill(bar, with: .color(.white.opacity(0.9)))
+
+            // Plates, so it reads as a loaded dumbbell rather than a held rod.
+            for side in [-1.0, 1.0] {
+                let rect = CGRect(
+                    x: side * half - barHalf * 1.5,
+                    y: -plate,
+                    width: barHalf * 3,
+                    height: plate * 2
+                )
+                layer.fill(
+                    Path(roundedRect: rect, cornerSize: CGSize(width: barHalf, height: barHalf)),
+                    with: .color(.white.opacity(0.9))
+                )
+            }
         }
     }
 

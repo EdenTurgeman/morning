@@ -22,6 +22,7 @@ final class FigureAnatomyTests: XCTestCase {
         ("floor fly", .floorFly),
         ("bent-over row", .row),
         ("curl", .curl),
+        ("hammer curl", .hammerCurl),
     ]
 
     /// Sampled across the whole travel, not just the ends: an interpolation can
@@ -97,9 +98,10 @@ final class FigureAnatomyTests: XCTestCase {
             "Overhead press": .overheadPress,
             "Curl": .curl,
             "Bent-over row": .row,
-            // Shares the curl skeleton on purpose: the web build's own comment
-            // says only the grip differs, and a grip is not visible at this size.
-            "Hammer curl": .curl,
+            // Shares the curl's skeleton and its side-on viewpoint; the grip is
+            // the difference, and from the side the grip is visible — the bar
+            // is edge-on for a curl and along the forearm for a hammer.
+            "Hammer curl": .hammerCurl,
             "Lateral raise": .lateralRaise,
             "Rear-delt fly": .rearDeltFly,
             "Floor fly": .floorFly,

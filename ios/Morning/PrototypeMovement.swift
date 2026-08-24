@@ -121,6 +121,7 @@ enum ExerciseMovement {
     case floorFly
     case row
     case curl
+    case hammerCurl
 
     init(exercise: String) {
         switch exercise {
@@ -131,6 +132,7 @@ enum ExerciseMovement {
         // program animated as an entirely different exercise. The web build has
         // always had its own figure for this one.
         case "Rear-delt fly": self = .rearDeltFly
+        case "Hammer curl": self = .hammerCurl
         case "Floor fly": self = .floorFly
         case "Bent-over row": self = .row
         default: self = .curl
@@ -169,7 +171,8 @@ struct ExerciseFigure: View {
         case .rearDeltFly: rearDeltFly
         case .floorFly: floorFly
         case .row: row
-        case .curl: curl
+        case .curl: curl(neutralGrip: false)
+        case .hammerCurl: curl(neutralGrip: true)
         }
     }
 
@@ -238,6 +241,25 @@ struct ExerciseFigure: View {
     ///
     /// So an over-reach pulls the hand in to where the arm can actually get to.
     /// The pose asks; the anatomy answers.
+    /// The same solve, but always choosing the elbow that stays OUTSIDE the
+    /// body — which is what a front-view arm does and what a fixed sign cannot
+    /// express.
+    ///
+    /// `bend` picks a side of the shoulder-to-hand line, and that line rotates
+    /// as the arm travels. On an overhead press the hand goes from low-and-wide
+    /// to high-and-centred, so a sign that means "outside" at the bottom means
+    /// "inside" by the top: the elbows swung in and the arms drew a diamond
+    /// over the head halfway up. Picking per frame is the fix, and it is
+    /// exactly as cheap — the solver already computes both.
+    private func armOutward(
+        from shoulder: (Double, Double),
+        to target: (Double, Double)
+    ) -> (elbow: (Double, Double), hand: (Double, Double)) {
+        let a = arm(from: shoulder, to: target, bend: 1)
+        let b = arm(from: shoulder, to: target, bend: -1)
+        return abs(a.elbow.0 - 0.5) >= abs(b.elbow.0 - 0.5) ? a : b
+    }
+
     private func arm(
         from shoulder: (Double, Double),
         to target: (Double, Double),
@@ -268,26 +290,53 @@ struct ExerciseFigure: View {
         )
     }
 
+    /// Strict press, front view: dumbbells from ear height to lockout.
+    ///
+    /// The first version put the bottom hand 0.09 from the shoulder on an arm
+    /// 0.29 long — folded to under a third of its length — so the solver had
+    /// nowhere to put the elbow but straight up, and the whole movement
+    /// rendered as a tiny "M" of crushed limbs beside the head that barely
+    /// travelled. Eden: *"the overhead press animation is terrible."*
+    ///
+    /// A dumbbell press starts with the upper arm angled down and OUT and the
+    /// forearm coming back up and out, so the bells sit at ear height and well
+    /// outside the head. That is a hand 0.177 from the shoulder — an elbow at
+    /// roughly a right angle, which is what the bottom of a press actually is —
+    /// and it puts the bells clear of the skull instead of through it.
+    ///
+    /// `bend: -1` keeps the elbow below and outside the shoulder-to-hand line
+    /// for the whole travel. With the hand level with the shoulder that
+    /// perpendicular is nearly vertical and the sign chooses up or down rather
+    /// than in or out, which is the other half of why the first version put the
+    /// elbows above the wrists.
     private var overheadPress: FigurePose {
-        // Bottom: hands at chin height, just outside the shoulders. Top: locked
-        // overhead and converged slightly, which is where the joint is stacked.
         let shoulder = (0.44, 0.39)
-        let reachFor = interpolated(from: (0.35, 0.395), to: (0.462, 0.104))
-        // Elbows flare out and down at the bottom of a press.
-        let (elbow, hand) = arm(from: shoulder, to: reachFor, bend: 1)
+        // AN ARC, NOT A LINE. A straight path from wide-and-low to
+        // narrow-and-high converges the whole way, so at 60% the hands had
+        // already met above the head while the elbows were still out wide, and
+        // the arms drew a diamond. A press goes UP the sides and only comes IN
+        // at the top: the hands stay outside the shoulders until the elbows
+        // have nearly finished extending.
+        let rise = phase
+        let close = pow(phase, 2.2)
+        // Lockout is about shoulder width, not narrower. At 0.448 the two bells
+        // were 0.104 apart and each is 0.104 across, so they met in the middle
+        // and the top of the press rendered as one solid bar over the head.
+        let reachFor = (0.274 + (0.428 - 0.274) * close, 0.330 + (0.112 - 0.330) * rise)
+        let (elbow, hand) = armOutward(from: shoulder, to: reachFor)
         return FigurePose(
             head: (0.5, 0.22),
             neck: (0.5, 0.33),
             hip: (0.5, 0.66),
             arms: [
-                [(0.44, 0.39), elbow, hand],
+                [shoulder, elbow, hand],
                 [(0.56, 0.39), mirrored(elbow), mirrored(hand)],
             ],
             legs: [
                 [(0.465, 0.68), (0.455, 0.79), (0.450, 0.90)],
                 [(0.535, 0.68), (0.545, 0.79), (0.550, 0.90)],
             ],
-            dumbbells: [hand, mirrored(hand)]
+            dumbbells: [FigureWeight(at: hand), FigureWeight(at: mirrored(hand))]
         )
     }
 
@@ -328,7 +377,7 @@ struct ExerciseFigure: View {
         let shoulder = (0.44, 0.37)
         let reachFor = interpolated(from: (0.437, 0.648), to: (0.168, 0.386))
         // A lateral raise keeps a soft elbow that stays below the wrist.
-        let (elbow, hand) = arm(from: shoulder, to: reachFor, bend: 1)
+        let (elbow, hand) = armOutward(from: shoulder, to: reachFor)
         return FigurePose(
             head: (0.5, 0.21),
             neck: (0.5, 0.32),
@@ -341,7 +390,7 @@ struct ExerciseFigure: View {
                 [(0.465, 0.66), (0.455, 0.78), (0.450, 0.90)],
                 [(0.535, 0.66), (0.545, 0.78), (0.550, 0.90)],
             ],
-            dumbbells: [hand, mirrored(hand)]
+            dumbbells: [FigureWeight(at: hand), FigureWeight(at: mirrored(hand))]
         )
     }
 
@@ -361,7 +410,7 @@ struct ExerciseFigure: View {
     private var rearDeltFly: FigurePose {
         let shoulder = (0.44, 0.415)
         let reachFor = interpolated(from: (0.452, 0.692), to: (0.192, 0.553))
-        let (elbow, hand) = arm(from: shoulder, to: reachFor, bend: 1)
+        let (elbow, hand) = armOutward(from: shoulder, to: reachFor)
         return FigurePose(
             head: (0.5, 0.30),
             neck: (0.5, 0.375),
@@ -374,7 +423,7 @@ struct ExerciseFigure: View {
                 [(0.468, 0.685), (0.452, 0.79), (0.446, 0.90)],
                 [(0.532, 0.685), (0.548, 0.79), (0.554, 0.90)],
             ],
-            dumbbells: [hand, mirrored(hand)]
+            dumbbells: [FigureWeight(at: hand), FigureWeight(at: mirrored(hand))]
         )
     }
 
@@ -384,7 +433,7 @@ struct ExerciseFigure: View {
         // there", so the bend never changes and only the arc does.
         let shoulder = (0.45, 0.39)
         let reachFor = interpolated(from: (0.182, 0.418), to: (0.432, 0.238))
-        let (elbow, hand) = arm(from: shoulder, to: reachFor, bend: 1)
+        let (elbow, hand) = armOutward(from: shoulder, to: reachFor)
         return FigurePose(
             head: (0.5, 0.22),
             neck: (0.5, 0.33),
@@ -397,7 +446,7 @@ struct ExerciseFigure: View {
                 [(0.470, 0.72), (0.458, 0.82), (0.452, 0.90)],
                 [(0.530, 0.72), (0.542, 0.82), (0.548, 0.90)],
             ],
-            dumbbells: [hand, mirrored(hand)],
+            dumbbells: [FigureWeight(at: hand), FigureWeight(at: mirrored(hand))],
             ground: FigureGround(fromX: 0.10, toX: 0.90, y: 0.92)
         )
     }
@@ -421,28 +470,55 @@ struct ExerciseFigure: View {
                 [(0.622, 0.56), (0.608, 0.74), (0.622, 0.90)],
                 [(0.678, 0.56), (0.692, 0.74), (0.706, 0.90)],
             ],
-            dumbbells: [hand]
+            dumbbells: [FigureWeight(at: hand)]
         )
     }
 
-    private var curl: FigurePose {
-        // Elbow pinned at the ribs, forearm rotating through about 150°. See
-        // `swung(about:)` for why this one is not solved like the others.
-        let elbow = (0.437, 0.518)
-        let hand = swung(about: elbow, radius: Arm.fore, from: 0, to: 2.62, inward: -1)
+    /// Curl and hammer curl — the same movement, two grips, **seen from the
+    /// side**.
+    ///
+    /// The front view was the mistake. From the front a curl's forearm rotates
+    /// in a plane perpendicular to the screen, so the honest projection is the
+    /// forearm getting shorter, which this renderer has no depth to express.
+    /// Swinging the hand across the body instead — which is what the first
+    /// version did — draws a cross-body curl: at the halfway point both bells
+    /// were out horizontal at waist height, spanning the whole figure.
+    ///
+    /// From the side, the arc IS the movement. The web build has always drawn
+    /// it this way and its own comment says so: *"side view: a shorter shoulder
+    /// bar, since you're seeing it edge-on"*.
+    ///
+    /// **The grip is then a real visual difference rather than a caption.**
+    /// Supinated, the bar runs across the body and you see it end-on, so it
+    /// reads as a stub. Neutral, it lies in the plane of the movement and you
+    /// see the whole dumbbell swinging with the forearm. Session A programmes
+    /// both, back to back, and until now they were the same picture.
+    private func curl(neutralGrip: Bool) -> FigurePose {
+        let shoulder = (0.47, 0.375)
+        let elbow = (0.458, 0.527)
+        // Facing left, so the forearm swings forward and up through about 126°.
+        let hand = swung(about: elbow, radius: Arm.fore, from: 0, to: 2.20, inward: -1)
+        let along = atan2(hand.1 - elbow.1, hand.0 - elbow.0)
+
         return FigurePose(
-            head: (0.5, 0.21),
-            neck: (0.5, 0.32),
-            hip: (0.5, 0.64),
+            head: (0.485, 0.205),
+            neck: (0.478, 0.315),
+            hip: (0.487, 0.645),
             arms: [
-                [(0.44, 0.37), elbow, hand],
-                [(0.56, 0.37), mirrored(elbow), mirrored(hand)],
+                [shoulder, elbow, hand],
             ],
             legs: [
-                [(0.465, 0.66), (0.455, 0.78), (0.450, 0.90)],
-                [(0.535, 0.66), (0.545, 0.78), (0.550, 0.90)],
+                [(0.474, 0.665), (0.468, 0.785), (0.462, 0.905)],
+                [(0.500, 0.665), (0.506, 0.785), (0.512, 0.905)],
             ],
-            dumbbells: [hand, mirrored(hand)]
+            dumbbells: [
+                FigureWeight(
+                    at: hand,
+                    angle: neutralGrip ? along : 0,
+                    foreshortening: neutralGrip ? 1 : 0.26
+                ),
+            ],
+            ground: FigureGround(fromX: 0.30, toX: 0.70, y: 0.912)
         )
     }
 
