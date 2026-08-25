@@ -30,6 +30,7 @@ binding. `ios-port/02-design-brief.md` is the main one.
 | `ios-port/06-data.md` | The storage contract. |
 | `ios-port/07-acceptance.md` | What "done" is checked against. |
 | `ios/Agents/README.md` | How agents hand work to each other here. |
+| `ios/Docs/redesign-plan.md` | **If you are rebuilding the UI:** which skill runs when, and the web→SwiftUI translation table. |
 
 Then pick up a workstream from `ios/Agents/workstreams.md`.
 
@@ -85,37 +86,33 @@ full session of B.** `ios-port/README.md` puts this in the first-session
 checklist for a reason: you cannot design the replacement for something you have
 not used.
 
-## What is already scaffolded
+## Where the port actually is
 
-| Path | What it is | Trust level |
+Eighteen workstreams in. **The Swift compiles, the tests run, and every surface
+in `spec.md` §3 is built and on screen.** An older version of this file said the
+code had never been through a compiler and that there were no screens; both were
+true in W0 and neither has been true for months.
+
+| Path | What it is | State |
 |---|---|---|
-| `ios/Morning.xcodeproj` | The Xcode project. App + unit test target, iOS 26, Swift 6, iPhone, portrait. | Committed. |
-| `ios/Morning/Program.swift` | The program, transcribed to Swift literals per `03-program.md`. **This is now the source of truth**, not the JSON. | Machine-transcribed, never compiled. |
-| `ios/Morning/Model/Schema.swift` | The v1 storage contract from `06-data.md §3`, terse keys and all. | Hand-written, never compiled. |
-| `ios/Morning/Debug/Seeds.swift` | Debug seeder: `-seed six-months`. | Hand-written, never compiled. |
-| `ios/Morning/Resources/Seeds/*.seed.json` | empty / one-session / one-week / six-months / one-year, in the exact web schema. | Generated and checked. |
-| `ios/Morning/Resources/Content/` | `cards.json`, `guide.json` — verbatim. | Copied. |
-| `ios/MorningTests/Acceptance/` | **53 assertions** from `07-acceptance.md`, one test each, all `XCTSkip`. | Generated. |
-| `ios/MorningTests/Fixtures/` | `compiled-steps.json` golden fixture + `program.json`. | Copied. |
-| `ios/Docs/device-checklist.md` | The 10 device checks that cannot be automated. | — |
+| `ios/Morning/Screens/` | Eighteen files. Every surface in `spec.md` §3, including the Live Activity. | Built, shipped, **about to be redesigned.** |
+| `ios/Morning/Program.swift` | The program as Swift literals per `03-program.md`. **The source of truth**, not the JSON. | Compiled and tested. |
+| `ios/Morning/Model/Schema.swift` | The v1 storage contract from `06-data.md §3`. | Compiled and tested. |
+| `ios/Morning/Shaders/` | `Sky.metal` (the workout sky) and `Daybreak.metal` (the completion moment). | Built. Read their headers before touching them. |
+| `ios/MorningWidgets/` | The Live Activity target. | Built. |
+| `ios/MorningTests/Acceptance/` | 68 tests from `07-acceptance.md`. Two still skipped. | Passing. |
+| `ios/Docs/design-system.md` | 655 lines. Every contrast figure measured on rendered frames, not calculated. | Real. Revise it, do not start it. |
+| `ios/Docs/redesign-plan.md` | **How the UI rebuild is run**, phase by phase, on Emil Kowalski's skills. | The method for the next programme. |
+| `ios/Docs/device-checklist.md` | The 10 device checks that cannot be automated. | W11, still blocked on the phone. |
 
-**The Swift in this repo has never been through a compiler.** It was written from
-the spec on Linux, behind an egress allowlist that refuses `swift.org` — and a
-Linux `swiftc` would not have proved much anyway, with no SwiftUI and no iOS SDK.
-Assume syntax slips. The first agent's first job is `./scripts/verify-ios.sh`,
-then fixing everything in `ios/build/verify-report.txt` — and logging that it
-did, in `ios/Agents/00-handoff-log.md`.
+Run `./scripts/verify-ios.sh` first anyway. It never stops at the first failure
+and writes every phase's errors to `ios/build/verify-report.txt`.
 
 ## What is deliberately absent
 
 Not oversights. Do not "fix" these without asking:
 
-- **No screens.** `ScaffoldView` is a placeholder. See rule 1.
-- **No design system yet.** `ios/Docs/design-system.md` is an empty structure to
-  fill *after* a direction is agreed. A palette is not a design system and it is
-  not a direction either.
-- **No widget, Live Activity or HealthKit target.** `05-platform.md §7`: propose,
-  don't assume. Adding them is two targets in Xcode when they are agreed.
+- **No HealthKit.** `05-platform.md §7`: propose, don't assume.
 - **No history import.** `06-data.md`: v1 ships starting at zero. The web app
   keeps the real history for now. What that costs you is that **empty and
   near-empty states are the normal case on day one, not an edge case.**
@@ -124,6 +121,12 @@ Not oversights. Do not "fix" these without asking:
   isolated by default, which is correct for a single-user app with no background
   work. Add `nonisolated` only where the compiler actually asks for it, and never
   reach for `@unchecked Sendable` or `nonisolated(unsafe)` to silence it.
+- **Two things `spec.md` specifies that are built but never rendered.**
+  `Celebration.rays` has no reader, so a plateau looks identical to a personal
+  best; `SetStep.intense` has no reader, where the web build shows a MYO badge.
+  Both were left for the redesign rather than patched into views about to be
+  replaced. See `ios/Docs/redesign-plan.md` R4.
+
 
 ## Traps
 
