@@ -3602,3 +3602,109 @@ it), and the Set screen's sub-label now appears only where it disambiguates
   installed. `.claude/launch.json` is the web dev server only. The iOS loop is
   `xcodebuild` to `ios/build/dd`, `simctl install`, `simctl launch` with flags,
   `simctl io screenshot`, and `ios/Tools/frames.swift` for motion.
+
+---
+
+## 2026-08-24 · W18 — atmosphere in Metal, and figures that keep their bones
+
+**Branch** `ios-port/w18-atmosphere` → [PR #13](https://github.com/EdenTurgeman/morning/pull/13). CI green.
+
+Asked for in four messages over one session: invest in the app's vibe, the
+atmosphere, animation quality and smoothness; review the workout animations for
+accuracy because they look goofy; use Metal better.
+
+### The thing to take from this entry
+
+**Two review hosts did not exist, and that is most of why these faults
+survived.** `-screen sky` puts the six session progresses on one screen;
+`-screen figures` puts all eight movements at both extremes on one screen, and
+`-screen figures -movement "Overhead press"` sweeps one across its travel.
+
+Before them, every figure lived inside a MOVEMENT bay on a set screen you had to
+navigate to, at whatever size that bay happened to be, playing a 3.2-second
+loop. Six movements at two extremes is twelve things to judge and they had never
+once been beside each other. The moment they were, three faults were obvious in
+a single screenshot — including one where **an exercise had been animating as a
+different exercise for the entire life of the port**.
+
+The pattern is the same one this log keeps recording: the fix is almost never
+cleverness, it is making the thing observable.
+
+### The sky
+
+The app had two skies and the wrong one was good. `Daybreak.metal` computed a
+real atmosphere for a 4.4-second moment; the workout — twenty minutes, every
+morning — got eight composited SwiftUI layers. It is one pass now,
+`Shaders/Sky.metal`.
+
+The argument is not mainly speed. Alpha-blended gradients can only add light on
+top of light, which is why the layered sky needed a scrim under the copy to claw
+contrast back. Computing the frame lets the strata be **lit** — dark where
+thick, warm where the low sun is behind them — lets the stars be **occluded** by
+them, and makes haze a function of altitude rather than a gradient somebody
+positioned.
+
+**The palette stays in Swift.** Zenith, middle and horizon arrive as colours.
+`DawnPalette`'s stops are hand-picked and its own header says a formula gave an
+even ramp and not a sunrise. Swift owns the colour, Metal owns the physics.
+
+Runs at 12fps deliberately: nothing in it moves faster than a cloud crossing in
+three minutes, and a full-screen fragment shader at display rate for twenty
+minutes is real battery for drift nobody can perceive. Reduce Motion pauses the
+timeline outright.
+
+**I shipped a pinwheel first** — `sin(angle × 9) × sin(angle × 21)`, a
+symmetric fan of spokes from bottom-centre, the most recognisable way for a sky
+to look fake. `Daybreak.metal`'s header spends a paragraph warning about exactly
+that. They are occlusion now, marched through the same strata.
+
+### The figures
+
+"Goofy" was measurable. Every arm pose authored the elbow by hand beside the
+wrist and interpolated both independently, so **the bones changed length**: the
+forearm grew 42% through a lateral raise, the upper arm lost 86% of itself
+through a floor fly and ended 7pt from the shoulder. Two-bone IK now — the pose
+says where the hand goes, the bones are fixed, the solver places the elbow.
+
+Then, in order, each found by looking at the gallery and then the sweep:
+
+- **"Rear-delt fly" fell through the switch to `.curl`.** Its own figure now.
+- **A curl is not an IK movement** — its elbow does not travel, so solving from
+  the hand made both arms chicken-wing. Elbow pinned, forearm on a fixed radius.
+- **`cgPoint` scaled x by width and y by height**, so the figure stretched with
+  the bay's aspect. Harmless until W15 made the bay flexible.
+- **A fixed bend sign rotates with the arm**, so "outside" at the bottom is
+  "inside" at the top and the press drew a diamond over the head at 60%.
+  `armOutward` picks per frame.
+- **A straight hand path converges the whole way.** A press goes up the sides
+  and in only at the top.
+- **The curls belong side-on.** From the front the forearm rotates in a plane
+  perpendicular to the screen, so the honest projection is foreshortening and
+  this renderer has no depth. From the side the grip becomes a real difference:
+  bar edge-on for a curl, along the forearm for a hammer.
+
+### `FigureAnatomyTests` earned itself twice
+
+Bone lengths constant to within 2% across 21 sampled phases of all eight
+figures, no non-finite or off-canvas joints, every programmed exercise resolving
+to the figure it should.
+
+**It caught two regressions I had already rendered, looked at, and signed off.**
+Clamping the elbow to full extension without clamping the hand left the forearm
+stretching 19% on the press and 31% on the push-up to cover the gap. It also
+caught me splitting `hammerCurl` out without updating its table. This is a
+property a test checks exactly and an eye only squints at.
+
+### Open
+
+- **W11**, the device pass, still blocked on Eden's phone. Frame-rate smoothness
+  cannot be measured meaningfully on a simulator — it does not run at 120Hz and
+  its timing is not representative — so the brief's "no dropped frames during a
+  timer" bar is unverified.
+- **Two things specified and never rendered**, from the W17 audit and written
+  into `spec.md` rather than fixed, because they live in view files a design
+  agent is rewriting: `Celebration.rays` has no reader, so a plateau looks the
+  same as a personal best; and Home has no lifetime line where the web has one.
+- **iPhone 16 Pro only.** Settled 2026-08-23. The SE reasoning already in the
+  layout comments stays because it costs nothing and pays again at accessibility
+  text sizes, but 375x667 is not something to verify against.
