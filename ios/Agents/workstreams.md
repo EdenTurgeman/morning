@@ -1071,3 +1071,112 @@ specified items, across eight areas with no area uncovered.
 120Hz under a running timer, real haptics, airplane mode, legibility at 1.5m in
 a dark room, the screen not sleeping, and music ducking on real hardware. These
 need Eden's phone and are the whole of W11.
+
+## W18 · Atmosphere, motion and the figures — `in progress`
+
+Asked for on 2026-08-24: *"can we try to invest more time in the app's vibe? the
+atmosphere, the animation quality and smoothness?"*, then *"let's also review the
+workout animations for accuracy and improvements so it looks less goofy"*, then
+*"use metal better for animations and stuff like this"*.
+
+### The sky
+
+The app had two skies and the wrong one was good. `Daybreak.metal` computes a
+real atmosphere for a moment that lasts 4.4 seconds; the workout got eight
+composited SwiftUI layers. It is one Metal pass now — `Shaders/Sky.metal`.
+
+The argument is not mainly speed. Alpha-blended gradients can only add light on
+top of light, which is why the layered sky needed a scrim under the copy to claw
+contrast back. Computing the frame lets the strata be **lit** — dark where
+thick, warm where the low sun is behind them — lets the stars be **occluded** by
+them, and makes haze a function of altitude rather than a gradient somebody
+positioned.
+
+**The first version's rays were a pinwheel** and I shipped it to a screenshot
+before noticing. They are occlusion now, marched through the same strata.
+
+### The figures
+
+Eden called them goofy. He was right and it was measurable: every arm pose
+authored the elbow by hand beside the wrist and interpolated both independently,
+so the bones changed length. At the extremes of the five arm movements:
+
+| movement | upper arm | forearm |
+|---|---:|---:|
+| overhead press | −12% | −26% |
+| lateral raise | +14% | **+42%** |
+| floor fly | **−86%** | −13% |
+| bent-over row | +26% | −6% |
+| curl | +3% | +7% |
+
+The floor fly's upper arm ended 7pt from the shoulder. **The figure was made of
+rubber.** Two-bone IK now: the pose says where the hand goes, the bones are a
+fixed length, and the solver works out the only two places the elbow can be.
+
+Three other faults found by finally putting all eight side by side:
+
+- **"Rear-delt fly" fell through the switch to `.curl`** — one of the eight
+  movements in the program had been animating as a different exercise for as
+  long as the port has existed. It has its own figure now.
+- **A curl is not an IK movement.** Its elbow does not travel, so solving from
+  the hand made both arms chicken-wing at the top. Authored the other way round:
+  elbow pinned, forearm swinging on a fixed radius.
+- **`cgPoint` scaled x by width and y by height**, so the figure stretched with
+  the bay's aspect — survivable when the bay was a fixed 178pt, but W15 made its
+  height flexible, so the same body was a different shape on a four-cue screen
+  than on a two-cue one. Both axes scale by height now.
+
+`FigureAnatomyTests` guards all of it: bone lengths constant to within 2% across
+21 sampled phases of all seven figures, no non-finite or off-canvas joints, and
+every exercise in the program resolving to the figure it should. **It caught two
+regressions I had already looked at and signed off** — clamping the elbow to
+full extension without clamping the hand left the forearm stretching 19% and 31%
+to cover the gap.
+
+### Still open
+
+- `-screen figures` and `-screen sky` are new review hosts. Neither existed,
+  which is most of why these faults survived: nothing had ever put the six
+  figures, or the sky's six progresses, on one screen.
+- Frame-rate smoothness cannot be measured meaningfully on the simulator; the
+  120Hz claim in the brief needs W11 and a real phone.
+
+### Round two — the overhead press and the hammer curl
+
+Eden, after seeing round one: *"The overhead press animation is terrible, let's
+re design it and the hammer curl aswell."*
+
+**The press** had the hand 0.09 from the shoulder on an arm 0.29 long at the
+bottom — folded to under a third — so the solver put the elbows above the
+wrists, the bells sat through the head, and the whole movement rendered as a
+crushed "M" that barely travelled. Rebuilt from the geometry a dumbbell press
+actually has: upper arm down and out, forearm back up and out, bells at ear
+height and clear of the skull, which puts the hand 0.177 from the shoulder and
+the elbow at a right angle.
+
+Two things that only showed up in a **phase sweep**, which is a new review mode
+(`-screen figures -movement "Overhead press"`) and the reason both were found:
+
+- **A fixed bend sign rotates with the arm.** "Outside" at the bottom becomes
+  "inside" by the top, so the elbows swung in and the arms drew a diamond over
+  the head at 60%. `armOutward` picks the solution further from the midline per
+  frame instead — the solver already computes both.
+- **A straight hand path converges the whole way.** A press goes UP the sides
+  and only comes IN at the top, so the horizontal travel is `pow(phase, 2.2)`
+  against a linear rise. Also widened the lockout: at 0.448 the two bells were
+  0.104 apart and each is 0.104 across, so they met and the top of the press was
+  one solid bar.
+
+**The curl and hammer curl are drawn from the side now**, which is what the web
+build has always done and its own comment explains: from the front a curl's
+forearm rotates in a plane perpendicular to the screen, so the honest projection
+is foreshortening and this renderer has no depth. Swinging across the body
+instead — the first version — drew a cross-body curl with both bells out
+horizontal at waist height.
+
+From the side the grip becomes a **real** difference rather than a caption.
+Supinated, the bar runs across the body and you see it end-on, so it reads as a
+stub; neutral, it lies in the plane of the movement and the whole dumbbell
+swings with the forearm. `FigureWeight` gained an angle and a foreshortening for
+this. Session A programmes both curls back to back and until now they were the
+same picture.

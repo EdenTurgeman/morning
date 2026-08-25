@@ -42,6 +42,10 @@ struct MorningApp: App {
                         reps: Self.value(after: "-reps").flatMap(Int.init),
                         step: Self.value(after: "-step").flatMap(Int.init)
                     )
+                } else if Self.requestedScreen == "figures" {
+                    FigureReviewHost()
+                } else if Self.requestedScreen == "sky" {
+                    MetalSkyReviewHost()
                 } else if Self.requestedScreen == "metal" {
                     MetalDaybreakReviewHost()
                 } else if Self.requestedScreen == "live-activity" {
