@@ -19,8 +19,7 @@ Three documents, three jobs:
 ## 1. Can the skills be used? Answered by testing, not by assuming
 
 **Installed.** All twelve, at `~/.claude/skills/`, cloned from
-`github.com/emilkowalski/skills`. They sit beside the `frontend-design` skill
-that was already there.
+`github.com/emilkowalski/skills`.
 
 They are **user-level, not in this repo.** A fresh clone on another machine does
 not have them. To reinstall:
@@ -68,7 +67,7 @@ Triaged honestly:
 |---|---|
 | **`emil-design-eng`** | The animation decision framework is platform-neutral. Frequency gate, purpose test, asymmetric timing, "when unsure, delete it". The craft bar for the whole programme. |
 | **`apple-design`** | The only skill in the set native to this platform. Materials and depth (§12), typography (§15), the eight principles (§16), and a spring model SwiftUI implements *directly*. Highest-value skill in the repo for this app. |
-| **`animation-vocabulary`** | Pure language. 100% transferable, and the cheapest win available: it is how Eden says exactly what he wants instead of "it looks goofy". |
+| **`animation-vocabulary`** | Pure language, 100% transferable. Two jobs: it is how Eden says exactly what he wants instead of "it looks goofy", and it is the naming discipline for the agent — every motion in the rebuild gets called by its right name in the handoff log, so the next reader knows what was built without running it. |
 | **`write-swift`** | Directly applicable. Note it already agrees with this project — its "stay single-threaded until profiling says otherwise" is `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, which is what the project already sets. |
 
 ### Use the process, translate the values
@@ -80,7 +79,7 @@ Triaged honestly:
 | **`find-animation-opportunities`** | The four-question Gate, and the required "rejected candidates" section that keeps it from becoming a wishlist | The grep recipes and CSS values |
 | **`improve-animations`** | Recon → audit → vet → self-contained plans. The eight audit categories | The `--ease-*` token values |
 | **`review-animations`** | The ten non-negotiables, escalation triggers, the remedial hierarchy, Block/Approve | Roughly half the escalation triggers are CSS-only. See §4. |
-| **`animate-expo`** | Read §8 haptics and the device-testing discipline. It is the closest thing in the set to a phone. | Reanimated, Gesture Handler, Expo Router |
+| **`animate-expo`** | **The closest skill in the set to this app** — it is the only one written for a phone. Its whole decision spine transfers: press instead of hover (§7), haptics (§8), 120fps (its own section), reduced motion (§9), and "not in the simulator, not on a flagship in dev mode". Read it beside `animate`, not instead of it. | Reanimated, Gesture Handler, Expo Router |
 
 ### Skip
 
@@ -89,16 +88,33 @@ Triaged honestly:
 | **`ask-sonner`** | A React toast library. Nothing in this app is a toast, and there is no React in `ios/`. |
 | **`pick-ui-library`** | Curated npm packages. This app has zero third-party dependencies and should keep it that way. |
 
-### Already installed, worth one pass
+### Coverage — ten of the twelve
 
-**`frontend-design`** (Anthropic's, already at `~/.claude/skills/`) is written for
-web pages — "the hero is a thesis", type pairing, page-load sequences. Its
-*process* is the useful half and it transfers: brainstorm a compact token system
-(colour, type, layout, signature), then **critique it against the three looks AI
-design defaults to** before writing any code. Run it once, in R2, for the
-anti-generic pressure. Ignore its page-layout advice entirely.
+Stated plainly so it is not misread as a shortlist:
 
----
+| Skill | Where it runs |
+|---|---|
+| `emil-design-eng` | R1, and as the standing craft bar through R4–R7 |
+| `apple-design` | R2 (foundation), R4 (values) |
+| `prototype` | R3 |
+| `animate` | R4 |
+| `animate-expo` | R4, beside `animate` |
+| `find-animation-opportunities` | R5 |
+| `improve-animations` | R6 |
+| `review-animations` | R7 |
+| `write-swift` | R4 and R8 |
+| `animation-vocabulary` | Throughout, by both Eden and the agent |
+| `ask-sonner` | **Not used.** React toast library. |
+| `pick-ui-library` | **Not used.** npm packages; this app has zero dependencies. |
+
+**No non-Emil design skill is used.** An earlier draft of this plan put
+Anthropic's `frontend-design` into R2 for its anti-generic critique step. Eden
+removed it, and it was not needed: the same pressure already exists inside the
+set. `prototype`'s operating posture enforces it at the point where it matters
+("three tints of the same idea waste the picker" — every variant must sit on a
+different named axis), and `apple-design` §16 Craft states the bar directly —
+nothing is random, every spacing, timing and alignment value is a deliberate
+choice you can defend.
 
 ## 3. Web → SwiftUI, the translation table
 
@@ -332,13 +348,11 @@ doctrine states explicitly which surfaces get *no* motion.
 
 ---
 
-### R2 · The foundation — `apple-design`, then `frontend-design`
+### R2 · The foundation — `apple-design`
 
 The visual system: materials and depth, typography, colour, the spring
-vocabulary. Two skills, in this order, because they pull in opposite and
-complementary directions.
-
-**`apple-design` first**, for platform correctness:
+vocabulary. One skill, and it is the right one — `apple-design` is the only
+skill in the set native to this platform.
 
 - §12 materials — the app currently draws its own scrims and gradients over the
   sky. Real `Material` may do this better, and it is the one place the app has
@@ -353,10 +367,13 @@ complementary directions.
 - §16 the eight principles — the names to reason with for the rest of the
   programme.
 
-**`frontend-design` second**, for one thing only: its critique step. Take the
-token system and ask whether any part of it is the generic default rather than a
-choice made for *this* brief. Ignore everything it says about page layout and
-heroes.
+Then critique the result before building on it, using `apple-design` §16 Craft
+as the test: **every value must be one you can defend.** Walk the token system
+and, for each colour, size, tracking value and spring, say why it is that number
+and not the neighbouring one. Anything answered with "it looked about right" is
+a default wearing a decision's clothes. This is the anti-generic pass, and it
+belongs here rather than at R3, because a generic token system produces three
+generic directions.
 
 **Output:** an updated `ios/Docs/design-system.md` (655 lines today, already
 real — this revises it, it does not replace it), plus `DesignTokens.swift` and
@@ -430,9 +447,13 @@ that is currently missing:
   personal best
 - `SetStep.intense` has no reader (the web build shows a MYO badge)
 
-**Read `animate-expo` §8 before doing haptics.** It is the only haptics guidance
-in the set, and `apple-design` §13 sets the bar: the visual, the sound and the
-haptic must fire on the *same frame*, or the illusion breaks.
+**Run `animate-expo` alongside `animate`, not instead of it.** `animate` is
+written for the browser; `animate-expo` is written for a phone, and its
+decision spine is the one that fits here — press rather than hover, haptics,
+120fps, and its refusal to accept "it was smooth in the simulator". Take the
+sequence from `animate` and the *concerns* from `animate-expo`. On haptics it is
+the only guidance in the set, and `apple-design` §13 sets the bar: the visual,
+the sound and the haptic must fire on the *same frame*, or the illusion breaks.
 
 **Every motion change gets filmed.** `xcrun simctl io recordVideo`, then
 `ios/Tools/frames.swift` to pull exact frames. See the trap in §3.
@@ -561,13 +582,17 @@ starts from a lie.
 |---|---|---|---|---|
 | R0 | none | Brief, inventory, `scripts/shoot.sh` | no | All eleven surfaces render |
 | R1 | `emil-design-eng` | Motion doctrine | no | Every surface has a verdict |
-| R2 | `apple-design`, `frontend-design` | Design system, tokens | tokens | Contrast re-measured, floor 6.6:1 |
+| R2 | `apple-design` | Design system, tokens | tokens | Contrast re-measured, floor 6.6:1 |
 | R3 | `prototype` | Three Set-screen directions | no | **Eden picks** |
-| R4 | `animate`, `apple-design`, `write-swift` | The rebuilt app | yes | `CLAUDE.md` definition of done |
+| R4 | `animate`, `animate-expo`, `apple-design`, `write-swift` | The rebuilt app | yes | `CLAUDE.md` definition of done |
 | R5 | `find-animation-opportunities` | Opportunities + rejections | no | Rejections present |
 | R6 | `improve-animations` | `plans/` | no | Plans self-contained |
 | R7 | `review-animations` | Verdict | no | **Approve** |
 | R8 | `write-swift` | Code health | yes | `verify-ios.sh` clean |
 
-Two skills skipped, with reasons: `ask-sonner`, `pick-ui-library`.
+Ten of Emil's twelve skills run. Two are skipped and both for the same reason —
+`ask-sonner` is a React toast library and `pick-ui-library` picks npm packages,
+and there is no React and there are no dependencies. No skill from outside the
+set is used.
+
 One hard gate: **R3**. Nothing visual proceeds until Eden has picked a direction.
