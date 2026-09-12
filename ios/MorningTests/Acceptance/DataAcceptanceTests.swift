@@ -203,7 +203,72 @@ final class DataAcceptanceTests: XCTestCase {
             "export is not a JSON object"
         )
 
+        // `studyAnswers` is absent here because this fixture has none, and an
+        // absent key is the contract: every web export and every backup written
+        // before the study log existed has to keep round-tripping unchanged.
         XCTAssertEqual(Set(parsed.keys), ["v", "history", "lastBackup", "loads"])
+
+        let withStudy = try store.exportJSON(
+            AppData(
+                v: 1,
+                history: [],
+                studyAnswers: [StudyAnswer(card: "w-madeira-estufagem", ts: 1_756_000_000_000, picked: 2, right: false)]
+            )
+        )
+        let studyParsed = try XCTUnwrap(JSONSerialization.jsonObject(with: withStudy) as? [String: Any])
+        let logged = try XCTUnwrap(studyParsed["studyAnswers"] as? [[String: Any]])
+        // No `pickedText` on this one, and that is the contract: an answer from
+        // before the wording was recorded exports without it, and imports as a
+        // miss the app cannot name rather than one it guesses at.
+        XCTAssertEqual(Set(logged[0].keys), ["card", "ts", "picked", "right"])
+        XCTAssertEqual(
+            logged[0]["picked"] as? Int,
+            2,
+            "WHICH option he chose is the field that cannot be reconstructed later"
+        )
+
+        // THE WORDING RIDES OUT WITH THE ANSWER when it was recorded. Without
+        // it, "you keep answering X" is a sentence about an index into a deck
+        // content agents rewrite, which is a sentence that can become false.
+        let withWording = try store.exportJSON(
+            AppData(
+                v: 1,
+                history: [],
+                studyAnswers: [
+                    StudyAnswer(
+                        card: "w-cabernet-travels",
+                        ts: 1_756_000_000_000,
+                        picked: 0,
+                        right: false,
+                        pickedText: "It ripens early, so it finishes in almost any climate"
+                    ),
+                ]
+            )
+        )
+        let wordingParsed = try XCTUnwrap(JSONSerialization.jsonObject(with: withWording) as? [String: Any])
+        let named = try XCTUnwrap(wordingParsed["studyAnswers"] as? [[String: Any]])
+        XCTAssertEqual(Set(named[0].keys), ["card", "ts", "picked", "right", "pickedText"])
+        XCTAssertEqual(
+            named[0]["pickedText"] as? String,
+            "It ripens early, so it finishes in almost any climate"
+        )
+
+        // AND THE SIGHTINGS RIDE OUT WITH THEM. Eden: *"all that needs to be
+        // saved in memory so i can export."* Without this half, a restore hands
+        // the scheduler a deck it believes has never been shown.
+        let withSightings = try store.exportJSON(
+            AppData(
+                v: 1,
+                history: [],
+                studySightings: [
+                    StudySighting(card: "w-madeira-estufagem", ts: 1_756_000_000_000, opened: true),
+                ]
+            )
+        )
+        let sightingParsed = try XCTUnwrap(JSONSerialization.jsonObject(with: withSightings) as? [String: Any])
+        let seen = try XCTUnwrap(sightingParsed["studySightings"] as? [[String: Any]])
+        XCTAssertEqual(Set(seen[0].keys), ["card", "ts", "opened"])
+        XCTAssertEqual(seen[0]["opened"] as? Bool, true)
         XCTAssertEqual(parsed["v"] as? Int, 1)
 
         let history = try XCTUnwrap(parsed["history"] as? [[String: Any]])
@@ -232,17 +297,101 @@ final class DataAcceptanceTests: XCTestCase {
         }
     }
 
-    /// PHASE 2, not v1: importing the real backup reproduces, exactly: total
-    /// tonnage, total reps, session count, current streak, longest run, and the
-    /// year grid.
-    func testPhase2ImportingTheRealBackupReproducesEveryDerivedNumber() throws {
-        throw XCTSkip("Phase 2. v1 ships starting at zero — 06-data.md §6.")
+    /// Importing a WEB-APP export reproduces every field and every derived
+    /// number.
+    ///
+    /// **Un-skipped 2026-08-30.** These two were `XCTSkip`ped as "Phase 2. v1
+    /// ships starting at zero — 06-data.md §6", which was a real product
+    /// decision until Eden said *"I just don't wanna lose my progress."* The
+    /// import path already existed (`BackupScreen.handleImport`); what did not
+    /// exist was any proof it survives a file the WEB app wrote.
+    ///
+    /// The JSON below is hand-written in the web build's exact wire shape
+    /// (`src/lib/storage.ts`) rather than produced by this app, because a
+    /// round-trip through our own encoder would prove only that we can read
+    /// ourselves. It deliberately includes the three things most likely to
+    /// break an import: a record with **no `kg`** (logged before the weight was
+    /// adjustable), a **working-weight change** partway through, and a
+    /// bodyweight movement.
+    func testImportingAWebAppExportReproducesEveryDerivedNumber() throws {
+        let webExport = """
+        {
+          "v": 1,
+          "lastBackup": "2026-08-20T05:58:00.000Z",
+          "loads": { "A": 7.5, "B": 6.25 },
+          "history": [
+            { "d": "2026-08-10", "s": "A", "min": 16, "reps": 23,
+              "ts": 1786000000000, "log": { "1.0.0": 12, "2.0.0": 11 } },
+            { "d": "2026-08-12", "s": "A", "min": 17, "reps": 25, "kg": 7.5,
+              "ts": 1786200000000, "log": { "1.0.0": 13, "2.0.0": 12 } },
+            { "d": "2026-08-14", "s": "A", "min": 16, "reps": 21, "kg": 10,
+              "ts": 1786400000000, "log": { "1.0.0": 11, "2.0.0": 10 } }
+          ]
+        }
+        """
+
+        // The SAME call `BackupScreen.handleImport` makes. If this decoder ever
+        // diverges from that one, this test stops meaning anything.
+        let decoded = try JSONDecoder().decode(AppData.self, from: Data(webExport.utf8))
+
+        XCTAssertEqual(decoded.v, 1)
+        XCTAssertEqual(decoded.history.count, 3, "a record was dropped on import")
+        XCTAssertEqual(decoded.lastBackup, "2026-08-20T05:58:00.000Z")
+        XCTAssertEqual(decoded.loads?["A"], 7.5)
+        XCTAssertEqual(decoded.loads?["B"], 6.25)
+
+        // Field-for-field on the terse wire names.
+        let first = try XCTUnwrap(decoded.history.first)
+        XCTAssertEqual(first.date, "2026-08-10")
+        XCTAssertEqual(first.sessionKey, "A")
+        XCTAssertEqual(first.minutes, 16)
+        XCTAssertEqual(first.reps, 23)
+        XCTAssertEqual(first.timestamp, 1_786_000_000_000)
+        XCTAssertEqual(first.log["1.0.0"], 12)
+
+        // A MISSING `kg` STAYS MISSING. CLAUDE.md: absence means "logged before
+        // the weight was adjustable" and backfilling it retroactively rewrites
+        // tonnage. This is the assertion that catches a well-meaning default.
+        XCTAssertNil(first.kg, "an absent kg was backfilled on import")
+        XCTAssertEqual(decoded.history[1].kg, 7.5)
+        XCTAssertEqual(decoded.history[2].kg, 10)
+
+        // Derived numbers computed from the imported history.
+        let ledger = LedgerMath.compute(decoded.history)
+        XCTAssertEqual(ledger.sessions, 3)
+        XCTAssertEqual(ledger.reps, 23 + 25 + 21)
+        XCTAssertEqual(ledger.minutes, 16 + 17 + 16)
+        XCTAssertEqual(ledger.since, "2026-08-10", "the first session's date drives 'since'")
     }
 
-    /// PHASE 2, not v1: malformed records are skipped; the rest of the import
-    /// succeeds.
-    func testPhase2MalformedRecordsAreSkippedAndTheRestSucceeds() throws {
-        throw XCTSkip("Phase 2. v1 ships starting at zero — 06-data.md §6.")
+    /// One malformed record is skipped and the rest of the file still loads.
+    ///
+    /// `AppData.init(from:)` is lenient by design and `LenientRecord` is what
+    /// makes it so. The failure this guards against is the strict one: a single
+    /// bad element throwing and taking an entire backup with it, which for a
+    /// user restoring years of history is the difference between losing one
+    /// session and losing all of them.
+    func testMalformedRecordsAreSkippedAndTheRestSucceeds() throws {
+        let webExport = """
+        {
+          "v": 1,
+          "lastBackup": null,
+          "history": [
+            { "d": "2026-08-10", "s": "A", "min": 16, "reps": 23, "kg": 7.5,
+              "ts": 1786000000000, "log": { "1.0.0": 23 } },
+            { "d": "2026-08-11", "s": "B", "reps": "not a number",
+              "ts": 1786100000000, "log": { "1.0.0": 9 } },
+            { "d": "2026-08-12", "s": "B", "min": 19, "reps": 18, "kg": 6.25,
+              "ts": 1786200000000, "log": { "1.0.0": 18 } }
+          ]
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(AppData.self, from: Data(webExport.utf8))
+
+        XCTAssertEqual(decoded.history.count, 2, "the good records did not survive a bad one")
+        XCTAssertEqual(decoded.history.map(\.timestamp), [1_786_000_000_000, 1_786_200_000_000])
+        XCTAssertNil(decoded.lastBackup, "an explicit JSON null must decode to nil")
     }
 
     // MARK: - Helpers

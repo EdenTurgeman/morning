@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Keeps Morning signed on a free Apple ID.
+
+  A free provisioning profile lasts seven days. This runs twice a day, does
+  nothing at all when the phone is not on the network, and re-signs whenever it
+  is — so the seven-day wall is something a launchd job walks into instead of
+  Eden. See scripts/refresh-device.sh.
+
+  Install:
+      cp scripts/refresh-device.plist ~/Library/LaunchAgents/com.edenturgeman.morning.refresh.plist
+      launchctl load ~/Library/LaunchAgents/com.edenturgeman.morning.refresh.plist
+
+  Check on it:
+      launchctl list | grep morning.refresh
+      tail -f ios/build/refresh.log
+
+  Stop it:
+      launchctl unload ~/Library/LaunchAgents/com.edenturgeman.morning.refresh.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.edenturgeman.morning.refresh</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/eden.turgeman/Dev/morning/scripts/refresh-device.sh</string>
+        <string>--quiet-absent</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/eden.turgeman/Dev/morning</string>
+
+    <!-- Twice a day rather than weekly. The window is seven days, so two
+         chances a day means the phone has to be away for a fortnight of
+         attempts before the app ever expires. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Hour</key><integer>21</integer><key>Minute</key><integer>0</integer></dict>
+    </array>
+
+    <!-- Never at 6:10am. A build kicking off while he is mid-session is the one
+         time this must not run. -->
+
+    <key>StandardOutPath</key>
+    <string>/Users/eden.turgeman/Dev/morning/ios/build/refresh.launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/eden.turgeman/Dev/morning/ios/build/refresh.launchd.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

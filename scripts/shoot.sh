@@ -109,7 +109,6 @@ surface_args() {
     # Review hosts. Not surfaces — instruments.
     figures)       ARGS=(-screen figures) ;;
     sky)           ARGS=(-screen sky) ;;
-    metal)         ARGS=(-screen metal) ;;
     lab)           ARGS=(-screen lab) ;;
     *)             ARGS=(-screen "$1") ;;
   esac
@@ -132,7 +131,7 @@ ALL=(home warmup set rest rest-card rest-myo daybreak summary history ledger gui
 
 # --- arguments ---------------------------------------------------------------
 [[ $# -ge 1 ]] || die "usage: shoot.sh <target|all> [--out NAME] [--delay SEC] [app args...]
-targets: ${ALL[*]} figures sky metal lab"
+targets: ${ALL[*]} figures sky lab"
 
 TARGET="$1"; shift
 

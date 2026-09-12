@@ -2,9 +2,22 @@
 
 ## Scope for v1
 
-**The app ships starting at zero.** Importing the existing web history is a
-follow-up, not a launch requirement — do not build the import flow, the document
-picker, or the migration UI in the first pass.
+**The app ships starting at zero**, and importing the existing web history was
+originally a follow-up rather than a launch requirement.
+
+> **CHANGED 2026-08-30 — import is in scope and it is built.** Eden: *"i wanna
+> make sure we can import all my progress from the prev web app… I just don't
+> wanna loose my progress."* That is the whole reason the deferral existed, so
+> the deferral is over.
+>
+> `BackupScreen` has the document picker, the decode, the confirmation and the
+> restore. `AppData.init(from:)` reads the web build's wire shape directly, and
+> the two acceptance tests that used to `XCTSkip` on "Phase 2" now run against a
+> hand-written **web-format** export. The suite has **zero skipped tests** for
+> the first time.
+>
+> A fresh install still starts at zero — that has not changed, and empty is
+> still the normal case on day one.
 
 One thing carries over from that decision though:
 
@@ -148,9 +161,9 @@ nothing. This one **is** required in v1.
 
 ---
 
-## 6. Later: importing the web history
+## 6. Importing the web history — BUILT
 
-Not v1. Recorded here so the design does not close the door on it.
+Was "later, not v1". Shipped 2026-08-30; see the note in Scope above.
 
 There is no shared storage between a web app and a native app, so the handoff is
 a file. The user taps **Back up now** in the web app, which produces JSON through
@@ -158,11 +171,23 @@ the share sheet; the native app accepts it via a document picker or by
 registering for `.json`, validates, shows the session count and resulting
 lifetime totals, confirms, and writes.
 
-When that lands, the acceptance check is that the derived numbers match what the
-web app's Ledger screen shows on the same device: tonnage, total reps, session
-count, current streak, longest run, and the year grid. Those five numbers are the
-test that the whole import is correct.
+The acceptance check is that the derived numbers match what the web app's Ledger
+screen shows on the same device: tonnage, total reps, session count, current
+streak, longest run, and the year grid.
 
-Until then the two apps run side by side with separate histories, which is fine —
-the user is going to run both for a couple of weeks anyway to decide whether the
-native one wins.
+**Covered in code, with one honest gap.**
+`testImportingAWebAppExportReproducesEveryDerivedNumber` decodes a web-shaped
+export through the exact call `handleImport` makes and asserts sessions, reps,
+minutes and `since`, plus that an absent `kg` **stays absent** — backfilling it
+would retroactively rewrite tonnage.
+`testMalformedRecordsAreSkippedAndTheRestSucceeds` proves one bad element does
+not take the whole file with it, which for a multi-year history is the
+difference between losing one session and losing all of them.
+
+**The gap: no test has ever run against Eden's REAL export.** The fixtures are
+faithful to `src/lib/storage.ts` but they are written by us. Comparing against
+the web Ledger's own on-screen figures is still a manual check and still the
+only thing that fully closes this.
+
+The two apps can still run side by side with separate histories while the native
+one is being judged; import is now available whenever he wants to move across.

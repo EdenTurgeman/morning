@@ -92,8 +92,11 @@ in §3–§14 and feels wrong has failed.
 The comparison set is Things 3, Flighty, Halide, Oura. Delight comes from craft
 and responsiveness, never from cartoon reward.
 
-**Not gamified, and it must never become gamified.** No points, no badges, no
-levels, no XP, no mascot, no streak-freeze economy, no "Great job!". Every
+**No reward economy.** No points, no badges, no levels, no XP, no mascot, no
+streak-freeze economy, no "Great job!". (This read "not gamified, and it must
+never become gamified" until 2026-09-09, when Eden asked the study deck to
+remember what he has seen and bring back what he gets wrong. That is knowledge
+state, and it is now built; nothing about it is earned or lost.) Every
 headline states something **true and specific** — "Your previous best on A was
 148", "Third A at the same total", "Not one set matched last time". That is what
 makes a moment land the twentieth time; a generic congratulation is worth

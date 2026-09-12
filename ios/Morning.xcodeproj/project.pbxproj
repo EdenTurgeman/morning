@@ -7,13 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		314CD81D40F13523E8CF4B54 /* RealBackupImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E0D57899F7E74FC828B0C7 /* RealBackupImportTests.swift */; };
+		AC357DAF0B764E917683CA0F /* PrototypeSetVariants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4412C8D4441FBD78C43E40C /* PrototypeSetVariants.swift */; };
+		AC357DAF0B764E917683CB01 /* PrototypeR4Worlds.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4412C8D4441FBD78C43E501 /* PrototypeR4Worlds.swift */; };
+		AC357DAF0B764E917683CB02 /* PaperTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4412C8D4441FBD78C43E502 /* PaperTokens.swift */; };
+		AC357DAF0B764E917683CB03 /* PaperSunrise.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4412C8D4441FBD78C43E503 /* PaperSunrise.swift */; };
 		CC4AE52299EC6A721181C56C /* FigureAnatomyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48D5D9359C7DC6C39FAD9E0 /* FigureAnatomyTests.swift */; };
 		499AED288F159F6DA0B28340 /* FigureReviewHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D1AB26F1BE7115D937F109 /* FigureReviewHost.swift */; };
 		680E8993B223510149110216 /* MetalSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9BDC0A5625606FFCF3E40B /* MetalSky.swift */; };
 		EB88854B1AA248535A4A88BB /* Sky.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3AA0D9AB1EB9A7965A335B02 /* Sky.metal */; };
 		751E5C69EC0433CFD7D7720C /* CountdownRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */; };
-		67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */; };
-		8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */ = {isa = PBXBuildFile; fileRef = F0102D8606AEAE1192831B3F /* Daybreak.metal */; };
 		3573D091CD4CB72641B11E28 /* AppActionsAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */; };
 		B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C34B443B09E40AF92143EAA /* AppModel.swift */; };
 		8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9520A59BDFA835728DA588D0 /* RestActivityViews.swift */; };
@@ -26,6 +29,7 @@
 		48E7F30F07F7F38E63E0C55A /* WarmupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */; };
 		CCF825DDC6F35B071354A4E3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6A732CF5554EC40FA5747E /* GuideScreen.swift */; };
 		E7611D0998871513EC10B8C9 /* LedgerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF661806566B13880E59A82 /* LedgerScreen.swift */; };
+		31623F3FD4EFCBAD980550CF /* StudyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD859C48708C6E05C241B352 /* StudyScreen.swift */; };
 		1F8525BB17B2655EAB943516 /* HistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */; };
 		9DF5540C13526E598B2DE70D /* SummaryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A834BB58E44D87754375E381 /* SummaryScreen.swift */; };
 		6B425B2FCF0269E84AC2B720 /* Daybreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4EDC5137F9FAB91B6964C /* Daybreak.swift */; };
@@ -36,9 +40,14 @@
 		3AE499B31E48ADD989449B5D /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */; };
 		600EEC908B0CB5EE23F8074A /* Week.swift in Sources */ = {isa = PBXBuildFile; fileRef = E070EE3FA0F72F5CC9BC3DEB /* Week.swift */; };
 		88E70088BB8FFC282137A2FD /* RestScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */; };
+		4F897727023A47943EC9E7CA /* EndSessionConfirm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3755EE1BE090D9B7D7DF671E /* EndSessionConfirm.swift */; };
 		21C8E85EF7883D0892480846 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56359319D3EF2A90354C8A3 /* Audio.swift */; };
 		E872A9E953257A1010305C73 /* DuckWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */; };
 		F931E872C9CD5A79F428A21F /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB45F7318157028E123837CC /* Deck.swift */; };
+		9B72EFBE1B70244B08CEF835 /* StudyPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 936B4B3AC8C0A63BF0E15965 /* StudyPlan.swift */; };
+		F8B3DA70C1E690CAB44FFF53 /* StudyReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE282DB2580BC87A2BFFA3C /* StudyReport.swift */; };
+		085A32B831410D721998A01D /* AbandonNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = A978A6FC8B9C0BB51E538590 /* AbandonNote.swift */; };
+		F2E078CD2FBB626DC76467D1 /* FirstRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF09244AA5B8F62D820B70EA /* FirstRecord.swift */; };
 		61246B97184D35D802FC0D9E /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 896971FECE671753F440F58F /* Cards.swift */; };
 		2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */; };
 		B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */; };
@@ -60,6 +69,7 @@
 		4F190151524578034B457F0C /* cards.json in Resources */ = {isa = PBXBuildFile; fileRef = 9B99F4D0685122FC0B3DE761 /* cards.json */; };
 		625B26B51E50A993E82173D1 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CB16627879A20064744804 /* Schema.swift */; };
 		6C9BC7C08B64EBF2BD76BD5B /* StudyDeckAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F9B4FD90B30EACE10185C13 /* StudyDeckAcceptanceTests.swift */; };
+		F57261253B3C91DEE89BAB5D /* StudyScheduleAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFAC284352409FE478B6626 /* StudyScheduleAcceptanceTests.swift */; };
 		7577405680D7386411BCF700 /* GoldenSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB729A2E1D11FEE4A5E626A1 /* GoldenSteps.swift */; };
 		81D6E43879143CC1B837A1A4 /* program.json in Resources */ = {isa = PBXBuildFile; fileRef = 9193B31768BB3671C62B0804 /* program.json */; };
 		83FD0DBA9D90BF5A1CC04621 /* SessionLifecycleAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A39B803CD8EB4E0B97FE1F /* SessionLifecycleAcceptanceTests.swift */; };
@@ -125,13 +135,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		03E0D57899F7E74FC828B0C7 /* RealBackupImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealBackupImportTests.swift; sourceTree = "<group>"; };
+		F4412C8D4441FBD78C43E40C /* PrototypeSetVariants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeSetVariants.swift; sourceTree = "<group>"; };
+		F4412C8D4441FBD78C43E501 /* PrototypeR4Worlds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeR4Worlds.swift; sourceTree = "<group>"; };
+		F4412C8D4441FBD78C43E502 /* PaperTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperTokens.swift; sourceTree = "<group>"; };
+		F4412C8D4441FBD78C43E503 /* PaperSunrise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens/PaperSunrise.swift; sourceTree = "<group>"; };
 		E48D5D9359C7DC6C39FAD9E0 /* FigureAnatomyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigureAnatomyTests.swift; sourceTree = "<group>"; };
 		39D1AB26F1BE7115D937F109 /* FigureReviewHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigureReviewHost.swift; sourceTree = "<group>"; };
 		2A9BDC0A5625606FFCF3E40B /* MetalSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalSky.swift; sourceTree = "<group>"; };
 		3AA0D9AB1EB9A7965A335B02 /* Sky.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Sky.metal; sourceTree = "<group>"; };
 		A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownRing.swift; sourceTree = "<group>"; };
-		8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalDaybreakSky.swift; sourceTree = "<group>"; };
-		F0102D8606AEAE1192831B3F /* Daybreak.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Daybreak.metal; sourceTree = "<group>"; };
 		FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActionsAcceptanceTests.swift; sourceTree = "<group>"; };
 		9C34B443B09E40AF92143EAA /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		9520A59BDFA835728DA588D0 /* RestActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestActivityViews.swift; sourceTree = "<group>"; };
@@ -143,6 +156,7 @@
 		21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarmupScreen.swift; sourceTree = "<group>"; };
 		4E6A732CF5554EC40FA5747E /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
 		BDF661806566B13880E59A82 /* LedgerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerScreen.swift; sourceTree = "<group>"; };
+		FD859C48708C6E05C241B352 /* StudyScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyScreen.swift; sourceTree = "<group>"; };
 		BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryScreen.swift; sourceTree = "<group>"; };
 		A834BB58E44D87754375E381 /* SummaryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScreen.swift; sourceTree = "<group>"; };
 		12F4EDC5137F9FAB91B6964C /* Daybreak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Daybreak.swift; sourceTree = "<group>"; };
@@ -153,9 +167,14 @@
 		AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		E070EE3FA0F72F5CC9BC3DEB /* Week.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Week.swift; sourceTree = "<group>"; };
 		A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestScreen.swift; sourceTree = "<group>"; };
+		3755EE1BE090D9B7D7DF671E /* EndSessionConfirm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndSessionConfirm.swift; sourceTree = "<group>"; };
 		B56359319D3EF2A90354C8A3 /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
 		E10C55791AFC8D6B9286872A /* DuckWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckWindowTests.swift; sourceTree = "<group>"; };
 		AB45F7318157028E123837CC /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		936B4B3AC8C0A63BF0E15965 /* StudyPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyPlan.swift; sourceTree = "<group>"; };
+		4AE282DB2580BC87A2BFFA3C /* StudyReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyReport.swift; sourceTree = "<group>"; };
+		A978A6FC8B9C0BB51E538590 /* AbandonNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbandonNote.swift; sourceTree = "<group>"; };
+		FF09244AA5B8F62D820B70EA /* FirstRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstRecord.swift; sourceTree = "<group>"; };
 		896971FECE671753F440F58F /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
 		7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHost.swift; sourceTree = "<group>"; };
 		8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetScreen.swift; sourceTree = "<group>"; };
@@ -176,6 +195,7 @@
 		1A4A7286BC04B821EFB83F64 /* one-year.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "one-year.seed.json"; sourceTree = "<group>"; };
 		23A673461F31BBF2CAD31193 /* compiled-steps.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "compiled-steps.json"; sourceTree = "<group>"; };
 		4F9B4FD90B30EACE10185C13 /* StudyDeckAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyDeckAcceptanceTests.swift; sourceTree = "<group>"; };
+		6FFAC284352409FE478B6626 /* StudyScheduleAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyScheduleAcceptanceTests.swift; sourceTree = "<group>"; };
 		5930A5EA3F4D9E0310E0D17B /* one-week.seed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "one-week.seed.json"; sourceTree = "<group>"; };
 		60A39B803CD8EB4E0B97FE1F /* SessionLifecycleAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLifecycleAcceptanceTests.swift; sourceTree = "<group>"; };
 		6B9EF34F789D4A17D31F0529 /* MorningApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorningApp.swift; sourceTree = "<group>"; };
@@ -208,7 +228,6 @@
 			isa = PBXGroup;
 			children = (
 				3AA0D9AB1EB9A7965A335B02 /* Sky.metal */,
-				F0102D8606AEAE1192831B3F /* Daybreak.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -228,11 +247,11 @@
 				39D1AB26F1BE7115D937F109 /* FigureReviewHost.swift */,
 				2A9BDC0A5625606FFCF3E40B /* MetalSky.swift */,
 				A61F5E6E0F86353BE6ACA581 /* CountdownRing.swift */,
-				8560C521B1BDB750FC789187 /* MetalDaybreakSky.swift */,
 				9520A59BDFA835728DA588D0 /* RestActivityViews.swift */,
 				21700CBDB4FD5B96C2FE5BAD /* WarmupScreen.swift */,
 				4E6A732CF5554EC40FA5747E /* GuideScreen.swift */,
 				BDF661806566B13880E59A82 /* LedgerScreen.swift */,
+				FD859C48708C6E05C241B352 /* StudyScreen.swift */,
 				BF86B439B891D3CDDA77E421 /* HistoryScreen.swift */,
 				A834BB58E44D87754375E381 /* SummaryScreen.swift */,
 				12F4EDC5137F9FAB91B6964C /* Daybreak.swift */,
@@ -240,6 +259,7 @@
 				B2A026BCBEF4A59459A96AEE /* AppRoot.swift */,
 				AAF0A40D9919697204AAAEA4 /* HomeScreen.swift */,
 				A3FEBAD88ED8CE72C6151821 /* RestScreen.swift */,
+				3755EE1BE090D9B7D7DF671E /* EndSessionConfirm.swift */,
 				7F15FD0402B23FEA4C7E4488 /* WorkoutHost.swift */,
 				8D0A6E83ACA344E7E445C6A5 /* SetScreen.swift */,
 				3024DEC7857A680871BEEA49 /* RepControl.swift */,
@@ -258,7 +278,11 @@
 				E070EE3FA0F72F5CC9BC3DEB /* Week.swift */,
 				B56359319D3EF2A90354C8A3 /* Audio.swift */,
 				AB45F7318157028E123837CC /* Deck.swift */,
-				896971FECE671753F440F58F /* Cards.swift */,
+				936B4B3AC8C0A63BF0E15965 /* StudyPlan.swift */,
+				4AE282DB2580BC87A2BFFA3C /* StudyReport.swift */,
+				A978A6FC8B9C0BB51E538590 /* AbandonNote.swift */,
+				FF09244AA5B8F62D820B70EA /* FirstRecord.swift */,
+						896971FECE671753F440F58F /* Cards.swift */,
 				C9F4A6E3E6711B5CDB4486F1 /* Haptics.swift */,
 				27CD28D350DC22D16F2B0A42 /* WorkoutSession.swift */,
 				737FCE27438C9AA2B24A980F /* History.swift */,
@@ -295,6 +319,10 @@
 		449C7FBA832FA356A9500DA8 /* Morning */ = {
 			isa = PBXGroup;
 			children = (
+				F4412C8D4441FBD78C43E40C /* PrototypeSetVariants.swift */,
+				F4412C8D4441FBD78C43E501 /* PrototypeR4Worlds.swift */,
+				F4412C8D4441FBD78C43E502 /* PaperTokens.swift */,
+				F4412C8D4441FBD78C43E503 /* PaperSunrise.swift */,
 				C951ED9F061EAF54D1762EF8 /* Shaders */,
 				75B691A625410BD958A812BF /* Screens */,
 				46E61A46BAF56C602F066A1B /* PrototypeFigure.swift */,
@@ -342,6 +370,7 @@
 		89D71EDE641A6F0A47E51CC1 /* Acceptance */ = {
 			isa = PBXGroup;
 			children = (
+				03E0D57899F7E74FC828B0C7 /* RealBackupImportTests.swift */,
 				FFAE7BF04B35EF017A8AA5C9 /* AppActionsAcceptanceTests.swift */,
 				EBD349C71D10ED7172AC1B85 /* CelebrationAcceptanceTests.swift */,
 				A9E09AB74F9D6BB9ADD2B984 /* DataAcceptanceTests.swift */,
@@ -349,6 +378,7 @@
 				DBECFE938E10A87FF09083D0 /* ProgramCompilerAcceptanceTests.swift */,
 				60A39B803CD8EB4E0B97FE1F /* SessionLifecycleAcceptanceTests.swift */,
 				4F9B4FD90B30EACE10185C13 /* StudyDeckAcceptanceTests.swift */,
+				6FFAC284352409FE478B6626 /* StudyScheduleAcceptanceTests.swift */,
 				A3A305E4CB16812AE530B377 /* WeekAndStreakAcceptanceTests.swift */,
 			);
 			path = Acceptance;
@@ -549,12 +579,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC357DAF0B764E917683CA0F /* PrototypeSetVariants.swift in Sources */,
+				AC357DAF0B764E917683CB01 /* PrototypeR4Worlds.swift in Sources */,
+				AC357DAF0B764E917683CB02 /* PaperTokens.swift in Sources */,
+				AC357DAF0B764E917683CB03 /* PaperSunrise.swift in Sources */,
 				499AED288F159F6DA0B28340 /* FigureReviewHost.swift in Sources */,
 				680E8993B223510149110216 /* MetalSky.swift in Sources */,
 				EB88854B1AA248535A4A88BB /* Sky.metal in Sources */,
 				751E5C69EC0433CFD7D7720C /* CountdownRing.swift in Sources */,
-				67DCE9B7DB953D124770A0E4 /* MetalDaybreakSky.swift in Sources */,
-				8B969ADA0DC27BBE16D8EEA9 /* Daybreak.metal in Sources */,
 				B67FFC4391C961053BA51DF1 /* AppModel.swift in Sources */,
 				8AD7A390334F4757FF20E647 /* RestActivityViews.swift in Sources */,
 				A290F3B3F13F8B73BD02C7CE /* RestActivityController.swift in Sources */,
@@ -562,6 +594,7 @@
 				48E7F30F07F7F38E63E0C55A /* WarmupScreen.swift in Sources */,
 				CCF825DDC6F35B071354A4E3 /* GuideScreen.swift in Sources */,
 				E7611D0998871513EC10B8C9 /* LedgerScreen.swift in Sources */,
+				31623F3FD4EFCBAD980550CF /* StudyScreen.swift in Sources */,
 				1F8525BB17B2655EAB943516 /* HistoryScreen.swift in Sources */,
 				9DF5540C13526E598B2DE70D /* SummaryScreen.swift in Sources */,
 				6B425B2FCF0269E84AC2B720 /* Daybreak.swift in Sources */,
@@ -572,9 +605,14 @@
 				3AE499B31E48ADD989449B5D /* HomeScreen.swift in Sources */,
 				600EEC908B0CB5EE23F8074A /* Week.swift in Sources */,
 				88E70088BB8FFC282137A2FD /* RestScreen.swift in Sources */,
+				4F897727023A47943EC9E7CA /* EndSessionConfirm.swift in Sources */,
 				21C8E85EF7883D0892480846 /* Audio.swift in Sources */,
 				F931E872C9CD5A79F428A21F /* Deck.swift in Sources */,
-				61246B97184D35D802FC0D9E /* Cards.swift in Sources */,
+				9B72EFBE1B70244B08CEF835 /* StudyPlan.swift in Sources */,
+				F8B3DA70C1E690CAB44FFF53 /* StudyReport.swift in Sources */,
+				085A32B831410D721998A01D /* AbandonNote.swift in Sources */,
+				F2E078CD2FBB626DC76467D1 /* FirstRecord.swift in Sources */,
+						61246B97184D35D802FC0D9E /* Cards.swift in Sources */,
 				2EE828CCB0BBF58780669FBB /* WorkoutHost.swift in Sources */,
 				B715A5EF3466F060D7E5997D /* SetScreen.swift in Sources */,
 				5A1C0BC68F34ED34886E6AD9 /* RepControl.swift in Sources */,
@@ -605,6 +643,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				314CD81D40F13523E8CF4B54 /* RealBackupImportTests.swift in Sources */,
 				3573D091CD4CB72641B11E28 /* AppActionsAcceptanceTests.swift in Sources */,
 				E872A9E953257A1010305C73 /* DuckWindowTests.swift in Sources */,
 				8CF93CAE58C61E7A2851AA9B /* CelebrationAcceptanceTests.swift in Sources */,
@@ -615,6 +654,7 @@
 				A4351156A1C7694FB10ADEAF /* ProgramCompilerAcceptanceTests.swift in Sources */,
 				83FD0DBA9D90BF5A1CC04621 /* SessionLifecycleAcceptanceTests.swift in Sources */,
 				6C9BC7C08B64EBF2BD76BD5B /* StudyDeckAcceptanceTests.swift in Sources */,
+				F57261253B3C91DEE89BAB5D /* StudyScheduleAcceptanceTests.swift in Sources */,
 				D6AFFD8EB7FD1564C8ABBBCC /* WeekAndStreakAcceptanceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -649,6 +689,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				DEVELOPMENT_TEAM = 2UUGYJ68K4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.edenturgeman.morning.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -674,6 +715,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				DEVELOPMENT_TEAM = 2UUGYJ68K4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.edenturgeman.morning.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -759,6 +801,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				DEVELOPMENT_TEAM = 2UUGYJ68K4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.edenturgeman.morning;
 				PRODUCT_NAME = Morning;
 				SDKROOT = iphoneos;
@@ -778,6 +821,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				DEVELOPMENT_TEAM = 2UUGYJ68K4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.edenturgeman.morning.tests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -867,6 +911,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				DEVELOPMENT_TEAM = 2UUGYJ68K4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.edenturgeman.morning.tests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -888,6 +933,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				DEVELOPMENT_TEAM = 2UUGYJ68K4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.edenturgeman.morning;
 				PRODUCT_NAME = Morning;
 				SDKROOT = iphoneos;
