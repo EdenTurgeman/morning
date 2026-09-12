@@ -25,6 +25,40 @@ struct Card: Codable, Equatable, Identifiable {
     /// The question. Always phrased as one.
     let q: String
     let a: String
+
+    /// Four answers to choose between. **A card with `options` is a QUESTION;
+    /// a card without is a factoid**, and both go on working.
+    ///
+    /// Optional so every existing card decodes untouched and so adding a
+    /// question stays the ONE-LINE APPEND this file's header promises — two
+    /// more keys on the object, no registry, no enum, no count constant.
+    ///
+    /// Defaulted to nil so constructing a factoid stays a one-liner at every
+    /// call site — the same promise this file's header makes about the JSON,
+    /// kept for code.
+    var options: [String]? = nil
+    /// Index into `options` of the right answer.
+    var correct: Int? = nil
+
+    /// A card is a question only if it is a WELL-FORMED one.
+    ///
+    /// Four options and an in-range index, checked here rather than trusted,
+    /// because the deck is about to be written by a separate authoring agent
+    /// and a malformed question must degrade to a factoid rather than crash or
+    /// render an unanswerable card. The prose answer is always there, so the
+    /// fallback is a card that still teaches.
+    var choices: [String]? {
+        guard let options, let correct,
+              options.count == 4, options.indices.contains(correct)
+        else {
+            return nil
+        }
+        return options
+    }
+
+    var correctIndex: Int? {
+        choices == nil ? nil : correct
+    }
 }
 
 enum Cards {
