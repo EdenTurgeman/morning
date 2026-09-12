@@ -75,7 +75,7 @@ struct MetalSky: View {
 
 /// `-screen sky` — the sky alone, at a spread of session progresses.
 ///
-/// Built for the same reason `MetalDaybreakReviewHost` was: a sky that has to be
+/// Built for the same reason the deleted daybreak review host was: a sky that has to be
 /// judged has to be seen without the copy sitting on top of it, and judged as a
 /// PROGRESSION rather than as one frame. The workout's sky is the one surface in
 /// this app nobody ever looks at deliberately, which is exactly how it ended up

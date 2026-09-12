@@ -3,246 +3,134 @@
 Deliverable 4 of `ios-port/02-design-brief.md §11`. Written **after** the
 direction was agreed, which is the point of the ordering.
 
-The code half of this document is three files, and they are the source of truth
-for values:
+**Rewritten 2026-09-03, because it described a world that no longer exists.**
+Every colour in the Colour section was a stop on a dawn ramp — indigo, violet,
+rose — and that ramp, its sky and its shader were deleted when the app became
+paper. The document still said "the sky is the material" thirty-two times, and
+`CLAUDE.md` pointed every new session at it as the design system. Anything below
+that still reads as the old world is a bug in this file, not a feature of the
+app.
+
+The code half of this document is the source of truth for values:
 
 | File | Holds |
 |---|---|
-| `ios/Morning/DesignTokens.swift` | The dawn ramp, ink levels, semantic colour, surfaces, type scale, spacing, hit targets, the legibility scrim |
-| `ios/Morning/DesignMotion.swift` | Curves, durations, drift periods, hold-to-repeat, and every reduced-motion form |
+| `ios/Morning/PaperTokens.swift` | **The world.** Inks, grounds, the paper primitives, the controls, the stamps |
+| `ios/Morning/DesignTokens.swift` | Type scale, tracking, spacing, hit targets |
+| `ios/Morning/DesignMotion.swift` | Curves, durations, hold-to-repeat, and every reduced-motion form |
 | `ios/Morning/DesignHaptics.swift` | The haptic vocabulary, as data |
+| `ios/Docs/redesign/01-motion-doctrine.md` | **Whether a thing may animate at all.** Surface by surface. Not re-argued here |
 
 **Every contrast figure in this document was measured on rendered simulator
-frames**, across progress 0.00 → 1.00, using a harness that snaps to the glyph
-rows before sampling. It is not calculated from declared alphas, and it is not
-estimated by eye. Both of those were tried first and both lied — see
-`prototype-directions.md`.
+frames** with `ios/Tools/measure-contrast.py`. It is not calculated from
+declared alphas, and it is not estimated by eye. Both were tried first and both
+lied. Note that the tool's ZONE ROWS are tuned to a layout two redesigns old —
+check its printed row ranges against the frame before quoting it.
 
 ---
 
 ## Direction
 
-**A · Dawn, done properly** — the Atmospheric treatment.
+**Paper mâché.** Spot ink on newsprint: a mid-tone stock, pasted plies with torn
+edges, a halftone dot over everything, and a slow boil on the shapes that move.
 
-Eden reviewed three running native executions of the same load-bearing idea
-(Atmospheric, Precise, Tactile; `prototype-directions.md`) and chose
-Atmospheric. Precise and Tactile remain runnable in the lab as frozen
-comparison artifacts; they are not part of this system and do not constrain it.
+### What it replaced, and what it had to keep
 
-The idea being executed is the one `02-design-brief.md §3` describes and which
-the web build already proved:
+The app was a dawn. Its colour was a function of how far through the session you
+were — astronomical twilight to gold — and the load-bearing claim was that **you
+could tell how far through the workout you were from across the room without
+reading anything.**
 
-> The app's entire colour is a function of how far through the session you are.
-> It starts at astronomical twilight and walks the actual phases of a dawn as
-> you work, arriving at gold as you finish.
+That claim is the thing the new world had to answer, not the gradient that
+delivered it. It answers it with the **step block** in the workout chrome: every
+set in the session printed as a mark, inked as it is finished. A discrete count
+you can read at 1.5m, rather than a colour you have to interpret. It is owned by
+`WorkoutHost` for exactly the reason the sky was — it must not blink when Set
+becomes Rest.
 
-Two consequences that justify the whole system. You can tell how far through the
-workout you are **from across the room, without reading anything**. And the
-session ends at sunrise, which is when it is actually happening.
+### The one constraint that decides everything else
+
+**This world cannot produce a gradient.** Not "prefers not to" — a duplicator
+lays down flat ink or it lays down nothing, and every soft ramp, glow, halo and
+coloured shadow in the old system had to be re-answered as a flat mark or
+deleted. That is structural, and it is why:
+
+- urgency on the countdown ring is the arc getting **heavier**, not brighter —
+  ink cannot glow;
+- the completion moment is ~41 flat shapes rising behind a torn horizon, not a
+  shader;
+- "you passed it" is an **overprint** — orange laid over blue makes plum —
+  rather than a highlight.
+
+### What survived the change
+
+`Hit` (68 / 80 / 64pt targets), `Space`, and the tracking values Eden named
+unprompted as the thing he liked: `counterTracking -1.5`, `titleTracking -0.4`,
+`microTracking 0.6`. Weight-led hierarchy survived too. **This world changed the
+ground and the ink, not the typographic discipline.**
 
 ---
 
 ## Colour
 
-### The dawn ramp
+### The ink law
 
-Five stops, hand-picked from the phases of a real dawn. Not generated — the web
-build's `src/lib/sunrise.ts` is blunt about why: *"a formula gave an even ramp;
-it did not give a sunrise."* Lightness climbs monotonically because dawn gets
-brighter; chroma peaks in the middle, where the sky is genuinely at its most
-saturated, then eases back into the golden light.
+**Three inks, and each has exactly one job on every surface.** A fourth value
+exists and is not a fourth ink — it is what two of them make where they
+overprint.
 
-| t | Colour | Phase |
-|---|---|---|
-| 0.00 | `#6F80E0` | astronomical twilight — deep indigo |
-| 0.26 | `#A974E3` | nautical — violet lifts off the horizon |
-| 0.50 | `#ED6BAF` | civil — the rose band, sky at peak chroma |
-| 0.74 | `#FF8271` | first light — coral |
-| 1.00 | `#FFB440` | sunrise — gold |
-
-Interpolated with `Color.mix(in: .perceptual)`, which is the native equivalent
-of the web build's OKLCH walk. A straight line through a perceptual space looks
-like a straight line; the same walk in HSL visibly surges and dips.
-
-The accent drives the progress bar, the timer ring, the primary action fill and
-the horizon light — all sampling one live value, which is what makes progress
-legible without text.
-
-### The rule that took a measurement to find
-
-> **The raw `accent` fills and lights. `accentText` writes.**
-
-The ramp's values are chosen to be a *light source*. Used as small glyphs on a
-lit sky, its darker end measures **4.59:1** — barely over AA and far under this
-app's own tertiary bar. `DawnPalette.accentText` lifts the live accent 42%
-toward white, which reads 7.37:1 at twilight and 8.75:1 at gold while staying
-unmistakably accent-family.
-
-This was found by measuring the study card's topic label, not by looking at it.
-
-### The zenith is not the accent
-
-Rayleigh scattering is wavelength-dependent, so the top of a real sky stays deep
-blue even at the height of a sunrise; only light coming through the thickest
-atmosphere, at the horizon, turns warm. `DawnPalette.zenith` is therefore its
-own near-black blue that brightens slightly with progress and never takes the
-accent hue.
-
-A sky that takes the accent everywhere reads as a coloured wash rather than as
-sky. The web build learned this and said so; the first native port had not read
-that comment.
-
-### Ink, and the bar it clears
-
-`02-design-brief.md §6` sets the target: *"The current palette holds 18:1 /
-10:1 / 6.6:1 for its three text levels — match or beat that."*
-
-Measured across progress 0.00 → 1.00 on Set, Rest and the study card:
-
-| Level | Token | Used for | Measured span |
+| Ink | Job | Value | Measured |
 |---|---|---|---|
-| Primary | `Ink.primary` | Exercise name, rep count, timer | **12.15 – 19.00:1** |
-| Secondary | `Ink.secondary` | Sub-label, load, set position, cues | **7.65 – 11.41:1** |
-| Tertiary | `Ink.tertiary` | `Reps`, `MOVEMENT`, footer, meta lines | **6.90 – 9.04:1** |
-| On accent | `Ink.onAccent` | The primary action's label | **5.84 – 6.98:1** — see below |
+| `press` | Every glyph being **read**, and the primary action's block | `#2E2B26` | **7.74:1** on stock · **11.35:1** on ply |
+| `blue` | Everything **already true** — last time's figure, finished steps, logged history | `#0F3066` | **7.02:1** on stock |
+| `orange` | Everything **happening now** | `#E05221` | **2.14:1** as text — see below |
+| `overprint` | Orange printed over blue: the crossing, and the stamps | `#572229` | **10.2:1** knocked out in ply |
+| `danger` | Destruction, and "you have no copy of this" | `#730D0D` | **6.77:1** on stock |
+| `rule` | A hairline that is furniture, never a glyph | `press` at 0.30 | — |
 
-**Where this does and does not beat the web palette, stated honestly.** The web
-figures are measured against a flat near-black background. This sky is lit at
-the bottom by design, so pure white reads 19.00:1 at the top of the screen and
-**12.15:1 over the rep counter**, which sits on the brightest region. Primary
-therefore beats the web's *secondary* bar everywhere but does not reach 18:1 at
-the counter, and it never will while the sky carries progress. That is the trade
-the direction makes.
+### The grounds
 
-What matters more, and what does hold everywhere: **the weakest text on any
-screen at any progress is 6.98:1**, against a 6.6:1 floor — and the three levels
-stay clearly separated, which is what makes the hierarchy readable rather than
-just compliant.
-
-Scoring elements against per-level bars was tried and abandoned: it turns into
-moving an element between levels until it passes. One floor, plus the range each
-level actually spans, is the honest report. `ios/Tools/measure-contrast.py`
-prints exactly that.
-
-`Ink.hairline` is furniture only — rails and dividers. It never carries glyphs.
-
-**One correction worth recording, because the mistake is easy to repeat.**
-`Ink.tertiary` was first written down as `white 0.62`, taken from the
-prototype's measured results — without checking what the prototype was actually
-using. Its labels were at 0.72 and had never been switched to the token, so the
-number in this table had been measured against a value the token did not have.
-
-Built on the real Set screen, `0.62` delivered **5.98:1** against a 6.6:1 floor.
-The token is now 0.72 and the screen measures 6.90:1 at its weakest, at gold.
-
-A token that does not deliver the figure recorded beside it is worse than no
-token, and only building the real screen on it exposed the gap. Rebuilding the
-prototypes on the tokens was supposed to catch exactly this and did not, because
-the prototype kept its literals in the places that mattered.
-
-### The exception that turned out to be avoidable
-
-For three workstreams this document carried a documented exception: the primary
-button's label read **5.84:1** at twilight, where the accent is a mid-lightness
-indigo, and the reasoning was that a 68pt filled control clearing AA-large twice
-over did not justify distorting a hand-picked ramp.
-
-Building **Home** is what showed that reasoning was too comfortable. Home sits at
-the ramp's dark end *permanently* rather than passing through it, so its start
-button measured 5.99:1 every single time — and a second screen about to inherit
-the same exception is a signal that the exception was wrong, not that it needed
-restating.
-
-The fix costs nothing and distorts nothing:
-
-> The raw `accent` **lights**. `accentText` **writes**. `accentFill` **carries a
-> label**.
-
-`accentFill` lifts the live accent 12% toward white — enough that black on it
-clears the floor at every progress, invisible at the gold end. Measured after:
-**7.02:1** on the Set screen at twilight, **7.14:1** on Home.
-
-There is now **no text on any screen, at any progress, below 7.00:1** against a
-6.6:1 floor.
-
-### Semantic colour, kept off the ramp
-
-**`danger` and `dangerText` are a pair, for the same measured reason as `accent`
-and `accentText`.** The red on the night sky is 4.27:1 — right for a 1.5pt rule
-or a filled icon, under this app's 6.6:1 text floor *and* under WCAG AA's 4.5:1,
-so it must not carry a glyph. `dangerText` is the same red lifted 34% toward
-white: **7.16:1**. "Erase everything" shipped at `danger.opacity(0.75)` and
-measured 3.07:1 — de-emphasis taken as far as illegibility, on the label of the
-one control that destroys everything.
-
-
-`§6` requires these to live outside the accent ramp so they can never collide
-with whatever the accent happens to be at that moment.
-
-| Token | Colour | Means |
+| | Value | Why |
 |---|---|---|
-| `Semantic.threshold` | `#59E0AD` mint | You passed last time's number |
-| `Semantic.urgency` | `#FFC257` amber | The 20-second myo rest — which *is* the training stimulus |
+| `stock` | `#C9BFAC` | Newsprint. **Mid-tone by material** — newsprint is never white, so the direction reset's "no white page" is satisfied without trying |
+| `ply` | `#EDE6D8` | The pasted ply, a second sheet laid over the stock |
 
-Mint was lifted from `#33D399` after measurement: as a 92pt numeral it read
-6.03:1 — comfortably fine for text that size, but under this app's own floor.
-Ten percent more luminance clears it at 6.95:1 without the colour becoming
-anything other than mint, which is better than carrying a second documented
-exception.
+The ply pays for itself twice. Press black measures **11.35:1** on it against
+7.74:1 on the stock, so **the contrast and the material are one decision** — the
+surfaces you actually read are the ones made of a second sheet.
 
-Mint is worth a second note. Held at 2m, the words *"Beating last time's 13"* have gone
-soft while the mint is still unmistakable. Colour outliving text is the correct
-order for this to degrade in, because the state matters more than the sentence.
+### Orange is a MARK, never a glyph
 
-### The legibility scrim
+The single most load-bearing rule in this section, and it was measured rather
+than chosen. Orange carries text at **2.14:1** on stock — under the house floor
+and under WCAG's 3:1 large-text bar. **A 152pt orange numeral was never
+available, however good it looked.**
 
-A richer sky costs contrast — the exact risk `§5` names for this direction:
-*"the risk is mush — atmosphere fighting legibility at 6am."*
+So: **orange lights, press black writes.** On newsprint a giant black numeral is
+the bib. Orange is the live tick on the rail, the thinking bar under a question,
+the rule draining beneath a timer badge — marks, all of them.
 
-The scrim sits **behind** content, so it lowers background luminance without
-touching the glyphs. That is what makes it buy contrast rather than cost it: a
-veil over both would make things worse.
+The old world had already learned the same split from the other side, where a
+raw accent lit and a lifted one wrote. Here it resolves more simply, because
+there is no lifted variant to reach for.
 
-It is a function of progress, because the sky it holds back is. A fixed scrim
-that cleared the bar at twilight let the cue text, `Reps` and the footer fall to
-6.2–6.5:1 by the time the palette reached gold.
+### A mid-tone ground cannot carry three levels of text
 
-```
-location  0.00   0.30
-location  0.38   0.14 + 0.04·progress
-location  0.58   0.20 + 0.08·progress
-location  0.78   0.48 + 0.08·progress
-location  1.00   0.64 + 0.07·progress
-```
+Found the hard way and worth stating as a rule. The old system had a three-step
+ink hierarchy — primary, secondary, tertiary — carried by opacity. On a mid-tone
+stock the third step lands too close to the ground to clear the floor, and the
+second is not reliably distinguishable from the first.
 
-Near-black and faintly blue (`Surface.ink`), never pure black — pure black
-flattens the night out of the sky.
+**Hierarchy here is carried by size and weight, never by transparency.** A level
+recedes by getting smaller or lighter in weight. This is why a 12pt tracked
+label under a 112pt number is not also dimmed: it is already ninety points
+smaller.
 
-### Control boundaries
+### `danger` is the one exception to the three-job law, and it earns it
 
-WCAG 2.1 SC 1.4.11 asks for **3:1 on the boundary of a UI component**, and the
-first Atmospheric rep control measured **1.18:1** — a `white 0.07` fill behind a
-`white 0.1` hairline, over a lit sky. Its glyph was fine at 9.71:1, so the
-symbol was doing all the work and the button had no shape at all.
-
-That matters more here than the number suggests: this is the control a
-half-awake person hits with a knuckle from a metre away, and an 82pt target is
-worth nothing if you cannot see where it is. It only surfaced because the
-control was measured as a *component* rather than as text — the text harness had
-been giving it a clean bill of health all along.
-
-| Token | Value | For |
-|---|---|---|
-| `Control.surface` | `white 0.10` | Quiet enough to sit under a 92pt counter |
-| `Control.border` | `white 0.44`, 1.5pt | The edge that makes the target findable |
-| `Control.quietBorder` | `white 0.30` | A deliberately subordinate control — `+15s` beside `Skip` |
-
-Measured after: rep control **3.51:1**, Rest's `+15s` / `Skip` **4.10:1**. The
-surface stays at ~1.3:1 against the sky, which is the point — the design goal
-was "quiet", and it was never "invisible".
-
-The `−` and `+` glyphs also went from 34pt medium to 38pt semibold. At 1.5m the
-old ones were the first thing to disappear.
+Deleting a session must never be confusable with the crossing, and the overprint
+already owns the crossing. A pure red against the overprint's plum. The other
+half of why this is safe: **they never appear on the same surface.**
 
 ---
 
@@ -354,40 +242,50 @@ answer; all three have deterministic fixtures in the lab.
 
 ## Material and depth
 
-The sky is the material. `PrototypeSky.swift`, eight layers:
+**The paper is the material.** Four primitives in `PaperTokens.swift`, and
+between them they build every surface in the app.
 
-| Layer | Carries | Motion |
+| Primitive | What it is | Numbers that matter |
 |---|---|---|
-| Base + `MeshGradient` | The dawn palette; zenith blue, horizon warm | with progress |
-| Ozone band | The purple-pink band between blue zenith and warm ground | opacity peaks mid-session on a sine |
-| Haze | Atmosphere is denser near the ground | with progress |
-| Stars | How early it still is | twinkle on individual phases; thin out with progress |
-| Meteor | That the sky is not a loop | one per ~11s while stars are visible |
-| Crepuscular rays | The sun, without a sun — strengthening with progress | 150s drift |
-| Two cloud banks | Depth, through parallax | 200s and 128s |
-| Grain | Stops the gradients banding on OLED | static, deliberately |
+| `PaperGround` | The stock, under one press run | `stock` + `Halftone` overlay |
+| `Halftone` | The dot, offset row to row | pitch 5, radius 0.62, alpha 0.16, `press` tint |
+| `TornEdge` | A `Shape` whose top and/or bottom is torn | 44 steps, amplitude **3.5pt**, hash-seeded so a sheet's tear is stable |
+| `Fibre` | Loose fibres in a pasted sheet | 420 strokes, 3–12pt, xorshift-seeded |
+| `Ply` | A pasted sheet: `TornEdge` filled, fibre clipped to it, **a real offset shadow** | `press` at 0.22, radius 3, y +2 |
 
 Decisions inside it:
 
-- **Cloud noise is baked once** into a tiling `CGImage`, then translated. Live
-  noise across a screen held awake for twenty minutes is not affordable; a
-  translated bitmap is free. The web build makes the same call.
-- **The streak ratio is the trick.** Low frequency across x, high down y. The
-  first attempt inverted it and produced vertical streaks, which read as screen
-  noise rather than cloud.
-- **One tile covers the band vertically.** A vertically repeating tile reads as
-  banding — the opposite of cloud.
-- **No sun disc and no bottom halo.** Both were removed as decoration competing
-  with the copy and they stay removed. The rays are the sun's presence without
-  its body.
-- **Liquid Glass is a control layer, never a content background.** It is limited
-  to controls the user actually manipulates, grouped in one
-  `GlassEffectContainer`, and Reduce Transparency replaces it with opaque
-  bordered surfaces.
+- **The halftone is an overlay, not a background**, so the dot falls across the
+  plies too. A duplicator does not stop printing at a pasted edge.
+- **The shadow under a ply is an offset and a blur, never a zero-offset halo.**
+  What makes a torn edge read as torn is the light under it.
+- **One `TornEdge` per sheet, used for both the fill and the clip.** Two
+  instances drift apart the moment somebody changes a seed, and then the clip
+  stops matching the edge it is supposed to be. `StudyCard.sheet` is the
+  exemplar.
+- **Ink cannot exist off the paper.** Content is clipped to its sheet. Filmed at
+  60fps, an opening study card drew its option rows on the bare stock for ~100ms
+  while the sheet was still rising underneath them — an inserted view is placed
+  using the layout it is arriving *into*. Clipping is both the fix and the
+  truth: a row with no sheet under it yet is simply not printed yet.
+- **The ground is a sibling, never a background modifier on a transitioning
+  container.** `.paperGround()` on the `Group` in `WorkoutHost` put the stock
+  *inside* the subtree the step transition fades, and every Set ↔ Rest swap
+  washed the screen to white: mean luma **185 → 241 → 184**. As a `ZStack`
+  sibling it measures 185 → 188 → 185, and the peak frame samples exactly
+  `Paper.stock`.
+- **No Liquid Glass, no `MeshGradient`, no shader.** `Sky.metal` survives only
+  because `PrototypeVisuals.swift` is the record of how the direction was
+  chosen; `Daybreak.metal` was deleted outright when the completion moment
+  became shapes. Paper has no atmosphere, so a shader had nothing to compute.
 
-No third-party animation dependency. `MeshGradient`, `Canvas`, `TimelineView`
-and baked `CGImage` tiles cover all of it — the gates are in
-`technical-decisions.md` and nothing has cleared them.
+### The boil
+
+Shapes that move are re-hashed on a coarse clock — the sunrise's rays quantise
+their seed at 8fps — so the drawing wobbles the way a hand-cut stencil does.
+It is the one ambient motion in the world, and it is **off under Reduce
+Motion**: continuous jitter is precisely what that setting exists to switch off,
+and the shapes keep their whole form without it.
 
 ### The exercise figure
 
@@ -484,17 +382,36 @@ the content simply appears. Both the rep comparison line and the study card now
 use opacity on a view that never leaves the tree. If you add a fourth, assume
 it will not animate and measure it.
 
-### The sky does not participate
+### The ground does not participate — and this has now gone wrong TWICE
 
-`DawnBackdrop` belongs to `WorkoutHost`, not to the screens. Owned per-screen it
-faded with everything else and mean luminance across a Set→Rest swap went
+`DawnBackdrop` belonged to `WorkoutHost`, not to the screens. Owned per-screen
+it faded with everything else and mean luminance across a Set → Rest swap went
 47 → 7 → 40 — a full blackout, 25+ times a session. Held continuous underneath,
-the same swap measures 50 → 22 → 40.
+the same swap measured 50 → 22 → 40.
+
+**The sky is gone; the stock inherited its job, and inherited the trap with it.**
+`.paperGround()` was applied as a modifier on the `Group` holding the three
+transitioning branches, which put the stock and its halftone inside the subtree
+the transition fades. Measured 2026-09-03: **185 → 241 → 184** — the paper
+world's whiteout in place of the old world's blackout, and the frame at the peak
+shows the Rest screen ghosted on bare white with not a halftone dot left.
+
+The ground is a `ZStack` **sibling** now. A sibling cannot be faded by a
+transition on its siblings. Re-measured: 185 → 188 → 185, the peak frame
+sampling exactly `Paper.stock` — the ground holding while the screens cross.
+
+The lesson generalises past this one modifier: **a ruling written about the sky
+did not transfer to the thing that replaced it, because nobody re-measured after
+the world changed.** Every claim in `01-motion-doctrine.md` that names the sky is
+worth re-reading against the paper.
 
 ### The countdown's last five seconds
 
-`urgency` ramps 0 → 1 over the final five seconds and drives the ring's glow
-(opacity 0.20 → 0.65) and its shadow (8 → 22px). Ported from
+`urgency` ramps 0 → 1 over the final five seconds. It drove the ring's glow
+(opacity 0.20 → 0.65) and its shadow (8 → 22px); **both were a gradient and a
+coloured drop shadow, and neither survived the move to paper.** It now drives
+the arc's LINE WIDTH, `stroke + urgency * 6`, because ink cannot glow — urgency
+is carried by the mark getting heavier. Ported from
 `src/components/Ring.tsx`, which names what it is for: peripheral warning. The
 audio and the haptics both ramped over this window and the screen did nothing,
 which is backwards — the phone is 1.5m away and the ring going hot is the part
@@ -535,7 +452,8 @@ colour and progress reading survives. Calmer, not broken.
 Every tap in the shipped app is mute to the hand, which makes this the single
 largest available improvement in felt quality.
 
-**The primary action's haptic lives in `DawnPrimaryButton`, not at its call
+**The primary action's haptic lives in the primary button component**
+(`PaperPrimaryButton`, formerly `DawnPrimaryButton`) **, not at its call
 sites.** It used to be written out by each caller and four of the five
 remembered; Guide's Export did not, so the one primary action that opens a file
 picker was the one that said nothing to the hand. Tapping the summary card had

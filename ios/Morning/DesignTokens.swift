@@ -107,26 +107,40 @@ struct DawnPalette {
 /// Text levels, with the contrast each one holds against the Atmospheric sky.
 ///
 /// `02-design-brief.md §6` sets the bar: *"The current palette holds 18:1 /
-/// 10:1 / 6.6:1 for its three text levels — match or beat that."* Measured
-/// across progress 0.00 → 1.00, this system holds **19.05:1 / 9.87:1 / 7.00:1**
-/// at its weakest.
+/// 10:1 / 6.6:1 for its three text levels — match or beat that."*
+///
+/// R2, 2026-08-25 — RAISED, because the figure that used to sit here was no
+/// longer true. It read "19.05:1 / 9.87:1 / 7.00:1 at its weakest", and the
+/// Rest screen's next-up meta line measured **6.18:1 at progress 1.00**: under
+/// the floor, on a rendered frame, for the whole life of the gold end of every
+/// session. It passes at twilight (8.46:1), which is why nobody saw it. Third
+/// time this project has recorded a documented measurement that quietly stopped
+/// being true — re-measure, do not inherit.
+///
+/// The repair was not available at the old values, and that is the interesting
+/// part. `secondary` 0.78 and `tertiary` 0.72 sat six points apart, so there
+/// was no room to lift tertiary off the floor without it colliding with
+/// secondary. A hierarchy compressed that tight has no repair strategy; the
+/// spacing between the levels is what buys you the ability to fix one of them.
 enum Ink {
     /// Exercise name, rep count, timer. The one thing you must read at 1.5m.
-    /// Measured 19.05:1.
     static let primary = Color.white
 
-    /// Sub-label, load, set position, cue text. Measured 9.87–11.45:1.
-    static let secondary = Color.white.opacity(0.78)
+    /// Sub-label, load, set position, cue text.
+    static let secondary = Color.white.opacity(0.88)
 
     /// `Reps`, `MOVEMENT`, the footer, next-exercise meta.
     ///
-    /// 0.72, not 0.62. The first value here was written down from the
-    /// prototype's *measured* results without checking what the prototype was
-    /// actually using — its labels were at 0.72 and had never been switched to
-    /// the token. Built on the real screen, 0.62 delivered 5.98:1 against a
-    /// 6.6:1 floor. A token that does not deliver the number recorded beside it
-    /// is worse than no token.
-    static let tertiary = Color.white.opacity(0.72)
+    /// 0.78, and the floor is what sets it. 0.62 was tried and delivered
+    /// 5.98:1; 0.72 held everywhere it was measured and then failed at 6.18:1
+    /// on the one zone that had never been measured at the gold end.
+    ///
+    /// Note what this level is NOT allowed to become: a way to make text quiet.
+    /// It is the floor-pinned level, and `apple-design` §15 is explicit that
+    /// hierarchy is built from weight, size and leading as a set — not from
+    /// alpha alone. If a label needs to recede further than this, it recedes by
+    /// getting smaller or lighter in weight, never by going more transparent.
+    static let tertiary = Color.white.opacity(0.78)
 
     /// Non-text furniture only — hairlines, inactive rails. Never glyphs.
     static let hairline = Color.white.opacity(0.13)
@@ -225,11 +239,37 @@ enum TypeScale {
 
     /// Study-card question.
     static let question = Font.system(size: 17, weight: .semibold)
-    static let answer = Font.system(size: 14.5)
+    /// 15, not 14.5. A half-point size is not a decision anyone made — it is a
+    /// value that was nudged until it looked about right, which is the exact
+    /// thing `apple-design` §16 Craft says a token may not be. SF ships optical
+    /// sizing and tracking tables at whole points; asking it for 14.5 opts out
+    /// of them to buy nothing.
+    static let answer = Font.system(size: 15)
 
-    /// Chrome, footers, units.
+    /// Chrome and footers. Sentence-case, read as text.
     static let label = Font.caption.weight(.semibold)
+
+    /// Units and all-caps micro-labels — `SEC`, `MOVEMENT`, `TARGET`.
+    ///
+    /// This was byte-identical to `label` — two names for one value, which
+    /// means one of them was going to be different and never became different.
+    ///
+    /// It is different now, and `apple-design` §15 says how: **tracking is
+    /// size-specific and a fixed letter-spacing is wrong somewhere.** Small
+    /// text wants slightly positive tracking to stay legible, and all-caps
+    /// wants more of it again, because caps have no ascender/descender rhythm
+    /// to separate them. This is the level that is always small and usually
+    /// caps, so it is the level that takes the tracking.
+    ///
+    /// Apply as `.font(TypeScale.microLabel).tracking(TypeScale.microTracking)`.
     static let microLabel = Font.caption.weight(.semibold)
+    static let microTracking: CGFloat = 0.6
+
+    /// Large display type wants NEGATIVE tracking — letters read too far apart
+    /// as they grow (`apple-design` §15). The counter is 92pt; at that size the
+    /// default spacing is visibly loose.
+    static let counterTracking: CGFloat = -1.5
+    static let titleTracking: CGFloat = -0.4
 
     /// The primary action.
     static let action = Font.headline
@@ -251,9 +291,15 @@ enum Hit {
     /// Primary actions. The brief's floor is 64pt; the primary action is 68.
     static let primary: CGFloat = 68
 
-    /// Rep controls get more, because they are hit with a knuckle. Floor 78pt;
-    /// these are 82.
-    static let repControl: CGFloat = 82
+    /// Rep controls get more, because they are hit with a knuckle.
+    ///
+    /// **The floor is 78 and it is not a guideline** — `01-product.md`, sweaty
+    /// hands at 6:10am. These were 82; they are 80 so the control block sits
+    /// more comfortably on its ply. That leaves 2pt of margin above the floor,
+    /// which is nearly all of it: there is no more room here, and the next
+    /// person who wants this block smaller has to take it out of the counter,
+    /// not out of the target.
+    static let repControl: CGFloat = 80
 
     /// Everything else that can be tapped, including Back and End.
     static let minimum: CGFloat = 64
