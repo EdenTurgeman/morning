@@ -37,11 +37,30 @@ struct CountdownRing: View {
     let accent: Color
     /// Shown under the number. "SEC" on a rest; the warm-up says what it is.
     var caption: String = "SEC"
+    /// THE FIGURE HAS SOMEWHERE TO GO.
+    ///
+    /// When a question opens on the Rest screen the ring leaves and a small
+    /// inked badge takes over in the card's corner. What travels between them
+    /// is the NUMBER — the track, the arc and the caption are drawn evidence
+    /// about this ring and they do not belong on a stamp, but the figure is the
+    /// fact and the fact is the same fact.
+    ///
+    /// The whole ring used to carry the `matchedGeometryEffect` instead, and it
+    /// could not work: a circle cannot interpolate into a rectangular chip, and
+    /// the id sat on a `maxHeight: .infinity` container, so the match was
+    /// between a full-height band and a 54pt chip. Matching a figure to a
+    /// figure is a match between two things that are actually alike.
+    ///
+    /// `nil` everywhere else — the warm-up's ring goes nowhere.
+    var figureMatch: FigureFlight?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static let minimumDiameter: CGFloat = 136
     static let maximumDiameter: CGFloat = 232
+    /// The figure's point size, as a fraction of the diameter. Named because
+    /// the flight has to know it to scale the figure correctly.
+    static let figureFraction: CGFloat = 0.353
 
     private var size: CGFloat {
         guard let diameter else { return Self.maximumDiameter }
@@ -71,36 +90,46 @@ struct CountdownRing: View {
 
     var body: some View {
         ZStack {
-            // The glow pad behind the ring. Same 0.20→0.65 range as the web.
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [accent, accent.opacity(0)],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: size * 0.70
+            // NO GLOW PAD, NO SHADOW, NO ROUNDED CAP.
+            //
+            // The glow was a RadialGradient and a coloured drop shadow — both
+            // the previous world's vocabulary, and a gradient is the one thing
+            // this world cannot produce. What replaced them is what a press
+            // gives you: a printed track, and an arc of solid ink laid over it
+            // with hard ends. Urgency is carried by the arc getting HEAVIER
+            // rather than by light, because ink cannot glow.
+            // THE FURNITURE LEAVES FIRST.
+            //
+            // Track and arc are evidence about THIS ring and they have nowhere
+            // to go, so when the figure is travelling they clear out in 0.14s
+            // rather than riding the same half-second spring. Filmed with them
+            // on the same curve, the study card grew up over a still
+            // full-strength orange circle and the whole thing read as a
+            // dissolve rather than as one object moving.
+            Group {
+                Circle()
+                    .stroke(Paper.press.opacity(0.18), lineWidth: stroke)
+
+                Circle()
+                    .trim(from: 0, to: fraction)
+                    .stroke(
+                        Paper.orange,
+                        style: StrokeStyle(lineWidth: stroke + urgency * 6, lineCap: .butt)
                     )
-                )
-                .opacity(0.20 + urgency * 0.45)
-                .blur(radius: 12)
-
-            Circle()
-                .stroke(Ink.hairline, lineWidth: stroke)
-
-            Circle()
-                .trim(from: 0, to: fraction)
-                .stroke(accent, style: StrokeStyle(lineWidth: stroke, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .shadow(color: accent.opacity(0.55), radius: 8 + urgency * 14)
+                    .rotationEffect(.degrees(-90))
+            }
+            .modifier(FurnitureExit(travelling: figureMatch != nil))
 
             VStack(spacing: -2) {
                 Text(Int(ceil(remaining)), format: .number)
-                    .font(TypeScale.counter(size * 0.353))
+                    .font(PaperType.counter(size * Self.figureFraction)).tracking(TypeScale.counterTracking)
                     .monospacedDigit()
                     .contentTransition(Motion.numeric(reduceMotion: reduceMotion, countsDown: true))
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
+                    .modifier(MatchedFigure(match: figureMatch, from: size * Self.figureFraction))
 
                 Text(caption)
+                    .modifier(FurnitureExit(travelling: figureMatch != nil))
                     .font(TypeScale.label)
                     .tracking(1.2)
                     // Primary, not secondary. Measured on the myo rest — whose
@@ -109,12 +138,76 @@ struct CountdownRing: View {
                     // floor. Hierarchy here is carried by size: this is 12pt
                     // under a 112pt number, and it does not need to be dimmer
                     // as well as ninety points smaller.
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
             }
         }
         .frame(width: size, height: size)
         .animation(Motion.timerResize(reduceMotion: reduceMotion), value: size)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(Int(ceil(remaining))) seconds remaining")
+    }
+}
+
+/// Where a countdown's figure is going, and how big it is when it gets there.
+struct FigureFlight {
+    let id: String
+    let namespace: Namespace.ID
+    /// The figure's point size at the OTHER end. The ring needs it to work out
+    /// how far to shrink; without it the two ends are two unrelated numbers.
+    let destinationSize: CGFloat
+}
+
+/// The figure travelling, or standing still.
+///
+/// **`properties: .position`, never the frame.** Matching frames is the obvious
+/// thing to write and it is wrong here, because a matched geometry effect
+/// resizes the BOX and leaves the font alone: filmed, the ring's 82pt "56" was
+/// handed the badge's 54pt-wide box and rendered as `•••`, an ellipsis, for the
+/// whole flight. The number turned into three dots on its way across the
+/// screen.
+///
+/// So each end keeps its own type size and only the position is shared, and the
+/// change in size is carried by `scaleEffect` — which scales the drawing rather
+/// than re-running layout, which is what "the same number, smaller" actually
+/// means. The scale is exact rather than eyeballed: the ring knows its own
+/// figure size and is told the badge's.
+/// A countdown figure that may or may not be travelling.
+///
+/// Internal rather than private because BOTH ends of the flight use it — the
+/// ring here and the badge on the Rest screen. Two hand-written
+/// `matchedGeometryEffect` calls is two places to forget the same detail, and
+/// the detail they would forget is Reduce Motion.
+struct MatchedFigure: ViewModifier {
+    let match: FigureFlight?
+    /// This end's own figure size, so the ratio can be computed.
+    let from: CGFloat
+
+    func body(content: Content) -> some View {
+        if let match {
+            content
+                .matchedGeometryEffect(id: match.id, in: match.namespace, properties: .position)
+                .transition(
+                    .scale(scale: from > 0 ? match.destinationSize / from : 1)
+                        .combined(with: .opacity)
+                )
+        } else {
+            content
+        }
+    }
+}
+
+/// A ring's track, arc and caption, when the figure is leaving without them.
+///
+/// A plain `if` on a value that never changes at runtime is safe — every call
+/// site either flies or does not, for the life of the view.
+private struct FurnitureExit: ViewModifier {
+    let travelling: Bool
+
+    func body(content: Content) -> some View {
+        if travelling {
+            content.transition(.opacity.animation(.easeOut(duration: 0.14)))
+        } else {
+            content
+        }
     }
 }

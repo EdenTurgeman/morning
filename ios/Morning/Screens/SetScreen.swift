@@ -21,30 +21,27 @@ import SwiftUI
  * ======================================================================== */
 
 struct SetScreen: View {
+    /// THE CHROME IS THE HOST'S. `WorkoutHost` draws `WorkoutChrome` once,
+    /// above the step transition, so the rail, the set marks, BACK and END do
+    /// not blink when one screen becomes another — `plans/011`. `progress`,
+    /// `setMarks`, `onBack` and `onEnd` went with it.
     let setStep: SetStep
-    let progress: Double
+    /// Kept after the chrome left: the rep counter keys its numeric-roll
+    /// identity to this, so a new set's number never rolls from the last
+    /// set's. See `stepKey` below.
     let stepLabel: String
-    let setsRemaining: Int
     let reps: Int
     let previous: History.PreviousSet?
     let isComparable: Bool
     let isBeating: Bool
-    /// Where each set falls in the session, 0…1. See `WorkoutChrome.setMarks`.
-    var setMarks: [Double] = []
     /// True when this exercise appears more than once in the session, so its
     /// sub-label is the only thing telling the two apart. See `factLine`.
     var subDisambiguates = false
 
     let onAdjust: (Int) -> Void
     let onLog: () -> Void
-    let onBack: () -> Void
-    let onEnd: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private var palette: DawnPalette {
-        DawnPalette(progress: progress)
-    }
 
     var body: some View {
         // NOTHING HERE IS A MEASURED CONSTANT ANY MORE, and that is the fix.
@@ -68,14 +65,6 @@ struct SetScreen: View {
         // W15 #2 asked for. That only holds because `RepControl` is a fixed
         // height now; see the note on `RepControl.height`.
         VStack(spacing: 0) {
-            WorkoutChrome(
-                progress: progress,
-                step: stepLabel,
-                setMarks: setMarks,
-                onBack: onBack,
-                onEnd: onEnd
-            )
-
             // The demonstration is what gives way, and `ViewThatFits` is what
             // decides — not a threshold I guessed at per device.
             //
@@ -89,29 +78,73 @@ struct SetScreen: View {
             // cannot have 120 it does not appear at all — which is honester
             // than a smear, and much honester than clipping the Done button to
             // keep one.
-            ViewThatFits(in: .vertical) {
-                upper(withBay: true)
+            // The ply HUGS its content and the slack falls on the stock below
+            // it. Sized to fill instead, the sheet kept the leftover space
+            // INSIDE itself — a pasted sheet with a void in the middle, which
+            // is the exact "lot of empty space" that got R3 rejected.
+            Ply(tornBottom: true, seed: 11) {
                 upper(withBay: false)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.horizontal, Space.gutter)
+                    .padding(.bottom, Space.gutter)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .clipped()
-            .layoutPriority(-1)
+
+            // The diagram is PRINTED ON THE STOCK, below the pasted sheet,
+            // rather than boxed inside it. It is the one element here that
+            // merely illustrates — everything else instructs or is the control
+            // — so it is the one that gives way: below 120pt the figure stops
+            // reading as a body and becomes a smudge, so it leaves rather than
+            // smears.
+            //
+            // NO SPACERS AROUND IT. A Spacer either side claimed the slack
+            // before `ViewThatFits` was proposed anything, so it was measured
+            // against ~0pt and silently chose the empty branch on every screen
+            // — the bay simply never appeared. This container takes the
+            // leftover itself and hands the real figure to the decision.
+            ExerciseMotionBay(
+                treatment: .precise,
+                exercise: setStep.exercise,
+                accent: Paper.press,
+                paper: true,
+                // 1.3, at Eden's report: *"i think the person animation size is
+                // too little maybe now we'll have extra space for it"*. The bay
+                // takes the leftover height and the sets-to-go line below gave
+                // some of it back, but the figure never used what it had — a
+                // pose spans well under the full unit, so a taller bay drew the
+                // same small body with more paper around it.
+                // 1.15, not more. The `Canvas` clips at its bounds, so past
+                // this the pose's extremities are cut rather than drawn: at 1.3
+                // the measured figure grew only 11% because the rest was
+                // outside the box. The real constraint is that a figure-unit
+                // IS the bay's height, so a wide, short bay under-uses its own
+                // width — fixing that means fitting the pose's bounding box,
+                // which is a change to `FigureRenderer`, not a number here.
+                figureScale: 1.35
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             RepControl(
                 reps: reps,
                 previous: previous,
                 isComparable: isComparable,
                 isBeating: isBeating,
-                accent: palette.accent,
+                accent: Paper.orange,
                 stepKey: stepLabel,
                 onAdjust: onAdjust
             )
+            .padding(.horizontal, Space.gutter)
             // W15 #2's other half: *"the number and button of reps is always
             // too close to the text above it"*. The block above is flexible, so
             // this gap is not taken from anywhere — the figure gives it up.
             .padding(.top, Space.section)
 
-            DawnPrimaryButton(title: "Done", treatment: .atmospheric, accent: palette.accent) {
+            // TALLER THAN THE HOUSE PRIMARY, on this screen only.
+            //
+            // Eden: *"the done button is a little too high… we can enlarge the
+            // Done a little"*. It is the single most-pressed control in the
+            // app, hit with a knuckle, on a phone on the floor. Home's "Start"
+            // keeps `Hit.primary` — it is pressed once a session, sitting down.
+            PaperPrimaryButton(title: "Done", height: 78) {
                 // `Cue.confirm` was composed and never played. The web fires it
                 // from exactly this button (`src/screens/Workout.tsx`), and the
                 // haptic alone is not the same acknowledgement when the phone
@@ -119,14 +152,35 @@ struct SetScreen: View {
                 Audio.shared.play(.confirm)
                 onLog()
             }
-            .padding(.top, Space.step)
-
-            Text(setsRemaining == 1 ? "1 set to go" : "\(setsRemaining) sets to go")
-                .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
-                .padding(.top, Space.snug)
+            // ROOM ABOVE IT. Eden: *"space it from the number card above it so
+            // movement and it have more space around them"*. 12pt put the
+            // primary action right against the rep sheet's torn bottom edge,
+            // so the two read as one block rather than as a card and the
+            // control that commits it.
+            .padding(.top, Space.gutter)
+            // FIXED, NOT STRETCHED. As the VStack's last child the button's
+            // block grew to 136pt against a declared 78 — measured — and ran
+            // flush to the bottom edge, under the home indicator. The trailing
+            // "sets to go" line used to absorb that slack; with it gone the
+            // button has to refuse it.
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.bottom, Space.snug)
         }
-        .padding(.horizontal, Space.gutter)
+        // NO GROUND HERE. `WorkoutHost` paints the stock and the halftone as a
+        // ZStack sibling, above the step transition, and this screen is drawn
+        // inside that transition — so painting it again meant **a second
+        // full-screen halftone canvas, 14,175 dots, alive inside the subtree
+        // that animates on every Done.** `RestScreen` and `WarmupScreen` never
+        // did this; only this screen.
+        //
+        // NOT a double exposure, though it looks like one on paper: the ground
+        // paints an OPAQUE stock behind its halftone, so this screen's copy
+        // covered the host's rather than compounding it. Measured across the
+        // bare margin, mean luma 192.0 before and 191.0 after — the dots shift
+        // phase because the grid is now aligned to the screen instead of to
+        // this view, and that is the whole visual difference.
+        //
+        // So this is a pure cost removal, not a fix to how it looks.
         // 22, not 9. Nine points put the primary action of the whole app
         // directly on top of the home indicator; see the note on `body`.
         .safeAreaPadding(.bottom, Space.gutter)
@@ -147,26 +201,17 @@ struct SetScreen: View {
     /// slack goes into the FIGURE before it goes into empty space. Before this
     /// the order was the other way round by default and a 16 Pro showed a
     /// 161pt figure above 120pt of nothing.
-    private func upper(withBay: Bool) -> some View {
+    private func upper(withBay _: Bool) -> some View {
         VStack(spacing: 0) {
             metadata
-
-            if withBay {
-                ExerciseMotionBay(
-                    treatment: .atmospheric,
-                    exercise: setStep.exercise,
-                    accent: palette.accent
-                )
-                .frame(minHeight: 120, maxHeight: 300)
-                .padding(.top, Space.step)
-                .layoutPriority(-1)
-            }
 
             cues
                 .padding(.top, Space.step)
 
-            Spacer(minLength: 0)
-                .layoutPriority(-2)
+            // The trailing Spacer that used to live here is gone. It existed to
+            // push content up when this block FILLED the screen; inside a ply
+            // that hugs its content it did the opposite — it inflated the sheet
+            // from within and left a void between the cues and the torn edge.
         }
     }
 
@@ -192,21 +237,38 @@ struct SetScreen: View {
     private var metadata: some View {
         HStack(alignment: .top, spacing: Space.step) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(setStep.exercise)
-                    .font(TypeScale.title)
-                    .foregroundStyle(Ink.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.62)
+                HStack(alignment: .firstTextBaseline, spacing: Space.snug) {
+                    Text(setStep.exercise)
+                        .font(PaperType.title)
+                        .tracking(TypeScale.titleTracking)
+                        .foregroundStyle(Paper.press)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.62)
+
+                    // `SetStep.intense`, RENDERED — for the first time in this
+                    // app's life.
+                    //
+                    // `spec.md` §3.3 has required since W0 that a set you are
+                    // meant to take past failure be distinguishable BEFORE you
+                    // start it, and the flag has been compiled into every step
+                    // with nothing reading it. The R4 prototype drew it, Eden
+                    // approved that prototype, and the port kept the palette
+                    // and dropped the stamp — the same way the crossing wipe
+                    // was lost. Second instance of that pattern in two days.
+                    if setStep.intense {
+                        PaperStamp(text: "All out")
+                    }
+                }
 
                 Text(factLine)
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let prose = proseTarget {
                     Text("Target: \(prose)")
                         .font(TypeScale.bodyEmphasis)
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -220,7 +282,7 @@ struct SetScreen: View {
                 if setStep.straightIntoNext == true {
                     Text("No rest after this. Straight into the next one.")
                         .font(TypeScale.body)
-                        .foregroundStyle(palette.accentText)
+                        .foregroundStyle(Paper.blue)
                         .padding(.top, Space.tight)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -232,15 +294,15 @@ struct SetScreen: View {
                     Text("TARGET")
                         .font(TypeScale.microLabel)
                         .tracking(1.4)
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                     Text(count)
                         .font(TypeScale.counter(30))
                         .monospacedDigit()
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                         .lineLimit(1)
                     Text("reps")
                         .font(TypeScale.microLabel)
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                 }
                 .fixedSize(horizontal: true, vertical: false)
             }
@@ -304,13 +366,13 @@ struct SetScreen: View {
                     // `§8` asks for that and the emphasis is the dot plus the
                     // weight, not a second colour.
                     Circle()
-                        .fill(carriesEffect(cue) ? palette.accent : Ink.hairline)
+                        .fill(carriesEffect(cue) ? Paper.orange : Paper.press.opacity(0.35))
                         .frame(width: 5, height: 5)
                         .padding(.top, 8)
 
                     Text(cue)
                         .font(carriesEffect(cue) ? TypeScale.bodyEmphasis : TypeScale.body)
-                        .foregroundStyle(carriesEffect(cue) ? Ink.primary : Ink.secondary)
+                        .foregroundStyle(Paper.press)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -368,46 +430,87 @@ struct WorkoutChrome: View {
         VStack(spacing: Space.snug) {
             ZStack {
                 HStack {
-                    Button(action: onBack) {
-                        Label("Back", systemImage: "chevron.left")
-                            .labelStyle(.titleAndIcon)
-                            .font(TypeScale.label)
-                            .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .leading)
-                    }
+                    // Both carried no button style at all, and the VStack
+                    // below sets `.foregroundStyle(Paper.press)` over the top,
+                    // which suppresses whatever tint the system would have
+                    // given them. So the two controls in the corner of every
+                    // workout screen — one of which discards the session —
+                    // acknowledged nothing.
+                    Button("BACK", action: onBack)
+                        .buttonStyle(PressLabelStyle())
+                        .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .leading)
+                        // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                        // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                        // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                        // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                        // box, so most of the target was dead paper.
+                        //
+                        // Eden, on the phone: *"seems like the clickable area is the text of the
+                        // button not the button itself, this feels bad to click."* At 6:10am with a
+                        // knuckle this is the difference between a control and a dare.
+                        .contentShape(Rectangle())
 
                     Spacer()
 
-                    Button("End", action: onEnd)
-                        .font(TypeScale.label)
+                    Button("END", action: onEnd)
+                        .buttonStyle(PressLabelStyle())
                         .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .trailing)
+                        // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                        // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                        // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                        // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                        // box, so most of the target was dead paper.
+                        //
+                        // Eden, on the phone: *"seems like the clickable area is the text of the
+                        // button not the button itself, this feels bad to click."* At 6:10am with a
+                        // knuckle this is the difference between a control and a dare.
+                        .contentShape(Rectangle())
                 }
-                .foregroundStyle(Ink.secondary)
 
-                Text(step)
-                    .font(TypeScale.label.monospacedDigit())
-                    .foregroundStyle(Ink.secondary)
+                // THE LABEL CHANGES; IT DOES NOT CROSS-FADE.
+                //
+                // Introduced by `plans/011`. Once the chrome is hoisted it
+                // persists across the step swap, so the step change — which
+                // runs inside `advance()`'s `withAnimation` — started
+                // cross-dissolving two different strings in the same place.
+                // Filmed mid-swap it printed **"SEREST13"**: "SET 2 / 13" and
+                // "REST" on top of each other.
+                //
+                // Exactly the family of bug §3.2 already rules on for the rep
+                // digit — *"per-set identity so a new set's number never rolls
+                // from the previous set's… without identity it reads as a slot
+                // machine on every step"*. This label is a fact about which
+                // step you are on, and a fact that smears is unreadable.
+                Text(step.uppercased())
+                    .contentTransition(.identity)
+                    .animation(nil, value: step)
             }
+            .font(PaperType.micro)
+            .tracking(TypeScale.microTracking)
+            .foregroundStyle(Paper.press)
 
-            GeometryReader { proxy in
-                ZStack(alignment: .topLeading) {
-                    Capsule().fill(Ink.hairline)
-                        .frame(height: 3)
-                    Capsule()
-                        .fill(DawnPalette(progress: progress).accent)
-                        .frame(width: proxy.size.width * progress, height: 3)
-
-                    ForEach(Array(setMarks.enumerated()), id: \.offset) { _, at in
-                        Circle()
-                            .fill(at <= progress
-                                ? DawnPalette(progress: progress).accent
-                                : Ink.primary.opacity(0.18))
-                            .frame(width: 3, height: 3)
-                            .offset(x: proxy.size.width * at - 1.5, y: 7)
-                    }
-                }
-            }
-            .frame(height: 13)
+            StepBlock(marks: setMarks, progress: progress)
+            // The 2pt press-black rule that used to close this block is gone.
+            //
+            // It sat directly on the head ply's torn top edge — a hard printed
+            // rule butting into torn paper, which is TWO separator vocabularies
+            // stacked on one seam. The tear and the shadow under it already
+            // separate the chrome from the sheet, and they do it in the world's
+            // own language.
         }
-        .frame(height: 82)
+        // NO HORIZONTAL PADDING HERE — THE CALLER OWNS IT.
+        //
+        // This used to inset itself by `Space.gutter`. `SetScreen` pads its
+        // children individually so the chrome got exactly one gutter, but
+        // `RestScreen` and `WarmupScreen` wrap their whole stack in another
+        // one — so the rail was 22pt in from the edge on a set and **44pt on a
+        // rest**, and it visibly changed width every time the workout advanced.
+        //
+        // Eden has reported this exact class of thing on this exact component
+        // before (W15: *"when you switch to the rest screens the progress bar
+        // at the top changes… i don't like any inconsistancies like this"*),
+        // which is why the fix is structural rather than a negative padding:
+        // one gutter, applied once, by whoever places it.
+        .padding(.bottom, Space.snug)
     }
 }

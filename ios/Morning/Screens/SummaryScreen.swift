@@ -58,7 +58,7 @@ struct SummaryScreen: View {
                 .transition(.opacity)
             }
         }
-        .background(DawnBackdrop(treatment: .atmospheric, progress: skyProgress))
+        .paperGround()
     }
 
     private var summary: some View {
@@ -83,11 +83,7 @@ struct SummaryScreen: View {
             }
             .scrollBounceBehavior(.basedOnSize)
 
-            DawnPrimaryButton(
-                title: "Done",
-                treatment: .atmospheric,
-                accent: DawnPalette(progress: skyProgress).accent
-            ) {
+            PaperPrimaryButton(title: "Done") {
                 onDone()
             }
             .padding(.top, Space.step)
@@ -102,12 +98,12 @@ struct SummaryScreen: View {
             VStack(alignment: .leading, spacing: Space.tight) {
                 Text(celebration.eyebrow)
                     .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
+                    .foregroundStyle(Paper.press)
 
                 Text(record.reps, format: .number)
                     .font(TypeScale.counter(76))
                     .monospacedDigit()
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
 
                 // The unit is not decoration here. Without it "150" sits
                 // directly above "Reps have stopped moving." and the two scan
@@ -117,17 +113,17 @@ struct SummaryScreen: View {
                 // summary underneath.
                 Text("reps")
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .padding(.bottom, Space.snug)
 
                 Text(celebration.headline)
                     .font(TypeScale.title)
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(celebration.body)
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, Space.tight)
             }
@@ -147,6 +143,24 @@ struct SummaryScreen: View {
                     guard !Task.isCancelled else { return }
                     reveal()
                 }
+            }
+
+            // WHAT YOU KNOW, ON THE SAME SCREEN AS WHAT YOU LIFTED.
+            //
+            // The deck's whole presence outside a rest is this sentence. It is
+            // deliberately not a fifth entry in `factsRow`: those four are what
+            // you just DID, and putting knowledge in the same row as tonnage
+            // and the week would make it a fifth number to keep up, which is
+            // the reading `plans/004` rules out.
+            //
+            // Below the card, because the card is the deck and this is a fact
+            // about the same thing. It is absent entirely until it has
+            // something true to say — see `Deck.Standing.line`.
+            if let line = deckStanding.line {
+                Text(line)
+                    .font(TypeScale.body)
+                    .foregroundStyle(Paper.press)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer(minLength: Space.step)
@@ -173,7 +187,7 @@ struct SummaryScreen: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
                 .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
+                .foregroundStyle(Paper.press)
             // W15 #4, applied where it earns the most: these four numbers ARE
             // the screen. "What you just did, how it compares, where the week
             // stands" — and they were set at callout, one step above the
@@ -181,8 +195,37 @@ struct SummaryScreen: View {
             Text(value)
                 .font(TypeScale.counter(22))
                 .monospacedDigit()
-                .foregroundStyle(Ink.primary)
+                .foregroundStyle(Paper.press)
         }
+    }
+
+    /// The deck's standing, or a made-up one for review.
+    ///
+    /// `-standing <settled>/<shaky>/<questions>`. The shipped deck holds ONE
+    /// question, so the only standing this screen can reach on its own is some
+    /// arrangement of one — and the line was written for "19 of 26 solid. 4 you
+    /// keep missing." A sentence nobody can look at is a sentence nobody has
+    /// checked, which is the same reason `-tier`, `-card` and `-answer` exist.
+    ///
+    /// Read-only, like the others: it never writes mastery.
+    private var deckStanding: Deck.Standing {
+        let arguments = ProcessInfo.processInfo.arguments
+        if let flag = arguments.firstIndex(of: "-standing"),
+           arguments.indices.contains(flag + 1)
+        {
+            // `-standing met/cards/answered/settled/shaky`.
+            let parts = arguments[flag + 1].split(separator: "/").compactMap { Int($0) }
+            if parts.count == 5 {
+                return Deck.Standing(
+                    met: parts[0],
+                    cards: parts[1],
+                    answered: parts[2],
+                    settled: parts[3],
+                    shaky: parts[4]
+                )
+            }
+        }
+        return Deck.standing()
     }
 
     private func reveal() {
@@ -217,17 +260,23 @@ private struct SummaryCard: View {
                 Text(card.topic.uppercased())
                     .font(TypeScale.microLabel)
                     .tracking(1.8)
-                    .foregroundStyle(DawnPalette(progress: 1).accentText)
+                    // Was `DawnPalette(progress: 1).accentText` — gold lifted
+                    // toward white, which on paper stock measures **1.30:1**.
+                    // The worst contrast anywhere in the app, and the pink Eden
+                    // spotted. Blue matches the same label on the Rest screen's
+                    // card: 7.02:1, and it is the ink for something already
+                    // true, which a topic name is.
+                    .foregroundStyle(Paper.blue)
 
                 Text(card.q)
                     .font(TypeScale.question)
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if revealed {
                     Text(card.a)
                         .font(TypeScale.answer)
-                        .foregroundStyle(Ink.secondary)
+                        .foregroundStyle(Paper.press)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .opacity(answerShown ? 1 : 0)
@@ -236,7 +285,9 @@ private struct SummaryCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        // The Summary's study card. Same component role as the Rest screen's,
+        // and it was missing its press state for the same reason.
+        .buttonStyle(PressSheetStyle())
         .accessibilityLabel(revealed ? "\(card.q) \(card.a)" : "\(card.q). Reveal answer.")
     }
 }
