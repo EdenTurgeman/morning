@@ -27,31 +27,21 @@ import SwiftUI
  * ======================================================================== */
 
 struct WarmupScreen: View {
+    // THE CHROME IS THE HOST'S. `WorkoutHost` draws `WorkoutChrome` once,
+    // above the step transition, so the rail, the set marks, BACK and END do
+    // not blink when one screen becomes another — `plans/011`. `progress`,
+    // `setMarks`, `onBack` and `onEnd` went with it.
     let step: TimerStep
     let endsAt: Date
-    let progress: Double
-    let stepLabel: String
-    /// The rail's ticks. See `WorkoutChrome.setMarks` — passed on every screen
-    /// in the workout, because a rail that changes shape between them reads as
-    /// a bug.
-    let setMarks: [Double]
 
     let onDone: () -> Void
-    let onBack: () -> Void
-    let onEnd: () -> Void
 
     /// Fires once. `endsAt` resets it.
     @State private var completed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var palette: DawnPalette {
-        DawnPalette(progress: progress)
-    }
-
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutChrome(progress: progress, step: stepLabel, setMarks: setMarks, onBack: onBack, onEnd: onEnd)
-
             // W15 #5, all four of Eden's complaints about this screen:
             // "doesn't have the same countdown as other screens… it's spaced
             // really badly, the text spacing is bad, the text is small and
@@ -66,12 +56,12 @@ struct WarmupScreen: View {
             VStack(alignment: .leading, spacing: Space.tight) {
                 Text(step.title)
                     .font(TypeScale.title)
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
 
                 // Verbatim from the web build. Content is not ours to improve.
                 Text("90 seconds. Don't skip it, don't extend it.")
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, Space.snug)
@@ -86,7 +76,7 @@ struct WarmupScreen: View {
                 CountdownRing(
                     remaining: remaining,
                     total: Double(step.seconds),
-                    accent: palette.accent,
+                    accent: Paper.orange,
                     caption: "SEC"
                 )
                 .onChange(of: Int(ceil(remaining))) { _, value in
@@ -98,12 +88,22 @@ struct WarmupScreen: View {
 
             Spacer(minLength: Space.step)
 
-            DawnPrimaryButton(title: "Start lifting", treatment: .atmospheric, accent: palette.accent) {
+            PaperPrimaryButton(title: "Start lifting") {
                 finish()
             }
+            // Explicit, not only `safeAreaPadding`. As the last child of the
+            // stack the button sat flush on the home indicator regardless of
+            // the safe-area value — verified on a rendered frame, which is the
+            // only check that has ever caught this class of thing here.
+            .padding(.bottom, Space.step)
         }
         .padding(.horizontal, Space.gutter)
-        .safeAreaPadding(.bottom, Space.snug)
+        // 22, not 9. Nine points put the primary action on top of the home
+        // indicator — the same W15 #9 defect the Set screen already fixed
+        // ("we ruined the done button, it's pinned downstairs"). Warm-up kept
+        // the old value and inherited the bug the moment its button grew the
+        // orange rule.
+        .safeAreaPadding(.bottom, Space.gutter)
         .dynamicTypeSize(.large)
         // The floor, for the same reason `RestScreen` has one: `TimelineView`
         // only ticks while the app is drawing.
@@ -125,13 +125,13 @@ struct WarmupScreen: View {
             ForEach(Array(step.cues.enumerated()), id: \.offset) { _, cue in
                 HStack(alignment: .top, spacing: Space.snug) {
                     Circle()
-                        .fill(Ink.hairline)
+                        .fill(Paper.press.opacity(0.22))
                         .frame(width: 5, height: 5)
                         .padding(.top, 8)
 
                     Text(cue)
                         .font(TypeScale.body)
-                        .foregroundStyle(Ink.secondary)
+                        .foregroundStyle(Paper.press)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }

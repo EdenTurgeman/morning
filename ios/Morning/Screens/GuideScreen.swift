@@ -61,12 +61,22 @@ struct GuideScreen: View {
             HStack {
                 Button("Close", action: onClose)
                     .font(TypeScale.label)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .leading)
+                    // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                    // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                    // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                    // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                    // box, so most of the target was dead paper.
+                    //
+                    // Eden, on the phone: *"seems like the clickable area is the text of the
+                    // button not the button itself, this feels bad to click."* At 6:10am with a
+                    // knuckle this is the difference between a control and a dare.
+                    .contentShape(Rectangle())
                 Spacer()
                 Text("Guide")
                     .font(TypeScale.label)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                 Spacer()
                 Color.clear.frame(width: Hit.minimum, height: Hit.minimum)
             }
@@ -78,11 +88,11 @@ struct GuideScreen: View {
                         VStack(alignment: .leading, spacing: Space.snug) {
                             Text(entry.heading)
                                 .font(.title3.weight(.semibold))
-                                .foregroundStyle(Ink.primary)
+                                .foregroundStyle(Paper.press)
 
                             Text(entry.body)
                                 .font(.body)
-                                .foregroundStyle(Ink.secondary)
+                                .foregroundStyle(Paper.press)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -92,7 +102,7 @@ struct GuideScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: 0.30))
+        .paperGround()
         // Read monthly, not at 6:10am. This one takes the accessibility sizes;
         // the workout screens deliberately do not.
         .dynamicTypeSize(...DynamicTypeSize.accessibility3)
@@ -137,12 +147,19 @@ struct BackupScreen: View {
         return "Last backup \(days) \(days == 1 ? "day" : "days") ago."
     }
 
-    /// Rose when there is no copy at all, the accent once it is going stale,
-    /// green while it is current. A rule rather than a filled badge: this is
-    /// status, not a control.
+    /// Three states, on the paper world's own inks. A rule rather than a
+    /// filled badge: this is status, not a control.
+    ///
+    /// The middle state was a leftover `DawnPalette(progress: 0.3).accent` —
+    /// the ramp's violet-rose, which belongs to a world that no longer exists.
+    /// And "current" was the OVERPRINT, which everywhere else in this app means
+    /// attention: a healthy backup was being flagged in the app's alarm ink.
+    ///
+    /// Now it follows the ink law. `danger` — you have no copy of this. The
+    /// overprint — attention, it is going stale. Blue — already true, current.
     private var statusTone: Color {
-        guard let days = daysSinceBackup else { return Semantic.danger }
-        return days > 14 ? DawnPalette(progress: 0.3).accent : Semantic.threshold
+        guard let days = daysSinceBackup else { return Paper.danger }
+        return days > 14 ? Paper.overprint : Paper.blue
     }
 
     var body: some View {
@@ -150,12 +167,22 @@ struct BackupScreen: View {
             HStack {
                 Button("Close", action: onClose)
                     .font(TypeScale.label)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .leading)
+                    // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                    // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                    // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                    // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                    // box, so most of the target was dead paper.
+                    //
+                    // Eden, on the phone: *"seems like the clickable area is the text of the
+                    // button not the button itself, this feels bad to click."* At 6:10am with a
+                    // knuckle this is the difference between a control and a dare.
+                    .contentShape(Rectangle())
                 Spacer()
                 Text("Backup")
                     .font(TypeScale.label)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                 Spacer()
                 Color.clear.frame(width: Hit.minimum, height: Hit.minimum)
             }
@@ -174,7 +201,7 @@ struct BackupScreen: View {
                 // own.
                 Text(statusText)
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
                 Spacer(minLength: 0)
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -182,16 +209,16 @@ struct BackupScreen: View {
             VStack(alignment: .leading, spacing: Space.snug) {
                 Text("\(data.history.count) sessions")
                     .font(TypeScale.counter(38))
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
                 Text("This is everything the app knows about you. The export is the "
                     + "only copy that survives a lost phone.")
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             VStack(spacing: Space.step) {
-                DawnPrimaryButton(title: "Export", treatment: .atmospheric, accent: DawnPalette(progress: 0.3).accent) {
+                PaperPrimaryButton(title: "Export") {
                     exporting = true
                     onExported()
                 }
@@ -199,8 +226,18 @@ struct BackupScreen: View {
                 Button("Restore from a file") { importing = true }
                     .font(TypeScale.body)
                     .fixedSize(horizontal: false, vertical: true)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .frame(minHeight: Hit.minimum)
+                    // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                    // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                    // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                    // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                    // box, so most of the target was dead paper.
+                    //
+                    // Eden, on the phone: *"seems like the clickable area is the text of the
+                    // button not the button itself, this feels bad to click."* At 6:10am with a
+                    // knuckle this is the difference between a control and a dare.
+                    .contentShape(Rectangle())
             }
 
             Spacer()
@@ -216,7 +253,7 @@ struct BackupScreen: View {
             // for a destructive action and costs none of the distance.
             VStack(spacing: Space.snug) {
                 Rectangle()
-                    .fill(Ink.hairline)
+                    .fill(Paper.press.opacity(0.22))
                     .frame(height: 1)
 
                 Button("Erase everything") { confirmingErase = true }
@@ -230,7 +267,7 @@ struct BackupScreen: View {
                     // of the screen from Export. Making the label hard to read
                     // is not a fourth — you have to be able to read the thing
                     // you are about to tap.
-                    .foregroundStyle(Semantic.dangerText)
+                    .foregroundStyle(Paper.danger)
                     .frame(maxWidth: .infinity, minHeight: Hit.minimum)
             }
         }
@@ -238,7 +275,7 @@ struct BackupScreen: View {
         .modifier(FillOrScroll())
         .safeAreaPadding(.vertical, Space.step)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: 0.30))
+        .paperGround()
         .fileExporter(
             isPresented: $exporting,
             document: BackupDocument(bytes: exportBytes),

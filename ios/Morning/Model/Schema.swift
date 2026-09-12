@@ -72,6 +72,84 @@ struct SessionRecord: Codable, Identifiable, Equatable {
 
 /// The whole file. One `Codable` struct written as JSON to Application Support.
 /// A few tens of KB per year — SwiftData and Core Data buy nothing here.
+/// ONE ANSWER HE ACTUALLY GAVE, kept forever.
+///
+/// `Deck.Mastery` is a summary — misses, and the run since the last one — and a
+/// summary cannot answer a question it was not designed for. Eden asked for the
+/// raw events *"so that if i wanna gamify it later i can"*, and the whole point
+/// of that is that the shape of the game is not decided yet. So this records
+/// what happened rather than what it is worth: which card, when, which option
+/// he chose, and whether it was right.
+///
+/// **Which option** is the field that would be impossible to reconstruct later
+/// and is worth the most: it is the difference between "he missed this" and
+/// "he keeps confusing it with THAT", and the second is the one that could ever
+/// teach him something.
+///
+/// It lives in `AppData` rather than beside the mastery store, because
+/// `AppData` is what the backup file carries. Mastery has never been exported —
+/// so until now a restore brought back every workout and none of the study
+/// progress. Mastery is derivable from these events; the events are derivable
+/// from nothing.
+struct StudyAnswer: Codable, Equatable {
+    /// The card's id. Not a reference to the card object: cards are content and
+    /// may be reworded, and an event that happened does not change when they are.
+    var card: String
+    /// Epoch milliseconds, the same convention `06-data.md` uses for `ts`.
+    var ts: Int
+    /// Index into that card's options, as they stood when he answered.
+    var picked: Int
+    var right: Bool
+    /// WHAT THAT OPTION SAID, as it read when he chose it.
+    ///
+    /// `picked` is an index, and an index is only a reference — the deck is
+    /// written by agents who rephrase and reorder options, so index 2 in March
+    /// is not necessarily the answer he gave in March. That is fine for
+    /// counting misses and useless for saying anything about them: *"you keep
+    /// answering Chenin Blanc"* is worth reading, and worth nothing at all if
+    /// it might name an option he never picked. This app does not tell those.
+    ///
+    /// So the words ride along. About forty bytes an answer, and it is the
+    /// difference between a log that can only count and one that can say what
+    /// happened.
+    ///
+    /// **Optional, and its absence is meaningful** — "logged before the wording
+    /// was recorded". Those answers still count as misses; they simply cannot
+    /// say which one. Never backfill it from the card's options as they stand
+    /// today: that is exactly the lie this field exists to prevent.
+    var pickedText: String?
+}
+
+/// ONE TIME A CARD WAS PUT IN FRONT OF HIM.
+///
+/// The answer log records what he CHOSE; this records what he was SHOWN, and
+/// the two are not the same event. A question he let run out writes nothing to
+/// the answer log — deliberately, so a slow morning is never recorded as
+/// ignorance — and a factoid can never write to it at all. Before this, more
+/// than a quarter of the deck had no record of ever having been seen.
+///
+/// Eden asked for exactly this: *"i want to start remembering which questions i
+/// saw, how many times i saw each, so it's always diverse."* Times seen is the
+/// only thing that can make the draw diverse, because it is the only thing that
+/// knows a factoid has come round four times.
+///
+/// Kept as EVENTS rather than a per-card counter for the same reason
+/// `StudyAnswer` is: a counter can answer "how many", and nothing else. These
+/// can answer "how many, in what order, how far apart, and did he engage" —
+/// including questions nobody has thought of yet.
+struct StudySighting: Codable, Equatable {
+    /// The card's id.
+    var card: String
+    /// Epoch milliseconds.
+    var ts: Int
+    /// Whether he opened it by hand, rather than letting the clock open it.
+    ///
+    /// The one signal that separates a card he engaged with from a card that
+    /// merely happened at him — and the only way to ever notice that some card
+    /// is being skipped every single time it comes round.
+    var opened: Bool = false
+}
+
 struct AppData: Codable, Equatable {
     var v: Int
     var history: [SessionRecord]
@@ -81,6 +159,17 @@ struct AppData: Codable, Equatable {
     /// default". It lives in data rather than the program so changing it needs
     /// no rebuild.
     var loads: [String: Double]?
+    /// Every study answer he has given, oldest first. Absent in files written
+    /// before this existed, and in every web export.
+    var studyAnswers: [StudyAnswer]?
+    /// Every time a card was shown to him, oldest first. Absent in files
+    /// written before this existed, and in every web export.
+    ///
+    /// It rides in the backup for the reason Eden gave — *"all that needs to be
+    /// saved in memory so i can export"* — and because without it a restore
+    /// hands the scheduler a deck it believes has never been shown, and the
+    /// whole rotation starts again from nothing.
+    var studySightings: [StudySighting]?
 
     static let empty = AppData(v: 1, history: [], lastBackup: nil, loads: nil)
 
@@ -94,13 +183,24 @@ struct AppData: Codable, Equatable {
         case history
         case lastBackup
         case loads
+        case studyAnswers
+        case studySightings
     }
 
-    init(v: Int = 1, history: [SessionRecord] = [], lastBackup: String? = nil, loads: [String: Double]? = nil) {
+    init(
+        v: Int = 1,
+        history: [SessionRecord] = [],
+        lastBackup: String? = nil,
+        loads: [String: Double]? = nil,
+        studyAnswers: [StudyAnswer]? = nil,
+        studySightings: [StudySighting]? = nil
+    ) {
         self.v = v
         self.history = history
         self.lastBackup = lastBackup
         self.loads = loads
+        self.studyAnswers = studyAnswers
+        self.studySightings = studySightings
     }
 
     /// Lenient by design: a malformed record is skipped and the rest of the
@@ -110,6 +210,8 @@ struct AppData: Codable, Equatable {
         v = try container.decodeIfPresent(Int.self, forKey: .v) ?? 1
         lastBackup = try container.decodeIfPresent(String.self, forKey: .lastBackup)
         loads = try container.decodeIfPresent([String: Double].self, forKey: .loads)
+        studyAnswers = try container.decodeIfPresent([StudyAnswer].self, forKey: .studyAnswers)
+        studySightings = try container.decodeIfPresent([StudySighting].self, forKey: .studySightings)
         let lenient = try container.decodeIfPresent([LenientRecord].self, forKey: .history) ?? []
         history = lenient.compactMap(\.record)
     }

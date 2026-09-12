@@ -42,13 +42,13 @@ struct SummaryReviewHost: View {
                 VStack(spacing: Space.snug) {
                     Text("Done")
                         .font(TypeScale.title)
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                     Text("Review only. The app returns to Home here.")
                         .font(TypeScale.body)
-                        .foregroundStyle(Ink.secondary)
+                        .foregroundStyle(Paper.press)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Surface.night)
+                .background(Paper.stock)
             }
         }
     }
@@ -133,7 +133,83 @@ struct ReadingReviewHost: View {
         case .ledger: LedgerScreen(history: data.history, onClose: {})
         case .guide: GuideScreen(onClose: {})
         case .backup: BackupScreen(data: data, onRestore: { _ in }, onErase: {}, onClose: {}, onExported: {})
+        case .study:
+            StudyScreen(report: Self.studyReport(), onClose: {})
         }
+    }
+
+    /// `-study-seed` fills the deck's logs so the populated page can be looked
+    /// at. Without it a review install has met nothing and the only reachable
+    /// state is the empty one — and this project has shipped a state nobody
+    /// could reach more than once.
+    ///
+    /// It writes through `Deck.restore*` and reads back through
+    /// `StudyReport.current()`, so what is on screen came down the REAL
+    /// pipeline: the fold, the engagement rule, the confusion filter. A
+    /// hand-built `StudyReport` would prove only that the layout compiles.
+    private static func studyReport() -> StudyReport {
+        guard ProcessInfo.processInfo.arguments.contains("-study-seed") else {
+            return .current()
+        }
+        var sightings: [StudySighting] = []
+        var answers: [StudyAnswer] = []
+        var stamp = Int(Date().addingTimeInterval(-120 * 86400).timeIntervalSince1970 * 1000)
+
+        // A plausible half-year: a third of the deck met, most of it settled,
+        // a handful still being missed, and two questions he keeps answering
+        // the same wrong way.
+        for (index, card) in Cards.all.enumerated() where index % 3 == 0 {
+            stamp += 3_600_000
+            let isQuestion = card.choices != nil
+            sightings.append(StudySighting(card: card.id, ts: stamp, opened: isQuestion))
+            guard isQuestion, let choices = card.choices, let correct = card.correctIndex else { continue }
+            let wrong = choices.indices.first { $0 != correct } ?? 0
+
+            switch index % 21 {
+            case 0:
+                // He keeps reaching for the same wrong answer.
+                answers.append(.init(
+                    card: card.id,
+                    ts: stamp + 1,
+                    picked: wrong,
+                    right: false,
+                    pickedText: choices[wrong]
+                ))
+                answers.append(.init(
+                    card: card.id,
+                    ts: stamp + 2,
+                    picked: wrong,
+                    right: false,
+                    pickedText: choices[wrong]
+                ))
+            case 3:
+                answers.append(.init(
+                    card: card.id,
+                    ts: stamp + 1,
+                    picked: wrong,
+                    right: false,
+                    pickedText: choices[wrong]
+                ))
+            default:
+                answers.append(.init(
+                    card: card.id,
+                    ts: stamp + 1,
+                    picked: correct,
+                    right: true,
+                    pickedText: choices[correct]
+                ))
+                answers.append(.init(
+                    card: card.id,
+                    ts: stamp + 2,
+                    picked: correct,
+                    right: true,
+                    pickedText: choices[correct]
+                ))
+            }
+        }
+        Deck.restoreSightings(sightings)
+        Deck.restoreAnswers(answers)
+        return .current()
     }
 }
 
@@ -153,11 +229,21 @@ struct LiveActivityReviewHost: View {
         VStack(spacing: Space.step) {
             Text("Live Activity · lock screen")
                 .font(TypeScale.microLabel)
-                .foregroundStyle(Ink.tertiary)
+                .foregroundStyle(Paper.press)
 
             ForEach(Array(samples.enumerated()), id: \.offset) { _, sample in
                 RestActivityLockScreen(attributes: sample, frozenAt: Self.now)
-                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 22))
+                    // THE SAME TINT THE REAL ACTIVITY GETS.
+                    //
+                    // Was `.black.opacity(0.55)`, which mirrored the old
+                    // `activityBackgroundTint`. That modifier only takes effect
+                    // in a real activity, so this preview draws the card
+                    // itself — and the moment the slip went to press black on
+                    // a paper tint, a dark card here made the ONE tool for
+                    // looking at this surface show the exact opposite of what
+                    // ships. A preview that disagrees with production is worse
+                    // than no preview.
+                    .background(Paper.stock, in: RoundedRectangle(cornerRadius: 22))
                     .frame(maxWidth: .infinity)
             }
 
@@ -165,7 +251,7 @@ struct LiveActivityReviewHost: View {
         }
         .padding(Space.gutter)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Surface.night)
+        .background(Paper.stock)
     }
 
     /// The two shapes it actually has to hold — a long rest with a long
@@ -233,13 +319,13 @@ struct ReviewHost: View {
             VStack(spacing: Space.snug) {
                 Text(ended)
                     .font(TypeScale.title)
-                    .foregroundStyle(Ink.primary)
+                    .foregroundStyle(Paper.press)
                 Text("Review only. The app returns to Home here.")
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(DawnBackdrop(treatment: .atmospheric, progress: 0.2))
+            .paperGround()
         } else {
             WorkoutHost(
                 session: WorkoutSession(

@@ -33,7 +33,13 @@ struct HistoryScreen: View {
     let onClose: () -> Void
 
     @State private var editing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var confirming: SessionRecord?
+    /// When the year grid's once-ever wipe began. See `YearGrid.inkingFrom`.
+    @State private var inkingFrom: Date?
+    /// Whether the claim has been made. The grid is held back for the frame it
+    /// takes, so a first-data wipe never starts by flashing the finished grid.
+    @State private var claimed = false
 
     private var sorted: [SessionRecord] {
         history.sorted { $0.timestamp > $1.timestamp }
@@ -48,7 +54,8 @@ struct HistoryScreen: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: Space.section) {
-                        YearGrid(history: history)
+                        YearGrid(history: history, inkingFrom: inkingFrom)
+                            .opacity(claimed ? 1 : 0)
 
                         weekStrip
 
@@ -60,7 +67,8 @@ struct HistoryScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: 0.12))
+        .paperGround()
+        .onAppear(perform: claimFirstRecord)
         // See `WorkoutHost`: the sheet form has no visible cancel on iOS 26.
         .alert(
             "Delete this session?",
@@ -87,14 +95,24 @@ struct HistoryScreen: View {
         HStack {
             Button("Close", action: onClose)
                 .font(TypeScale.label)
-                .foregroundStyle(Ink.secondary)
+                .foregroundStyle(Paper.press)
                 .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .leading)
+                // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                // box, so most of the target was dead paper.
+                //
+                // Eden, on the phone: *"seems like the clickable area is the text of the
+                // button not the button itself, this feels bad to click."* At 6:10am with a
+                // knuckle this is the difference between a control and a dare.
+                .contentShape(Rectangle())
 
             Spacer()
 
             Text("History")
                 .font(TypeScale.label)
-                .foregroundStyle(Ink.secondary)
+                .foregroundStyle(Paper.press)
 
             Spacer()
 
@@ -103,8 +121,18 @@ struct HistoryScreen: View {
             } else {
                 Button(editing ? "Done" : "Edit") { editing.toggle() }
                     .font(TypeScale.label)
-                    .foregroundStyle(editing ? DawnPalette(progress: 0.12).accentText : Ink.secondary)
+                    .foregroundStyle(editing ? Paper.blue : Paper.press)
                     .frame(minWidth: Hit.minimum, minHeight: Hit.minimum, alignment: .trailing)
+                    // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                    // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                    // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                    // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                    // box, so most of the target was dead paper.
+                    //
+                    // Eden, on the phone: *"seems like the clickable area is the text of the
+                    // button not the button itself, this feels bad to click."* At 6:10am with a
+                    // knuckle this is the difference between a control and a dare.
+                    .contentShape(Rectangle())
             }
         }
         .padding(.horizontal, Space.gutter)
@@ -127,14 +155,14 @@ struct HistoryScreen: View {
             HStack {
                 Text("Last 12 weeks")
                     .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
+                    .foregroundStyle(Paper.press)
 
                 Spacer()
 
                 if week.streak > 0 || week.longestRun > 0 {
                     Text(runLine(week))
                         .font(TypeScale.microLabel)
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                 }
             }
 
@@ -151,16 +179,33 @@ struct HistoryScreen: View {
         .padding(.horizontal, Space.gutter)
     }
 
+    /// This session's reps as a fraction of the best session on screen.
+    ///
+    /// Scaled against the visible history rather than against a fixed ceiling,
+    /// because a fixed one would make every bar tiny on a light week and the
+    /// shape would say nothing. Guards a zero max: a history where nothing was
+    /// logged has no shape to draw and every bar stays empty rather than
+    /// dividing by nothing.
+    private func fraction(of record: SessionRecord) -> CGFloat {
+        let best = sorted.map { History.reps(of: $0) }.max() ?? 0
+        guard best > 0 else { return 0 }
+        return CGFloat(History.reps(of: record)) / CGFloat(best)
+    }
+
     private func barColour(_ summary: WeekSummary) -> Color {
         if summary.complete {
-            return DawnPalette(progress: 0.55).accent
+            // Blue: a finished week is ALREADY TRUE. The dawn ramp put a
+            // different hue here for every position in the session, which meant the
+            // colour of a week said nothing — it was decoration keyed to an
+            // unrelated number.
+            return Paper.blue
         }
         // Bound to a local because `empty_count` fires on `summary.count == 0`.
         // It is a tally of sessions, not the size of a collection, so `isEmpty`
         // is not a thing it has — a false positive worth sidestepping rather
         // than disabling the rule for the file.
         let sessions = summary.count
-        return sessions > 0 ? Ink.primary.opacity(0.28) : Ink.primary.opacity(0.10)
+        return sessions > 0 ? Paper.press.opacity(0.28) : Paper.press.opacity(0.10)
     }
 
     /// Same rule as the home screen's: the longest run stays visible after the
@@ -174,16 +219,29 @@ struct HistoryScreen: View {
     }
 
     /// Not "no sessions yet". The beginning of a record.
+    /// `-first-record` forgets the claim, so a once-in-a-lifetime state can be
+    /// filmed more than once. The same flag `LedgerScreen` uses; the two keys
+    /// are separate so neither spends the other.
+    private func claimFirstRecord() {
+        if ProcessInfo.processInfo.arguments.contains("-first-record") {
+            FirstRecord.forget(FirstRecord.history)
+        }
+        if !history.isEmpty, FirstRecord.claim(FirstRecord.history) {
+            inkingFrom = .now
+        }
+        claimed = true
+    }
+
     private var empty: some View {
         VStack(alignment: .leading, spacing: Space.step) {
             Text("Nothing here yet")
                 .font(TypeScale.title)
-                .foregroundStyle(Ink.primary)
+                .foregroundStyle(Paper.press)
 
             Text("Every session you finish lands here. The date, which one, how many "
                 + "reps. A year of them fits on one screen.")
                 .font(TypeScale.body)
-                .foregroundStyle(Ink.secondary)
+                .foregroundStyle(Paper.press)
                 .fixedSize(horizontal: false, vertical: true)
 
             // The grid is shown EMPTY rather than hidden, so the shape of what
@@ -206,9 +264,9 @@ struct HistoryScreen: View {
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .font(.title3)
-                                .foregroundStyle(Semantic.danger)
+                                .foregroundStyle(Paper.danger)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressSheetStyle(scale: 0.97))
                         .frame(minWidth: 44, minHeight: Hit.minimum)
                         .accessibilityLabel("Delete \(record.sessionKey) on \(readable(record.date))")
                     }
@@ -216,24 +274,64 @@ struct HistoryScreen: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(readable(record.date))
                             .font(TypeScale.bodyEmphasis)
-                            .foregroundStyle(Ink.primary)
+                            .foregroundStyle(Paper.press)
                         Text("Session \(record.sessionKey) · \(record.minutes) min")
                             .font(TypeScale.microLabel)
-                            .foregroundStyle(Ink.tertiary)
+                            .foregroundStyle(Paper.press)
                     }
 
-                    Spacer()
+                    Spacer(minLength: Space.step)
 
-                    Text(History.reps(of: record), format: .number)
-                        .font(TypeScale.bodyEmphasis.monospacedDigit())
-                        .foregroundStyle(Ink.secondary)
+                    // SHAPE FIRST, FIGURE SECOND.
+                    //
+                    // `04-direction-reset.md` §2.3: History stops leading with
+                    // figures and leads with something qualitative. The number
+                    // was `bodyEmphasis`, isolated on the right — the loudest
+                    // thing in every row, so the list read as a column of
+                    // totals and you had to compare them by arithmetic.
+                    //
+                    // The bar is that same number as a LENGTH, scaled against
+                    // the best session on screen, so scanning the column shows
+                    // the shape of the training without reading anything. The
+                    // figure stays — it is still true and still wanted — it is
+                    // just no longer the headline.
+                    //
+                    // No behaviour change: `History.reps(of:)` is the same call
+                    // it always was.
+                    HStack(spacing: Space.snug) {
+                        GeometryReader { proxy in
+                            ZStack(alignment: .leading) {
+                                Rectangle()
+                                    .fill(Paper.press.opacity(0.18))
+                                    .frame(height: 6)
+                                Rectangle()
+                                    .fill(Paper.blue)
+                                    .frame(
+                                        width: proxy.size.width * fraction(of: record),
+                                        height: 6
+                                    )
+                            }
+                            .frame(height: proxy.size.height, alignment: .center)
+                        }
+                        .frame(width: 92, height: 6)
+
+                        Text(History.reps(of: record), format: .number)
+                            .font(TypeScale.microLabel.monospacedDigit())
+                            .foregroundStyle(Paper.press)
+                            .frame(width: 34, alignment: .trailing)
+                    }
                 }
                 .frame(minHeight: 56)
 
-                Divider().overlay(Ink.hairline)
+                Divider().overlay(Paper.press.opacity(0.22))
             }
         }
-        .animation(.easeInOut(duration: 0.18), value: editing)
+        // Was `.easeInOut(duration: 0.18)` — the only hand-written curve left in
+        // production, and the wrong shape besides: the delete controls are
+        // ENTERING, and ease-in-out withholds movement at the moment the eye is
+        // on it. `Motion.stage` is the token for a state change you are waiting
+        // on, and it carries its own reduced form.
+        .animation(Motion.stage(reduceMotion: reduceMotion), value: editing)
     }
 
     private func readable(_ iso: String) -> String {
@@ -265,7 +363,69 @@ struct YearGrid: View {
     private static let weeks = 53
     private static let days = 7
 
+    /// WHEN THE FIRST-RECORD WIPE BEGAN, or nil for a grid that is simply
+    /// there.
+    ///
+    /// `01-motion-doctrine.md` §3.2 permits delight in exactly two places and
+    /// this is one of them — *"Empty → first data (year grid, lifetime).
+    /// Delight permitted. Seen once, ever."* — with the reason attached:
+    /// *"Day one is the normal case, not an edge case."*
+    ///
+    /// **A wipe of the whole grid, not the one inked cell.** The obvious move
+    /// was to ink the single trained day, and it is the wrong one: a cell here
+    /// is about five points across, so a lone square fading in is a delight
+    /// moment nobody can see. The grid laying itself out IS the statement —
+    /// here is the year, and your first day is in it — and it is unmissable.
+    ///
+    /// Left to right, the direction a sheet comes off a press, and the same
+    /// vocabulary as `plans/001`'s ink wipe and the Ledger's drawn rule.
+    var inkingFrom: Date?
+
+    /// How long the wipe takes. Longer than anything else on a reading surface
+    /// is allowed to be, because §3.2 exempts this moment: it is seen once in
+    /// the lifetime of an install.
+    static let wipeSeconds: TimeInterval = 0.8
+
     var body: some View {
+        Group {
+            if let inkingFrom {
+                // READ OFF A CLOCK, not driven by `withAnimation`. This file's
+                // siblings record two animations that were written, compiled
+                // and moved nothing — `RestScreen`'s thinking bar and Home's
+                // stagger. A `Canvas` redrawn from a date is a value that can
+                // be printed and measured.
+                TimelineView(.animation) { context in
+                    grid(wipe: Self.wipe(at: context.date, from: inkingFrom))
+                }
+            } else {
+                grid(wipe: 1)
+            }
+        }
+        .aspectRatio(CGFloat(Self.weeks) / CGFloat(Self.days), contentMode: .fit)
+        .accessibilityElement()
+        .accessibilityLabel("A year of sessions")
+        .accessibilityValue("\(history.count) sessions")
+    }
+
+    /// 0…1 of the wipe, eased out.
+    ///
+    /// Eased rather than linear: this is a thing arriving, not a clock. The
+    /// countdown ring and the thinking bar are linear because easing a clock
+    /// makes it lie; nothing here is reporting time.
+    static func wipe(at now: Date, from start: Date) -> Double {
+        let t = min(1, max(0, now.timeIntervalSince(start) / wipeSeconds))
+        // Written out rather than pulled from `UnitCurve`, so the value in a
+        // frame capture can be checked against arithmetic on paper.
+        return 1 - pow(1 - t, 2)
+    }
+
+    /// How much of the grid's width the wipe's leading edge is smeared over.
+    ///
+    /// Without it the wipe is a hard vertical line marching across, which reads
+    /// as a loading bar. A soft edge reads as ink spreading.
+    private static let wipeEdge = 0.12
+
+    private func grid(wipe: Double) -> some View {
         Canvas { context, size in
             let model = Model(history: history)
             let gap: CGFloat = 2
@@ -278,7 +438,15 @@ struct YearGrid: View {
             let gridWidth = cell * CGFloat(Self.weeks) + gap * CGFloat(Self.weeks - 1)
             let originX = (size.width - gridWidth) / 2
 
+            // The wipe's leading edge, carried past 1 so the last column
+            // finishes rather than stopping at the threshold.
+            let head = wipe * (1 + Self.wipeEdge)
+
             for week in 0 ..< Self.weeks {
+                let column = Double(week) / Double(Self.weeks - 1)
+                let alpha = min(1, max(0, (head - column) / Self.wipeEdge))
+                guard alpha > 0 else { continue }
+
                 for day in 0 ..< Self.days {
                     let index = week * Self.days + day
                     guard index < model.cells.count else { continue }
@@ -292,7 +460,7 @@ struct YearGrid: View {
                     )
                     context.fill(
                         Path(roundedRect: rect, cornerRadius: cell * 0.28),
-                        with: .color(colour(for: cellModel, in: model))
+                        with: .color(colour(for: cellModel, in: model).opacity(alpha))
                     )
                 }
             }
@@ -313,11 +481,16 @@ struct YearGrid: View {
         guard cell.reps > 0 else {
             // Future days are quieter than past ones: a blank day behind you is
             // absence, a blank day ahead has not happened yet.
-            return cell.future ? Ink.hairline.opacity(0.35) : Ink.hairline
+            return cell.future ? Paper.press.opacity(0.22).opacity(0.35) : Paper.press.opacity(0.22)
         }
         let span = Double(model.maximum - model.minimum)
         let position = span > 0 ? Double(cell.reps - model.minimum) / span : 1
-        return DawnPalette(progress: 0.15 + position * 0.85).accent
+        // The year grid inks by DENSITY, not by hue. `04-direction-reset.md`
+        // §2.3 demotes the analytical surfaces from leading with figures to
+        // leading with shape and texture, and a year of blue at varying weight
+        // IS the texture — a printed sheet where the busy months are darker.
+        // A rainbow keyed to position said nothing true about the day.
+        return Paper.blue.opacity(0.25 + position * 0.75)
     }
 
     /// The days, week-major so each column is a whole week.

@@ -28,12 +28,15 @@ enum HomeDestination: String, CaseIterable, Identifiable {
         rawValue
     }
 
-    case history, ledger, guide, backup
+    case history, ledger, study, guide, backup
 
     var title: String {
         switch self {
         case .history: "History"
         case .ledger: "All time"
+        // `plans/004` refused a twelfth surface when the deck was 26 cards.
+        // Eden reopened it at 356 — `plans/010`.
+        case .study: "Study"
         case .guide: "Guide"
         case .backup: "Backup"
         }
@@ -46,6 +49,8 @@ struct HomeScreen: View {
     let load: Double?
     let progress: WeeklyProgress
     let lastSession: SessionRecord?
+    /// What to say about a session that was ended and discarded, or nil.
+    let abandon: AbandonNote?
 
     let onStart: (String) -> Void
     /// The way into the reading screens.
@@ -65,14 +70,13 @@ struct HomeScreen: View {
     /// in the development environment. Inline layout rather than a
     /// presentation, so an initial `@State` value is enough here.
     @State private var editingLoad = ProcessInfo.processInfo.arguments.contains("-edit-load")
+    /// Whether Home has landed. Drives the one entrance in the app that
+    /// `01-motion-doctrine.md` §3.2 explicitly affords — see `arriving(_:)`.
+    @State private var arrived = false
 
     /// Home sits at the start of the day, so the sky sits at the start of its
     /// walk. The dawn belongs to the session, not to the menu.
     private let skyProgress = 0.08
-    private var palette: DawnPalette {
-        DawnPalette(progress: skyProgress)
-    }
-
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Home is not inside a workout, so it supports the accessibility sizes
     /// rather than clamping the way Set and Rest do. The session panel is the
@@ -107,11 +111,23 @@ struct HomeScreen: View {
         // congratulating anybody. Bigger type on a true number is emphasis, not
         // a reward.
         VStack(alignment: .leading, spacing: Space.gutter) {
-            header
+            // The note shares the header's rank rather than taking a sixth.
+            // The stagger's budget is 80ms TOTAL — §3.2 — and a sixth rank at
+            // 18ms would spend 90. It is also the header's news, not a separate
+            // announcement.
+            VStack(alignment: .leading, spacing: Space.step) {
+                header
+                if let abandon {
+                    abandonNote(abandon)
+                }
+            }
+            .modifier(arriving(0))
 
             upNext
+                .modifier(arriving(1))
 
-            WeekMeter(progress: progress, hasHistory: lastSession != nil, accent: palette.accent)
+            WeekMeter(progress: progress, hasHistory: lastSession != nil, accent: Paper.orange)
+                .modifier(arriving(2))
 
             Spacer(minLength: Space.step)
 
@@ -131,23 +147,23 @@ struct HomeScreen: View {
             } label: {
                 loadout
             }
-            .buttonStyle(.plain)
+            // A ~60pt target with no press state. The comment above explains at
+            // length why the whole row is the target; nothing told you when you
+            // had hit it.
+            .buttonStyle(PressSheetStyle())
             .disabled(load == nil)
             .accessibilityLabel(
                 load.map { "Working weight \(Plates.format($0)) kilograms per handle. Change it." }
                     ?? "Bodyweight only"
             )
+            .modifier(arriving(3))
 
             if editingLoad {
                 weightPicker
             }
 
             VStack(spacing: Space.step) {
-                DawnPrimaryButton(
-                    title: "Start \(nextSession)",
-                    treatment: .atmospheric,
-                    accent: palette.accent
-                ) {
+                PaperPrimaryButton(title: "Start \(nextSession)") {
                     onStart(nextSession)
                 }
 
@@ -157,8 +173,18 @@ struct HomeScreen: View {
                     onStart(otherSession)
                 }
                 .font(TypeScale.body)
-                .foregroundStyle(Ink.tertiary)
+                .foregroundStyle(Paper.press)
                 .frame(minHeight: Hit.minimum)
+                // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                // box, so most of the target was dead paper.
+                //
+                // Eden, on the phone: *"seems like the clickable area is the text of the
+                // button not the button itself, this feels bad to click."* At 6:10am with a
+                // knuckle this is the difference between a control and a dare.
+                .contentShape(Rectangle())
 
                 // Quiet, and on one line: these are read occasionally, not at
                 // 6:10am mid-workout, and four separate rows would compete with
@@ -175,11 +201,22 @@ struct HomeScreen: View {
                             // smallest text in the app is more than that asked
                             // for.
                             .font(TypeScale.label)
-                            .foregroundStyle(Ink.tertiary)
+                            .foregroundStyle(Paper.press)
                             .frame(minHeight: Hit.minimum)
+                            // THE WHOLE TARGET IS TAPPABLE, NOT JUST THE GLYPHS.
+                            // A `.frame(min…: Hit.…)` on a Button reserves the layout space and does
+                            // NOT extend its hit region — SwiftUI still hit-tests the rendered label.
+                            // With `alignment: .leading` the text is then pinned to one edge of a 68pt
+                            // box, so most of the target was dead paper.
+                            //
+                            // Eden, on the phone: *"seems like the clickable area is the text of the
+                            // button not the button itself, this feels bad to click."* At 6:10am with a
+                            // knuckle this is the difference between a control and a dare.
+                            .contentShape(Rectangle())
                     }
                 }
             }
+            .modifier(arriving(4))
         }
         .padding(.horizontal, Space.gutter)
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -196,20 +233,75 @@ struct HomeScreen: View {
         // phone Eden actually holds.
         .modifier(FillOrScroll())
         .safeAreaPadding(.vertical, Space.step)
-        .background(DawnBackdrop(treatment: .atmospheric, progress: skyProgress))
+        .paperGround()
+        // ARRIVAL, IN `onAppear` AND NOWHERE ELSE.
+        //
+        // Not a `.task`, which would re-run; not an initial `@State` of true,
+        // which would mean there was never a "before" to animate from. This
+        // fires once per appearance and the whole entrance is over inside a
+        // third of a second.
+        .onAppear {
+            guard !arrived else { return }
+            // NO `withAnimation`. Each element carries its own animation with
+            // its own delay, and an explicit ambient transaction overrides
+            // them: measured on a 60fps capture, `withAnimation { arrived =
+            // true }` produced all four bands rising in LOCKSTEP — 24/24/24/23%
+            // at the same frame, then 41/39/41/41, then 60/60/60/60. The
+            // stagger was written, compiled, and did nothing.
+            //
+            // Setting it plainly leaves `.animation(_:value:)` as the only
+            // source, which is what makes the ranks mean anything.
+            arrived = true
+        }
+    }
+
+    /// One element of Home's entrance.
+    ///
+    /// A modifier rather than five copies of the same three lines, because five
+    /// copies is how a stagger drifts out of its budget: the doctrine caps the
+    /// TOTAL at 80ms and there is no way to see that from any one call site.
+    /// Here the ranks are visible in one place and `Motion.homeArrival` owns
+    /// the arithmetic.
+    private func arriving(_ rank: Int) -> some ViewModifier {
+        HomeArrival(rank: rank, arrived: arrived, reduceMotion: reduceMotion)
     }
 
     // MARK: - Parts
+
+    /// ONE TRUE LINE ABOUT THE MORNING THAT DID NOT HAPPEN.
+    ///
+    /// Under an orange rule, because orange in this world is a MARK and never a
+    /// glyph — a short stroke in the margin is exactly the vocabulary for "note
+    /// this", and it keeps the line itself in press black where it is
+    /// readable. See `AbandonNote` for why the copy is what it is.
+    ///
+    /// It arrives with Home and it does not leave on a timer. A line that
+    /// vanished while he was reading it would be the app taking back the one
+    /// thing it said, and collapsing its own space to do it.
+    private func abandonNote(_ note: AbandonNote) -> some View {
+        VStack(alignment: .leading, spacing: Space.snug) {
+            Rectangle()
+                .fill(Paper.orange)
+                .frame(width: 24, height: 2)
+
+            Text(note.line)
+                .font(TypeScale.body)
+                .foregroundStyle(Paper.press)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Morning")
                 .font(TypeScale.title)
-                .foregroundStyle(Ink.primary)
+                .foregroundStyle(Paper.press)
 
             Text(subtitle)
                 .font(TypeScale.body)
-                .foregroundStyle(Ink.secondary)
+                .foregroundStyle(Paper.press)
         }
     }
 
@@ -257,29 +349,29 @@ struct HomeScreen: View {
                 Text("UP NEXT · SESSION \(nextSession)")
                     .font(TypeScale.microLabel)
                     .tracking(1.5)
-                    .foregroundStyle(Ink.tertiary)
+                    .foregroundStyle(Paper.press)
                 if !stacked {
                     Spacer()
                 }
                 Text(sessionSummary)
                     .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
+                    .foregroundStyle(Paper.press)
             }
 
             Text(session(for: nextSession)?.name ?? "Session \(nextSession)")
                 .font(TypeScale.counter(38))
-                .foregroundStyle(Ink.primary)
+                .foregroundStyle(Paper.press)
 
             if !outline.isEmpty {
                 Divider()
-                    .overlay(Ink.hairline)
+                    .overlay(Paper.press.opacity(0.22))
                     .padding(.vertical, 2)
 
                 VStack(alignment: .leading, spacing: Space.snug) {
                     ForEach(Array(outline.enumerated()), id: \.offset) { _, line in
                         Text(line)
                             .font(TypeScale.bodyEmphasis)
-                            .foregroundStyle(Ink.secondary)
+                            .foregroundStyle(Paper.press)
                             // Wrap rather than truncate. At accessibility sizes
                             // one line turned "Lateral raise + Rear-delt fly"
                             // into "Lateral raise + R…", which hides half of
@@ -294,17 +386,22 @@ struct HomeScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, Space.gutter - 4)
         .padding(.vertical, Space.gutter - 4)
-        .background(
-            LinearGradient(
-                colors: [Color.black.opacity(0.26), Color.black.opacity(0.12)],
-                startPoint: .top,
-                endPoint: .bottom
-            ),
-            in: RoundedRectangle(cornerRadius: 22)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 22)
-                .stroke(Color.white.opacity(0.1), lineWidth: 0.75)
+        // A PASTED PLY, not a rounded translucent card.
+        //
+        // This was a `LinearGradient` inside a 22pt corner radius with a white
+        // hairline — three separate pieces of the previous world's vocabulary,
+        // and a gradient is the one thing this world cannot produce. The
+        // session panel is the most important block on Home, so it is the one
+        // that gets the material.
+        .background {
+            let sheet = TornEdge(tornTop: true, tornBottom: true, seed: 47)
+            sheet
+                .fill(Paper.ply)
+                // THE SHADOW IS CAST BY THE SHEET, NOT BY THE FIBRE ON IT.
+                // See `Ply` in `PaperTokens.swift` for the whole reason. Order is the
+                // entire fix: shadow the fill, then print the fibre on top.
+                .shadow(color: Paper.press.opacity(0.22), radius: 3, x: 0, y: 2)
+                .overlay { Fibre().clipShape(sheet) }
         }
         .accessibilityElement(children: .combine)
     }
@@ -380,15 +477,15 @@ struct HomeScreen: View {
                 if let load {
                     Text("\(Plates.format(load)) kg per handle")
                         .font(TypeScale.action)
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
 
                     Text(Plates.breakdown(for: load) ?? "not loadable with the plates you own")
                         .font(TypeScale.body)
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                 } else {
                     Text("Bodyweight only")
                         .font(TypeScale.action)
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                 }
             }
 
@@ -399,8 +496,13 @@ struct HomeScreen: View {
             // Guide's instruction only helps someone who has read the Guide.
             if load != nil {
                 Text(editingLoad ? "Done" : "Change")
-                    .font(TypeScale.label)
-                    .foregroundStyle(palette.accentText)
+                    .font(PaperType.micro)
+                    .tracking(TypeScale.microTracking)
+                    // Blue, because it is the ink for things that are already
+                    // true and this is the one affordance on Home that has to
+                    // look tappable without being the primary action. It was
+                    // `accentText`, which in a light world is invisible.
+                    .foregroundStyle(Paper.blue)
             }
         }
         .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
@@ -426,10 +528,10 @@ struct HomeScreen: View {
                     Text("\(Plates.format(current)) kg")
                         .font(TypeScale.counter(34))
                         .monospacedDigit()
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                     Text("per handle")
                         .font(TypeScale.microLabel)
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                 }
                 .frame(maxWidth: .infinity)
 
@@ -440,7 +542,7 @@ struct HomeScreen: View {
 
             Text(Plates.breakdown(for: current) ?? "not loadable with the plates you own")
                 .font(TypeScale.body)
-                .foregroundStyle(Ink.secondary)
+                .foregroundStyle(Paper.press)
         }
         .frame(maxWidth: .infinity)
     }
@@ -455,14 +557,17 @@ struct HomeScreen: View {
             Text(symbol)
                 .font(.system(size: 30, weight: .semibold, design: .rounded))
                 .frame(width: 62, height: 62)
-                .foregroundStyle(enabled ? Ink.primary : Ink.tertiary)
-                .background(Control.surface, in: RoundedRectangle(cornerRadius: 18))
+                .foregroundStyle(enabled ? Paper.press : Paper.press)
+                .background(Color.clear, in: RoundedRectangle(cornerRadius: 18))
                 .overlay {
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(Control.border, lineWidth: Control.borderWidth)
+                        .stroke(Paper.press, lineWidth: 2.5)
                 }
         }
-        .buttonStyle(.plain)
+        // Key-sized, so 0.97 — the same factor `PressKeyStyle` uses. Not
+        // `PressKeyStyle` itself: it draws its own square border and this key
+        // already has a rounded one, so the two would stack.
+        .buttonStyle(PressSheetStyle(scale: 0.97))
         .disabled(!enabled)
         .accessibilityLabel(label)
     }
@@ -482,6 +587,27 @@ struct HomeScreen: View {
 
 /// Consistency without gamification. Pips, a count and one honest line — no
 /// points, no badges, no streak-freeze economy.
+/// Home's entrance, one element at a time.
+///
+/// `01-motion-doctrine.md` §3.2 is the only place in the app that affords an
+/// arrival at all, and it affords a small one: *"≤250ms. Stagger permitted but
+/// capped at 80ms total across all items… a long cascade delays the one tap the
+/// user came to make."*
+private struct HomeArrival: ViewModifier {
+    let rank: Int
+    let arrived: Bool
+    let reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(arrived ? 1 : 0)
+            // No offset under Reduce Motion: the element still fades in, so
+            // nothing appears from nowhere, but nothing travels.
+            .offset(y: arrived || reduceMotion ? 0 : Motion.homeArrivalRise)
+            .animation(Motion.homeArrival(reduceMotion: reduceMotion, rank: rank), value: arrived)
+    }
+}
+
 private struct WeekMeter: View {
     let progress: WeeklyProgress
     /// On day one there is no week to have missed.
@@ -505,7 +631,7 @@ private struct WeekMeter: View {
                 Text("THIS WEEK")
                     .font(TypeScale.microLabel)
                     .tracking(1.5)
-                    .foregroundStyle(Ink.tertiary)
+                    .foregroundStyle(Paper.press)
                 Spacer()
                 // "2" carries, "of 5" is the scale it is read against — one
                 // fact, two weights, rather than two greys the same size.
@@ -513,18 +639,18 @@ private struct WeekMeter: View {
                     Text("\(progress.done)")
                         .font(TypeScale.counter(30))
                         .monospacedDigit()
-                        .foregroundStyle(progress.done > 0 ? Ink.primary : Ink.tertiary)
+                        .foregroundStyle(progress.done > 0 ? Paper.press : Paper.press)
                     Text("of \(progress.target)")
                         .font(TypeScale.body)
                         .monospacedDigit()
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                 }
             }
 
             HStack(spacing: 6) {
                 ForEach(0 ..< progress.target, id: \.self) { index in
                     Capsule()
-                        .fill(index < progress.done ? accent : Ink.hairline)
+                        .fill(index < progress.done ? accent : Paper.press.opacity(0.22))
                         .frame(height: 10)
                 }
             }
@@ -540,14 +666,14 @@ private struct WeekMeter: View {
             if hasHistory, let nudge = WeekNudge.text(for: progress) {
                 Text(nudge)
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             if progress.streak > 0 || progress.longestRun > 0 {
                 Text(runLine)
                     .font(TypeScale.body)
-                    .foregroundStyle(Ink.secondary)
+                    .foregroundStyle(Paper.press)
             }
         }
     }

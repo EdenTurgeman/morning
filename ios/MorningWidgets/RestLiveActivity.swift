@@ -25,8 +25,14 @@ struct RestLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: RestAttributes.self) { context in
             RestActivityLockScreen(attributes: context.attributes)
-                .activityBackgroundTint(Color.black.opacity(0.55))
-                .activitySystemActionForegroundColor(.white)
+                // A PAPER SLIP ON THE LOCK SCREEN.
+                //
+                // Was `black.opacity(0.55)` with a white action colour — the
+                // night sky, on the one surface other people can see. The tint
+                // is the stock now, so press black reads at 7.74:1 on it
+                // exactly as it does everywhere in the app.
+                .activityBackgroundTint(RestActivityStyle.stock)
+                .activitySystemActionForegroundColor(RestActivityStyle.press)
                 .widgetURL(RestActivityLink.url)
         } dynamicIsland: { context in
             DynamicIsland {
@@ -58,9 +64,17 @@ struct RestLiveActivity: Widget {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
+                // THE DYNAMIC ISLAND IS NOT PAPER, and must not be given paper
+                // ink. It is a black pill the system owns and composites; press
+                // black on it is invisible. Everything in the island below stays on
+                // the SYSTEM's semantic colours deliberately — that is the correct
+                // vocabulary for a surface this app does not own the background of.
+                //
+                // The one exception is the icon, which is a mark rather than a
+                // glyph: orange on the island's black reads 5.39:1.
             } compactLeading: {
                 Image(systemName: "sun.horizon.fill")
-                    .foregroundStyle(RestActivityStyle.accent)
+                    .foregroundStyle(RestActivityStyle.orange)
             } compactTrailing: {
                 RestActivityCountdown(attributes: context.attributes, size: 15)
                     .frame(width: 44)
@@ -69,7 +83,7 @@ struct RestLiveActivity: Widget {
                     .frame(width: 34)
             }
             .widgetURL(RestActivityLink.url)
-            .keylineTint(RestActivityStyle.accent)
+            .keylineTint(RestActivityStyle.orange)
         }
     }
 }

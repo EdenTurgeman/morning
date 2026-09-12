@@ -67,7 +67,20 @@ struct Daybreak: View {
             let elapsed = context.date.timeIntervalSince(start)
             content(at: elapsed)
         }
+        // THE EXIT HAD NO ANIMATION AT ALL.
+        //
+        // `dismiss()` flipped `leaving` with no `withAnimation` and nothing
+        // keyed on it, so `exit` stepped 0 to 1 in a single frame: the moment
+        // CUT to nothing and then sat blank for the 520ms before `onDone`. The
+        // header above claimed "a 520ms exit that fades and drifts rather than
+        // cutting" the whole time.
+        //
+        // Declarative rather than `withAnimation` inside the tap handler,
+        // because this project has twice shipped an imperative animation that
+        // compiled, read correctly and did nothing.
+        .animation(Motion.leave(reduceMotion: reduceMotion), value: leaving)
         .onAppear {
+            scheduleDismissDemoIfRequested()
             start = Date()
             Audio.shared.play(.chime)
             // Fired once, at the rise. Its own internal timing does the rest.
@@ -89,11 +102,11 @@ struct Daybreak: View {
         let exit = leaving ? 1.0 : 0.0
 
         ZStack {
-            Surface.night
+            Paper.stock
                 .opacity(1 - exit * 0.4)
                 .ignoresSafeArea()
 
-            sunrise(at: elapsed)
+            sunrise(at: elapsed, exiting: exit)
 
             GeometryReader { proxy in
                 // The copy is centred in the space ABOVE the horizon, not in
@@ -102,30 +115,30 @@ struct Daybreak: View {
                 VStack(spacing: Space.step) {
                     Text(celebration.eyebrow)
                         .font(TypeScale.microLabel)
-                        .foregroundStyle(Ink.tertiary)
+                        .foregroundStyle(Paper.press)
                         .opacity(ramp(elapsed, from: beats.copy, over: 0.4))
 
                     Text(reps, format: .number)
                         .font(TypeScale.counter(92))
                         .monospacedDigit()
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                         .scaleEffect(springIn(elapsed, from: beats.number))
                         .opacity(ramp(elapsed, from: beats.number, over: 0.3))
 
                     Text("reps")
                         .font(TypeScale.body)
-                        .foregroundStyle(Ink.secondary)
+                        .foregroundStyle(Paper.press)
                         .opacity(ramp(elapsed, from: beats.number + 0.1, over: 0.3))
 
                     Text(celebration.headline)
                         .font(TypeScale.title)
-                        .foregroundStyle(Ink.primary)
+                        .foregroundStyle(Paper.press)
                         .multilineTextAlignment(.center)
                         .opacity(ramp(elapsed, from: beats.copy, over: 0.45))
 
                     Text(celebration.body)
                         .font(TypeScale.body)
-                        .foregroundStyle(Ink.secondary)
+                        .foregroundStyle(Paper.press)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .opacity(ramp(elapsed, from: beats.copy + 0.2, over: 0.5))
@@ -134,12 +147,12 @@ struct Daybreak: View {
                         .padding(.top, Space.tight)
                 }
                 .padding(.horizontal, Space.gutter)
-                .frame(width: proxy.size.width, height: proxy.size.height * 0.74)
-                .position(x: proxy.size.width / 2, y: proxy.size.height * 0.37)
+                .frame(width: proxy.size.width, height: proxy.size.height * 0.52)
+                .position(x: proxy.size.width / 2, y: proxy.size.height * 0.26)
 
                 Text("Tap to continue")
                     .font(TypeScale.microLabel)
-                    .foregroundStyle(Ink.tertiary)
+                    .foregroundStyle(Paper.press)
                     .opacity(ramp(elapsed, from: beats.hint, over: 0.6) * 0.9)
                     .frame(width: proxy.size.width)
                     .position(x: proxy.size.width / 2, y: proxy.size.height * 0.95)
@@ -151,22 +164,64 @@ struct Daybreak: View {
 
     // MARK: - The sunrise
 
-    private func sunrise(at elapsed: TimeInterval) -> some View {
-        // W13. Everything that used to be drawn here — the horizon rectangle,
-        // the ray fan, the gradient sun, the flash overlay — is now computed
-        // per pixel by `Shaders/Daybreak.metal`, which builds an atmosphere and
-        // lets the sunrise fall out of it rather than assembling one from
-        // shapes. The header on that file argues the case.
-        //
-        // The contract is unchanged and that is the point: one elapsed value
-        // in, no clock of its own, and `calm` carrying the reduced form. The
-        // beats are the same beats, at the same seconds.
-        //
-        // The burst still scales the light, because a lifetime milestone has to
-        // be visibly bigger than an ordinary morning — `04-rules.md §5`.
-        MetalDaybreakSky(elapsed: elapsed, reduceMotion: reduceMotion)
-            .brightness(burstGain > 1 ? 0.05 : 0)
-            .saturation(burstScale)
+    /// The sunrise: a folded fan rising and opening behind a torn horizon.
+    ///
+    /// Drawn back to front the way it is pasted up — fan, then horizon over it,
+    /// so the fan is genuinely BEHIND the paper it clears rather than clipped
+    /// to look that way. See `PaperSunrise.swift` for why this is shapes and
+    /// not Metal.
+    private func sunrise(at elapsed: TimeInterval, exiting: Double) -> some View {
+        ZStack {
+            PaperSunrise(
+                elapsed: elapsed,
+                fanStart: beats.sun,
+                rays: celebration.rays,
+                milestoneBurst: celebration.milestoneBurst,
+                reduceMotion: reduceMotion
+            )
+            // Sinks back behind the horizon rather than drifting off it. The
+            // horizon itself does not move — it is the ground.
+            .offset(y: exiting * 150)
+
+            horizon(at: elapsed)
+        }
+        .ignoresSafeArea()
+    }
+
+    /// The horizon: a torn ply pasted across the lower third.
+    ///
+    /// It tears in BEFORE anything else moves, and then holds. That held beat
+    /// is the anticipation — the screen going deliberately quiet is what says
+    /// something is coming, and it costs no motion to say it.
+    ///
+    /// Where the fan crosses the tear, the two inks OVERPRINT. That is this
+    /// world's own answer to the flash the atmosphere version had: orange over
+    /// blue makes plum, it is already the law everywhere else in the app, and
+    /// it needs no light source in a world that has none.
+    private func horizon(at elapsed: TimeInterval) -> some View {
+        GeometryReader { proxy in
+            let sheet = TornEdge(tornTop: true, tornBottom: false, amplitude: 6, seed: 71)
+            let settle = ramp(elapsed, from: beats.horizon, over: 0.5)
+            let lift = reduceMotion ? 0 : (1 - settle) * 14
+
+            ZStack(alignment: .top) {
+                sheet
+                    .fill(Paper.ply)
+                    // THE SHADOW IS CAST BY THE SHEET, NOT BY THE FIBRE ON IT.
+                    // See `Ply` in `PaperTokens.swift` for the whole reason. Order is the
+                    // entire fix: shadow the fill, then print the fibre on top.
+                    .shadow(color: Paper.press.opacity(0.22), radius: 4, x: 0, y: -3)
+                    .overlay { Fibre().clipShape(sheet) }
+
+                // The overprint, along the tear itself.
+                sheet
+                    .stroke(Paper.overprint, lineWidth: 3)
+                    .opacity(flash(elapsed) * 0.9)
+            }
+            .frame(height: proxy.size.height * 0.26)
+            .offset(y: proxy.size.height * 0.74 + lift)
+            .opacity(reduceMotion ? settle : 1)
+        }
     }
 
     /// The milestone burst, in this app's own material rather than confetti.
@@ -218,7 +273,7 @@ struct Daybreak: View {
                 // Staggered 120ms apart, so the week fills rather than appearing.
                 let at = beats.pips + Double(index) * 0.12
                 Capsule()
-                    .fill(index < week.done ? Semantic.urgency : Ink.hairline)
+                    .fill(index < week.done ? Paper.overprint : Paper.press.opacity(0.22))
                     .frame(width: 26, height: 6)
                     .scaleEffect(springIn(elapsed, from: at))
                     .opacity(ramp(elapsed, from: at, over: 0.25))
@@ -241,11 +296,25 @@ struct Daybreak: View {
         return 0.82 + 0.18 * t + sin(t * .pi) * 0.06
     }
 
+    /// `-demo-dismiss` — taps Continue for you, 3.5s after the moment starts.
+    ///
+    /// The exit is the one beat here no agent can reach: it needs a tap, and no
+    /// synthesised tap is delivered to this simulator. That is exactly how the
+    /// exit shipped un-animated in the first place — it was the only part of
+    /// the choreography nobody could ever look at. This makes it filmable.
+    private func scheduleDismissDemoIfRequested() {
+        guard ProcessInfo.processInfo.arguments.contains("-demo-dismiss") else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3.5))
+            dismiss()
+        }
+    }
+
     private func dismiss() {
         guard !leaving else { return }
         leaving = true
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(0.52))
+            try? await Task.sleep(for: .seconds(reduceMotion ? 0.20 : 0.42))
             onDone()
         }
     }
@@ -263,17 +332,25 @@ struct Daybreak: View {
         /// Whether anything overshoots, travels or breathes.
         let overshoots: Bool
 
+        /// REBUILT FROM SCRATCH for the paper world, not retimed.
+        ///
+        /// The atmosphere version ran eight beats over 4.4s and needed them:
+        /// the horizon drew, then the sun rose, then the rays bloomed, then it
+        /// flashed. Here **the rise and the unfold are one beat** — the fan
+        /// opening IS the sun arriving — so `sun` and `rays` fire together and
+        /// the whole moment is over in ~3.0s. A moment that ends sooner is one
+        /// you are more willing to see six mornings a week.
         static let full = Beats(
-            horizon: 0.12, sun: 0.38, rays: 0.70, flash: 0.90,
-            number: 1.00, pips: 1.35, copy: 1.90, hint: 2.60,
+            horizon: 0.20, sun: 0.45, rays: 0.45, flash: 1.30,
+            number: 1.55, pips: 2.35, copy: 1.95, hint: 2.60,
             overshoots: true
         )
 
         /// Same beats, same order, no travel — the moment still happens, it
         /// just stops moving through space.
         static let reduced = Beats(
-            horizon: 0.10, sun: 0.30, rays: 0.55, flash: 0.70,
-            number: 0.80, pips: 1.05, copy: 1.45, hint: 2.00,
+            horizon: 0.10, sun: 0.25, rays: 0.25, flash: 0.70,
+            number: 0.85, pips: 1.40, copy: 1.10, hint: 1.90,
             overshoots: false
         )
     }

@@ -78,12 +78,18 @@ struct FigureRenderer {
     let limbColor: Color
     let bodyColor: Color
     let size: CGSize
+    /// How much of the bay's height one figure-unit spans.
+    ///
+    /// 1 is the original behaviour exactly — see `cgPoint`, which is written so
+    /// that `scale == 1` reduces to the arithmetic it replaced. Above 1 the
+    /// figure grows about its own centre rather than off the top of the bay.
+    var scale: Double = 1
 
     /// Widths are a fraction of the bay's height so the figure keeps its
     /// proportions whatever the bay is; the coordinate space itself is
     /// non-uniform, which is why nothing here derives a width from x.
     private var unit: Double {
-        size.height
+        size.height * scale
     }
 
     func draw(into context: inout GraphicsContext) {
@@ -288,10 +294,15 @@ struct FigureRenderer {
     ///
     /// Scaling both by `unit` also makes a normalised distance a real distance,
     /// which is what lets `elbow(from:to:)` solve at all.
+    /// Centred on BOTH axes, which at `scale == 1` is identical to the
+    /// `coordinate.1 * unit` this replaced: `height/2 + (c - 0.5) * height`
+    /// **is** `c * height`. Written this way so growing the unit expands the
+    /// figure about the middle of the bay instead of pushing it downward off
+    /// the bottom edge.
     private func cgPoint(_ coordinate: (Double, Double)) -> CGPoint {
         CGPoint(
             x: size.width / 2 + (coordinate.0 - 0.5) * unit,
-            y: coordinate.1 * unit
+            y: size.height / 2 + (coordinate.1 - 0.5) * unit
         )
     }
 }

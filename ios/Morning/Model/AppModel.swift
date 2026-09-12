@@ -76,6 +76,7 @@ final class AppModel {
     // MARK: - The session
 
     func start(_ key: String) {
+        lastAbandon = nil
         session = WorkoutSession(
             sessionKey: key,
             kg: load(for: key),
@@ -95,6 +96,18 @@ final class AppModel {
 
         var updated = data
         updated.history.append(record)
+        // THE STUDY LOG RIDES OUT WITH THE HISTORY.
+        //
+        // `Deck` writes each answer to its own store the moment it is given,
+        // which is where the app reads it from. Folding it into `AppData` here
+        // is what puts it in the BACKUP FILE — mastery has never been exported,
+        // so a restore used to bring back every workout and none of the study.
+        //
+        // Here rather than on every answer because this is already the moment
+        // the session is committed, and one write that cannot half-happen beats
+        // two that can.
+        updated.studyAnswers = Deck.answers()
+        updated.studySightings = Deck.sightings()
         do {
             try store.save(updated)
             try store.saveInProgress(nil)
@@ -113,17 +126,34 @@ final class AppModel {
         finished = FinishedSession(
             record: record,
             celebration: Celebrations.forSession(record, history: updated.history),
-            card: Deck.draw()
+            // The session's THIRD card, and the only one with no timer to beat.
+            // `.open` takes whatever the deck wants most, which is usually the
+            // hardest thing in the queue — the right place for it.
+            card: Deck.draw(preferring: Deck.intent(forCardNumber: 2))
         )
     }
 
     /// Nothing is written to history. `04-rules.md §1`: not even sets already
     /// logged.
     func abandon() {
+        // WHAT WAS THROWN AWAY, captured before it is. Home says one true thing
+        // about it and cannot say anything at all once the session is gone.
+        lastAbandon = AbandonNote(reps: session?.log.values.reduce(0, +) ?? 0)
         session?.abandon()
         session = nil
         release()
     }
+
+    /// What Home says after a session was ended and discarded, or nil.
+    ///
+    /// Ending is the only destructive action in the app and until now the app
+    /// said NOTHING about it — `abandon()` cleared the session and Home
+    /// appeared, silent, as though the morning had not happened. Eden, asking
+    /// for the opposite: *"not make it all sad."*
+    ///
+    /// Cleared when the next session starts rather than on a timer. It is a
+    /// fact about the morning, and the morning moves on when he does.
+    private(set) var lastAbandon: AbandonNote?
 
     func dismissSummary() {
         finished = nil
@@ -141,7 +171,22 @@ final class AppModel {
     }
 
     /// Replaces the history wholesale, after the caller has confirmed the swap.
+    ///
+    /// BOTH study logs come back — what he answered, and what he was shown —
+    /// and mastery and the whole schedule are read back off them. Each is
+    /// restored only if the file HAS it: a file with no `studyAnswers` (every
+    /// web export, and every backup this app wrote before the log existed) or
+    /// no `studySightings` (every backup written before the scheduler) leaves
+    /// that log alone rather than wiping it. Absent is not the same as empty,
+    /// and the one thing an import must never do is destroy something it has no
+    /// replacement for.
     func restore(_ incoming: AppData) {
+        if let log = incoming.studyAnswers {
+            Deck.restoreAnswers(log)
+        }
+        if let log = incoming.studySightings {
+            Deck.restoreSightings(log)
+        }
         commit(incoming)
     }
 

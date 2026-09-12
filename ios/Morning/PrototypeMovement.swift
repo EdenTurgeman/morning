@@ -6,6 +6,16 @@ struct ExerciseMotionBay: View {
     let accent: Color
     /// Freezes the animation at a phase, for review. `nil` in the app.
     var frozenPhase: Double?
+    /// Printed rather than framed.
+    ///
+    /// The paper world has no translucent rounded cards — a bay surface with a
+    /// hairline border is the previous world's vocabulary, and dropped onto a
+    /// pasted ply it reads as a grey smudge in the middle of the sheet. Printed,
+    /// the figure is line art in press black directly on the paper, which is
+    /// what a duplicator does with a diagram.
+    var paper = false
+    /// How large the figure is drawn inside the bay. See `FigureRenderer.scale`.
+    var figureScale: Double = 1
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -20,38 +30,68 @@ struct ExerciseMotionBay: View {
             ExerciseFigure(
                 movement: movement,
                 phase: 0,
-                accent: accent
+                accent: accent,
+                onPaper: paper,
+                scale: figureScale
             )
             .opacity(0.13)
 
             if let frozenPhase {
-                ExerciseFigure(movement: movement, phase: frozenPhase, accent: accent)
+                ExerciseFigure(
+                    movement: movement,
+                    phase: frozenPhase,
+                    accent: accent,
+                    onPaper: paper,
+                    scale: figureScale
+                )
             } else if reduceMotion {
                 ExerciseFigure(
                     movement: movement,
                     phase: 1,
-                    accent: accent
+                    accent: accent,
+                    onPaper: paper,
+                    scale: figureScale
                 )
             } else {
-                TimelineView(.animation(minimumInterval: 1 / 60)) { timeline in
+                // 30fps, NOT 60 — the one rate in the app this pass changed.
+                //
+                // This is the most expensive continuous draw in the product: a
+                // `Canvas` rebuilding a whole figure — torso, neck, head, two
+                // arms, two legs, dumbbells, ground — every frame, for as long
+                // as a Set screen is on screen, which is most of a workout. It
+                // also keeps ticking straight through the Done transition,
+                // competing with the swap Eden reported as choppy.
+                //
+                // The loop it drives is a 3.2-second cosine sweep. Halving the
+                // rate of a limb moving that slowly is below perception — film
+                // runs at 24 — and this world already has the precedent: the
+                // dawn sky ran at 12fps by explicit ruling, because an ambient
+                // demonstration is not a clock.
+                //
+                // The countdown ring is deliberately NOT treated this way. It
+                // reports time, `01-motion-doctrine.md` calls it "continuous,
+                // not an animation", and a clock that stutters lies.
+                TimelineView(.animation(minimumInterval: 1 / 30)) { timeline in
                     ExerciseFigure(
                         movement: movement,
                         phase: motionPhase(at: timeline.date),
-                        accent: accent
+                        accent: accent,
+                        onPaper: paper,
+                        scale: figureScale
                     )
                 }
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .clipShape(RoundedRectangle(cornerRadius: paper ? 0 : cornerRadius))
         .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(borderColor, lineWidth: treatment == .precise ? 1 : 0.75)
+            RoundedRectangle(cornerRadius: paper ? 0 : cornerRadius)
+                .stroke(paper ? .clear : borderColor, lineWidth: treatment == .precise ? 1 : 0.75)
         }
         .overlay(alignment: .topLeading) {
             Text("MOVEMENT")
                 .font(TypeScale.microLabel)
                 .tracking(1.6)
-                .foregroundStyle(Ink.tertiary)
+                .foregroundStyle(paper ? Paper.press.opacity(0.55) : Ink.tertiary)
                 .padding(.horizontal, 13)
                 .padding(.vertical, 10)
         }
@@ -60,8 +100,15 @@ struct ExerciseMotionBay: View {
         .accessibilityValue(reduceMotion ? "Start and finish positions" : "Repeating demonstration")
     }
 
-    @ViewBuilder
-    private var baySurface: some View {
+    @ViewBuilder private var baySurface: some View {
+        if paper {
+            Color.clear
+        } else {
+            legacyBaySurface
+        }
+    }
+
+    @ViewBuilder private var legacyBaySurface: some View {
         switch treatment {
         case .atmospheric:
             LinearGradient(
@@ -144,14 +191,19 @@ struct ExerciseFigure: View {
     let movement: ExerciseMovement
     let phase: Double
     let accent: Color
+    /// Printed in press black rather than drawn in white on a dark bay.
+    var onPaper = false
+    /// See `FigureRenderer.scale`. 1 is the shipped size.
+    var scale: Double = 1
 
     var body: some View {
         Canvas { context, size in
             let renderer = FigureRenderer(
                 pose: pose,
                 limbColor: accent,
-                bodyColor: .white.opacity(0.82),
-                size: size
+                bodyColor: onPaper ? Paper.press.opacity(0.86) : .white.opacity(0.82),
+                size: size,
+                scale: scale
             )
             renderer.draw(into: &context)
         }

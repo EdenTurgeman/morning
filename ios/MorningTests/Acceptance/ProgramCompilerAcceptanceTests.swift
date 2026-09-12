@@ -155,6 +155,32 @@ final class ProgramCompilerAcceptanceTests: XCTestCase {
     }
 
     /// Slot IDs are stable and unique, and match the golden fixture exactly.
+    /// SUPERSET PARTNERS ARE ADJACENT STEPS, WITH NO REST BETWEEN THEM.
+    ///
+    /// `Steps.swift`: *"Partners run back to back; rest comes only after the
+    /// round."* `WorkoutHost` keys the Set branch to `session.stepIndex`
+    /// BECAUSE of this — two adjacent `.set` steps share one branch, so without
+    /// an explicit identity the step transition never fires between them.
+    ///
+    /// If the compiler ever stops emitting adjacent sets, that `.id` becomes
+    /// dead weight and should be reconsidered rather than left. See plans/012.
+    func testSupersetPartnersAreAdjacentSteps() {
+        for key in ["A", "B"] {
+            let steps = StepCompiler.build(session: key)
+            let adjacent = zip(steps, steps.dropFirst()).count { left, right in
+                if case .set = left, case .set = right {
+                    return true
+                }
+                return false
+            }
+            XCTAssertGreaterThan(
+                adjacent,
+                0,
+                "\(key) has no adjacent sets — the set-to-set transition has nothing to serve"
+            )
+        }
+    }
+
     func testSlotIdsAreStableUniqueAndMatchTheGoldenFixture() throws {
         let fixture = try GoldenSteps.load()
 

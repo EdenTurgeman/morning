@@ -26,14 +26,29 @@ import SwiftUI
  *  else. The dawn belongs to the app.
  * ======================================================================== */
 
-/// The dawn's mid-morning accent, hardcoded.
+/// The paper world's inks, mirrored for the widget target.
 ///
-/// The app's palette walks with session progress, but the Lock Screen is not
-/// the app and a colour that drifted between rests would read as a bug rather
-/// than as a sunrise. One value, and it is the one the accent passes through
-/// around the middle of a session.
+/// **This is a deliberate copy, not an oversight.** `MorningWidgets` contains
+/// exactly three files and cannot see `PaperTokens.swift`; pulling the token
+/// files into the extension would drag `DesignTokens` and a dead dawn palette
+/// in with them. The file has always kept its own constant for this reason —
+/// the old comment here explained the same thing about the dawn accent.
+///
+/// The copy is safe because it is ASSERTED: `testLiveActivityInksMatchPaper`
+/// fails the build the day these drift from `Paper`. Duplication that a test
+/// pins is a different thing from duplication that hopes.
+///
+/// **The Lock Screen only.** See `RestLiveActivity` — the Dynamic Island is a
+/// black pill the system owns, and paper ink on it would be invisible.
 enum RestActivityStyle {
-    static let accent = Color(red: 0.78, green: 0.55, blue: 0.95)
+    /// Mirrors `Paper.stock`.
+    static let stock = Color(red: 0.788, green: 0.749, blue: 0.675)
+    /// Mirrors `Paper.press`.
+    static let press = Color(red: 0.180, green: 0.169, blue: 0.149)
+    /// Mirrors `Paper.orange`. A MARK, never a glyph.
+    static let orange = Color(red: 0.878, green: 0.322, blue: 0.110)
+    /// Mirrors `Paper.overprint`. The myo rest, which IS the training stimulus.
+    static let overprint = Color(red: 0.340, green: 0.130, blue: 0.170)
 }
 
 /// The Lock Screen presentation.
@@ -45,36 +60,54 @@ struct RestActivityLockScreen: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
+            // The app's signature mark, and the only orange on the slip.
+            // Orange lights and never writes — the same law as every other
+            // surface — so it appears here as a rule and not as a label.
+            Rectangle()
+                .fill(RestActivityStyle.orange)
+                .frame(width: 4)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(attributes.isMyo ? "MYO REST" : "REST")
                     .font(.caption2.weight(.semibold))
                     .tracking(1.6)
-                    .foregroundStyle(RestActivityStyle.accent)
+                    // The myo rest IS the training stimulus, so it gets the
+                    // overprint — the same ink `RestScreen` uses for the same
+                    // sentence, and the only one here that reads urgent while
+                    // still clearing the floor as text.
+                    .foregroundStyle(attributes.isMyo
+                        ? RestActivityStyle.overprint
+                        : RestActivityStyle.press)
 
                 RestActivityCountdown(attributes: attributes, size: 44, frozenAt: frozenAt)
             }
 
             if let next = attributes.nextExercise {
+                // Press black throughout. The system's `.secondary` and
+                // `.tertiary` adapt to the SYSTEM's appearance, not to the
+                // paper tint underneath them, so on this slip they were a
+                // guess. Hierarchy is size and weight here, which is the Ink
+                // doctrine's rule anyway: a level recedes by getting smaller or
+                // lighter in weight, never by going more transparent.
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Next")
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
                     Text(next)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
                     if let detail = attributes.nextDetail {
                         Text(detail)
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
                     }
                 }
+                .foregroundStyle(RestActivityStyle.press)
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Spacer(minLength: 0)
             }
         }
-        .padding(.horizontal, 18)
+        .padding(.trailing, 18)
         .padding(.vertical, 14)
+        .foregroundStyle(RestActivityStyle.press)
     }
 }
 
@@ -97,9 +130,12 @@ struct RestActivityCountdown: View {
                 Text(timerInterval: Date() ... attributes.endsAt, countsDown: true)
             }
         }
-        .font(.system(size: size, weight: .bold, design: .rounded))
+        // `.black`, and NOT `.rounded`. The paper world's display voice is a
+        // grotesque at poster weight; a rounded cut belongs to the world this
+        // replaced. `design:` is omitted rather than set, so the Dynamic
+        // Island — which is not paper — still gets the system face.
+        .font(.system(size: size, weight: .black))
         .monospacedDigit()
-        .foregroundStyle(.primary)
     }
 
     /// `src/lib/format.ts`'s shape: bare seconds under a minute, `m:ss` above.

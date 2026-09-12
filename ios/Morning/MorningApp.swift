@@ -34,6 +34,17 @@ struct MorningApp: App {
                     ReadingReviewHost(which: reading)
                 } else if Self.requestedScreen == "summary" {
                     SummaryReviewHost(tier: Self.value(after: "-tier"))
+                } else if Self.requestedScreen == "set", let variant = SetVariant.requested {
+                    // R3. `-screen set -variant dawn|far-field|track`. The lab
+                    // only; `SetScreen` is untouched. See PrototypeSetVariants.
+                    SetVariantHost(
+                        variant: variant,
+                        sessionKey: Self.value(after: "-session"),
+                        progressOverride: Self.progressOverride,
+                        slot: Self.value(after: "-slot"),
+                        reps: Self.value(after: "-reps").flatMap(Int.init),
+                        step: Self.value(after: "-step").flatMap(Int.init)
+                    )
                 } else if Self.requestedScreen == "set" {
                     ReviewHost(
                         sessionKey: Self.value(after: "-session"),
@@ -46,8 +57,6 @@ struct MorningApp: App {
                     FigureReviewHost()
                 } else if Self.requestedScreen == "sky" {
                     MetalSkyReviewHost()
-                } else if Self.requestedScreen == "metal" {
-                    MetalDaybreakReviewHost()
                 } else if Self.requestedScreen == "live-activity" {
                     LiveActivityReviewHost()
                 } else if Self.requestedScreen == "lab" {
@@ -56,13 +65,29 @@ struct MorningApp: App {
                     AppRoot()
                 }
             }
-            // Pays the Metal pipeline's compile at launch rather than on the
-            // first frame that wants it. At the app's root rather than on
-            // `AppRoot`, because the review hosts bypass `AppRoot` entirely and
-            // `-screen summary` is exactly where the cost showed up.
-            // See `MetalDaybreakWarmup`.
-            .overlay(alignment: .topLeading) { MetalDaybreakWarmup() }
-            .preferredColorScheme(.dark) // used before sunrise; dark by default
+            // The `MetalDaybreakWarmup` overlay that used to sit here is gone,
+            // and so is everything it warmed.
+            //
+            // It pre-compiled the Daybreak Metal pipeline at launch so the cost
+            // did not land on the first frame that wanted it. Nothing wanted it
+            // any more — the completion moment is `PaperSunrise`, which is
+            // shapes — so every launch was paying a shader compile for a
+            // pipeline that never rendered. `Daybreak.metal` and
+            // `MetalDaybreakSky.swift` have since been deleted outright.
+            //
+            // `Sky.metal` and `MetalSky.swift` are NOT dead and were kept:
+            // `PrototypeVisuals.swift` still draws with them, and that file is
+            // the record of how the app's visual direction was chosen.
+            // The app was a night sky and was `.dark`. It is paper now, so it
+            // is `.light` — a preference set on a child never wins against one
+            // set here, this Group being its ancestor, so the status bar has to
+            // be answered at the root or the clock stays white on sand.
+            //
+            // Surfaces not yet converted to `Paper` will look wrong under this
+            // until they are. That is a visible, temporary state and it is the
+            // right way round: a converted surface with a white clock is a
+            // defect, an unconverted one is just unconverted.
+            .preferredColorScheme(.light)
             // Tapping the Live Activity. There is deliberately nothing to do:
             // `AppRoot.init` already restores an in-progress session before
             // anything is drawn, so launching IS returning to the step the

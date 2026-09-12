@@ -22,3 +22,13 @@ ios/DerivedData/
 **/xcuserdata/
 *.xcuserstate
 .DS_Store
+
+# --- local agent tooling ---------------------------------------------------
+# The `impeccable` skill vendors itself into the repo: two near-identical
+# 148-file copies under `.claude/skills` and `.github/skills`, ~6.8MB, plus its
+# agents, hooks and state. None of it is Morning, and this repo is public.
+.claude/
+.github/agents/
+.github/hooks/
+.github/skills/
+.impeccable/
