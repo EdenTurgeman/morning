@@ -134,7 +134,7 @@ true in W0 and neither has been true for months.
 | `ios/Morning/Model/Schema.swift` | The v1 storage contract from `06-data.md §3`. | Compiled and tested. |
 | `ios/Morning/Shaders/` | `Sky.metal` only, and **only the prototype uses it**. `Daybreak.metal` was deleted when the completion moment became `PaperSunrise` — paper has no atmosphere, so a shader had nothing to compute. | Read its header before touching it. |
 | `ios/MorningWidgets/` | The Live Activity target. | Built. |
-| `ios/MorningTests/Acceptance/` | 123 assertions from `07-acceptance.md`. **None skipped.** | Passing. |
+| `ios/MorningTests/Acceptance/` | 128 assertions from `07-acceptance.md`. **None skipped.** | Passing. |
 | `ios/Docs/design-system.md` | The paper world: the ink law, the grounds, the primitives. Every contrast figure measured on rendered frames, not calculated. | **Rewritten 2026-09-03** — it had described the deleted dawn world. Revise it, do not start it. |
 | `ios/Docs/redesign-plan.md` | **How the UI rebuild is run**, phase by phase, on Emil Kowalski's skills. | The method for the next programme. |
 | `ios/Docs/motion-performance.md` | **Why the app stutters, when it does.** Ten rules, every one of them measured on Eden's phone after breaking it. Read before touching anything that moves. | Current. |

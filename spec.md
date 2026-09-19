@@ -299,12 +299,18 @@ never delay the summary by more than a few seconds; be dismissible.
 - Session letter, elapsed minutes, the delta against last time — **absent
   entirely when the working weight changed**, because then there is no honest
   comparison — and where the week now stands.
+- **Any movement whose reps have not changed for three or more sessions**, named,
+  with the number it is stuck on. Every set of the movement must match the same
+  set in each earlier session, and the run ends at a weight change. Absent
+  entirely when nothing has stalled. This is separate from the plateau headline
+  in §9, which reads the session total: a total can hold still while half the
+  sets move, and it can move while one set has never changed at all.
 - One study card.
 
 **Must be able to do:** dismiss, returning to Home.
 
 **States:** first session ever, an ordinary session, a personal best, a plateau,
-a week completed, a lifetime milestone, a weight change.
+a stalled movement, a week completed, a lifetime milestone, a weight change.
 
 ---
 

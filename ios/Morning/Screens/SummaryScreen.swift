@@ -26,6 +26,8 @@ struct SummaryScreen: View {
     let celebration: Celebration
     let week: WeeklyProgress
     let card: Card?
+    /// Movements that have not moved. Empty is the ordinary case.
+    let stalls: [History.Stall]
     let onDone: () -> Void
 
     /// `-screen summary -skip-daybreak` shows what is underneath. Daybreak
@@ -129,6 +131,25 @@ struct SummaryScreen: View {
             }
 
             factsRow
+
+            // WHAT HAS STOPPED MOVING.
+            //
+            // Above the card because it is about the session, not the deck,
+            // and below `factsRow` because those four numbers are what you did
+            // and this is a reading of them.
+            //
+            // It is NOT a twelfth celebration tier. The tiers are ranked and
+            // exactly one fires, so a stall would have had to outrank a
+            // personal best to be seen at all — and a morning where you set a
+            // record on one movement and never counted another is a real
+            // morning that should say both things. Absent entirely until it
+            // has something true to say, exactly like the deck's line below.
+            if let line = History.stallLine(stalls) {
+                Text(line)
+                    .font(TypeScale.body)
+                    .foregroundStyle(Paper.press)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             if let card {
                 SummaryCard(card: card, revealed: cardRevealed, answerShown: cardAnswerShown) {

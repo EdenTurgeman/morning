@@ -28,13 +28,17 @@ struct SummaryReviewHost: View {
     @State private var done = false
 
     var body: some View {
-        let history = Store().load().history
-        let (record, celebration) = example(from: history)
+        // The example returns the history it SYNTHESISED, not the store's.
+        // Anything reading history beside the record — the stall line does —
+        // has to read the same one, or it reports on a session that never
+        // happened alongside a record from one that did.
+        let (record, celebration, history) = example(from: Store().load().history)
         SummaryScreen(
             record: record,
             celebration: celebration,
             week: Week.progress(history: history),
             card: Cards.all.first,
+            stalls: History.stalls(after: record, in: history),
             onDone: { done = true }
         )
         .overlay {
@@ -64,7 +68,9 @@ struct SummaryReviewHost: View {
     /// Builds the history a given tier actually needs, rather than faking a
     /// `Celebration` — the point of looking at it is to see what the real tier
     /// logic produces.
-    private func example(from history: [SessionRecord]) -> (SessionRecord, Celebration) {
+    private func example(
+        from history: [SessionRecord]
+    ) -> (SessionRecord, Celebration, [SessionRecord]) {
         let slot = StepCompiler.build(session: "A").compactMap(\.asSet).first?.slot ?? "1.0.0"
 
         func make(_ reps: Int, kg: Double?, ts: Int) -> SessionRecord {
@@ -79,15 +85,16 @@ struct SummaryReviewHost: View {
             let first = make(150, kg: 7.5, ts: 1000)
             let second = make(150, kg: 7.5, ts: 2000)
             let third = make(150, kg: 7.5, ts: 3000)
-            return (third, Celebrations.forSession(third, history: [first, second, third]))
+            let plateau = [first, second, third]
+            return (third, Celebrations.forSession(third, history: plateau), plateau)
         case "record":
             let earlier = make(100, kg: 7.5, ts: 1000)
             let best = make(200, kg: 7.5, ts: 2000)
-            return (best, Celebrations.forSession(best, history: [earlier, best]))
+            return (best, Celebrations.forSession(best, history: [earlier, best]), [earlier, best])
         case "weight-changed":
             let before = make(150, kg: 7.5, ts: 1000)
             let heavier = make(120, kg: 10, ts: 2000)
-            return (heavier, Celebrations.forSession(heavier, history: [before, heavier]))
+            return (heavier, Celebrations.forSession(heavier, history: [before, heavier]), [before, heavier])
         case "week-complete":
             // Five sessions inside the current week, so the tier that earns a
             // burst is reachable for review at all. Without this there was no
@@ -111,13 +118,41 @@ struct SummaryReviewHost: View {
                 )
             }
             let last = built[built.count - 1]
-            return (last, Celebrations.forSession(last, history: built))
+            return (last, Celebrations.forSession(last, history: built), built)
+        case "stalled":
+            // Three B sessions shaped like the ones he actually logged: the
+            // push-ups and the lateral raise climb, while the floor fly and the
+            // rear-delt fly read the same number every time.
+            let sessions = (0 ..< 3).map { index in
+                SessionRecord(
+                    date: String(format: "2026-08-%02d", 19 + index * 2),
+                    sessionKey: "B",
+                    log: [
+                        "1.0.0": 10 + index, "1.0.1": 10 + index, "1.0.2": 11 + index,
+                        "1.1.0": 8 + index, "1.1.1": 7, "1.1.2": 7,
+                        "2.0.0": 8, "2.0.1": 6, "2.0.2": 6 + index,
+                        "3.0.0": 12, "3.0.1": 12,
+                        "3.1.0": 7, "3.1.1": 7,
+                    ],
+                    minutes: 17,
+                    reps: 0,
+                    timestamp: 1_787_000_000_000 + index * 86_400_000,
+                    kg: 5
+                )
+            }
+            .map { record in
+                var counted = record
+                counted.reps = record.log.values.reduce(0, +)
+                return counted
+            }
+            let finished = sessions[sessions.count - 1]
+            return (finished, Celebrations.forSession(finished, history: sessions), sessions)
         case "first":
             let only = make(163, kg: 7.5, ts: 1000)
-            return (only, Celebrations.forSession(only, history: [only]))
+            return (only, Celebrations.forSession(only, history: [only]), [only])
         default:
             let latest = history.max { $0.timestamp < $1.timestamp } ?? make(163, kg: 7.5, ts: 1000)
-            return (latest, Celebrations.forSession(latest, history: history))
+            return (latest, Celebrations.forSession(latest, history: history), history)
         }
     }
 }

@@ -4,6 +4,72 @@ Append-only, newest at the top. One agent works this clone at a time; this file
 is the only thing standing between the next agent and re-deciding what you
 already decided.
 
+## 2026-09-19 · R36 — the Summary now names what has stopped moving
+
+`verify-ios.sh` green, **128 assertions, 0 skipped**. `History.stalls`,
+`History.stallLine`, a `stalls` parameter on `SummaryScreen`, and
+`-screen summary -tier stalled` to look at it.
+
+### Why this exists
+
+R35 rebuilt B because its numbers had not moved. Going through the record to
+answer a question Eden asked afterwards turned up something worse: **several of
+those numbers had never been counted at all.**
+
+The rep control prefills with last time's figure and one tap logs it. Accept it
+once and it reproduces itself forever, and on screen it is indistinguishable
+from a set that is being trained hard and has plateaued. The tell is in the
+first session of any movement — the app offers 10 for bodyweight and 12 for a
+loaded set, and every loaded movement in the record was corrected away from that
+default within a session or two. **One never was.**
+
+`PRODUCT.md` has always said *"three identical sessions in a row is the most
+valuable output the app has: it means the program needs to change."* The app
+believed it and only ever checked the session TOTAL — `Celebration.isPlateau`.
+A total is the coarsest possible reading: it can hold still while half the sets
+move, and it can move while one set has never changed at all. That second case
+is exactly what was happening, and nothing anywhere said so.
+
+### The design calls worth not re-deciding
+
+**Not a twelfth celebration tier.** The tiers are ranked and exactly one fires,
+so a stall would have had to outrank a personal best to be seen. Run the review
+host at `-tier stalled` and you get the reason: a morning that is genuinely a
+personal best *and* has two movements that never moved. Both are true and the
+screen should say both. It is a separate line, on the `Deck.Standing.line`
+model — absent entirely until it has something true to say.
+
+**It states the fact and stops.** The plateau headline already names the rung to
+climb and the Guide has the whole ladder. A third repetition is a nag.
+
+**It does not try to tell a stall from an uncounted set**, because it cannot and
+because both want the same response: go and look at that movement.
+
+**The run ends at a weight change**, like every other comparison in this app.
+
+**Every set of a movement must match.** One set moving is progress and clears
+the whole movement — the response is already happening.
+
+### Checked against the real thing
+
+Run over his actual four B sessions, through R35's slot map, it says nothing for
+the first two and then:
+
+    B 2026-08-23 — Push-up and rear-delt fly have not moved in three sessions.
+    B 2026-08-27 — Floor fly and rear-delt fly have not moved in three sessions.
+
+Both correct. The push-up drops off the second one because that is the session he
+started counting them.
+
+### A bug found on the way
+
+`SummaryReviewHost` synthesises a record for each tier but was passing the
+STORE's history alongside it. Nothing read history beside the record until now,
+so it never mattered; the stall line does, and would have reported on a session
+that never happened. `example(from:)` now returns the history it built. Third
+time this file has handed a screen something that was not wired to what it
+appeared to describe — see its own header comment about `onDone`.
+
 ## 2026-09-19 · R35 — session B was rebuilt from a research review, and the slot map is why nothing was lost
 
 `verify-ios.sh` green, **123 assertions, 0 skipped**. `Program.swift` session B

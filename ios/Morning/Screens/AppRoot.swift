@@ -35,6 +35,7 @@ struct AppRoot: View {
                     celebration: finished.celebration,
                     week: Week.progress(history: model.data.history),
                     card: finished.card,
+                    stalls: History.stalls(after: finished.record, in: model.data.history),
                     onDone: model.dismissSummary
                 )
             } else if let session = model.session {

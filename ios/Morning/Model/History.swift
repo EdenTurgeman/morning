@@ -136,6 +136,143 @@ enum History {
         return "\(moved).\(parts[2])"
     }
 
+    /* --- what has stopped moving -------------------------------------------
+     * `PRODUCT.md`: "Three identical sessions in a row is the most valuable
+     * output the app has: it means the program needs to change." The app has
+     * always believed that and has only ever checked it against the session
+     * TOTAL, which is the coarsest possible reading — a total can hold still
+     * while half the sets move, and it can move while one set never has.
+     *
+     * The per-set version is the one that catches the thing nobody sees: a
+     * number accepted rather than counted. The rep control prefills with last
+     * time's figure and one tap logs it, so a set that is never actually
+     * counted reproduces itself forever and looks exactly like a set that is
+     * being trained and has plateaued. Both readings want the same response —
+     * go and look at that movement — so the line does not have to tell them
+     * apart, and deliberately does not try.
+     */
+
+    /// A movement whose reps have not changed for several sessions.
+    struct Stall: Equatable {
+        let exercise: String
+        /// The rep count, when every set of the movement sits on the same one.
+        /// Nil when its sets differ from each other — 10/11/12 repeated
+        /// identically is still a stall, it just has no single number.
+        let reps: Int?
+        /// Consecutive sessions at these numbers, this one included.
+        let sessions: Int
+    }
+
+    /// Movements that have not moved, in program order.
+    ///
+    /// Every set of a movement must be identical to the same set in each of the
+    /// preceding sessions. One set moving is progress and disqualifies the
+    /// whole movement, because the response — go and look at it — is already
+    /// happening.
+    ///
+    /// **The run stops at a weight change**, like every other comparison in
+    /// this app. Reps held level across a heavier load are not a stall, they
+    /// are an improvement the arithmetic cannot see.
+    static func stalls(
+        after record: SessionRecord,
+        in history: [SessionRecord],
+        minimum: Int = 3
+    ) -> [Stall] {
+        // Built rather than taken from `history`, so this is correct whether or
+        // not the caller has already appended the finished session.
+        let earlier = history
+            .filter { $0.sessionKey == record.sessionKey && $0.timestamp < record.timestamp }
+            .sorted { $0.timestamp > $1.timestamp }
+        var window = [record]
+        for previous in earlier {
+            // Comparable only while the load holds. The first change ends the
+            // run rather than being skipped over.
+            guard let here = resolvedLoad(for: previous),
+                  let now = resolvedLoad(for: record),
+                  abs(here - now) < 0.01
+            else {
+                break
+            }
+            window.append(previous)
+        }
+        guard window.count >= minimum else { return [] }
+
+        let logs = window.map { currentSlotLog(of: $0) }
+        var seen: Set<String> = []
+        var out: [Stall] = []
+
+        for set in StepCompiler.build(session: record.sessionKey).compactMap(\.asSet) {
+            guard !seen.contains(set.exercise) else { continue }
+            seen.insert(set.exercise)
+
+            let slots = StepCompiler.build(session: record.sessionKey)
+                .compactMap(\.asSet)
+                .filter { $0.exercise == set.exercise }
+                .map(\.slot)
+
+            // How many sessions back every one of this movement's sets reads
+            // the same as it does today.
+            var run = 1
+            guard let today = reps(of: slots, in: logs[0]) else { continue }
+            for log in logs.dropFirst() {
+                guard reps(of: slots, in: log) == today else { break }
+                run += 1
+            }
+
+            guard run >= minimum else { continue }
+            let uniform = Set(today).count == 1 ? today.first : nil
+            out.append(Stall(exercise: set.exercise, reps: uniform, sessions: run))
+        }
+
+        return out
+    }
+
+    /// Every one of `slots` read from one session, or nil if any is absent — a
+    /// movement half-logged cannot be compared against one that was not.
+    private static func reps(of slots: [String], in log: [String: Int]) -> [Int]? {
+        let found = slots.compactMap { log[$0] }
+        return found.count == slots.count ? found : nil
+    }
+
+    /// The Summary's line, **or nothing at all** — the same contract as
+    /// `Deck.Standing.line`. It states the fact and stops: the plateau
+    /// celebration already names the rung to climb, and the Guide has the
+    /// ladder. Saying it a third time here would make this a nag.
+    static func stallLine(_ stalls: [Stall]) -> String? {
+        guard let shortest = stalls.map(\.sessions).min() else { return nil }
+        let span = "\(spelled(shortest)) sessions"
+
+        switch stalls.count {
+        case 1:
+            let only = stalls[0]
+            guard let reps = only.reps else {
+                return "\(only.exercise) has not moved in \(span)."
+            }
+            return "\(only.exercise) has been \(reps) for \(span)."
+        case 2:
+            return "\(stalls[0].exercise) and \(lowered(stalls[1].exercise)) "
+                + "have not moved in \(span)."
+        default:
+            let others = stalls.count - 2
+            let count = others == 1 ? "one other" : "\(spelled(others)) others"
+            return "\(stalls[0].exercise), \(lowered(stalls[1].exercise)) and \(count) "
+                + "have not moved in \(span)."
+        }
+    }
+
+    /// Mid-sentence, "Floor fly" is a movement and not a proper noun.
+    private static func lowered(_ exercise: String) -> String {
+        exercise.prefix(1).lowercased() + exercise.dropFirst()
+    }
+
+    /// Small counts read as words in this app's prose — "One more identical
+    /// session", "Third A at the same total". Digits are for measurements.
+    private static func spelled(_ count: Int) -> String {
+        let words = ["zero", "one", "two", "three", "four", "five",
+                     "six", "seven", "eight", "nine", "ten"]
+        return words.indices.contains(count) ? words[count] : "\(count)"
+    }
+
     /// The weight a record should be valued at.
     ///
     /// An absent `kg` means "logged before the weight was adjustable" and falls

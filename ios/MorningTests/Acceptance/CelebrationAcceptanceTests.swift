@@ -220,6 +220,145 @@ final class CelebrationAcceptanceTests: XCTestCase {
         )
     }
 
+    // MARK: - What has stopped moving
+
+    /// A movement every set of which has read the same for three sessions is
+    /// named, with the number it is stuck on.
+    ///
+    /// This is the case that actually happened: the floor fly was logged at
+    /// 12 and 12 in every session it existed for — the app's default for a
+    /// loaded set, accepted once and prefilled forever after. Every other
+    /// loaded movement in the record was corrected away from its default
+    /// within a session or two. Nothing on any screen ever said so.
+    func testAMovementThatHasNotMovedForThreeSessionsIsNamed() throws {
+        let history = threeIdenticalFloorFlySessions()
+        let latest = try XCTUnwrap(history.last)
+
+        let stalls = History.stalls(after: latest, in: history)
+        let floorFly = try XCTUnwrap(stalls.first { $0.exercise == "Floor fly" })
+
+        XCTAssertEqual(floorFly.reps, 12)
+        XCTAssertEqual(floorFly.sessions, 3)
+        XCTAssertEqual(
+            History.stallLine([floorFly]),
+            "Floor fly has been 12 for three sessions."
+        )
+    }
+
+    /// Two sessions is not a stall. Three is the threshold `PRODUCT.md` names.
+    func testTwoSessionsIsNotYetAStall() throws {
+        let history = Array(threeIdenticalFloorFlySessions().dropFirst())
+        let latest = try XCTUnwrap(history.last)
+
+        XCTAssertEqual(history.count, 2)
+        XCTAssertTrue(History.stalls(after: latest, in: history).isEmpty)
+        XCTAssertNil(History.stallLine([]))
+    }
+
+    /// One set moving is progress, and it clears the whole movement.
+    func testOneSetMovingClearsTheMovement() throws {
+        var history = threeIdenticalFloorFlySessions()
+        let latest = try XCTUnwrap(history.popLast())
+        var log = latest.log
+        log["3.0.1"] = 13 // the second floor fly went up by one
+        history.append(SessionRecord(
+            date: latest.date,
+            sessionKey: latest.sessionKey,
+            log: log,
+            minutes: latest.minutes,
+            reps: log.values.reduce(0, +),
+            timestamp: latest.timestamp,
+            kg: latest.kg
+        ))
+        let moved = try XCTUnwrap(history.last)
+
+        XCTAssertFalse(
+            History.stalls(after: moved, in: history).contains { $0.exercise == "Floor fly" },
+            "a movement with one set going up is not stalled"
+        )
+    }
+
+    /// THE RUN ENDS AT A WEIGHT CHANGE.
+    ///
+    /// Reps held level under a heavier load are an improvement the arithmetic
+    /// cannot see, and calling that a stall would be the same dishonesty as
+    /// reporting a rep delta across a weight change.
+    func testTheRunEndsAtAWeightChange() throws {
+        var history = threeIdenticalFloorFlySessions()
+        // Re-value the OLDEST of the three: the load moved before it.
+        let oldest = history.removeFirst()
+        history.insert(SessionRecord(
+            date: oldest.date,
+            sessionKey: oldest.sessionKey,
+            log: oldest.log,
+            minutes: oldest.minutes,
+            reps: oldest.reps,
+            timestamp: oldest.timestamp,
+            kg: 3.75
+        ), at: 0)
+        let latest = try XCTUnwrap(history.last)
+
+        XCTAssertTrue(
+            History.stalls(after: latest, in: history).isEmpty,
+            "only two sessions are comparable, so nothing has stalled for three"
+        )
+    }
+
+    /// The line names two movements, then counts the rest.
+    func testTheLineNamesTwoMovementsThenCountsTheRest() {
+        let one = History.Stall(exercise: "Floor fly", reps: 12, sessions: 4)
+        let two = History.Stall(exercise: "Lateral raise", reps: nil, sessions: 3)
+        let three = History.Stall(exercise: "Rear-delt fly", reps: 7, sessions: 5)
+        let four = History.Stall(exercise: "Push-up", reps: 10, sessions: 6)
+
+        XCTAssertEqual(
+            History.stallLine([one, two]),
+            "Floor fly and lateral raise have not moved in three sessions."
+        )
+        XCTAssertEqual(
+            History.stallLine([one, two, three]),
+            "Floor fly, lateral raise and one other have not moved in three sessions."
+        )
+        XCTAssertEqual(
+            History.stallLine([one, two, three, four]),
+            "Floor fly, lateral raise and two others have not moved in three sessions."
+        )
+
+        // The span is the SHORTEST run among them, which is the weakest claim
+        // that is true of all of them.
+        XCTAssertEqual(
+            History.stallLine([one, three]),
+            "Floor fly and rear-delt fly have not moved in four sessions."
+        )
+
+        // A movement whose sets differ from each other has no single number.
+        XCTAssertEqual(
+            History.stallLine([two]),
+            "Lateral raise has not moved in three sessions."
+        )
+    }
+
+    /// Three B sessions identical on the floor fly, with everything else moving.
+    ///
+    /// Slots are B's current shape: `3.0.0`/`3.0.1` is the floor fly.
+    private func threeIdenticalFloorFlySessions() -> [SessionRecord] {
+        (0 ..< 3).map { index in
+            record(
+                day: 19 + index * 2,
+                key: "B",
+                log: [
+                    "1.0.0": 10 + index, "1.0.1": 10 + index, "1.0.2": 10 + index,
+                    "1.1.0": 8, "1.1.1": 7 + index, "1.1.2": 7,
+                    "2.0.0": 8, "2.0.1": 6, "2.0.2": 6 + index,
+                    "3.0.0": 12, "3.0.1": 12,
+                    "3.1.0": 7, "3.1.1": 7 + index,
+                ],
+                kg: 5,
+                ts: 1_787_000_000_000 + index * 86_400_000
+            )
+        }
+    }
+
     private func record(
         day: Int,
         key: String,
