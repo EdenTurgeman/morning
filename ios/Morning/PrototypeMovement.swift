@@ -480,26 +480,93 @@ struct ExerciseFigure: View {
     }
 
     private var floorFly: FigurePose {
-        // Seen from above, on your back. The arms open wide to the floor and
-        // close above the chest; the cue is "elbows slightly bent and locked
-        // there", so the bend never changes and only the arc does.
-        let shoulder = (0.45, 0.39)
-        let reachFor = interpolated(from: (0.182, 0.418), to: (0.432, 0.238))
-        let (elbow, hand) = armOutward(from: shoulder, to: reachFor)
+        // ON YOUR BACK, SEEN FROM ABOVE. Rebuilt 2026-09-19: Eden said it
+        // "loops bad and doesn't look like the real exercise", and all three
+        // faults were real.
+        //
+        // WHY IT LOOKED LIKE A STANDING EXERCISE. It drew a ground line under
+        // the feet. Nothing else in the pose said which way was up, so the
+        // ground did — and a body standing on a floor with its arms opening is
+        // a lateral raise, which is the movement immediately before this one in
+        // session B. Two of B's four exercises were drawing the same picture.
+        // The ground is gone; the label under the name already says "lying on
+        // your back", and the figure only has to not contradict it.
+        //
+        // WHY IT LOOKED WRONG. The hand was walked along a STRAIGHT LINE from
+        // wide to closed. An arm on a shoulder does not travel in a straight
+        // line, and the endpoint put the hands at head height with the elbows
+        // flared above them — a goalpost, not a fly. Here the hand swings on a
+        // FIXED RADIUS, which is what "elbows slightly bent and locked there"
+        // means: the bend is constant and only the angle moves.
+        //
+        // WHY IT LOOPED BADLY. `armOutward` picks whichever of the two IK
+        // solutions puts the elbow further from the body's centreline. As the
+        // hand crossed the midline that choice FLIPPED and the elbow snapped
+        // across the body mid-sweep. A fixed `bend` cannot flip.
+        //
+        // THE VIEWPOINT, which is the part that took two attempts.
+        //
+        // The arms have to be drawn face-on: a fly's arc is a circle in the
+        // frontal plane, and that is the ONE view where it projects to a
+        // circle instead of a line. Any other angle foreshortens it, and a
+        // foreshortened bone changes length in 2D, which `FigureAnatomyTests`
+        // rejects — correctly, because that check is what stopped the limbs
+        // being made of rubber. So the viewpoint is fixed: from the feet.
+        //
+        // The first attempt kept the arms honest and still read as a standing
+        // overhead press, because a face-on TORSO with legs hanging below it is
+        // a standing body no matter what the arms do. Eden's word was "again".
+        //
+        // So the body carries the message instead. It is foreshortened — a
+        // short torso, because seen end-on down its own length it is — and the
+        // knees are bent and splayed with the soles of the feet toward you,
+        // which is how you lie to do this and is a shape a standing figure
+        // cannot make. Legs and torso are not bone-checked, only arms, so this
+        // is free.
+        let shoulderY = 0.395
+        let halfChest = 0.048
+        let radius = 0.265
+
+        // 96° is out on the floor, a little below shoulder level — the bottom
+        // of the rep, where the triceps touch. 14° is hands nearly together
+        // over the chest. Phase 0 is the stretch, as it is everywhere else.
+        let degrees = 96 + (14 - 96) * phase
+        let angle = degrees * .pi / 180
+        let shoulder = (0.5 - halfChest, shoulderY)
+        let reachFor = (
+            shoulder.0 - sin(angle) * radius,
+            shoulder.1 - cos(angle) * radius
+        )
+        // Constant bend, never `armOutward`: see the note on looping above.
+        let (elbow, hand) = arm(from: shoulder, to: reachFor, bend: 1)
+
         return FigurePose(
-            head: (0.5, 0.22),
-            neck: (0.5, 0.33),
-            hip: (0.5, 0.70),
+            head: (0.5, 0.225),
+            neck: (0.5, 0.320),
+            // Short: the torso is pointing away from you, not across the page.
+            hip: (0.5, 0.560),
             arms: [
-                [(0.45, 0.39), elbow, hand],
-                [(0.55, 0.39), mirrored(elbow), mirrored(hand)],
+                [shoulder, elbow, hand],
+                [mirrored(shoulder), mirrored(elbow), mirrored(hand)],
             ],
+            // Knees up and out, soles toward you. A standing figure cannot make
+            // this shape, which is the whole job it is doing here.
             legs: [
-                [(0.470, 0.72), (0.458, 0.82), (0.452, 0.90)],
-                [(0.530, 0.72), (0.542, 0.82), (0.548, 0.90)],
+                [(0.468, 0.575), (0.352, 0.715), (0.430, 0.880)],
+                [(0.532, 0.575), (0.648, 0.715), (0.570, 0.880)],
             ],
             dumbbells: [FigureWeight(at: hand), FigureWeight(at: mirrored(hand))],
-            ground: FigureGround(fromX: 0.10, toX: 0.90, y: 0.92)
+            // THE FLOOR, and it is drawn where it is for a reason. Seen from
+            // the feet, the floor recedes away from you: its far edge is BEHIND
+            // the head and shoulders, not under the feet. So the line sits high,
+            // the head lies beyond it, and the knees — which are nearest to you
+            // — break in front of it. Every other figure in this app puts its
+            // ground under the feet, which is exactly the signal that made this
+            // one read as standing.
+            //
+            // It also does the work of a cue: the arms come down ONTO it, so
+            // "triceps to the floor" is a thing you can see rather than read.
+            ground: FigureGround(fromX: 0.04, toX: 0.96, y: 0.455)
         )
     }
 

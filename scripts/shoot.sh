@@ -91,7 +91,7 @@ surface_args() {
     #        rest-myo   B step 17 · 20s, the myo rest — no card, ever
     rest)          ARGS=(-screen set -session A -step 2) ;;
     rest-card)     ARGS=(-screen set -session A -step 6) ;;
-    rest-myo)      ARGS=(-screen set -session B -step 17) ;;
+    rest-myo)      ARGS=(-screen set -session B -step 11) ;;
     # 3.5  The completion moment, playing over the summary.
     daybreak)      ARGS=(-screen summary) ;;
     # 3.6  Summary, with the choreography skipped so the screen itself is what
@@ -121,8 +121,13 @@ surface_args() {
 #
 #   A: 0 warm-up · 1,3,5 push-up sets · 2,4,6 rests(60) · 7-15 superset+rests(45)
 #      · 16-20 superset, trailing rest dropped                       = 21 steps
-#   B: as A to step 15, then 16-21 the myo block, 3 sets w/ rests(20)
-#      · 22-24 floor fly, trailing rest dropped                      = 25 steps
+#   B: 0 warm-up · 1-9 push-up+lateral-raise superset, 3 rounds w/ rests(60)
+#      · 10-15 the myo block, 3 sets w/ rests(20) · 16-20 floor-fly+rear-delt
+#      superset, 2 rounds, trailing rest dropped                     = 21 steps
+#
+#   B was 25 until the 2026-09-19 restructure and `rest-myo` pointed at step 17,
+#   which is a SET now. That is the rot this comment warns about, caught by the
+#   symptom it predicts: a set screen in a file named rest-myo.png.
 #
 # `MorningTests/Acceptance` already asserts both compiled lengths, so a program
 # change fails there first. If it ever fails HERE instead, the symptom is a shot

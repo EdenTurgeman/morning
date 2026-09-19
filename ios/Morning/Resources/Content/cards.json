@@ -9,7 +9,7 @@
       "id": "w-flor-abv",
       "subject": "wine",
       "topic": "Fortified",
-      "q": "Why is Fino fortified to about 15% and Oloroso to about 17%?",
+      "q": "Two sherries: why is Fino fortified to about 15% and Oloroso to about 17%?",
       "a": "Flor yeast survives only to roughly 15.5% abv. Below that the flor layer lives and shields the wine from oxygen: biological ageing, which gives Fino its saline, bready character. Above it the flor dies and the wine ages oxidatively, giving Oloroso its nutty, dried-fruit profile."
     },
     {
@@ -394,7 +394,7 @@
       "id": "t-dancong-xiang",
       "subject": "tea",
       "topic": "Dancong",
-      "q": "Phoenix Dancong, from the Fenghuang mountains in Guangdong, is sold by aroma name. Is anything added to make it smell that way?",
+      "q": "Phoenix Dancong, an oolong from the Fenghuang mountains in Guangdong, is sold by aroma name. Is anything added to make it smell so?",
       "a": "No. The names translate the smell: Mi Lan Xiang is honey orchid, Ya Shi Xiang is duck shit, and each is its own cultivar line off Fenghuang Shui Xian. Dan cong means single bush: the aromas were found on individual old trees, then propagated by cutting."
     },
     {
@@ -458,7 +458,7 @@
       "subject": "tea",
       "topic": "Green tea",
       "q": "Matcha is ground leaf. What leaf, exactly, goes into the mill?",
-      "a": "Tencha. It is shaded like gyokuro and steamed like sencha, but it is never rolled, and the stems and veins are cut out before it dries flat. Rolling exists to shape leaf for infusing, and matcha is not infused, so the leaf goes to a stone mill whole."
+      "a": "Tencha. It is grown under shade for weeks, then steamed and dried flat, but it is never rolled, and the stems and veins are cut out first. Rolling exists to shape leaf for infusing, and matcha is not infused, so the leaf goes to a stone mill whole."
     },
     {
       "id": "w-1855",
@@ -765,7 +765,7 @@
       "id": "t-darjeeling-flush",
       "subject": "tea",
       "topic": "Darjeeling",
-      "q": "Darjeeling is sold by flush. What is a flush, and why do the first two taste nothing alike?",
+      "q": "Darjeeling, grown high in the Indian Himalaya, is sold by flush. What is a flush, and why do the first two taste nothing alike?",
       "a": "A flush is one growth cycle of the bush. First flush, from March, is barely oxidised and reads green and floral, closer to an oolong. Second flush, in May and June, is fully oxidised and gives the grapey muscatel note. Same bushes, different season, different making."
     },
     {
@@ -835,7 +835,7 @@
       "id": "w-syrah-rotundone",
       "subject": "wine",
       "topic": "Syrah",
-      "q": "Northern Rhône Syrah tastes of cracked black pepper and Barossa Shiraz almost never does. What decides that?",
+      "q": "Northern Rhône Syrah tastes of cracked black pepper and Shiraz from Australia's warm Barossa almost never does. What decides that?",
       "options": [
         "Cool, shaded ripening, which leaves the pepper compound intact",
         "The stems, kept in the ferment in the north and removed in Australia",
@@ -1080,7 +1080,7 @@
       "id": "t-uva-wintergreen",
       "subject": "tea",
       "topic": "Uva",
-      "q": "A July Uva from Sri Lanka smells of menthol and wintergreen. Where does that come from?",
+      "q": "A July tea from Uva, in Sri Lanka's eastern hills, smells of menthol and wintergreen. Where does that come from?",
       "options": [
         "Eucalyptus planted through the estates as windbreaks",
         "A longer wither before the leaf is rolled",
@@ -1185,7 +1185,7 @@
       "id": "w-brunello-sangiovese",
       "subject": "wine",
       "topic": "Sangiovese",
-      "q": "Brunello di Montalcino and Chianti Classico are both Sangiovese. Why may Brunello use nothing else?",
+      "q": "Brunello di Montalcino and Chianti Classico are Tuscan neighbours, both Sangiovese. Why may Brunello use nothing else?",
       "options": [
         "Montalcino is warmer and drier, so the grape ripens fully on its own",
         "Brunello ages so long that any blending partner would fade out of it",
@@ -1220,7 +1220,7 @@
       "id": "t-lapsang-smoke",
       "subject": "tea",
       "topic": "Wuyi",
-      "q": "Lapsang Souchong is smoked over pine. When in the making does the smoke go in?",
+      "q": "Lapsang Souchong, a black tea from the Wuyi hills, is the one famous tea deliberately smoked. When does the smoke go in?",
       "options": [
         "A pine oil is brushed onto the finished leaf",
         "The dry tea is stored with pine chips until it takes the scent",
@@ -1591,7 +1591,7 @@
       "id": "t-muzha-tieguanyin",
       "subject": "tea",
       "topic": "Tieguanyin",
-      "q": "A bag from Muzha in Taipei is labelled tieguanyin. What might that word be describing?",
+      "q": "A bag from Muzha in Taipei is labelled tieguanyin, the famous rolled oolong of Anxi. What might that word be describing?",
       "options": [
         "The village it came from, as with most Chinese tea names",
         "The cultivar alone, since the name belongs to that one bush",
@@ -1717,7 +1717,7 @@
       "id": "t-longjing-wok",
       "subject": "tea",
       "topic": "Green tea",
-      "q": "Longjing leaf lies flat and smooth rather than curled or twisted. What made it that shape?",
+      "q": "Longjing, China's best-known green tea, lies flat and smooth rather than curled or twisted. What made it that shape?",
       "a": "The pressing. A hand holds the leaf flat against the hot wok as it fires. So three jobs happen at once: the heat kills the enzymes, the leaf dries, and the shape is set. Elsewhere those are three separate stages. It goes into the wok twice, with a rest between."
     },
     {
@@ -2347,7 +2347,7 @@
       "id": "t-luan-guapian-fire",
       "subject": "tea",
       "topic": "Anhui",
-      "q": "Lu'an Guapian is finished by swinging baskets of leaf over an open charcoal fire, dozens of passes in relays. What does that buy?",
+      "q": "Lu'an Guapian, a green tea from Anhui, is finished by swinging baskets of leaf over an open charcoal fire. What does that buy?",
       "options": [
         "A smoky note, built in the way pine smoke is built into Lapsang Souchong",
         "A slow oxidation, which is what curls the leaf into its seed shape",
@@ -4540,6 +4540,20 @@
       ],
       "correct": 2,
       "a": "They are opposites. Barbera pours dark and juicy, high in acid over soft tannin, so it drinks young. Dolcetto is the reverse: low acid with firm, faintly bitter tannin, and its name, little sweet one, points at that soft acidity. It ripens weeks earlier than Nebbiolo too."
+    },
+    {
+      "id": "t-oolong-shape",
+      "subject": "tea",
+      "topic": "Oolong",
+      "q": "Some oolong comes as hard green pellets and some as long twisted strips. What does that shape tell you?",
+      "options": [
+        "The oxidation: pellets are always the greener style",
+        "The grade: pellets are machine-made, strips are hand-made",
+        "Where it is from, because the two are regional traditions",
+        "The age, since strips are the older style everywhere"
+      ],
+      "correct": 2,
+      "a": "Two traditions. Anxi tieguanyin and the Taiwanese high-mountain oolongs are wrapped and rolled into tight pellets, which open slowly over many infusions. Wuyi rock oolong and Phoenix Dancong are left as long twisted strips, and give more up front. Shape is a regional signature."
     }
   ]
 }

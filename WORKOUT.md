@@ -103,30 +103,29 @@ the lateral raise gets ~115 s between rounds instead of ~65.
 **Push-up, deficit, hands on books — bodyweight · 8–15 reps**
 - Hands on books, chest sinking below them
 - 3s down · 1s PAUSE at the bottom · fast up
-- Hit 15 and your feet go up next time. Go to failure
+- Go to failure. At 15, feet up next time
 
 **Lateral raise — 6–12 reps**
-- Lead with your elbows, stop at shoulder height. No swinging
-- Round 1 is the number that counts. Beat it or match it
-- At failure → 5–8 partial reps in the bottom third
-- Reach 15 here and put another 1.25 kg on each handle
+- Lead with your elbows. No swinging
+- At failure → 5–8 partials at the bottom
+- 15 reps here → add 1.25 kg a side
 
 ### Lateral raise, myo-reps — 3 sets · 20 s rest
 Targets run per set: **all-out to failure**, then **4–6 reps**, then **4–6 reps**.
-- Set 1 is all-out. Then 20s rest, 4–6 reps, repeat
+- All-out, then 20s rest, 4–6 reps, repeat
 - Stop when you can't get 4 clean reps
-- The 20-second rest IS the mechanism. Don't stretch it
+- The 20s rest IS the mechanism
 
 ### Superset ×2 · 60 s rest after each round
 
 **Floor fly, lying on your back — 10–20 reps**
-- Elbows slightly bent and locked there: a fly, not a press
-- Lower until your triceps touch the floor · 1s PAUSE in the stretch
-- Past 20 clean reps? Slow the lowering to 4s. Go to failure
+- Elbows bent and locked: a fly, not a press
+- Triceps to the floor · 1s PAUSE in the stretch
+- Go to failure. Past 20, lower for 4s
 
 **Rear-delt fly — 8–15 reps**
 - Hinge until almost parallel to the floor
-- Open your arms wide like a curtain, squeeze the blades
+- Open wide like a curtain, squeeze the blades
 
 ---
 
@@ -139,7 +138,7 @@ In order. Exhaust each rung before the next.
 3. **Add post-failure partials** in the bottom third.
 4. **Add weight.** The smallest step is 1.25 kg a side and reps restart from a
    fresh baseline. **The trigger is written into the set itself:** 15 reps on
-   B's first lateral raise and another 1.25 kg goes on each handle. Put every
+   B's lateral raise and another 1.25 kg goes on each handle. Put every
    future trigger where the set is, not in a document — this one sat in the
    Guide unread for a month while the condition to fire it was met repeatedly.
 5. **Switch to a variant with no ceiling** — pike push-ups, Z-press, archer

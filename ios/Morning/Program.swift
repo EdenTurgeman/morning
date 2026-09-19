@@ -297,7 +297,7 @@ let program: [Session] = [
                         cues: [
                             "Hands on books, chest sinking below them",
                             "3s down · 1s PAUSE at the bottom · fast up",
-                            "Hit 15 and your feet go up next time. Go to failure",
+                            "Go to failure. At 15, feet up next time",
                         ]
                     ),
                     Movement(
@@ -305,10 +305,9 @@ let program: [Session] = [
                         load: 5,
                         target: "6–12 reps",
                         cues: [
-                            "Lead with your elbows, stop at shoulder height. No swinging",
-                            "Round 1 is the number that counts. Beat it or match it",
-                            "At failure → 5–8 partial reps in the bottom third",
-                            "Reach 15 here and put another 1.25 kg on each handle",
+                            "Lead with your elbows. No swinging",
+                            "At failure → 5–8 partials at the bottom",
+                            "15 reps here → add 1.25 kg a side",
                         ]
                     ),
                 ]
@@ -326,9 +325,9 @@ let program: [Session] = [
                 ],
                 intense: true,
                 cues: [
-                    "Set 1 is all-out. Then 20s rest, 4–6 reps, repeat",
+                    "All-out, then 20s rest, 4–6 reps, repeat",
                     "Stop when you can't get 4 clean reps",
-                    "The 20-second rest IS the mechanism. Don't stretch it",
+                    "The 20s rest IS the mechanism",
                 ]
             )),
             .superset(Superset(
@@ -341,9 +340,9 @@ let program: [Session] = [
                         load: 5,
                         target: "10–20 reps",
                         cues: [
-                            "Elbows slightly bent and locked there: a fly, not a press",
-                            "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
-                            "Past 20 clean reps? Slow the lowering to 4s. Go to failure",
+                            "Elbows bent and locked: a fly, not a press",
+                            "Triceps to the floor · 1s PAUSE in the stretch",
+                            "Go to failure. Past 20, lower for 4s",
                         ]
                     ),
                     Movement(
@@ -352,7 +351,7 @@ let program: [Session] = [
                         target: "8–15 reps",
                         cues: [
                             "Hinge until almost parallel to the floor",
-                            "Open your arms wide like a curtain, squeeze the blades",
+                            "Open wide like a curtain, squeeze the blades",
                         ]
                     ),
                 ]

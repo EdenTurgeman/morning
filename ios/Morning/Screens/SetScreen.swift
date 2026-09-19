@@ -121,6 +121,31 @@ struct SetScreen: View {
                 // which is a change to `FigureRenderer`, not a number here.
                 figureScale: 1.35
             )
+            // A FIXED HEIGHT, and this is the fix for two complaints at once.
+            //
+            // The bay used to take whatever the ply left over, so the figure's
+            // size was a function of HOW MUCH TEXT the exercise happened to
+            // carry. Measured across session B: the push-up drew a body about
+            // 25pt tall and the myo lateral raise drew one under 5pt — a mark
+            // rather than a figure. Eden read that as the animations having
+            // disappeared, and he was right to: at that size nothing is being
+            // demonstrated.
+            //
+            // So the demonstration is the same size on every exercise and the
+            // TEXT is what has to fit around it. That is the honest way round
+            // — the figure either reads as a body or it should not be drawn —
+            // and it is why the cues in `Program.swift` were cut to one line
+            // each in the same commit.
+            //
+            // 150pt: `FigureRenderer.unit` is the canvas height, the canvas is
+            // the bay less 28pt of padding, and a pose spans 0.74 of a unit at
+            // `figureScale` 1.35 — so this draws a body about 120pt tall, which
+            // is the threshold this screen's own notes name as the point below
+            // which a figure stops reading as one.
+            .frame(height: 150)
+            // The outer frame takes the leftover and centres the bay in it, so
+            // slack above the rep control stays slack instead of inflating the
+            // drawing.
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             RepControl(

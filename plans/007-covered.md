@@ -258,7 +258,7 @@ him a card he has not met.
 
 ### Fortified
 
-`·` **Why is Fino fortified to about 15% and Oloroso to about 17%?**
+`·` **Two sherries: why is Fino fortified to about 15% and Oloroso to about 17%?**
   Flor yeast survives only to roughly 15.5% abv. Below that the flor layer lives and shields the wine from oxygen: biological ageing, which gives Fino its saline, bready character. Above it the flor dies and the wine ages oxidatively, giving Oloroso its nutty, dried-fruit profile.
 
 `Q` **Madeira, the fortified wine from a Portuguese island out in the Atlantic, is deliberately heated in production. What does that heating buy?**
@@ -532,7 +532,7 @@ him a card he has not met.
 
 ### Sangiovese
 
-`Q` **Brunello di Montalcino and Chianti Classico are both Sangiovese. Why may Brunello use nothing else?**
+`Q` **Brunello di Montalcino and Chianti Classico are Tuscan neighbours, both Sangiovese. Why may Brunello use nothing else?**
   Warmth. Montalcino lies south of Chianti Classico, warmer and drier, and Sangiovese ripens there fully enough to carry a wine by itself: Brunello must be 100% of it. Chianti Classico is cooler, keeps a sharper red-fruited bite, and may fill out with up to 20% of other red grapes.
 
 ### Sauvignon Blanc
@@ -651,7 +651,7 @@ him a card he has not met.
 
 ### Syrah
 
-`Q` **Northern Rhône Syrah tastes of cracked black pepper and Barossa Shiraz almost never does. What decides that?**
+`Q` **Northern Rhône Syrah tastes of cracked black pepper and Shiraz from Australia's warm Barossa almost never does. What decides that?**
   Rotundone, the compound that smells of black pepper. It builds late in ripening and only where the bunch stays cool and shaded; sun and heat break it down. Syrah and Shiraz are one grape, so what changes across the world is the temperature, not the vine.
 
 ### Tasting
@@ -792,7 +792,7 @@ him a card he has not met.
 `Q` **Zinfandel routinely finishes above 15% and shows a raisined edge. What in the vineyard causes both?**
   One bunch holds raisins next to green fruit whatever day it is picked, so the grower is always choosing which fault to take. The raisined berries carry huge sugar and the yeast turns that into alcohol. Primitivo in Puglia is the same grape under an Italian name.
 
-## tea (161)
+## tea (162)
 
 ### Altitude
 
@@ -804,7 +804,7 @@ him a card he has not met.
 `Q` **Taiping Houkui is a flat green tea with unusually long leaves, each marked with a faint criss-cross grid. What made that grid?**
   The leaf is laid out straight and rolled flat under a gauze mesh, which prints itself on. The flattening, with the local large-leaf bush, gives an orchid scent and very little astringency for leaves that mature. The leaves are long enough to brew upright in a tall glass.
 
-`Q` **Lu'an Guapian is finished by swinging baskets of leaf over an open charcoal fire, dozens of passes in relays. What does that buy?**
+`Q` **Lu'an Guapian, a green tea from Anhui, is finished by swinging baskets of leaf over an open charcoal fire. What does that buy?**
   The basket crosses the blaze for a second at a time, so the leaf takes hard heat in flashes and never sits in it. That drives out the last water and lays a toasted sweetness on. The move is called pulling the old fire. It is the one famous Chinese green with no bud in it.
 
 `Q` **Good Huangshan Maofeng shows a small pale leaf at the foot of each bud. What is it?**
@@ -919,12 +919,12 @@ him a card he has not met.
 
 ### Dancong
 
-`·` **Phoenix Dancong, from the Fenghuang mountains in Guangdong, is sold by aroma name. Is anything added to make it smell that way?**
+`·` **Phoenix Dancong, an oolong from the Fenghuang mountains in Guangdong, is sold by aroma name. Is anything added to make it smell so?**
   No. The names translate the smell: Mi Lan Xiang is honey orchid, Ya Shi Xiang is duck shit, and each is its own cultivar line off Fenghuang Shui Xian. Dan cong means single bush: the aromas were found on individual old trees, then propagated by cutting.
 
 ### Darjeeling
 
-`·` **Darjeeling is sold by flush. What is a flush, and why do the first two taste nothing alike?**
+`·` **Darjeeling, grown high in the Indian Himalaya, is sold by flush. What is a flush, and why do the first two taste nothing alike?**
   A flush is one growth cycle of the bush. First flush, from March, is barely oxidised and reads green and floral, closer to an oolong. Second flush, in May and June, is fully oxidised and gives the grapey muscatel note. Same bushes, different season, different making.
 
 `Q` **Darjeeling tastes nothing like the tea grown on the plains below it. What is planted on those slopes?**
@@ -1009,12 +1009,12 @@ him a card he has not met.
   Deep steaming, fukamushi, runs a minute or more against roughly thirty seconds for light. The extra heat breaks the leaf apart, so fine particles cloud the cup, extraction is fast and sweet, astringency drops, and the aroma is quieter and keeps less well.
 
 `·` **Matcha is ground leaf. What leaf, exactly, goes into the mill?**
-  Tencha. It is shaded like gyokuro and steamed like sencha, but it is never rolled, and the stems and veins are cut out before it dries flat. Rolling exists to shape leaf for infusing, and matcha is not infused, so the leaf goes to a stone mill whole.
+  Tencha. It is grown under shade for weeks, then steamed and dried flat, but it is never rolled, and the stems and veins are cut out first. Rolling exists to shape leaf for infusing, and matcha is not infused, so the leaf goes to a stone mill whole.
 
 `·` **Anji Bai Cha, from Anji county in Zhejiang, translates as Anji white tea, yet it is a green tea. Why the name?**
   The leaf, not the class. Its Bai Ye No.1 bush turns albino in a narrow band around 20C. Early spring shoots come out pale jade with green veins, and stack amino acids where polyphenols would normally go. Warmer or colder it greens over, so the picking window is short.
 
-`·` **Longjing leaf lies flat and smooth rather than curled or twisted. What made it that shape?**
+`·` **Longjing, China's best-known green tea, lies flat and smooth rather than curled or twisted. What made it that shape?**
   The pressing. A hand holds the leaf flat against the hot wok as it fires. So three jobs happen at once: the heat kills the enzymes, the leaf dries, and the shape is set. Elsewhere those are three separate stages. It goes into the wok twice, with a rest between.
 
 `Q` **Biluochun is a tiny spiral green tea from the hills above Lake Tai, west of Suzhou in Jiangsu. Why are its bushes planted in among fruit trees?**
@@ -1110,6 +1110,9 @@ him a card he has not met.
 
 `·` **Why does an oolong maker watch the sky more anxiously than a green tea maker?**
   Oolong opens with shai qing, sun withering: the leaf is spread outdoors for a short spell to soften and start its aroma chemistry, then carried in to cool and rest before the tossing begins. Cloud or rain forces it inside under fans and the tea comes out duller.
+
+`Q` **Some oolong comes as hard green pellets and some as long twisted strips. What does that shape tell you?**
+  Two traditions. Anxi tieguanyin and the Taiwanese high-mountain oolongs are wrapped and rolled into tight pellets, which open slowly over many infusions. Wuyi rock oolong and Phoenix Dancong are left as long twisted strips, and give more up front. Shape is a regional signature.
 
 ### Plucking
 
@@ -1261,7 +1264,7 @@ him a card he has not met.
 `·` **Is the jade-green, intensely floral style of tieguanyin, Anxi's famous oolong, the traditional one?**
   No. It is a market development from around the 1990s. Traditional tieguanyin, from Anxi in southern Fujian, was more oxidised, near 40%, and roasted. Demand for green, aromatic oolong pushed producers to 15–30% oxidation with little or no roast. Both are true to their era.
 
-`Q` **A bag from Muzha in Taipei is labelled tieguanyin. What might that word be describing?**
+`Q` **A bag from Muzha in Taipei is labelled tieguanyin, the famous rolled oolong of Anxi. What might that word be describing?**
   It names a cultivar and a way of making tea at once. Zhang Naimiao carried tieguanyin cuttings from Anxi to Muzha in 1895 and the heavy repeated charcoal roast came with them. Other bushes made that way sell under the name, so zheng cong, true bush, marks the original.
 
 `·` **One oolong tin from Anxi in Fujian is marked qing xiang and the next nong xiang. What is that pair of words sorting?**
@@ -1294,7 +1297,7 @@ him a card he has not met.
 
 ### Uva
 
-`Q` **A July Uva from Sri Lanka smells of menthol and wintergreen. Where does that come from?**
+`Q` **A July tea from Uva, in Sri Lanka's eastern hills, smells of menthol and wintergreen. Where does that come from?**
   Stress. From July the kachchan wind comes down off the mountains dry and warm, leaving Uva in a rain shadow, and the leaf answers by raising methyl salicylate, the wintergreen compound. It lasts a few weeks a year. The rest of the estate's crop does not taste like it.
 
 ### Water
@@ -1330,7 +1333,7 @@ him a card he has not met.
 `Q` **Da Hong Pao, the most famous of the roasted Wuyi rock oolongs, is sold in every shop in northern Fujian. What is almost certainly in the bag?**
   Picking the mother bushes stopped in 2006, so nobody sells their leaf. Most Da Hong Pao is a blended roast of Wuyi cultivars, usually Shui Xian and Rou Gui, built to a house style. Qi Dan is a genuine cutting off the originals; Bei Dou tests as something else.
 
-`Q` **Lapsang Souchong is smoked over pine. When in the making does the smoke go in?**
+`Q` **Lapsang Souchong, a black tea from the Wuyi hills, is the one famous tea deliberately smoked. When does the smoke go in?**
   It is built in, not added on. At Tongmu, in the Wuyi hills of northern Fujian, the leaf sits in a wooden smokehouse over a pine fire. It takes smoke while it withers, and again while it dries. The campfire version is an export style; the local one is faintly smoky.
 
 `Q` **Two Wuyi rock oolongs from northern Fujian, roasted alike: Rou Gui, named for cassia bark, and Shui Xian, an old large-leaf bush. Which tastes how?**
