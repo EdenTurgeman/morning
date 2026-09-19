@@ -1,8 +1,8 @@
 {
-  "_note": "What each session must compile to. Golden fixture for the step-compiler tests.",
+  "_note": "What each session must compile to. Golden fixture for the step-compiler tests. Regenerated 2026-09-19 when session B was restructured; session A is unchanged and was verified byte-identical against the previous fixture.",
   "counts": {
     "A": 21,
-    "B": 25
+    "B": 21
   },
   "steps": {
     "A": [
@@ -320,55 +320,86 @@
         "bodyweight": true,
         "target": "8–15 reps",
         "cues": [
-          "Hands on books or blocks, chest sinking below them",
+          "Hands on books, chest sinking below them",
           "3s down · 1s PAUSE at the bottom · fast up",
-          "Too easy → elevate your feet as well. Go to failure"
+          "Hit 15 and your feet go up next time. Go to failure"
         ],
         "n": 1,
         "of": 3,
-        "slot": "1.0.0"
+        "slot": "1.0.0",
+        "superset": [
+          1,
+          2
+        ],
+        "straightIntoNext": true
       },
       {
         "i": 2,
+        "kind": "set",
+        "exercise": "Lateral raise",
+        "load": 5,
+        "target": "6–12 reps",
+        "cues": [
+          "Lead with your elbows, stop at shoulder height. No swinging",
+          "Round 1 is the number that counts. Beat it or match it",
+          "At failure → 5–8 partial reps in the bottom third",
+          "Reach 15 here and put another 1.25 kg on each handle"
+        ],
+        "n": 1,
+        "of": 3,
+        "slot": "1.1.0",
+        "superset": [
+          2,
+          2
+        ],
+        "straightIntoNext": false
+      },
+      {
+        "i": 3,
         "kind": "rest",
         "seconds": 60
       },
       {
-        "i": 3,
+        "i": 4,
         "kind": "set",
         "exercise": "Push-up",
         "sub": "deficit, hands on books",
         "bodyweight": true,
         "target": "8–15 reps",
         "cues": [
-          "Hands on books or blocks, chest sinking below them",
+          "Hands on books, chest sinking below them",
           "3s down · 1s PAUSE at the bottom · fast up",
-          "Too easy → elevate your feet as well. Go to failure"
+          "Hit 15 and your feet go up next time. Go to failure"
         ],
         "n": 2,
         "of": 3,
-        "slot": "1.0.1"
-      },
-      {
-        "i": 4,
-        "kind": "rest",
-        "seconds": 60
+        "slot": "1.0.1",
+        "superset": [
+          1,
+          2
+        ],
+        "straightIntoNext": true
       },
       {
         "i": 5,
         "kind": "set",
-        "exercise": "Push-up",
-        "sub": "deficit, hands on books",
-        "bodyweight": true,
-        "target": "8–15 reps",
+        "exercise": "Lateral raise",
+        "load": 5,
+        "target": "6–12 reps",
         "cues": [
-          "Hands on books or blocks, chest sinking below them",
-          "3s down · 1s PAUSE at the bottom · fast up",
-          "Too easy → elevate your feet as well. Go to failure"
+          "Lead with your elbows, stop at shoulder height. No swinging",
+          "Round 1 is the number that counts. Beat it or match it",
+          "At failure → 5–8 partial reps in the bottom third",
+          "Reach 15 here and put another 1.25 kg on each handle"
         ],
-        "n": 3,
+        "n": 2,
         "of": 3,
-        "slot": "1.0.2"
+        "slot": "1.1.1",
+        "superset": [
+          2,
+          2
+        ],
+        "straightIntoNext": false
       },
       {
         "i": 6,
@@ -378,17 +409,18 @@
       {
         "i": 7,
         "kind": "set",
-        "exercise": "Lateral raise",
-        "load": 5,
-        "target": "15–25 reps",
+        "exercise": "Push-up",
+        "sub": "deficit, hands on books",
+        "bodyweight": true,
+        "target": "8–15 reps",
         "cues": [
-          "Lead with your elbows, stop at shoulder height",
-          "No swinging",
-          "At failure → 5–8 partial reps in the bottom third"
+          "Hands on books, chest sinking below them",
+          "3s down · 1s PAUSE at the bottom · fast up",
+          "Hit 15 and your feet go up next time. Go to failure"
         ],
-        "n": 1,
+        "n": 3,
         "of": 3,
-        "slot": "2.0.0",
+        "slot": "1.0.2",
         "superset": [
           1,
           2
@@ -398,16 +430,18 @@
       {
         "i": 8,
         "kind": "set",
-        "exercise": "Rear-delt fly",
+        "exercise": "Lateral raise",
         "load": 5,
-        "target": "15–25 reps",
+        "target": "6–12 reps",
         "cues": [
-          "Hinge until almost parallel to the floor",
-          "Open your arms wide like a curtain, squeeze the blades"
+          "Lead with your elbows, stop at shoulder height. No swinging",
+          "Round 1 is the number that counts. Beat it or match it",
+          "At failure → 5–8 partial reps in the bottom third",
+          "Reach 15 here and put another 1.25 kg on each handle"
         ],
-        "n": 1,
+        "n": 3,
         "of": 3,
-        "slot": "2.1.0",
+        "slot": "1.1.2",
         "superset": [
           2,
           2
@@ -417,198 +451,158 @@
       {
         "i": 9,
         "kind": "rest",
-        "seconds": 45
+        "seconds": 60
       },
       {
         "i": 10,
-        "kind": "set",
-        "exercise": "Lateral raise",
-        "load": 5,
-        "target": "15–25 reps",
-        "cues": [
-          "Lead with your elbows, stop at shoulder height",
-          "No swinging",
-          "At failure → 5–8 partial reps in the bottom third"
-        ],
-        "n": 2,
-        "of": 3,
-        "slot": "2.0.1",
-        "superset": [
-          1,
-          2
-        ],
-        "straightIntoNext": true
-      },
-      {
-        "i": 11,
-        "kind": "set",
-        "exercise": "Rear-delt fly",
-        "load": 5,
-        "target": "15–25 reps",
-        "cues": [
-          "Hinge until almost parallel to the floor",
-          "Open your arms wide like a curtain, squeeze the blades"
-        ],
-        "n": 2,
-        "of": 3,
-        "slot": "2.1.1",
-        "superset": [
-          2,
-          2
-        ],
-        "straightIntoNext": false
-      },
-      {
-        "i": 12,
-        "kind": "rest",
-        "seconds": 45
-      },
-      {
-        "i": 13,
-        "kind": "set",
-        "exercise": "Lateral raise",
-        "load": 5,
-        "target": "15–25 reps",
-        "cues": [
-          "Lead with your elbows, stop at shoulder height",
-          "No swinging",
-          "At failure → 5–8 partial reps in the bottom third"
-        ],
-        "n": 3,
-        "of": 3,
-        "slot": "2.0.2",
-        "superset": [
-          1,
-          2
-        ],
-        "straightIntoNext": true
-      },
-      {
-        "i": 14,
-        "kind": "set",
-        "exercise": "Rear-delt fly",
-        "load": 5,
-        "target": "15–25 reps",
-        "cues": [
-          "Hinge until almost parallel to the floor",
-          "Open your arms wide like a curtain, squeeze the blades"
-        ],
-        "n": 3,
-        "of": 3,
-        "slot": "2.1.2",
-        "superset": [
-          2,
-          2
-        ],
-        "straightIntoNext": false
-      },
-      {
-        "i": 15,
-        "kind": "rest",
-        "seconds": 45
-      },
-      {
-        "i": 16,
         "kind": "set",
         "exercise": "Lateral raise",
         "sub": "myo-reps",
         "load": 5,
         "target": "all-out to failure",
         "cues": [
-          "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+          "Set 1 is all-out. Then 20s rest, 4–6 reps, repeat",
           "Stop when you can't get 4 clean reps",
           "The 20-second rest IS the mechanism. Don't stretch it"
         ],
         "intense": true,
         "n": 1,
         "of": 3,
-        "slot": "3.0.0"
+        "slot": "2.0.0"
       },
       {
-        "i": 17,
+        "i": 11,
         "kind": "rest",
         "seconds": 20
       },
       {
-        "i": 18,
+        "i": 12,
         "kind": "set",
         "exercise": "Lateral raise",
         "sub": "myo-reps",
         "load": 5,
-        "target": "4–5 reps",
+        "target": "4–6 reps",
         "cues": [
-          "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+          "Set 1 is all-out. Then 20s rest, 4–6 reps, repeat",
           "Stop when you can't get 4 clean reps",
           "The 20-second rest IS the mechanism. Don't stretch it"
         ],
         "intense": true,
         "n": 2,
         "of": 3,
-        "slot": "3.0.1"
+        "slot": "2.0.1"
       },
       {
-        "i": 19,
+        "i": 13,
         "kind": "rest",
         "seconds": 20
       },
       {
-        "i": 20,
+        "i": 14,
         "kind": "set",
         "exercise": "Lateral raise",
         "sub": "myo-reps",
         "load": 5,
-        "target": "4–5 reps",
+        "target": "4–6 reps",
         "cues": [
-          "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+          "Set 1 is all-out. Then 20s rest, 4–6 reps, repeat",
           "Stop when you can't get 4 clean reps",
           "The 20-second rest IS the mechanism. Don't stretch it"
         ],
         "intense": true,
         "n": 3,
         "of": 3,
-        "slot": "3.0.2"
+        "slot": "2.0.2"
       },
       {
-        "i": 21,
+        "i": 15,
         "kind": "rest",
         "seconds": 20
       },
       {
-        "i": 22,
+        "i": 16,
         "kind": "set",
         "exercise": "Floor fly",
         "sub": "lying on your back",
         "load": 5,
-        "target": "15–25 reps",
+        "target": "10–20 reps",
         "cues": [
           "Elbows slightly bent and locked there: a fly, not a press",
           "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
-          "Past 25 clean reps? Slow the lowering to 4s. Go to failure"
+          "Past 20 clean reps? Slow the lowering to 4s. Go to failure"
         ],
         "n": 1,
         "of": 2,
-        "slot": "4.0.0"
+        "slot": "3.0.0",
+        "superset": [
+          1,
+          2
+        ],
+        "straightIntoNext": true
       },
       {
-        "i": 23,
+        "i": 17,
+        "kind": "set",
+        "exercise": "Rear-delt fly",
+        "load": 5,
+        "target": "8–15 reps",
+        "cues": [
+          "Hinge until almost parallel to the floor",
+          "Open your arms wide like a curtain, squeeze the blades"
+        ],
+        "n": 1,
+        "of": 2,
+        "slot": "3.1.0",
+        "superset": [
+          2,
+          2
+        ],
+        "straightIntoNext": false
+      },
+      {
+        "i": 18,
         "kind": "rest",
         "seconds": 60
       },
       {
-        "i": 24,
+        "i": 19,
         "kind": "set",
         "exercise": "Floor fly",
         "sub": "lying on your back",
         "load": 5,
-        "target": "15–25 reps",
+        "target": "10–20 reps",
         "cues": [
           "Elbows slightly bent and locked there: a fly, not a press",
           "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
-          "Past 25 clean reps? Slow the lowering to 4s. Go to failure"
+          "Past 20 clean reps? Slow the lowering to 4s. Go to failure"
         ],
         "n": 2,
         "of": 2,
-        "slot": "4.0.1"
+        "slot": "3.0.1",
+        "superset": [
+          1,
+          2
+        ],
+        "straightIntoNext": true
+      },
+      {
+        "i": 20,
+        "kind": "set",
+        "exercise": "Rear-delt fly",
+        "load": 5,
+        "target": "8–15 reps",
+        "cues": [
+          "Hinge until almost parallel to the floor",
+          "Open your arms wide like a curtain, squeeze the blades"
+        ],
+        "n": 2,
+        "of": 2,
+        "slot": "3.1.1",
+        "superset": [
+          2,
+          2
+        ],
+        "straightIntoNext": false
       }
     ]
   }

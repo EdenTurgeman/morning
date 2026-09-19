@@ -43,9 +43,16 @@
  *  default. History totals are never lost — only the per-set prefill resets.
  *  Adding or editing cues, names, loads and targets is always safe.
  *
- *  This is why the floor fly in B was APPENDED rather than inserted: inserting
- *  it earlier would have shifted every later block's slot ids and handed it the
- *  myo block's rep history as its starting target. Preserve that property.
+ *  B was restructured on 2026-09-19 and this is exactly what happened: every
+ *  block moved, so every slot in it came to mean a different exercise. The
+ *  floor fly would have inherited the myo block's numbers. Nothing was
+ *  discarded to fix it, because the restructure only REORDERED movements — it
+ *  removed none — so every old slot has an exact counterpart. The map lives in
+ *  `History.legacySlotB` and translates at read time; the stored records are
+ *  untouched. If you reorder B again, extend that map rather than dropping it.
+ *
+ *  That trick only works while the movements survive the edit. Delete one and
+ *  its history has nowhere to go: append instead, or accept the loss knowingly.
  *
  *  ── provenance ───────────────────────────────────────────────────────────
  *  Transcribed mechanically from ios-port/content/program.json by
@@ -265,8 +272,8 @@ let program: [Session] = [
     ),
     Session(
         key: "B",
-        name: "Light",
-        minutes: "~19 min",
+        name: "Width",
+        minutes: "~17 min",
         blocks: [
             .warmup(Warmup(
                 seconds: 90,
@@ -278,40 +285,30 @@ let program: [Session] = [
                     "Set the dumbbells while you do this",
                 ]
             )),
-            .straight(Straight(
-                exercise: "Push-up",
-                sub: "deficit, hands on books",
-                sets: 3,
-                rest: 60,
-                bodyweight: true,
-                target: "8–15 reps",
-                cues: [
-                    "Hands on books or blocks, chest sinking below them",
-                    "3s down · 1s PAUSE at the bottom · fast up",
-                    "Too easy → elevate your feet as well. Go to failure",
-                ]
-            )),
             .superset(Superset(
                 sets: 3,
-                rest: 45,
+                rest: 60,
                 items: [
                     Movement(
-                        exercise: "Lateral raise",
-                        load: 5,
-                        target: "15–25 reps",
+                        exercise: "Push-up",
+                        sub: "deficit, hands on books",
+                        bodyweight: true,
+                        target: "8–15 reps",
                         cues: [
-                            "Lead with your elbows, stop at shoulder height",
-                            "No swinging",
-                            "At failure → 5–8 partial reps in the bottom third",
+                            "Hands on books, chest sinking below them",
+                            "3s down · 1s PAUSE at the bottom · fast up",
+                            "Hit 15 and your feet go up next time. Go to failure",
                         ]
                     ),
                     Movement(
-                        exercise: "Rear-delt fly",
+                        exercise: "Lateral raise",
                         load: 5,
-                        target: "15–25 reps",
+                        target: "6–12 reps",
                         cues: [
-                            "Hinge until almost parallel to the floor",
-                            "Open your arms wide like a curtain, squeeze the blades",
+                            "Lead with your elbows, stop at shoulder height. No swinging",
+                            "Round 1 is the number that counts. Beat it or match it",
+                            "At failure → 5–8 partial reps in the bottom third",
+                            "Reach 15 here and put another 1.25 kg on each handle",
                         ]
                     ),
                 ]
@@ -324,27 +321,40 @@ let program: [Session] = [
                 load: 5,
                 targets: [
                     "all-out to failure",
-                    "4–5 reps",
-                    "4–5 reps",
+                    "4–6 reps",
+                    "4–6 reps",
                 ],
                 intense: true,
                 cues: [
-                    "Set 1 is all-out. Then 20s rest, 4–5 reps, repeat",
+                    "Set 1 is all-out. Then 20s rest, 4–6 reps, repeat",
                     "Stop when you can't get 4 clean reps",
                     "The 20-second rest IS the mechanism. Don't stretch it",
                 ]
             )),
-            .straight(Straight(
-                exercise: "Floor fly",
-                sub: "lying on your back",
+            .superset(Superset(
                 sets: 2,
                 rest: 60,
-                load: 5,
-                target: "15–25 reps",
-                cues: [
-                    "Elbows slightly bent and locked there: a fly, not a press",
-                    "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
-                    "Past 25 clean reps? Slow the lowering to 4s. Go to failure",
+                items: [
+                    Movement(
+                        exercise: "Floor fly",
+                        sub: "lying on your back",
+                        load: 5,
+                        target: "10–20 reps",
+                        cues: [
+                            "Elbows slightly bent and locked there: a fly, not a press",
+                            "Lower until your triceps touch the floor · 1s PAUSE in the stretch",
+                            "Past 20 clean reps? Slow the lowering to 4s. Go to failure",
+                        ]
+                    ),
+                    Movement(
+                        exercise: "Rear-delt fly",
+                        load: 5,
+                        target: "8–15 reps",
+                        cues: [
+                            "Hinge until almost parallel to the floor",
+                            "Open your arms wide like a curtain, squeeze the blades",
+                        ]
+                    ),
                 ]
             )),
         ]

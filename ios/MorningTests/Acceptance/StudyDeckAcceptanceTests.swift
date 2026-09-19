@@ -56,7 +56,10 @@ final class StudyDeckAcceptanceTests: XCTestCase {
         // The exact steps, so a change to the fraction maths shows up here
         // rather than as a card that silently stops appearing.
         XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "A")), [6, 15])
-        XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "B")), [6, 15])
+        // B moved to [6, 18] in the 2026-09-19 restructure: it now has four
+        // long rests rather than seven, because three 45s superset rests became
+        // one 60s rest per round.
+        XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "B")), [6, 18])
 
         // The summary's card is drawn by the summary, which is W7. What the
         // deck owes it is a longer think, because there is no timer to beat.

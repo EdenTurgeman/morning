@@ -4,6 +4,99 @@ Append-only, newest at the top. One agent works this clone at a time; this file
 is the only thing standing between the next agent and re-deciding what you
 already decided.
 
+## 2026-09-19 · R35 — session B was rebuilt from a research review, and the slot map is why nothing was lost
+
+`verify-ios.sh` green, **123 assertions, 0 skipped**. `Program.swift` session B
+replaced; `compiled-steps.json` regenerated; `History.bSlotMoves` added.
+
+Eden had a separate agent review B against the hypertrophy literature — the
+brief, the review and its 22-source bibliography live OUTSIDE this repo at
+`~/Dev/morning-workout-review/`, because they carry his logged reps and this
+repo is public. He then said: *"let's update the app to fit B to this."*
+**Rule 4 in CLAUDE.md — ask before touching the program — was satisfied by that
+sentence. It does not generalise.**
+
+### The thing to take from this entry
+
+**Reordering a block rewrites the meaning of every slot in it, and the app will
+not tell you.** History resolves `block.item.set` against `record.log` by string
+match alone; it has no idea what exercise a slot belonged to. B's restructure
+moved the floor fly from block 4 to block 3, so on the first run it would have
+read the myo block's numbers and announced he was beating a set he had never
+done. The app would have lied, confidently, on the surface the whole product is
+built around.
+
+The fix is `History.bSlotMoves`, and the reason it is cheap is worth stating: the
+restructure **moved movements without removing any**, so the map is a bijection
+and nothing had to be discarded. The review had argued for accepting the loss.
+It did not have to be accepted.
+
+Translation happens at READ time. Stored records are never rewritten — a logged
+session is a record of what he actually lifted, and re-keying it to suit a later
+program is the same class of dishonesty as backfilling `kg`. Legacy records are
+detected by SHAPE, not date (`2.1.*` can only have come from the old B), so a
+restore from an old backup still resolves correctly.
+
+**This also mattered more than it looks.** Without the map, B's lateral raise
+would have prefilled at the app's default of 12 — a number he has never reached.
+His first session on the fixed program would have opened by telling him he lost,
+which is the exact failure the rebuild exists to remove.
+
+### What changed in the program
+
+| | before | after |
+|---|---|---|
+| Name | "Light", ~19 min | **"Width", ~17 min** |
+| Sets · steps | 14 · 25 | 13 · 21 |
+| Block 1 | Push-up ×3 straight | **Push-up + Lateral raise ×3 superset**, 60s |
+| Block 2 | Lateral raise + Rear-delt fly ×3, 45s | **Lateral raise myo-reps ×3**, 20s |
+| Block 3 | Myo ×3, 20s | **Floor fly + Rear-delt fly ×2 superset**, 60s |
+| Block 4 | Floor fly ×2, 60s | — |
+| Lateral raise target | 15–25 reps | **6–12 reps** |
+| Rear-delt fly | 15–25 reps, 3 sets | 8–15 reps, 2 sets |
+| Floor fly | 15–25 reps | 10–20 reps |
+| Myo sets 2–3 | 4–5 reps | 4–6 reps |
+| Programmed rest | 435s | **360s** |
+
+**The targets were the actual bug.** B asked for roughly double the reps he
+actually does, on every loaded set, for as long as the record runs. Nothing in B
+was ever "hit". Its rep total was flat across four sessions while A's climbed
+steadily, and he then stopped logging B at all — choosing A several times
+running, each of which meant overriding the app's own proposal. The figures are
+in the review; they are not reproduced here because this repo is public.
+
+**The pairing was the structural bug.** A lateral raise supersetted with a
+rear-delt fly is two shoulder movements back to back: the delt got ~65s between
+sets and declined within the session. Pairing each priority movement with
+something that does not compete buys ~115s between lateral raise sets on *less*
+total rest.
+
+### What the review would NOT change, and why that matters
+
+It went looking for a better lateral raise and found the opposite. Larsen 2025
+ran dumbbell against cable raises within-participant for 8 weeks and found
+Bayesian support for no difference (BF 0.22/0.27) — the cable being exactly the
+"fix the resistance profile" move anyone would propose here. **Do not re-derive
+this.** Same for the myo block: rest-pause is equal, not better, and equal is a
+win under a 20-minute cap.
+
+### Left alone deliberately
+
+- `src/`, `ios-port/content/*.json` and `scripts/verify-program.ts` still
+  describe the OLD B. They are the frozen web build, which `Program.swift`'s
+  header already declares is no longer the source of truth. Do not "sync" them.
+- A is untouched. The review suggested chin-ups belong in A rather than B — it
+  is a suggestion, uncosted against A's 16-minute budget, and Eden has not
+  been asked.
+
+### Not verified
+
+Everything here is the simulator and the suite. **Nothing has run on the phone**
+— `refresh-device.sh` has been failing on a missing DDI since R34, so the
+20-minute cap, the floor-to-standing transition inside block 1, and whether four
+cues on the lateral raise are too much to read at 6:10am are all unconfirmed.
+The first real session is the test.
+
 ## 2026-09-12 · R34 — the app was paying for 420 shadows per ply, and the crossing stopped repainting the card
 
 `verify-ios.sh` green, **120 assertions, 0 skipped**. New doc:

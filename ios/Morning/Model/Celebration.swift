@@ -153,11 +153,16 @@ enum Celebrations {
         // 2. Beating every single set. Rare, unambiguous, and entirely measured
         //    against your own past — the best thing in here.
         if let previous, !sameLetter.isEmpty, !weightChanged {
+            // Read through the slot map: after B's restructure the previous
+            // record may be keyed to the old block order, and comparing raw
+            // would pair the floor fly against the myo block. `currentSlotLog`
+            // is a no-op for anything already current.
+            let previousLog = History.currentSlotLog(of: previous)
             let slots = Array(record.log.keys)
-            let comparable = slots.filter { previous.log[$0] != nil }
+            let comparable = slots.filter { previousLog[$0] != nil }
             let beatEvery = comparable.count >= 3
                 && comparable.count == slots.count
-                && comparable.allSatisfy { (record.log[$0] ?? 0) > (previous.log[$0] ?? 0) }
+                && comparable.allSatisfy { (record.log[$0] ?? 0) > (previousLog[$0] ?? 0) }
 
             if beatEvery {
                 return Celebration(

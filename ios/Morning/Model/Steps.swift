@@ -13,9 +13,10 @@ import Foundation
  *  wins, and the golden fixture settles it either way.
  *
  *  Golden fixture: `ios/MorningTests/Fixtures/compiled-steps.json`.
- *  A must produce 21 steps, B must produce 25 — and the tests assert the WHOLE
- *  list, not the counts, because the counts were right in a build where the
- *  slot ids were not.
+ *  Both must produce 21 steps — and the tests assert the WHOLE list, not the
+ *  counts, because the counts were right in a build where the slot ids were
+ *  not. B was 25 until the 2026-09-19 restructure; the two matching now is a
+ *  coincidence, not a rule.
  * ======================================================================== */
 
 // MARK: - Steps

@@ -20,12 +20,17 @@ import XCTest
 /// `nonisolated` through `Program.swift` to satisfy a test target is not.
 @MainActor
 final class ProgramCompilerAcceptanceTests: XCTestCase {
-    /// Session A compiles to 21 steps; B to 25. Assert the full list against
+    /// Both sessions compile to 21 steps. Assert the full list against
     /// compiled-steps.json, not just the counts.
-    func testSessionACompilesTo21StepsAndBTo25() throws {
+    ///
+    /// B was 25 until the 2026-09-19 restructure moved its push-ups into a
+    /// superset with the lateral raise and its rear-delt fly in with the floor
+    /// fly. Same movements, one fewer set, four fewer rests, and the two
+    /// numbers matching is a coincidence rather than a rule.
+    func testBothSessionsCompileTo21StepsAndMatchTheGoldenList() throws {
         let fixture = try GoldenSteps.load()
         XCTAssertEqual(fixture.counts["A"], 21)
-        XCTAssertEqual(fixture.counts["B"], 25)
+        XCTAssertEqual(fixture.counts["B"], 21)
 
         for key in ["A", "B"] {
             let golden = try XCTUnwrap(fixture.steps[key], "no golden steps for \(key)")
@@ -62,18 +67,20 @@ final class ProgramCompilerAcceptanceTests: XCTestCase {
 
     /// A rest appears after each superset round, including the last of a block.
     func testRestAfterEachSupersetRoundIncludingTheLast() throws {
-        // B's superset block is followed by more blocks, so every one of its
-        // rounds must be followed by a rest — including the final round, whose
-        // rest is the gap before the next exercise rather than an intra-block
-        // pause. A's last superset round is the end of the session, where the
-        // trailing rest is deliberately stripped.
+        // B has two superset blocks since the restructure. Every round is
+        // followed by a rest — including the last round of block 1, whose rest
+        // is the gap before the myo block rather than an intra-block pause.
+        // The one exception is a round that ENDS THE SESSION, where the
+        // trailing rest is deliberately stripped; in B that is block 3's
+        // second round, and in A its last superset round.
         let steps = StepCompiler.build(session: "B")
         var roundsChecked = 0
 
         for (index, step) in steps.enumerated() {
             guard let set = step.asSet,
                   let superset = set.superset,
-                  superset.index == superset.of
+                  superset.index == superset.of,
+                  index < steps.count - 1
             else {
                 continue
             }
@@ -82,7 +89,9 @@ final class ProgramCompilerAcceptanceTests: XCTestCase {
             roundsChecked += 1
         }
 
-        XCTAssertEqual(roundsChecked, 3, "B's superset block should have 3 rounds")
+        // 3 rounds in block 1 plus the first of block 2's two — the second one
+        // ends the session and is excluded above.
+        XCTAssertEqual(roundsChecked, 4, "B should have 5 superset rounds, 4 of them followed by a rest")
     }
 
     /// No rest is left dangling at the very end of a session.
@@ -100,7 +109,9 @@ final class ProgramCompilerAcceptanceTests: XCTestCase {
         let myo = steps.compactMap(\.asSet).filter(\.intense)
 
         XCTAssertEqual(myo.count, 3, "the myo block should produce 3 sets")
-        XCTAssertEqual(myo.map(\.target), ["all-out to failure", "4–5 reps", "4–5 reps"])
+        // 4–6, not 4–5: the block sat at 6, 6, 6 for three sessions running
+        // with no rung above it to climb to.
+        XCTAssertEqual(myo.map(\.target), ["all-out to failure", "4–6 reps", "4–6 reps"])
 
         // The 20-second rest IS the training stimulus, not a convenience.
         for (index, step) in steps.enumerated() {
@@ -140,18 +151,106 @@ final class ProgramCompilerAcceptanceTests: XCTestCase {
         let sets = StepCompiler.build(session: "B").compactMap(\.asSet)
         XCTAssertTrue(sets.contains { $0.exercise == "Floor fly" }, "B has lost the floor fly")
 
-        // It was APPENDED, not inserted: inserting it earlier would have shifted
-        // every later block's slot ids and handed it the myo block's rep
-        // history as its starting target.
-        let floorFlySlots = sets.filter { $0.exercise == "Floor fly" }.map(\.slot)
-        let highestBlock = sets.compactMap { Int($0.slot.split(separator: ".")[0]) }.max()
-        for slot in floorFlySlots {
+        // It used to have to be the LAST block: it was appended rather than
+        // inserted so that it could not shift every later slot id. The
+        // 2026-09-19 restructure moved it anyway and paid for that with
+        // `History.bSlotMoves`, so its position is no longer load-bearing —
+        // what is load-bearing now is that the map stays complete.
+        //
+        // Every set in B must find its own movement's reps in a record written
+        // against the old shape — all thirteen of them.
+        let legacy = History.currentSlotLog(of: legacyBRecord())
+        XCTAssertEqual(
+            sets.filter { legacy[$0.slot] != nil }.count,
+            sets.count,
+            "some B set has no legacy history to read, so the map has a hole in it"
+        )
+    }
+
+    /// The legacy map is a bijection: no two slots collapse into one.
+    func testTheLegacySlotMapLosesNothingAndCollapsesNothing() {
+        let record = legacyBRecord()
+        let translated = History.currentSlotLog(of: record)
+
+        XCTAssertEqual(
+            translated.count,
+            record.log.count,
+            "translating collapsed two of the old slots onto one current slot"
+        )
+
+        // The rear-delt fly's third set is the one movement-set the restructure
+        // dropped — the block runs two rounds now, not three — so its number
+        // translates to a slot no longer in the program. Nothing else is
+        // orphaned.
+        let live = Set(StepCompiler.build(session: "B").compactMap(\.asSet).map(\.slot))
+        XCTAssertEqual(translated.keys.filter { !live.contains($0) }.sorted(), ["3.1.2"])
+
+        let slots = StepCompiler.build(session: "B").compactMap(\.asSet).map(\.slot)
+        XCTAssertEqual(Set(slots).count, slots.count, "duplicate current slots")
+    }
+
+    /// The exercise a slot's history came from is the exercise it lands on.
+    ///
+    /// This is the whole point of the map. Before it, B's floor fly read the
+    /// myo block's numbers and told him he was beating a set he had never done.
+    func testLegacyHistoryLandsOnTheSameMovementItWasLoggedFor() {
+        let steps = StepCompiler.build(session: "B").compactMap(\.asSet)
+        let history = [legacyBRecord()]
+
+        // The old record logged, by movement:
+        //   push-up 10/11/12 · lateral raise 8/8/7 · rear-delt 7/7/7
+        //   myo 8/6/6        · floor fly 12/12
+        let expected: [String: Int] = [
+            "1.0.0": 10, "1.0.1": 11, "1.0.2": 12, // push-up, never moved
+            "1.1.0": 8, "1.1.1": 8, "1.1.2": 7, // lateral raise, was block 2
+            "2.0.0": 8, "2.0.1": 6, "2.0.2": 6, // myo, was block 3
+            "3.0.0": 12, "3.0.1": 12, // floor fly, was block 4
+            "3.1.0": 7, "3.1.1": 7, // rear-delt fly, was 2.1
+        ]
+
+        for set in steps {
+            let found = History.previousSet(slot: set.slot, sessionKey: "B", in: history)
             XCTAssertEqual(
-                Int(slot.split(separator: ".")[0]),
-                highestBlock,
-                "the floor fly must remain the last block — see Program.swift's header"
+                found?.reps,
+                expected[set.slot],
+                "\(set.exercise) at \(set.slot) read the wrong movement's history"
             )
         }
+    }
+
+    /// A record in the CURRENT shape is read directly, with no translation.
+    func testCurrentShapedRecordsAreNotTranslated() {
+        let current = SessionRecord(
+            date: "2026-09-20",
+            sessionKey: "B",
+            log: ["1.1.0": 9, "3.0.0": 14],
+            minutes: 17,
+            reps: 23,
+            timestamp: 1_790_000_000_000,
+            kg: 5
+        )
+        XCTAssertFalse(History.isLegacyB(current))
+        XCTAssertEqual(History.previousSet(slot: "1.1.0", sessionKey: "B", in: [current])?.reps, 9)
+        XCTAssertEqual(History.previousSet(slot: "3.0.0", sessionKey: "B", in: [current])?.reps, 14)
+    }
+
+    /// One of his real sessions, in the shape B had before 2026-09-19.
+    private func legacyBRecord() -> SessionRecord {
+        SessionRecord(
+            date: "2026-08-27",
+            sessionKey: "B",
+            log: [
+                "1.0.0": 10, "1.0.1": 11, "1.0.2": 12, // push-up
+                "2.0.0": 8, "2.0.1": 8, "2.0.2": 7, // lateral raise
+                "2.1.0": 7, "2.1.1": 7, "2.1.2": 7, // rear-delt fly
+                "3.0.0": 8, "3.0.1": 6, "3.0.2": 6, // myo
+                "4.0.0": 12, "4.0.1": 12, // floor fly
+            ],
+            minutes: 18,
+            reps: 121,
+            timestamp: 1_787_000_000_000,
+            kg: 5
+        )
     }
 
     /// Slot IDs are stable and unique, and match the golden fixture exactly.

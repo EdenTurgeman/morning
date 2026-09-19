@@ -99,8 +99,8 @@ struct HomeScreen: View {
         // prominent element was setup for a session the screen never described,
         // and 240pt of the middle was empty underneath it.
         //
-        // Nothing here is invented content. `Session.name` ("Light") and
-        // `Session.minutes` ("~19 min") have been in `Program.swift` since it
+        // Nothing here is invented content. `Session.name` ("Width") and
+        // `Session.minutes` ("~17 min") have been in `Program.swift` since it
         // was transcribed and no screen has ever shown them, and the movement
         // list is the session's own structure. It is a hierarchy change: what
         // you are about to do goes where the plate maths was, the plate maths

@@ -451,7 +451,7 @@ Lock Screen / Dynamic Island ──tap──► the step the countdown was count
 
 ## 4. The program
 
-Two sessions, **A** ("Heavy", ~16 min) and **B** ("Light", ~19 min), alternating.
+Two sessions, **A** ("Heavy", ~16 min) and **B** ("Width", ~17 min), alternating.
 
 **The program is one plainly-structured data object in one file**, with exercise
 names, set counts, rest seconds, loads and cues as literal values. The user

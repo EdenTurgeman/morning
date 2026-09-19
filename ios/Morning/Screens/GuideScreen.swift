@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
  *  ---------------------------------------------------------------------------
  *  The two screens that are read rather than used. `02-design-brief.md §8`.
  *
- *  The Guide is nine short entries, verbatim from `content/guide.json`. It is a
+ *  The Guide is ten short entries, verbatim from `content/guide.json`. It is a
  *  static reference read maybe monthly, which is exactly the case `§6` names as
  *  needing DYNAMIC TYPE THROUGH THE ACCESSIBILITY SIZES — unlike the workout
  *  screens, which clamp because they are already at the top of the scale and

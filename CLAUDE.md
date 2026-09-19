@@ -134,7 +134,7 @@ true in W0 and neither has been true for months.
 | `ios/Morning/Model/Schema.swift` | The v1 storage contract from `06-data.md §3`. | Compiled and tested. |
 | `ios/Morning/Shaders/` | `Sky.metal` only, and **only the prototype uses it**. `Daybreak.metal` was deleted when the completion moment became `PaperSunrise` — paper has no atmosphere, so a shader had nothing to compute. | Read its header before touching it. |
 | `ios/MorningWidgets/` | The Live Activity target. | Built. |
-| `ios/MorningTests/Acceptance/` | 76 assertions from `07-acceptance.md`. **None skipped.** | Passing. |
+| `ios/MorningTests/Acceptance/` | 123 assertions from `07-acceptance.md`. **None skipped.** | Passing. |
 | `ios/Docs/design-system.md` | The paper world: the ink law, the grounds, the primitives. Every contrast figure measured on rendered frames, not calculated. | **Rewritten 2026-09-03** — it had described the deleted dawn world. Revise it, do not start it. |
 | `ios/Docs/redesign-plan.md` | **How the UI rebuild is run**, phase by phase, on Emil Kowalski's skills. | The method for the next programme. |
 | `ios/Docs/motion-performance.md` | **Why the app stutters, when it does.** Ten rules, every one of them measured on Eden's phone after breaking it. Read before touching anything that moves. | Current. |
@@ -183,9 +183,12 @@ Every one of these has already cost someone something.
 - **Two slot-key shapes.** A record's `log` is keyed by the bare slot
   (`"2.1.0"`). The ledger's internal load table keys by `"A:2.1.0"`. Keep them
   straight or imported history mis-values.
-- **Slot ids are `block.item.set` and load-bearing.** This is why the floor fly
-  in session B was *appended*, not inserted — inserting it would have shifted
-  every later id and handed it the myo block's rep history.
+- **Slot ids are `block.item.set` and load-bearing.** Reordering a block changes
+  what every slot in it MEANS. B was restructured on 2026-09-19 and the floor
+  fly would have inherited the myo block's numbers; `History.bSlotMoves` maps
+  old slots to new at read time, and stored records are never rewritten. That
+  works only because the restructure moved movements without removing any. If
+  you delete one, its history has nowhere to go.
 - **One history record per finished session.** The web build briefly wrote two.
 - **Reps are only comparable at the same weight.** If the working weight moved,
   every delta is meaningless. Say so honestly; do not show a comparison that
