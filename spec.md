@@ -478,10 +478,18 @@ adds the handle weight mentally. Nothing may try to be clever about this.
 
 **Slot identity is `block.item.set` and is load-bearing.** Rep history, the "last
 time" lookup and the tonnage table all key off it. Reordering blocks or changing
-set counts breaks the match and silently re-attributes history — which is why a
-new movement is *appended* to a session rather than inserted.
+set counts breaks the match and silently re-attributes history, so a new movement
+is *appended* to a session rather than inserted.
 
-A compiles to **21 steps**, B to **25**. Assert against the whole compiled list.
+When a session is restructured anyway, the old slots must be mapped onto the new
+ones **at read time, with the stored records left untouched** — a logged session
+is a record of what was actually lifted, and re-keying it to suit a later program
+is the same dishonesty as backfilling a weight. The mapping is only possible
+while the movements survive the edit: delete one and its history has nowhere to
+go, so append instead or accept the loss knowingly.
+
+Both sessions compile to **21 steps**. Assert against the whole compiled list,
+never the counts — the counts were right once in a build whose slot ids were not.
 
 **Content is fixed.** Exercise names, sub-labels, cues, target ranges, rest
 seconds, study-card text, Guide text and celebration copy are the product. They

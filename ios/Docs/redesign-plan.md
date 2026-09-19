@@ -246,12 +246,12 @@ spend effort on device-class responsiveness. Eden was explicit about this twice.
 ## 6. The frequency map — apply Emil's gate to this app
 
 Every skill in the set hinges on one question: *how often will a user see this?*
-Answered for Morning, per session of roughly 20 minutes and 14 sets:
+Answered for Morning, per session of roughly 20 minutes and 13 sets:
 
 | Surface | Times seen | Emil's tier | Verdict |
 |---|---:|---|---|
 | Rep +/- adjust | dozens per session | Tens/day | **Near-zero motion.** Press feedback only, under 160ms. |
-| Set screen arrival | ~14 | Tens/day | **Reduce hard.** A counter that "arrives" is a counter that is late. |
+| Set screen arrival | ~13 | Tens/day | **Reduce hard.** A counter that "arrives" is a counter that is late. |
 | Step advance (Done) | ~28 | Tens/day | **Reduce hard.** |
 | Rest screen arrival | ~13 | Tens/day | **Reduce hard.** |
 | Ring completion | ~13 | Tens/day | Reduce. The ring itself is the information. |

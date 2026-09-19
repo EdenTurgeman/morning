@@ -145,7 +145,7 @@ true in W0 and neither has been true for months.
 | `ios/Docs/design-system.md` | The paper world: the ink law, the grounds, the primitives. Every contrast figure measured on rendered frames, not calculated. | **Rewritten 2026-09-03** — it had described the deleted dawn world. Revise it, do not start it. |
 | `ios/Docs/redesign-plan.md` | **How the UI rebuild is run**, phase by phase, on Emil Kowalski's skills. | The method for the next programme. |
 | `ios/Docs/motion-performance.md` | **Why the app stutters, when it does.** Ten rules, every one of them measured on Eden's phone after breaking it. Read before touching anything that moves. | Current. |
-| `ios/Docs/device-checklist.md` | The 10 device checks that cannot be automated. | W11, still blocked on the phone. |
+| `ios/Docs/device-checklist.md` | The 10 device checks that cannot be automated. | **Unblocked 2026-09-19** — the app is installed and `refresh-device.sh` keeps it signed. None of the ten have been run. |
 
 Run `./scripts/verify-ios.sh` first anyway. It never stops at the first failure
 and writes every phase's errors to `ios/build/verify-report.txt`.

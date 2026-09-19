@@ -6,6 +6,15 @@ simulator checks.** Do them on the phone.
 Record what you *observed*, not pass/fail — "readable but the sub-label washes
 out under 4% brightness" is worth something; a tick is not.
 
+**Unblocked 2026-09-19.** These sat unrunnable for months because the app had
+never been installed on the phone. It is on there now, `refresh-device.sh`
+re-signs it inside the free profile's seven-day window, and a newly issued
+certificate needs trusting once under Settings → General → VPN & Device
+Management. **None of the ten below has been run.** Several can only fail on
+hardware — 120Hz under a running timer, the crossing haptic felt through a
+floor, another app's music ducking — and the performance work in
+`motion-performance.md` is still unconfirmed on a device for the same reason.
+
 ## The ten
 
 - [ ] Airplane mode is indistinguishable from normal.

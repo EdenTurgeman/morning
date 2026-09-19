@@ -28,7 +28,14 @@ the plate breakdown, the tonnage table, the loadout card.
 
 ## Structure
 
-Two sessions, **A** ("Heavy") and **B** ("Light"), alternating. The app always
+> **Session B was rebuilt on 2026-09-19 and the tables below were updated with
+> it.** `ios/Morning/Program.swift` is the source of truth and `WORKOUT.md` is
+> the explanation; this file covers the STRUCTURE — the block kinds, the plate
+> convention, supersets, trailing rests — which is unchanged. If a session's
+> content here and in `WORKOUT.md` ever disagree, that one is right and this is
+> stale.
+
+Two sessions, **A** ("Heavy") and **B** ("Width"), alternating. The app always
 proposes the opposite of whatever was logged last. Each session is a list of
 blocks, of three kinds:
 
@@ -52,42 +59,58 @@ adds handle weight mentally. Do not try to be clever about this.
 
 Compiles to **21 steps.**
 
-## Session B — "Light", ~19 min, 5 kg per handle
+## Session B — "Width", ~17 min, 5 kg per handle
 
 | Block | Exercise | Sets | Load | Target | Rest |
 |---|---|---|---|---|---|
 | 1 | Warm-up | — | — | 90 s | — |
-| 2 | Push-up (deficit — hands on books) | 3 | bodyweight | 8–15 | 60 s |
-| 3 | Lateral raise + Rear-delt fly | 3 rounds | 5 kg | 15–25 each | 45 s after each round |
-| 4 | Lateral raise (myo-reps) | 3 | 5 kg | per-set targets | **20 s** |
-| 5 | Floor fly (lying on your back) | 2 | 5 kg | 15–25 | 60 s |
+| 2 | Push-up (deficit — hands on books) + Lateral raise | 3 rounds | bodyweight / 5 kg | 8–15 / 6–12 | 60 s after each round |
+| 3 | Lateral raise (myo-reps) | 3 | 5 kg | per-set targets | **20 s** |
+| 4 | Floor fly (lying on your back) + Rear-delt fly | 2 rounds | 5 kg | 10–20 / 8–15 | 60 s after each round |
 
-Compiles to **25 steps.**
+Compiles to **21 steps.**
 
-### Why B looks lopsided — do not "fix" it
+### Why B is shaped like this — and what was wrong with the old shape
 
-With 5 kg in each hand there is almost nothing you can train hard except small
-muscles, so B is a delt-and-chest isolation day while A carries the compounds.
-An earlier version was 57% lateral raises, which pushed side delts past ~20 sets
-a week — the point where extra volume stops paying — while the pecs had one
-movement and no isolation at all. The myo block came down from 5 sets to 3 and
-the floor fly took the difference. This is explained to the user in the Guide.
+B is the side-delt and chest day; A carries the compounds. Two things were
+wrong with the version this replaced, and both are worth not reintroducing.
+
+**The rep targets were never grounded.** It asked for 15–25 on a lateral raise
+the user does seven or eight of, so nothing in the session was ever hit and the
+session stopped being done at all. Load does not decide hypertrophy once a set
+goes to failure; the target has to match what the movement actually gives.
+
+**The superset paired two shoulder movements.** A lateral raise straight into a
+rear-delt fly gives the delt about 65 seconds between sets and it declines
+within the session. Each priority movement is now paired with something that
+does not compete with it: ~115 seconds between lateral raise sets, on *less*
+total rest than before.
+
+One claim in the old text was simply wrong and is recorded here because the app
+repeated it to the user: ~20 sets a week is **not** the point where extra volume
+stops paying. The dose-response curve flattens; it does not turn off.
 
 ### The myo-rep block
 
 Per-set targets differ: set 1 is `all-out to failure`, sets 2 and 3 are
-`4–5 reps`. The **20-second rest is the mechanism of the technique**, not a
+`4–6 reps`. The **20-second rest is the mechanism of the technique**, not a
 convenience. The app must not let it be silently stretched: the timer starts
 automatically, is visually prominent, and the screen says so. Skipping forward is
 allowed; drifting is not. **No study card ever appears on this rest** — see
 `04-rules.md`.
 
-### The floor fly was appended, not inserted
+### Reordering a block rewrites what every slot in it MEANS
 
-Deliberately. Slot IDs are `blockIndex.itemIndex.setIndex`; inserting it earlier
-would have shifted every later block's IDs and handed this exercise the myo
-block's rep history as its starting target. Preserve this ordering property in
-any future edit, and say so in the file's header comment.
+Slot IDs are `blockIndex.itemIndex.setIndex` and history is matched on that
+string alone — it has no idea which exercise a slot belonged to. The floor fly
+used to be appended for exactly this reason.
+
+The 2026-09-19 restructure moved it anyway, and without a map it would have read
+the myo block's numbers and told the user he was beating a set he had never
+done. `History.bSlotMoves` translates old slots to new **at read time**; stored
+records are never rewritten. That works only because the restructure moved
+movements without removing any. Extend the map if you reorder again; if you
+delete a movement, its history has nowhere to go.
 
 ---
 

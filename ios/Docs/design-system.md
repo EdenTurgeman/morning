@@ -311,6 +311,31 @@ is the same width and every joint is a corner.
 The pose coordinates and the motion model are unchanged from the stroke version.
 No assets, no dependency, no anatomy library.
 
+**The bay is a fixed 150pt, and the text fits around it.** It used to take
+whatever the sheet above it left over, which made the figure's size a function
+of how many cues the exercise happened to carry — measured across session B, a
+push-up drew a body about 25pt tall and the myo lateral raise drew one under
+5pt. Eden read that as the animations having disappeared, which at that size is
+the honest description. A figure either reads as a body or it should not be
+drawn at all, so the demonstration is the same size everywhere and the cues are
+written to fit. B's are one line each; the longest is 47 characters.
+
+**The ground line is what tells you which way is up.** It is the only element in
+these figures that establishes gravity, so a figure with a line under its feet
+is standing no matter what its arms do — which is how the floor fly spent months
+drawing the same picture as the lateral raise. Where a movement is done lying
+down, the ground goes where it actually is from that viewpoint (seen from the
+feet, its far edge is behind the head) and the body is foreshortened with the
+knees bent, which is a shape a standing figure cannot make.
+
+**Arms must be drawn face-on, and that is a hard constraint, not a preference.**
+`FigureAnatomyTests` requires every bone to keep its length in 2D at every phase
+— it is what stopped the limbs being made of rubber, when a floor fly's upper
+arm was losing 86% of itself mid-movement. Any viewpoint that foreshortens an
+arm breaks it. A fly's arc is a circle in the frontal plane, so that is the only
+angle where it projects to a circle rather than a line. The torso and legs are
+not bone-checked and are free to carry whatever the viewpoint needs.
+
 One trap worth recording: the bay is wide and short, so **a normalised x offset
 is worth far fewer points than the same number in y**. A stance that looked
 hip-width in coordinates rendered as two fused legs. Widths are all derived from
