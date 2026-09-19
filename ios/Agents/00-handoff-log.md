@@ -4,6 +4,74 @@ Append-only, newest at the top. One agent works this clone at a time; this file
 is the only thing standing between the next agent and re-deciding what you
 already decided.
 
+## 2026-09-19 · R37 — the app is on the phone, and the repo's front door tells the truth
+
+`verify-ios.sh` green, **eight phases now**, 128 assertions, 0 skipped. New:
+`WORKOUT.md`, `WEB-BUILD.md`, `scripts/verify-workout-doc.py`. Merged to `main`.
+
+### The device, at last
+
+R34 and R35 both ended with "nothing has run on the phone". It has now, and the
+blocker was never the DDI — it was that Xcode's Apple ID list had emptied. The
+free provisioning profile expired seven days after the last build and took the
+account session with it. The signing certificate was still valid in the keychain
+the whole time, which is why it looked like a device problem.
+
+**Pull the data BEFORE installing, every time:**
+
+    xcrun devicectl device copy from --device <udid> \
+      --domain-type appDataContainer --domain-identifier com.edenturgeman.morning \
+      --user mobile --source "Library/Application Support/Morning/history.json" \
+      --destination <local>
+
+Note `--user`, not `--username` — `devicectl device info files` takes the latter
+and `copy from` takes the former, and the usage error does not say which. The
+install turned out to preserve the container byte-for-byte, but that was checked
+after the fact against a copy, which is the only order worth working in.
+
+### What the phone's data said
+
+**Plan 014's gate was already met and nobody had noticed.** That plan is blocked
+on "the iOS app has never run on Eden's phone"; his container holds 20 sessions
+from 2026-08-17 to 2026-09-16 plus `studyAnswers` and `studySightings`, which
+the web build never had. He has been training on this app for a month. 014 now
+records that, and steps 0-2 are closed.
+
+**R36's stall line was right about A, not just B.** Run over the real record it
+would have said something on every session since 2026-09-06, ending at *"Bent-over
+row and hammer curl have not moved in eight sessions."* Four consecutive A
+sessions logged **every single set identically** at 164 reps. Whatever is wrong
+with B is not confined to B.
+
+Three records also carry impossible durations — 4 minutes, 53, and 1240. Nobody
+has looked at why. `min` is not validated on write.
+
+### The repo
+
+`README.md` described the web app as the product and told you the workout lived
+in `src/program.ts`. It was moved verbatim to `WEB-BUILD.md` — nothing deleted —
+and replaced with a front door that routes to `WORKOUT.md` and `CLAUDE.md`.
+
+**`WORKOUT.md` is new and is the thing to send anyone asking about the
+training.** Both sessions in full, the four rules, the ladder, the weekly volume,
+how to edit `Program.swift`, and the slot-id trap.
+
+**It cannot go stale.** `scripts/verify-workout-doc.py` is an eighth verify phase
+that reads the golden fixture — already asserted against the compiler by the
+suite — and fails the build if any exercise, target or cue the program compiles
+to is missing from the doc verbatim. It caught three paraphrases the moment it
+was written. Do this to any doc that claims to mirror code.
+
+### Still open
+
+- **Step 3 of plan 014: retiring the web app.** Not executed. `verify-export.ts`
+  imports the web parser as the live proof that the iOS export is readable, and
+  taking the Pages deployment down is outward-facing and Eden's alone.
+- The device checklist's 21 hardware checks. The app is installed now, so they
+  are finally runnable.
+- Eden has done B **once since 2026-08-27**. The rebuild is untested in the only
+  way that counts.
+
 ## 2026-09-19 · R36 — the Summary now names what has stopped moving
 
 `verify-ios.sh` green, **128 assertions, 0 skipped**. `History.stalls`,

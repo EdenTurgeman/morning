@@ -4,6 +4,28 @@ Opened 2026-09-11. **A plan, not a deletion.** Eden: *"I think the new version
 of the app is now ready to take over the repo, we can remove the old version and
 make this the cannonical one."*
 
+## Status, 2026-09-19: the gate is met. Steps 0-2 are done.
+
+**The premise below is out of date and is kept because it was true when
+written.** The iOS app has been on Eden's phone for weeks: his container holds
+20 sessions logged between 2026-08-17 and 2026-09-16, plus `studyAnswers` and
+`studySightings`, which the web build never had. It is what he trains on.
+
+- **0. Commit** — done. Everything is committed and pushed.
+- **1. Get it on the phone** — done. `DEVELOPMENT_TEAM` is set on both targets,
+  `refresh-device.sh` installs, and the free profile is renewed on a seven-day
+  timer. A newly issued certificate still needs trusting once on the device.
+- **2. Merge to main** — done 2026-09-19.
+- **3. Retire the web app** — **still open, and still Eden's call.** Nothing
+  below has been executed. The byte-compat check in `verify-export.ts` is the
+  live reason not to rush 3a, and 3e takes down something that is deployed and
+  outward-facing.
+
+What has changed since this was written: the README no longer claims `src/` is
+the product — it was moved verbatim to `WEB-BUILD.md` and replaced with a front
+door that points at `WORKOUT.md` and `CLAUDE.md`. So the repo now reads
+correctly whether or not step 3 ever happens.
+
 ## The gate this is blocked on, and it is not technical
 
 **The iOS app has never run on Eden's phone.** Checked today: `DEVELOPMENT_TEAM`

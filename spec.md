@@ -647,7 +647,7 @@ exist.
 
 ## 10. The study deck
 
-26 cards on wine and tea. Every card teaches a **mechanism**, not a fact. Adding
+368 cards on wine and tea. Every card teaches a **mechanism**, not a fact. Adding
 one is a one-line append with no other edit.
 
 ### Dosing — these numbers are deliberate

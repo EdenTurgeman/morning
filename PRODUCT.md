@@ -55,14 +55,17 @@ fitness app is built around, and everything follows from it:
   the Live Activity. `spec.md` §3 is the authority on what each owes the user.
 - **Three are inside a workout** — Warm-up, Set, Rest — and are bound by
   one-screen-one-action. The other surfaces are read outside a session.
-- **Two sessions, A ("Heavy", ~16 min) and B ("Light", ~19 min), alternating.**
+- **Two sessions, A ("Heavy", ~16 min) and B ("Width", ~17 min), alternating.**
   The next one is auto-derived as the opposite of the last logged.
 - **The program is one editable Swift object in one file** (`Program.swift`),
   edited by hand every few months and rebuilt. No builder UI, no indirection.
-- **The study deck** is 26 cards on wine and tea, dosed twice a session during
-  qualifying rests. **Confirmed 2026-08-27: it stays exactly that** — a rest
-  filler, not an identity. No surface of its own, no tracked progress, no
-  studying outside a workout.
+- **The study deck** is 368 cards on wine and tea — 280 questions and 88
+  factoids across 113 topics — dosed twice a session during qualifying rests,
+  plus one on the Summary. It was 26 cards and a rest filler with no surface of
+  its own; Eden reversed both of those (`plans/007`, `plans/009`, `plans/010`).
+  It now keeps score of what he KNOWS and has a page that says so. It still may
+  not keep score of what he EARNS, and still may not cost a tap inside a
+  workout.
 - **The app ships with no history import.** Empty is the normal case on day one,
   not an edge case, on every surface.
 

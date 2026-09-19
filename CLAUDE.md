@@ -20,6 +20,7 @@ binding. `ios-port/02-design-brief.md` is the main one.
 
 | File | What it settles |
 |---|---|
+| `WORKOUT.md` | **The training itself** — both sessions, the rules, the progression ladder, and what breaks if you reorder a block. Read before touching `Program.swift`. |
 | `spec.md` | **What the app must do.** Behaviour only, no UI. The one to read if you are changing or rebuilding anything. |
 | `ios-port/README.md` | The working agreement. Four rules. Read them literally. |
 | `ios-port/01-product.md` | One user, one iPhone, 6:10am, sweaty hands. Justifies every UI decision. |
@@ -53,6 +54,12 @@ violate on instinct:
    seconds, celebration copy and Guide text are **not yours to improve** — port
    them verbatim from `ios-port/content/*.json`. Layout, hierarchy, colour,
    type, material, motion, sound, haptics and which screens exist entirely are.
+
+   **The workout is the second exception, and it is narrower than it looks.**
+   Eden had session B reviewed against the hypertrophy literature and said
+   *"let's update the app to fit B to this"* on 2026-09-19. That authorised
+   that change. It did not authorise the next one: rule 4 below still stands,
+   and `WORKOUT.md` is where the current program and its reasoning live.
 
    **The study deck is the exception, and has been since 2026-09-06.** This rule
    used to cover `cards.json` too, and Eden lifted it for the curriculum review
