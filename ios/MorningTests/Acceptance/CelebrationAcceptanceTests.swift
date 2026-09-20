@@ -220,6 +220,93 @@ final class CelebrationAcceptanceTests: XCTestCase {
         )
     }
 
+    // MARK: - What this session earned
+
+    /// NOTHING IS THE COMMON CASE, and it is correct.
+    ///
+    /// A fact that turns up every morning is not a fact, it is furniture —
+    /// which is the mistake "A personal best." made by firing on twelve of his
+    /// first twenty-two sessions.
+    func testAnOrdinarySessionEarnsNoNote() throws {
+        let history = [
+            record(day: 17, key: "A", log: ["2.0.0": 10], kg: 7.5, ts: 1000),
+            record(day: 20, key: "A", log: ["2.0.0": 11], kg: 7.5, ts: 2000),
+        ]
+        let latest = try XCTUnwrap(history.last)
+        XCTAssertNil(
+            History.note(for: latest, in: history),
+            "one extra rep is not something to announce"
+        )
+    }
+
+    /// A LIFETIME TOTAL CROSSED, read as an ordinal on a singular name.
+    ///
+    /// "your 500th curl" is correct English and sidesteps pluralising "floor
+    /// fly" and "overhead press", which naive code renders as "presss".
+    func testCrossingALifetimeTotalForOneMovementIsWorthSaying() throws {
+        // Overhead press is A's slot 2.0.*. Ten sessions of 24 is 240, and the
+        // eleventh takes it through 250 — the crossing has to happen DURING
+        // this session, not before it.
+        var history = (0 ..< 10).map { index in
+            record(day: 1 + index, key: "A", log: ["2.0.0": 24], kg: 7.5, ts: 1000 + index * 100)
+        }
+        history.append(record(day: 20, key: "A", log: ["2.0.0": 10], kg: 7.5, ts: 9000))
+        let latest = try XCTUnwrap(history.last)
+
+        XCTAssertEqual(
+            History.note(for: latest, in: history),
+            "That is your 250th overhead press."
+        )
+    }
+
+    /// THE MOST OF ONE MOVEMENT HE HAS EVER DONE, gated by a real margin.
+    func testTheMostOfOneMovementEverDoneIsWorthSaying() throws {
+        let history = [
+            record(day: 17, key: "A", log: ["2.0.0": 10, "2.0.1": 10], kg: 7.5, ts: 1000),
+            record(day: 20, key: "A", log: ["2.0.0": 14, "2.0.1": 12], kg: 7.5, ts: 2000),
+        ]
+        let latest = try XCTUnwrap(history.last)
+        let note = try XCTUnwrap(History.note(for: latest, in: history))
+
+        XCTAssertTrue(note.contains("overhead press"), note)
+        XCTAssertTrue(note.contains("26 reps"), note)
+        XCTAssertTrue(note.contains("Your best was 20."), note)
+
+        // One rep over is not it.
+        XCTAssertEqual(History.movementHighMargin, 3)
+    }
+
+    /// THE RARE ONE OUTRANKS THE COMMON ONE when several are true at once.
+    func testTheRarestFactWins() throws {
+        // Ten sessions of A, each also pushing overhead press to a new high.
+        var history: [SessionRecord] = []
+        for index in 0 ..< 9 {
+            history.append(record(
+                day: 1 + index,
+                key: "A",
+                log: ["2.0.0": 10 + index],
+                kg: 7.5,
+                ts: 1000 + index * 100
+            ))
+        }
+        history.append(record(day: 20, key: "A", log: ["2.0.0": 40], kg: 7.5, ts: 9000))
+        let latest = try XCTUnwrap(history.last)
+        let note = try XCTUnwrap(History.note(for: latest, in: history))
+
+        XCTAssertTrue(note.hasPrefix("Your 10th A."), "the session milestone is rarer: \(note)")
+    }
+
+    /// Ordinals are right where English is irregular, even though every
+    /// constant in use happens to take "th".
+    func testOrdinalsAreCorrect() throws {
+        let history = [
+            record(day: 1, key: "A", log: ["2.0.0": 1], kg: 7.5, ts: 1000),
+            record(day: 2, key: "A", log: ["2.0.0": 260], kg: 7.5, ts: 2000),
+        ]
+        let latest = try XCTUnwrap(history.last)
+        XCTAssertEqual(History.note(for: latest, in: history), "That is your 250th overhead press.")
+    }
+
     // MARK: - A best is graded
 
     /// "A PERSONAL BEST." IS NOT FOR EVERY BEST.

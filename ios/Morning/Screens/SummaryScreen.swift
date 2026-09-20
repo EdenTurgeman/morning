@@ -28,6 +28,8 @@ struct SummaryScreen: View {
     let card: Card?
     /// Movements that have not moved. Empty is the ordinary case.
     let stalls: [History.Stall]
+    /// One thing this session earned, if it earned one. Nil is the common case.
+    let note: String?
     let onDone: () -> Void
 
     /// `-screen summary -skip-daybreak` shows what is underneath. Daybreak
@@ -146,6 +148,20 @@ struct SummaryScreen: View {
             // has something true to say, exactly like the deck's line below.
             if let line = History.stallLine(stalls) {
                 Text(line)
+                    .font(TypeScale.body)
+                    .foregroundStyle(Paper.press)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            // WHAT THIS SESSION EARNED.
+            //
+            // Below the stall line because they are two halves of the same
+            // reading and the stall is the actionable half — `PRODUCT.md` calls
+            // three identical sessions the most valuable output the app has.
+            // Both are absent far more often than they are present, so this
+            // rarely costs a line and never costs two.
+            if let note {
+                Text(note)
                     .font(TypeScale.body)
                     .foregroundStyle(Paper.press)
                     .fixedSize(horizontal: false, vertical: true)

@@ -273,6 +273,132 @@ enum History {
         return words.indices.contains(count) ? words[count] : "\(count)"
     }
 
+    /* --- what this session earned ------------------------------------------
+     * The best writing in this app is not praise, it is teaching — "eight
+     * weeks is past the point where gains are just your nervous system
+     * learning the movement. This is tissue now." The reward for training is
+     * being told something true about what just happened that you did not
+     * already know.
+     *
+     * That is what these are. Not a score: a fact he earned, cannot see any
+     * other way, and which could not have been said yesterday. The supply is
+     * unbounded and it IMPROVES with time, which is the opposite of points.
+     *
+     * The ranking is by rarity, rarest first, and exactly one fires. A fact
+     * that turns up every morning is not a fact, it is furniture — which is
+     * the mistake "A personal best." made by firing on twelve of his first
+     * twenty-two sessions. Measured over that same history: the session
+     * milestone fires twice a year, a lifetime crossing on 7 of 22 sessions
+     * and thinning as the thresholds spread, and a movement high on 6 of 22.
+     */
+
+    /// Reps of one movement, lifetime, that are worth saying out loud.
+    ///
+    /// Spaced so they keep arriving as the totals grow rather than bunching at
+    /// the start and then stopping.
+    static let movementTotals = [250, 500, 1000, 1500, 2000, 3000, 5000, 7500, 10000]
+
+    /// Sessions of one letter that are worth saying out loud.
+    static let sessionCounts = [10, 25, 50, 100, 200]
+
+    /// How far past the old best a single movement has to go.
+    ///
+    /// THREE. Ungated this fired on 13 of his first 22 sessions, usually by one
+    /// rep — the same inflation that spent "A personal best.". At three it
+    /// fires on six, and each one names a different movement.
+    static let movementHighMargin = 3
+
+    /// One thing this session earned, or nothing at all.
+    ///
+    /// Nothing is the common case and is correct. `Deck.Standing.line` and the
+    /// stall line have the same contract: absent entirely until there is
+    /// something true to say.
+    static func note(for record: SessionRecord, in history: [SessionRecord]) -> String? {
+        let earlier = history.filter { $0.timestamp < record.timestamp }
+        let mine = byExercise(record)
+
+        // 1. The rarest: a round number of sessions on this letter, with what
+        //    the first one looked like. Twice a year at five sessions a week.
+        let sameLetter = earlier.filter { $0.sessionKey == record.sessionKey }
+        let nth = sameLetter.count + 1
+        if sessionCounts.contains(nth),
+           let first = sameLetter.min(by: { $0.timestamp < $1.timestamp }),
+           first.reps < record.reps
+        {
+            return "Your \(ordinal(nth)) \(record.sessionKey). The first was \(first.reps) reps; "
+                + "this one was \(record.reps)."
+        }
+
+        // 2. A lifetime total crossed. Reads as an ordinal on a SINGULAR
+        //    exercise name — "your 500th curl" — which is both correct English
+        //    and the only way to avoid pluralising "floor fly" and "press".
+        var lifetime: [String: Int] = [:]
+        for past in earlier {
+            for (exercise, reps) in byExercise(past) {
+                lifetime[exercise, default: 0] += reps
+            }
+        }
+        var crossings: [(exercise: String, total: Int)] = []
+        for (exercise, reps) in mine {
+            let before = lifetime[exercise] ?? 0
+            for total in movementTotals where before < total && total <= before + reps {
+                crossings.append((exercise, total))
+            }
+        }
+        // The largest, so crossing 500 and 1000 in one morning says 1000.
+        if let crossed = crossings.max(by: { $0.total < $1.total }) {
+            return "That is your \(ordinal(crossed.total)) \(crossed.exercise.lowercased())."
+        }
+
+        // 3. The most of one movement he has ever done in a session.
+        var bests: [String: Int] = [:]
+        for past in sameLetter {
+            for (exercise, reps) in byExercise(past) {
+                bests[exercise] = max(bests[exercise] ?? 0, reps)
+            }
+        }
+        let highs = mine.compactMap { exercise, reps -> (String, Int, Int)? in
+            guard let best = bests[exercise], reps - best >= movementHighMargin else { return nil }
+            return (exercise, reps, best)
+        }
+        if let high = highs.max(by: { $0.1 - $0.2 < $1.1 - $1.2 }) {
+            return "\(high.1) reps of \(high.0.lowercased()) — the most you have done in one session. "
+                + "Your best was \(high.2)."
+        }
+
+        return nil
+    }
+
+    /// Reps per MOVEMENT for one record, read through the slot map so a session
+    /// logged against B's old block order still counts toward the right
+    /// exercise. A legacy slot with no counterpart in the current program is
+    /// skipped rather than guessed at.
+    private static func byExercise(_ record: SessionRecord) -> [String: Int] {
+        let names = Dictionary(
+            StepCompiler.build(session: record.sessionKey).compactMap(\.asSet).map { ($0.slot, $0.exercise) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        var out: [String: Int] = [:]
+        for (slot, reps) in currentSlotLog(of: record) {
+            guard let exercise = names[slot] else { continue }
+            out[exercise, default: 0] += reps
+        }
+        return out
+    }
+
+    /// 1st, 2nd, 3rd, 11th. Every constant above happens to take "th", but a
+    /// helper that is right is cheaper than remembering that it has to be.
+    private static func ordinal(_ value: Int) -> String {
+        let suffix = switch (value % 100, value % 10) {
+        case (11, _), (12, _), (13, _): "th"
+        case (_, 1): "st"
+        case (_, 2): "nd"
+        case (_, 3): "rd"
+        default: "th"
+        }
+        return "\(value)\(suffix)"
+    }
+
     /// The weight a record should be valued at.
     ///
     /// An absent `kg` means "logged before the weight was adjustable" and falls

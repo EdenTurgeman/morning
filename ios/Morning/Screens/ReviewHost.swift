@@ -39,6 +39,7 @@ struct SummaryReviewHost: View {
             week: Week.progress(history: shown.history),
             card: Cards.all.first,
             stalls: History.stalls(after: shown.record, in: shown.history),
+            note: History.note(for: shown.record, in: shown.history),
             onDone: { done = true }
         )
         .overlay {
