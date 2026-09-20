@@ -61,6 +61,21 @@ struct Celebration: Equatable {
     let delta: Int?
 }
 
+/// How far past the old best a session has to be for "A personal best."
+///
+/// FIVE, which is between a third and a half of one working set on this
+/// program. Below it, a best is one or two extra reps spread over thirteen
+/// sets — true, and not a landmark. Measured over the first 22 sessions this
+/// leaves five landmarks where the old rule found twelve.
+private let landmarkMargin = 5
+
+/// …or the beaten best had stood this many same-letter sessions.
+///
+/// A narrow win over a number that would not move for a month is the most
+/// satisfying result this program produces, and by margin alone it would have
+/// been filed as a Tuesday.
+private let landmarkStandingSessions = 3
+
 /// Week counts that get their own headline.
 private let streakMilestones: [Int: (headline: String, body: String)] = [
     2: (
@@ -125,6 +140,23 @@ enum Celebrations {
         let isFirstEver = history.count <= 1
         let bestBefore = sameLetter.map(\.reps).max() ?? 0
         let isRecord = !sameLetter.isEmpty && record.reps > bestBefore && !weightChanged
+
+        // HOW MUCH OF A BEST, which is the difference between a landmark and a
+        // Tuesday. Measured over Eden's first 22 sessions, "A personal best."
+        // fired on TWELVE of them — in the opening months of a fixed-load
+        // program almost every session beats the last, so the rarest-sounding
+        // thing this app can say was the thing it said most often, and the
+        // session that is genuinely a landmark would have landed exactly like
+        // the eleven before it.
+        let margin = record.reps - bestBefore
+        // Same-letter sessions since the beaten best was set. A narrow win over
+        // a best that has STOOD for weeks is a landmark; the same margin during
+        // a run of improvement is a Tuesday.
+        let bestStoodFor = sameLetter
+            .filter { $0.reps == bestBefore }
+            .map { beaten in sameLetter.count { $0.timestamp > beaten.timestamp } }
+            .min() ?? 0
+        let isLandmark = margin >= landmarkMargin || bestStoodFor >= landmarkStandingSessions
 
         // Three same-letter sessions ending on the identical total is the
         // signal the program is built around: reps have stopped moving.
@@ -228,13 +260,31 @@ enum Celebrations {
             )
         }
 
-        // 6. A personal best on this letter.
+        // 6. A best on this letter — graded, because not every best is a
+        //    landmark and calling all of them one spends the phrase.
         if isRecord {
+            let key = record.sessionKey
+            let standing = bestStoodFor >= landmarkStandingSessions
             return Celebration(
                 tier: .record,
-                eyebrow: "Best \(record.sessionKey) yet",
-                headline: "A personal best.",
-                body: "Your previous best on \(record.sessionKey) was \(bestBefore). That's the number to beat now.",
+                eyebrow: isLandmark ? "Best \(key) yet" : "Best \(key) yet, by \(margin)",
+                headline: isLandmark ? "A personal best." : "Up on your best.",
+                body: {
+                    if standing, margin < landmarkMargin {
+                        // The most satisfying kind and the app never said so: a
+                        // number that would not move, and then did.
+                        let sessions = bestStoodFor == 1 ? "session" : "sessions"
+                        return "\(bestBefore) had stood for \(bestStoodFor) \(sessions) of \(key). "
+                            + "It doesn't any more."
+                    }
+                    if isLandmark {
+                        return "Your previous best on \(key) was \(bestBefore), and you cleared it by "
+                            + "\(margin). That's the number to beat now."
+                    }
+                    return "Previous best was \(bestBefore). A margin that small is a rep or two on one "
+                        + "movement — real, but the kind of gain a good night's sleep gives you as "
+                        + "readily as training does."
+                }(),
                 milestoneBurst: false,
                 rays: true,
                 delta: delta

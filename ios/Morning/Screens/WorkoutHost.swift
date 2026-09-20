@@ -357,8 +357,19 @@ struct WorkoutHost: View {
         }
     }
 
+    /// "Set 10 / 13" — except on the last one, which says so.
+    ///
+    /// The final set is the one where everybody finds something extra, and
+    /// nothing in this app marked it. "Set 13 / 13" is the same information and
+    /// requires arithmetic at 6:10am to notice; "Last set" is the thing the
+    /// number was standing in for.
+    ///
+    /// It costs no tap, no motion and no space — it is the same slot, and it
+    /// only ever reads differently once a session. The rest of the time the
+    /// counter is doing its ordinary job of saying how far in he is.
     private var setLabel: String {
         guard let position = session.setPosition else { return "" }
+        guard position.index < position.total else { return "Last set" }
         return "Set \(position.index) / \(position.total)"
     }
 

@@ -220,6 +220,65 @@ final class CelebrationAcceptanceTests: XCTestCase {
         )
     }
 
+    // MARK: - A best is graded
+
+    /// "A PERSONAL BEST." IS NOT FOR EVERY BEST.
+    ///
+    /// It fired on 12 of Eden's first 22 sessions. In the opening months of a
+    /// fixed-load program almost every session beats the last, so the
+    /// rarest-sounding thing this app can say was the thing it said most often.
+    func testANarrowBestIsNotCalledAPersonalBest() throws {
+        // 170 -> 174, which is one of his real ones: four reps over thirteen
+        // sets, against a best set the session before.
+        let history = [
+            record(day: 14, key: "A", reps: 166, kg: 7.5, ts: 1000),
+            record(day: 16, key: "A", reps: 170, kg: 7.5, ts: 2000),
+            record(day: 19, key: "A", reps: 174, kg: 7.5, ts: 3000),
+        ]
+        let latest = try XCTUnwrap(history.last)
+        let celebration = Celebrations.forSession(latest, history: history, today: today)
+
+        XCTAssertEqual(celebration.tier, .record, "it is still a best and still says so")
+        XCTAssertEqual(celebration.headline, "Up on your best.")
+        XCTAssertEqual(celebration.eyebrow, "Best A yet, by 4", "the margin is the honest part")
+    }
+
+    /// A REAL MARGIN IS A LANDMARK.
+    func testAWideBestIsAPersonalBest() throws {
+        let history = [
+            record(day: 30, key: "A", reps: 142, kg: 7.5, ts: 1000),
+            record(day: 31, key: "A", reps: 154, kg: 7.5, ts: 2000),
+        ]
+        let latest = try XCTUnwrap(history.last)
+        let celebration = Celebrations.forSession(latest, history: history, today: today)
+
+        XCTAssertEqual(celebration.headline, "A personal best.")
+        XCTAssertEqual(celebration.eyebrow, "Best A yet")
+        XCTAssertTrue(celebration.body.contains("cleared it by 12"), "say the margin: \(celebration.body)")
+    }
+
+    /// AND SO IS A NARROW WIN OVER A BEST THAT WOULD NOT MOVE.
+    ///
+    /// The most satisfying result this program produces, and by margin alone it
+    /// would have been filed as a Tuesday. This is his 2026-09-12 session: two
+    /// reps, over a best that had stood four sessions.
+    func testBeatingALongStandingBestIsALandmarkHoweverNarrow() throws {
+        var history = [record(day: 5, key: "A", reps: 164, kg: 7.5, ts: 1000)]
+        // Four sessions that fail to beat it.
+        for (offset, reps) in [160, 158, 162, 161].enumerated() {
+            history.append(record(day: 6 + offset, key: "A", reps: reps, kg: 7.5, ts: 2000 + offset * 100))
+        }
+        history.append(record(day: 12, key: "A", reps: 166, kg: 7.5, ts: 9000))
+        let latest = try XCTUnwrap(history.last)
+        let celebration = Celebrations.forSession(latest, history: history, today: today)
+
+        XCTAssertEqual(celebration.headline, "A personal best.", "a stubborn best broken is a landmark")
+        XCTAssertTrue(
+            celebration.body.contains("had stood for"),
+            "the body should say what made it one: \(celebration.body)"
+        )
+    }
+
     // MARK: - The total counts up to itself
 
     /// IT LANDS ON THE NUMBER, whatever happens to the frames.
