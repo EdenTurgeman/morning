@@ -4,6 +4,111 @@ Append-only, newest at the top. One agent works this clone at a time; this file
 is the only thing standing between the next agent and re-deciding what you
 already decided.
 
+## 2026-09-20 · R38 — the web build is gone, B carries a fourth card, and two numbers move again
+
+Worked overnight, unattended, on Eden's instruction. `verify-ios.sh` green,
+eight phases, 0 skipped. Five commits. New: `plans/015`, `plans/016`,
+`ios/Tools/web-format.mjs`.
+
+### Read this first: another session was editing the repo at the same time
+
+Two peer sessions were live. One of them was writing `cards.json` and
+`plans/007-covered.md` while this one worked — the deck went from 368 cards to
+447 over the night.
+
+**`git add -A` swept 36 lines of their in-flight card edits into commit
+`c509a59`, which is a commit about exercise figures.** Nobody reviewed those
+lines and they are now in `main`. It is recoverable — the content is theirs and
+presumably correct — but the commit is a lie about its own contents.
+
+**Stage explicitly in this repo from now on.** `git add <paths>`, never
+`git add -A`, and read `git status` before every commit. Their two files were
+left unstaged for the rest of the night and are still uncommitted.
+
+### The web build is retired
+
+`plans/014` step 3, gated since 11 September on the iOS app having run on the
+phone. It has a month of sessions on it. 71 files: `src/`, `public/`,
+`prototype/`, the Vite and TypeScript config, `deploy.yml`, and the three
+verifiers that tested the web implementation. **Last present at `6b2def8`** —
+the `src/...` paths cited as provenance across the Swift still resolve there.
+
+The one real dependency was the byte-compat check, which imported the web app's
+own `parseData` to prove the iOS export had not drifted. **Vendored, not
+dropped:** `ios/Tools/web-format.mjs` is a frozen copy. The check used to mean
+"two implementations agree" and now means "the format has not moved", which is
+what it was always for — and a frozen copy states that better than a live import
+could, because it cannot drift along with the thing it guards.
+
+**3e was NOT done.** The PWA is still live on GitHub Pages. That is a repository
+setting rather than a file, it is outward-facing, and `plans/014` has always said
+it is Eden's alone.
+
+### B carries a third rest card, and I was wrong about what it should ask for
+
+Eden: *"maybe fitting another question or two in each workout if possible
+somewhere with 60+ secs"*. A third card needs a free 60-second rest with two
+working sets between it and every card already placed. **B qualifies, A does
+not** — A's only spare 60-second rest is one push-up set from a card it already
+carries. The answer to "can we fit another in" is allowed to be no.
+
+I wrote the new slot as `.fresh` with what looked like solid reasoning: the deck
+is ~450 cards, he has met a quarter, coverage is what another card buys most.
+**The year-long simulation disagreed and it was right.** A fresh slot meets new
+cards, every new card joins the review pool, and the pool grows faster than the
+draws serving it — a missed question went from returning in a median of 5 days
+to 8, with a 90th percentile of 28 rather than 9. Coverage up, and the thing he
+explicitly asked this scheduler for measurably worse. **The extra card reviews.**
+
+Keep that failure mode in mind for anything else touching the draw: adding
+capacity to one intent takes it from another, and the simulation is the only
+thing in this repo that can see it.
+
+### `plans/015` — two obvious ideas that are dead, with the measurements
+
+Both sound right and neither can work against this deck. **Do not re-derive.**
+
+- **"Teach him the thing he is confusing it with."** 0 of 1077 wrong options are
+  another card's correct answer. Zero, not few — the distractors are bespoke
+  explanatory sentences, median 58 characters, so a distractor exists nowhere
+  else in the deck and there is nothing to link it to.
+- **"Schedule around topic weakness."** Median 2 cards per topic, 48 topics hold
+  exactly one. The signal exists and there is nothing to spend it on.
+
+The real headroom is recorded there instead: response time is not logged, and it
+is the one missing input that would separate a known answer from a lucky guess
+on a four-option question — where one guess takes a card from 2 days to 6.
+
+### Two numbers move again, and how they were checked
+
+The web wrapped the completion total and the Ledger's tonnage in `CountUp`; the
+port drew both statically. **Third and fourth instance of this port silently
+dropping something**, after the crossing wipe and the ALL OUT stamp, and all
+four were found by reading the old source for something else entirely. That
+source is deleted now, so this class of find is over — `6b2def8` is where to
+look if something else feels missing.
+
+**`./scripts/shoot.sh daybreak` returns the launch screen at every delay from 4
+to 20 seconds.** Not a crash — the app runs, logs 269 lines, exits cleanly. It
+is pre-existing (stash the change, shoot the previous commit, same white frame)
+and simulator-only, since Eden described the animation working on his phone four
+days ago. Likely the Metal pipeline compile for the 41-ray Canvas, which
+`shoot.sh`'s own header warns about.
+
+**So the most crafted screen in the app is currently unreviewable**, and any
+motion work on it is blind until that is fixed. `plans/016` §2 proposes a
+`-freeze <seconds>` flag, following the `-snapshot` pattern that already exists
+for rests. The count-up was verified by testing the arithmetic instead, which is
+the better check anyway: "lands exactly on the total" is a property and a
+screenshot of one frame is an anecdote.
+
+### Still open
+
+- **The PWA is still deployed.** Eden's call.
+- Three history records carry impossible durations — 4 minutes, 53, and 1240.
+  `min` is not validated on write and nobody has looked at why.
+- The device checklist's ten checks. Still none run.
+
 ## 2026-09-19 · R37 — the app is on the phone, and the repo's front door tells the truth
 
 `verify-ios.sh` green, **eight phases now**, 128 assertions, 0 skipped. New:
