@@ -357,16 +357,29 @@ enum History {
                 bests[exercise] = max(bests[exercise] ?? 0, reps)
             }
         }
-        let highs = mine.compactMap { exercise, reps -> (String, Int, Int)? in
+        let highs = mine.compactMap { exercise, reps -> MovementHigh? in
             guard let best = bests[exercise], reps - best >= movementHighMargin else { return nil }
-            return (exercise, reps, best)
+            return MovementHigh(exercise: exercise, reps: reps, previous: best)
         }
-        if let high = highs.max(by: { $0.1 - $0.2 < $1.1 - $1.2 }) {
-            return "\(high.1) reps of \(high.0.lowercased()) — the most you have done in one session. "
-                + "Your best was \(high.2)."
+        // The biggest jump, not the biggest number: four reps up on a movement
+        // he does twelve of says more than four up on one he does forty of.
+        if let high = highs.max(by: { $0.margin < $1.margin }) {
+            return "\(high.reps) reps of \(high.exercise.lowercased()) — the most you have done in "
+                + "one session. Your best was \(high.previous)."
         }
 
         return nil
+    }
+
+    /// The most of one movement he has ever done in a session, and what it beat.
+    private struct MovementHigh {
+        let exercise: String
+        let reps: Int
+        let previous: Int
+
+        var margin: Int {
+            reps - previous
+        }
     }
 
     /// Reps per MOVEMENT for one record, read through the slot map so a session
