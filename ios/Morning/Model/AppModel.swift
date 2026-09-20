@@ -126,10 +126,11 @@ final class AppModel {
         finished = FinishedSession(
             record: record,
             celebration: Celebrations.forSession(record, history: updated.history),
-            // The session's THIRD card, and the only one with no timer to beat.
-            // `.open` takes whatever the deck wants most, which is usually the
-            // hardest thing in the queue — the right place for it.
-            card: Deck.draw(preferring: Deck.intent(forCardNumber: 2))
+            // The session's LAST card, and the only one with no timer to beat.
+            // Asked for by name: it used to be `intent(forCardNumber: 2)`,
+            // which meant "the third one", and a session can carry a real third
+            // card now. See `Deck.summaryIntent`.
+            card: Deck.draw(preferring: Deck.summaryIntent)
         )
     }
 

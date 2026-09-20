@@ -45,29 +45,62 @@ enum Deck {
     /// Short-term memory, so the same card cannot turn up twice in one sitting.
     /// In memory on purpose: a relaunch ends the sitting.
     ///
-    /// SIX, which is exactly two sessions of three cards. It was eight, which
-    /// is a multiple of nothing here and which pushed the earliest a card could
-    /// come back out to three sessions — and on a five-day training week that
-    /// is a hard floor of five days on returning a question he got wrong,
-    /// whatever the scheduler wants. Six keeps the guarantee that matters — a
-    /// card cannot repeat within a session, or in the next one — and lets a
-    /// miss come back on the third morning rather than the fourth.
-    private static let recentLimit = 6
+    /// SEVEN, which is A's three cards plus B's four — the largest pair of
+    /// consecutive sessions there is, and therefore the smallest window that
+    /// keeps the guarantee this exists for: a card cannot repeat within a
+    /// session, or in the next one.
+    ///
+    /// It was six, when every session carried three. Six was already a session
+    /// and a half rather than two, and B carrying a fourth card would have made
+    /// a card shown on Monday reachable again on Tuesday. Derived from the
+    /// program rather than chosen, so it moves when the program does — and the
+    /// smallest window that holds is the right one, because every card past it
+    /// is a day added to how long a question he got wrong takes to come back.
+    private static let recentLimit = 7
     private static var recent: [String] = []
 
     /// And the same for TOPICS, which is the other half of what Eden meant by
-    /// *"so it's always diverse"*. Three cards a morning all about Burgundy is
-    /// a narrow morning even when all three are different cards, and with fifty
-    /// topics in the deck there is no reason to allow it.
-    private static let recentTopicLimit = 3
+    /// *"so it's always diverse"*. Cards all about Burgundy make a narrow
+    /// morning even when they are different cards, and with 113 topics in the
+    /// deck there is no reason to allow it.
+    ///
+    /// FOUR, matching the most cards a session can carry. At three, B's fourth
+    /// card could have repeated the topic of its first.
+    private static let recentTopicLimit = 4
     private static var recentTopics: [String] = []
 
     // MARK: - Dosing
 
+    /// A THIRD card only ever goes on a rest at least this long.
+    ///
+    /// Eden: *"maybe fitting another question or two in each workout if possible
+    /// somewhere with 60+ secs"*. The "if possible" is load-bearing and is why
+    /// this is a floor rather than a target — a 45-second rest has to carry the
+    /// question, the four options, the think and the answer, and it is already
+    /// the tightest of them.
+    static let minimumRestForExtraCard = 60
+
+    /// Working sets that must lie between two carded rests.
+    ///
+    /// The old rule was that the two cards could not be ADJACENT LONG RESTS,
+    /// which was a proxy for "far apart in time" that held only while a session
+    /// had seven of them. Session B has four, and its rests at steps 6 and 9
+    /// are two working sets apart — a whole superset round, ninety-odd seconds
+    /// of effort. Counting sets says what the old rule meant.
+    static let minimumSetsBetweenCards = 2
+
     /// Which rest steps carry a card.
     ///
-    /// Taken from roughly the first and third quarter of the long rests so they
-    /// land spread across the session, and never from the very first one.
+    /// Two of them, taken from roughly the first and third quarter of the long
+    /// rests so they land spread across the session, and never from the very
+    /// first one — that one is for getting your breath back.
+    ///
+    /// Then a third, if the session can afford it: a free rest of at least
+    /// `minimumRestForExtraCard`, with at least `minimumSetsBetweenCards`
+    /// between it and its neighbours. **Session A cannot afford one** — its only
+    /// spare 60-second rest is a single push-up set away from a card it already
+    /// carries — and session B can. That asymmetry is the rule working, not a
+    /// bug: the answer to "can we fit another question in" is allowed to be no.
     static func cardRestIndices(in steps: [Step]) -> [Int] {
         let long = steps.enumerated().compactMap { index, step -> Int? in
             guard case let .rest(rest) = step, rest.seconds >= minimumRestForCard else { return nil }
@@ -79,22 +112,70 @@ enum Deck {
             let position = min(long.count - 1, max(1, Int((Double(long.count) * fraction).rounded())))
             return long[position]
         }
-        return Array(Set([at(0.25), at(0.72)])).sorted()
+        var chosen = Array(Set([at(0.25), at(0.72)])).sorted()
+
+        // The first long rest is never a candidate, for the third card either.
+        for candidate in long.dropFirst() where !chosen.contains(candidate) {
+            guard case let .rest(rest) = steps[candidate],
+                  rest.seconds >= minimumRestForExtraCard,
+                  chosen.allSatisfy({ setsBetween(candidate, $0, in: steps) >= minimumSetsBetweenCards })
+            else {
+                continue
+            }
+            chosen.append(candidate)
+            chosen.sort()
+            break
+        }
+        return chosen
+    }
+
+    /// Working sets strictly between two step indices, in either order.
+    private static func setsBetween(_ one: Int, _ other: Int, in steps: [Step]) -> Int {
+        let range = min(one, other) + 1 ..< max(one, other)
+        return steps[range].compactMap(\.asSet).count
     }
 
     /// What each of a session's three cards is FOR, in the order they land.
     ///
-    /// The first rest card opens the deck up, the second closes a loop, and the
-    /// summary's — the one with no timer to beat — takes whatever is hardest.
-    /// See `StudyPlan.Intent`: asking the three slots for different things is
-    /// what stops coverage and review from being a trade against each other.
+    /// The first rest card opens the deck up and the second closes a loop.
+    /// See `StudyPlan.Intent`: asking each slot for something different is what
+    /// stops coverage and review from being a trade against each other.
+    ///
+    /// **The third, where a session can afford one, reviews.** This was written
+    /// as `.fresh` first, on what looked like solid reasoning: the deck holds
+    /// ~450 cards, he has met about a quarter, so coverage is what another card
+    /// buys most, and review is already served by slot 1 and by `.open`.
+    ///
+    /// The year-long simulation disagreed, and it was right. A fresh slot meets
+    /// new cards, every new card joins the review pool, and the pool grows
+    /// faster than the draws that serve it: a question he got wrong went from
+    /// coming back in a median of **5 days to 8**, with a 90th percentile of
+    /// **28 days rather than 9**. Coverage up, and the thing Eden actually
+    /// asked the scheduler for — *"i wanna bring back questions that i got
+    /// wrong more often so i can iterate and learn better"* — measurably worse.
+    ///
+    /// So the extra card goes to review. Coverage still improves, because a
+    /// fourth card is a fourth card and `.fresh` still leads every session; it
+    /// just improves by less than it would have, in exchange for not spending
+    /// a stated priority to buy it.
     static func intent(forCardNumber number: Int) -> StudyPlan.Intent {
         switch number {
         case 0: .fresh
         case 1: .review
+        case 2: .review
         default: .open
         }
     }
+
+    /// What the SUMMARY's card asks for — the one with no timer to beat.
+    ///
+    /// Named rather than positional. It used to be `intent(forCardNumber: 2)`,
+    /// which was only ever a way of spelling "the third one", and the moment a
+    /// session could carry a real third card that spelling started meaning
+    /// something else. `.open` takes whatever the deck wants most, which is
+    /// usually the hardest thing in the queue: the right thing to read standing
+    /// still.
+    static let summaryIntent: StudyPlan.Intent = .open
 
     /// How long to think before the answer appears by itself.
     ///

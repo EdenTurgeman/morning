@@ -43,13 +43,22 @@ final class StudyDeckAcceptanceTests: XCTestCase {
         }
     }
 
-    /// Two cards per session on rests, plus one on the summary.
-    func testTwoCardsPerSessionOnRestsPlusOneOnTheSummary() {
+    /// Two cards per session on rests — three where the session can afford it —
+    /// plus one on the summary.
+    ///
+    /// Eden asked for *"another question or two in each workout if possible
+    /// somewhere with 60+ secs"*, and "if possible" is the whole rule. A third
+    /// card needs a free 60-second rest with two working sets between it and
+    /// every card already placed. **B has one and A does not**: A's only spare
+    /// 60-second rest is a single push-up set away from a card it already
+    /// carries. The answer to "can we fit another in" is allowed to be no.
+    func testCardsPerSessionOnRestsPlusOneOnTheSummary() {
+        let expected = ["A": 2, "B": 3]
         for key in ["A", "B"] {
             let indices = Deck.cardRestIndices(in: StepCompiler.build(session: key))
             XCTAssertEqual(
                 indices.count,
-                2,
+                expected[key],
                 "\(key) carries \(indices.count) cards on rests — eight cards in twenty minutes is homework"
             )
         }
@@ -58,8 +67,9 @@ final class StudyDeckAcceptanceTests: XCTestCase {
         XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "A")), [6, 15])
         // B moved to [6, 18] in the 2026-09-19 restructure: it now has four
         // long rests rather than seven, because three 45s superset rests became
-        // one 60s rest per round.
-        XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "B")), [6, 18])
+        // one 60s rest per round. Step 9 was added the day after — it is 60
+        // seconds, free, and two sets clear of both neighbours.
+        XCTAssertEqual(Deck.cardRestIndices(in: StepCompiler.build(session: "B")), [6, 9, 18])
 
         // The summary's card is drawn by the summary, which is W7. What the
         // deck owes it is a longer think, because there is no timer to beat.
@@ -113,14 +123,22 @@ final class StudyDeckAcceptanceTests: XCTestCase {
                 "\(key): a card on the first long rest — that one is for getting your breath back"
             )
 
-            // Spread across the session rather than back to back.
-            let positions = carrying.compactMap { long.firstIndex(of: $0) }
-            XCTAssertEqual(positions.count, 2)
-            XCTAssertGreaterThan(
-                positions[1] - positions[0],
-                1,
-                "\(key): the two cards are adjacent long rests, not spread"
-            )
+            // SPREAD IN SETS, NOT IN LIST POSITION.
+            //
+            // This used to assert that no two carded rests were adjacent in the
+            // long-rest list, which was a proxy for "far apart in time" that
+            // held only while a session had seven of them. B has four, and its
+            // rests at steps 6 and 9 are adjacent in the list but two working
+            // sets — a whole superset round — apart in the morning. Counting
+            // sets says what the old rule meant.
+            for (a, b) in zip(carrying, carrying.dropFirst()) {
+                let between = Array(steps[(a + 1) ..< b]).compactMap(\.asSet).count
+                XCTAssertGreaterThanOrEqual(
+                    between,
+                    Deck.minimumSetsBetweenCards,
+                    "\(key): only \(between) set(s) between the cards at \(a) and \(b)"
+                )
+            }
         }
     }
 
@@ -222,12 +240,17 @@ final class StudyDeckAcceptanceTests: XCTestCase {
         XCTAssertEqual(Deck.sightings(using: defaults).count, 1)
     }
 
-    /// THE THREE CARDS OF A SESSION ARE ASKED FOR DIFFERENT THINGS.
-    func testTheSessionsThreeCardsAreAskedForDifferentThings() {
+    /// THE CARDS OF A SESSION ARE ASKED FOR DIFFERENT THINGS.
+    func testTheSessionsCardsAreAskedForDifferentThings() {
         XCTAssertEqual(Deck.intent(forCardNumber: 0), .fresh, "the first opens the deck up")
         XCTAssertEqual(Deck.intent(forCardNumber: 1), .review, "the second brings back a miss")
         XCTAssertEqual(
             Deck.intent(forCardNumber: 2),
+            .review,
+            "a third rest card reviews — written as .fresh, and the simulation said no"
+        )
+        XCTAssertEqual(
+            Deck.summaryIntent,
             .open,
             "the summary's card has no timer to beat and can take the hardest thing"
         )

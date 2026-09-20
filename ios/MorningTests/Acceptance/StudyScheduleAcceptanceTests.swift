@@ -265,8 +265,11 @@ final class StudyScheduleAcceptanceTests: XCTestCase {
     /// actually mattered — no card is unreachable, and review does not crowd
     /// out new material.
     ///
-    /// A year of five sessions a week, three cards each, played against the
-    /// real deck. He answers about 62% of questions right cold and 85% of ones
+    /// A year of five sessions a week, played against the real deck.
+    ///
+    /// Three cards a session became **three and a half** on 2026-09-20 — B
+    /// carries a fourth and A does not — so the sessions alternate 3, 4 here
+    /// the way they do in the morning. He answers about 62% of questions right cold and 85% of ones
     /// he has already missed once, which is the shape of someone learning.
     func testAYearOfSessionsMeetsMostOfTheDeckAndStillBringsBackMisses() throws {
         var history: [String: StudyPlan.Encounter] = [:]
@@ -287,7 +290,9 @@ final class StudyScheduleAcceptanceTests: XCTestCase {
             sessions += 1
             let now = start.addingTimeInterval(Double(day) * 86400)
             var metThisSession = 0
-            for slot in 0 ..< 3 {
+            // A is three cards, B is four. Sessions alternate.
+            let cardsThisSession = sessions.isMultiple(of: 2) ? 4 : 3
+            for slot in 0 ..< cardsThisSession {
                 let pool = Cards.all.filter { !recent.contains($0.id) }
                 let intent = Deck.intent(forCardNumber: slot)
                 let candidates = StudyPlan.candidates(pool, intent: intent, encounters: history, now: now)
@@ -299,7 +304,9 @@ final class StudyScheduleAcceptanceTests: XCTestCase {
                     gaps.append(day - missed)
                 }
                 recent.append(card.id)
-                if recent.count > 6 {
+                // Mirrors `Deck.recentLimit`: the largest pair of consecutive
+                // sessions, which is B's four plus A's three.
+                if recent.count > 7 {
                     recent.removeFirst()
                 }
 
@@ -327,11 +334,19 @@ final class StudyScheduleAcceptanceTests: XCTestCase {
             // met, one of them is drawn. This is what stops review from closing
             // the deck in around what he already half-knows, and it is a
             // property rather than a statistic.
-            XCTAssertGreaterThanOrEqual(
-                metThisSession,
-                1,
-                "session \(sessions) showed nothing new, with \(Cards.all.count - history.count) cards unmet"
-            )
+            //
+            // Conditional on there BEING one, which is new: at three cards a
+            // session the deck outlasted the year, and at three and a half it
+            // does not. The simulation now meets every card in the deck part
+            // way through and the guarantee has nothing left to guarantee —
+            // which is the extra card working, not the fresh slot failing.
+            if history.count < Cards.all.count {
+                XCTAssertGreaterThanOrEqual(
+                    metThisSession,
+                    1,
+                    "session \(sessions) showed nothing new, with \(Cards.all.count - history.count) cards unmet"
+                )
+            }
             day += 1
         }
 

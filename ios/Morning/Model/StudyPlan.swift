@@ -213,7 +213,8 @@ enum StudyPlan {
 
     /// What this particular draw is FOR.
     ///
-    /// A session shows three cards, and letting one rule pick all three is what
+    /// A session shows three cards, four in B, and letting one rule pick them
+    /// all is what
     /// made the choice between coverage and review look forced. Asking each
     /// slot for something different is what makes it not a trade: simulated
     /// over a year, `fresh · review · open` sees **296 of the 302 cards** the deck then held — more
