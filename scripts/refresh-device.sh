@@ -18,6 +18,22 @@
 #  the profile without anybody opening Xcode, which is what makes a launchd job
 #  possible. See `scripts/refresh-device.plist`.
 #
+#  IT BACKS UP HIS HISTORY BEFORE IT INSTALLS, AND CHECKS AFTERWARDS
+#  ---------------------------------------------------------------------------
+#  Installing over an existing app preserves its data container — verified by
+#  copying `history.json` off, installing, copying it back and comparing, three
+#  times. But "verified three times" is not the same as "cannot fail", and the
+#  thing at risk is the only copy of six months of training that exists.
+#
+#  So the backup is not a habit, it is a precondition: **if the history cannot
+#  be copied off, the install does not happen.** The one exception is a phone
+#  with no Morning on it yet, where there is nothing to lose.
+#
+#  Backups land OUTSIDE the repository, because it is public and this is his
+#  training record. A copy is only written when the content has actually
+#  changed, so the launchd job re-signing every few days does not fill the
+#  folder with identical files.
+#
 #  RELEASE, NOT DEBUG, BY DEFAULT
 #  ---------------------------------------------------------------------------
 #  ⌘R from Xcode builds Debug and that is right for debugging. This is the build
@@ -35,6 +51,10 @@ QUIET_ABSENT=0
 WANT_DEVICE=""
 DD="$ROOT/ios/build/device"
 LOG="$ROOT/ios/build/refresh.log"
+# Outside the repo on purpose: it is public and this is his training record.
+BACKUPS="${MORNING_BACKUPS:-$HOME/Dev/morning-backups}"
+BUNDLE="com.edenturgeman.morning"
+STORE="Library/Application Support/Morning/history.json"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -107,6 +127,40 @@ if ! grep -qE 'DEVELOPMENT_TEAM = [A-Z0-9]+' ios/Morning.xcodeproj/project.pbxpr
   die "no DEVELOPMENT_TEAM in the project. Open ios/Morning.xcodeproj and set Team on BOTH the Morning and MorningWidgets targets — the widget is the one people miss."
 fi
 
+# --- his history comes off FIRST ---------------------------------------------
+# Prints the path it wrote, or nothing if the content was unchanged.
+pull_history() {
+  local to="$1"
+  xcrun devicectl device copy from --device "$UDID" \
+    --domain-type appDataContainer --domain-identifier "$BUNDLE" --user mobile \
+    --source "$STORE" --destination "$to" >>"$LOG" 2>&1
+}
+
+installed() {
+  xcrun devicectl device info apps --device "$UDID" 2>/dev/null | grep -q "$BUNDLE"
+}
+
+BEFORE=""
+if installed; then
+  mkdir -p "$BACKUPS"
+  BEFORE="$(mktemp)"
+  trap 'rm -f "$BEFORE"' EXIT
+  if ! pull_history "$BEFORE"; then
+    die "could not copy your history off the phone, so nothing was installed. Unlock it and try again; if it keeps failing, export a backup from the app's Backup screen before going any further."
+  fi
+  # Only keep a copy when something actually changed.
+  LATEST="$(ls -t "$BACKUPS"/history-*.json 2>/dev/null | head -1)"
+  if [[ -n "$LATEST" ]] && cmp -s "$BEFORE" "$LATEST"; then
+    say "history unchanged since $(basename "$LATEST") — no new backup needed"
+  else
+    KEPT="$BACKUPS/history-$(date +%Y-%m-%d-%H%M).json"
+    cp "$BEFORE" "$KEPT"
+    say "history backed up to ${KEPT/#$HOME/~}"
+  fi
+else
+  say "Morning is not installed yet — nothing to back up"
+fi
+
 say "building $CONFIG for $UDID"
 if ! xcodebuild build \
       -project ios/Morning.xcodeproj \
@@ -128,6 +182,19 @@ say "installing"
 if ! xcrun devicectl device install app --device "$UDID" "$APP" >>"$LOG" 2>&1; then
   tail -5 "$LOG" >&2
   die "install failed — full output in ${LOG#"$ROOT"/}"
+fi
+
+# --- and it is still there afterwards ----------------------------------------
+if [[ -n "$BEFORE" ]]; then
+  AFTER="$(mktemp)"
+  if pull_history "$AFTER" && cmp -s "$BEFORE" "$AFTER"; then
+    say "history intact — byte-identical across the install"
+  else
+    # Not fatal: the app is installed and the backup is on disk. But say it
+    # loudly, because this is the sentence that means go and restore.
+    say "WARNING: history differs after the install. Your backup is in ${BACKUPS/#$HOME/~} — check the app before training on it."
+  fi
+  rm -f "$AFTER"
 fi
 
 say "done. Morning is re-signed for another seven days."

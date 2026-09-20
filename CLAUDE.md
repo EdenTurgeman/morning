@@ -198,6 +198,11 @@ Every one of these has already cost someone something.
   old slots to new at read time, and stored records are never rewritten. That
   works only because the restructure moved movements without removing any. If
   you delete one, its history has nowhere to go.
+- **His history exists in one place and one place only** — the app's container
+  on his phone. `refresh-device.sh` copies it off before every install and
+  refuses to install if it cannot, and the launchd job means that happens at
+  least weekly. Never add a path that reinstalls, resets or migrates the app
+  without going through it.
 - **One history record per finished session.** The web build briefly wrote two.
 - **Reps are only comparable at the same weight.** If the working weight moved,
   every delta is meaningless. Say so honestly; do not show a comparison that

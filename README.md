@@ -63,6 +63,15 @@ That script is that rebuild, and `scripts/refresh-device.plist` runs it on a
 timer. A newly issued certificate has to be trusted once on the device itself:
 Settings → General → VPN & Device Management.
 
+**It copies the training history off the phone before it installs, and
+compares it afterwards.** If the history cannot be copied, nothing is
+installed — the backup is a precondition, not a habit. Copies land in
+`~/Dev/morning-backups` (override with `MORNING_BACKUPS`), outside this
+repository because it is public, and only when the content has actually
+changed. Installing over an existing app does preserve its container; this
+exists because "verified several times" is not "cannot fail", and the thing at
+risk is the only copy of six months of training.
+
 ---
 
 ## The shape of the repo
