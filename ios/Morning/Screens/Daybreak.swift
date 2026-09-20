@@ -118,7 +118,7 @@ struct Daybreak: View {
                         .foregroundStyle(Paper.press)
                         .opacity(ramp(elapsed, from: beats.copy, over: 0.4))
 
-                    Text(reps, format: .number)
+                    Text(counted(at: elapsed), format: .number)
                         .font(TypeScale.counter(92))
                         .monospacedDigit()
                         .foregroundStyle(Paper.press)
@@ -287,6 +287,55 @@ struct Daybreak: View {
     /// stages can drift apart.
     private func ramp(_ elapsed: TimeInterval, from: TimeInterval, over: TimeInterval) -> Double {
         min(1, max(0, (elapsed - from) / over))
+    }
+
+    /// How long the total takes to count up to itself.
+    ///
+    /// 0.75s, so it lands at 2.30 against pips at 2.35 — the number finishes
+    /// arriving and then the week arrives under it. Any longer and it is still
+    /// moving while the copy is being read.
+    private static let countUpDuration: TimeInterval = 0.75
+
+    /// Below this the count-up reads as a glitch rather than a flourish, which
+    /// is the web build's rule and was right.
+    static let countUpFloor = 20
+
+    /// THE TOTAL COUNTS UP TO ITSELF, and it is guaranteed to land on it.
+    ///
+    /// The web build had this (`src/components/CountUp.tsx`) and the port drew
+    /// the number statically. **That is the third thing this port has silently
+    /// dropped on its way across** — the crossing wipe and the ALL OUT stamp
+    /// were the first two, both recorded in the handoff log, both found the
+    /// same way: by reading the old source for something else entirely.
+    ///
+    /// Driven off `elapsed` rather than a state animation, because this whole
+    /// moment runs on one clock and a second one is how two things that should
+    /// land together stop landing together. It cannot be left mid-count by a
+    /// dropped frame: past the duration it returns `reps` itself, so the worst
+    /// a stalled render can do is show the right answer sooner.
+    ///
+    /// Not under Reduce Motion. A count-up is travel, and that setting keeps
+    /// every beat here and drops the travel.
+    private func counted(at elapsed: TimeInterval) -> Int {
+        guard !reduceMotion else { return reps }
+        return Self.countUp(to: reps, progress: ramp(elapsed, from: beats.number, over: Self.countUpDuration))
+    }
+
+    /// Split out and made reachable so it can be TESTED rather than filmed.
+    ///
+    /// The completion moment cannot be screenshotted on this machine: it is the
+    /// one surface whose first frame needs the 41-ray Canvas compiled, and the
+    /// capture lands on the launch screen every time however long the delay.
+    /// So the arithmetic is asserted instead — which is the better check in any
+    /// case, because "lands exactly on the total" is a property and a
+    /// screenshot of one frame is an anecdote.
+    static func countUp(to total: Int, progress: Double) -> Int {
+        guard total >= countUpFloor else { return total }
+        guard progress < 1 else { return total }
+        guard progress > 0 else { return 0 }
+        // Eased out, so it decelerates into the number rather than slamming
+        // into it — the last twenty are the ones worth watching arrive.
+        return Int((Double(total) * (1 - pow(1 - progress, 3))).rounded())
     }
 
     /// A settle rather than a pop: overshoots once and comes back.

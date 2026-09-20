@@ -220,6 +220,51 @@ final class CelebrationAcceptanceTests: XCTestCase {
         )
     }
 
+    // MARK: - The total counts up to itself
+
+    /// IT LANDS ON THE NUMBER, whatever happens to the frames.
+    ///
+    /// The web build had this and the port drew the number statically — the
+    /// third thing this port dropped silently on the way across, after the
+    /// crossing wipe and the ALL OUT stamp.
+    ///
+    /// The property that matters is not the easing, it is that a dropped frame
+    /// cannot leave the most important number in the app reading something
+    /// other than the truth. Past the duration it returns the total itself, so
+    /// the worst a stalled render can do is show the right answer sooner.
+    func testTheTotalCountsUpAndIsGuaranteedToLandOnItself() {
+        let total = 164
+
+        XCTAssertEqual(Daybreak.countUp(to: total, progress: 0), 0, "starts at nothing")
+        XCTAssertEqual(Daybreak.countUp(to: total, progress: 1), total, "lands exactly")
+        XCTAssertEqual(Daybreak.countUp(to: total, progress: 1.8), total, "and stays there, overshot clock or not")
+        XCTAssertEqual(Daybreak.countUp(to: total, progress: -0.4), 0, "before its beat it has not started")
+
+        // Monotonic, never over, and eased out — more than half the distance is
+        // covered in the first third, which is what makes the last few land.
+        var last = 0
+        for step in 0 ... 40 {
+            let shown = Daybreak.countUp(to: total, progress: Double(step) / 40)
+            XCTAssertGreaterThanOrEqual(shown, last, "the count went backwards at \(step)/40")
+            XCTAssertLessThanOrEqual(shown, total, "the count overshot the total at \(step)/40")
+            last = shown
+        }
+        XCTAssertGreaterThan(Daybreak.countUp(to: total, progress: 1.0 / 3), total / 2)
+    }
+
+    /// A SMALL NUMBER DOES NOT COUNT — it reads as a glitch rather than a
+    /// flourish, which was the web build's rule and was right.
+    func testASmallTotalIsNotCountedUp() {
+        XCTAssertEqual(Daybreak.countUpFloor, 20)
+        for progress in [0.0, 0.3, 0.7] {
+            XCTAssertEqual(
+                Daybreak.countUp(to: 12, progress: progress),
+                12,
+                "a twelve-rep session should just say twelve"
+            )
+        }
+    }
+
     // MARK: - What has stopped moving
 
     /// A movement every set of which has read the same for three sessions is

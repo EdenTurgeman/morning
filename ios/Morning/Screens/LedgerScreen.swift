@@ -25,6 +25,8 @@ import SwiftUI
  * ======================================================================== */
 
 struct LedgerScreen: View {
+    @State private var shownTonnes: Double = 0
+
     let history: [SessionRecord]
     let onClose: () -> Void
 
@@ -143,10 +145,31 @@ struct LedgerScreen: View {
 
     private var headline: some View {
         VStack(alignment: .leading, spacing: Space.tight) {
-            Text(tonnage)
+            // IT COUNTS UP, the way it did in the web build.
+            //
+            // `src/screens/Ledger.tsx` wrapped this number in `CountUp` and the
+            // port rendered a formatted string. Same omission as the completion
+            // total, found the same way — reading the old source for something
+            // else — and this one matters in its own right: the number is
+            // everything he has ever lifted, and it is the reason this screen
+            // exists. Watching it arrive is the screen doing its job.
+            //
+            // Driven by SwiftUI's own animation rather than a clock, because
+            // unlike Daybreak there is nothing else here to stay in step with.
+            // It cannot be left mid-count: an animation's final state is its
+            // target, so a dropped frame shows the right number sooner.
+            CountingTonnage(tonnes: shownTonnes)
                 .font(TypeScale.counter(76))
                 .monospacedDigit()
                 .foregroundStyle(Paper.press)
+                .onAppear {
+                    guard !reduceMotion, ledger.tonnes >= 1 else {
+                        shownTonnes = ledger.tonnes
+                        return
+                    }
+                    shownTonnes = 0
+                    withAnimation(.easeOut(duration: 0.9)) { shownTonnes = ledger.tonnes }
+                }
 
             Text("tonnes moved")
                 .font(TypeScale.body)
@@ -200,10 +223,17 @@ struct LedgerScreen: View {
             .padding(.top, Space.step)
     }
 
-    private var tonnage: String {
-        ledger.tonnes >= 10
-            ? String(format: "%.0f", ledger.tonnes)
-            : String(format: "%.1f", ledger.tonnes)
+    /// Rendered by `CountingTonnage`, which is `Animatable` so SwiftUI
+    /// interpolates the tonnes rather than cross-fading two strings.
+    ///
+    /// **One decimal below ten tonnes and none above**, which is the rule this
+    /// screen has always used — and it has to be applied to the value being
+    /// SHOWN rather than the total, or the count-up would run with a decimal it
+    /// then drops on the last frame.
+    static func tonnage(_ tonnes: Double) -> String {
+        tonnes >= 10
+            ? String(format: "%.0f", tonnes)
+            : String(format: "%.1f", tonnes)
     }
 
     private var provenance: String {
@@ -341,5 +371,24 @@ struct LedgerScreen: View {
         let formatter = DateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
         return formatter.string(from: date)
+    }
+}
+
+/// The lifetime tonnage, interpolated rather than cross-faded.
+///
+/// `Animatable` is what makes this a COUNT rather than a dissolve: SwiftUI
+/// drives `animatableData` through the range and this re-renders the string at
+/// each value. Formatting happens here, on the value being shown, so the number
+/// never changes shape part way through the count.
+private struct CountingTonnage: View, Animatable {
+    var tonnes: Double
+
+    var animatableData: Double {
+        get { tonnes }
+        set { tonnes = newValue }
+    }
+
+    var body: some View {
+        Text(LedgerScreen.tonnage(tonnes))
     }
 }
