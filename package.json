@@ -3,40 +3,11 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "//": "Node survives the web build's retirement for two jobs, both of which are tools rather than the app: ios/Tools/gen-seeds.mjs (no dependencies) and scripts/make-icons.mjs (sharp). scripts/verify-export.mjs is dependency-free too. There is nothing to build, serve or deploy here any more — the app is Swift.",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "check": "tsc -b --noEmit",
-    "test:program": "node --import ./scripts/alias-hook.mjs scripts/verify-program.ts",
-    "test:week": "node --import ./scripts/alias-hook.mjs scripts/verify-week.ts",
-    "test:deck": "node --import ./scripts/alias-hook.mjs scripts/verify-deck.ts",
-    "test": "npm run test:program && npm run test:week && npm run test:deck",
-    "deploy": "npm run build && gh-pages -d dist"
-  },
-  "dependencies": {
-    "@fontsource-variable/inter": "^5.1.1",
-    "@radix-ui/react-alert-dialog": "^1.1.6",
-    "@types/canvas-confetti": "^1.9.0",
-    "canvas-confetti": "^1.9.4",
-    "clsx": "^2.1.1",
-    "motion": "^12.4.7",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "sonner": "^2.0.1",
-    "tailwind-merge": "^3.6.0"
+    "icons": "node scripts/make-icons.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.9",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
-    "gh-pages": "^6.3.0",
-    "sharp": "^0.35.3",
-    "tailwindcss": "^4.0.9",
-    "typescript": "^5.7.3",
-    "vite": "^6.2.0",
-    "vite-plugin-pwa": "^0.21.1"
+    "sharp": "^0.35.3"
   }
 }

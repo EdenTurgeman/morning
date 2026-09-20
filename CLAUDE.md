@@ -4,14 +4,15 @@ Start here. Every session, before anything else.
 
 ## What this repo is
 
-Two things:
+**A native iOS app** (`ios/`). SwiftUI, iOS 26, Swift 6 mode, iPhone only,
+portrait only. One user, one 20-minute morning workout, fully offline.
 
-1. **A finished web app** (`src/`, TypeScript + React + Vite, deployed to
-   <https://edenturgeman.github.io/morning/>). An offline-first PWA that runs one
-   20-minute morning workout step by step. It works. It is **the behaviour
-   specification for the port, and it is not the design ceiling.**
-2. **A native iOS port in progress** (`ios/`). SwiftUI, iOS 26, Swift 6 mode,
-   iPhone only, portrait only. This is the work.
+It began as a port of a React PWA, and that PWA was the behaviour specification
+for it. **The PWA was deleted on 2026-09-20** once the iOS app had a month of
+real sessions logged on Eden's phone — see `WEB-BUILD.md`. Swift comments still
+cite `src/...` paths as provenance; those resolve at commit `6b2def8`.
+
+`spec.md` is the behaviour specification now, and `WORKOUT.md` is the program.
 
 The full brief for the port is `ios-port/`. It is 8 documents and they are
 binding. `ios-port/02-design-brief.md` is the main one.
@@ -108,8 +109,9 @@ See `plans/009-remembering-the-deck.md`.
 
 ```bash
 ./scripts/bootstrap.sh          # idempotent; run it first, every machine
-./scripts/verify-ios.sh         # build + test + lint + format, all errors in one report
-npm run dev                     # the web app — the behaviour spec
+./scripts/verify-ios.sh         # build + test + lint + format + docs, all errors in one report
+./scripts/shoot.sh set          # look at a screen without a simulator you can tap
+./scripts/refresh-device.sh     # build Release and install on the phone
 open ios/Morning.xcodeproj      # ⌘U runs the acceptance suite
 ```
 
@@ -122,10 +124,10 @@ project-generation tooling in this repo — open it and work in it. If the Morni
 and MorningTests groups have been converted to folders (see the handoff log),
 adding a file on disk needs no project edit at all.
 
-**Before you write any Swift, run the web app and do a full session of A and a
-full session of B.** `ios-port/README.md` puts this in the first-session
-checklist for a reason: you cannot design the replacement for something you have
-not used.
+**Before you write any Swift, read `WORKOUT.md` and walk both sessions with
+`./scripts/shoot.sh`.** `ios-port/README.md` used to say to run the web app and
+do a full session of A and B; that app is gone, but the reason it said so has
+not changed — you cannot design for something you have not seen end to end.
 
 ## Where the port actually is
 

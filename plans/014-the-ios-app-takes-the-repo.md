@@ -16,10 +16,30 @@ written.** The iOS app has been on Eden's phone for weeks: his container holds
   `refresh-device.sh` installs, and the free profile is renewed on a seven-day
   timer. A newly issued certificate still needs trusting once on the device.
 - **2. Merge to main** — done 2026-09-19.
-- **3. Retire the web app** — **still open, and still Eden's call.** Nothing
-  below has been executed. The byte-compat check in `verify-export.ts` is the
-  live reason not to rush 3a, and 3e takes down something that is deployed and
-  outward-facing.
+- **3. Retire the web app** — **done 2026-09-20, except 3e.** Eden: *"retire the
+  web build"*. Executed in the order below, each step leaving the repo working:
+  - **3a** — vendored, not deleted. `ios/Tools/web-format.mjs` is a frozen copy
+    of `parseData`, and `scripts/verify-export.mjs` runs against it with no
+    dependencies and no alias hook. The check was "two implementations agree";
+    it is now "the format has not moved", which is what it was always for.
+  - **3b** — `src/`, `public/`, `prototype/`, `index.html`, `vite.config.ts`,
+    `tsconfig*.json`, `components.json` deleted. 71 files. Last present at
+    `6b2def8`.
+  - **3c** — `package.json` trimmed to one script and one dependency. Node
+    survives for `gen-seeds.mjs`, `make-icons.mjs` and `verify-export.mjs`,
+    all of which are tools rather than the app. `package-lock.json` deleted.
+  - **3d** — `deploy.yml` deleted; `ios.yml`'s path filter now includes
+    `scripts/**`, which it did not, so changes to the verification scripts
+    never triggered CI.
+  - **3e — NOT DONE, and deliberately.** The PWA is still live at
+    <https://edenturgeman.github.io/morning/>. Taking it down is a GitHub Pages
+    setting rather than a file in this repo, it is outward-facing, and this plan
+    has always said it is Eden's alone. Deleting the workflow means it will
+    never be republished; it is frozen at its last deploy.
+
+  Also retired with it: `verify-program.ts`, `verify-week.ts` and
+  `verify-deck.ts`, all of which tested the web implementation. Their subjects
+  are covered by the acceptance suite and `ios/Tools/check-deck.py`.
 
 What has changed since this was written: the README no longer claims `src/` is
 the product — it was moved verbatim to `WEB-BUILD.md` and replaced with a front

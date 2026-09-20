@@ -10,7 +10,19 @@ workout is now wrong.** The program lives in `ios/Morning/Program.swift`, and
 `WORKOUT.md` explains it. `src/program.ts` is a frozen snapshot that is not read
 by anything at runtime.
 
-It is kept for three reasons: `scripts/verify-export.ts` still imports the web
+**Retired 2026-09-20.** `src/`, `public/`, `prototype/`, the Vite and TypeScript
+configuration and the deploy workflow are all gone; the last commit that
+contained them is **`6b2def8`**, and `git show 6b2def8:src/lib/storage.ts` still
+works. Swift comments across `ios/` cite `src/...` paths as provenance — where
+a piece of reasoning came from — and those citations resolve there.
+
+Two things outlived the source. `ios/Tools/web-format.mjs` is a frozen copy of
+the storage format's parser, so `scripts/verify-export.mjs` can still prove the
+iOS export has not drifted. And **the deployment is still up** at the URL above:
+taking it down is a GitHub Pages setting, not a file in this repo, and it is
+Eden's to make.
+
+It was kept until now for three reasons: `scripts/verify-export.ts` still imports the web
 app's own parser to prove the iOS app's exported JSON is readable by the thing
 that holds the history; the reasoning about weekly streaks and the design of the
 sunrise carried into the port; and the deployment outlives the source until

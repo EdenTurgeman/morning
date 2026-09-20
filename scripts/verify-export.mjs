@@ -1,11 +1,12 @@
-/* Runs an iOS export through the WEB APP'S OWN PARSER.
+/* Runs an iOS export through the STORAGE FORMAT AS IT WAS FROZEN.
  *
- *   node --import ./scripts/alias-hook.mjs scripts/verify-export.ts <export.json>
+ *   node scripts/verify-export.mjs <export.json>
  *
  * `07-acceptance.md` asks that an export "opens in the web app's Restore box and
  * parses". That check was manual, which meant it was checked once and then
- * assumed forever. This imports the real `parseData` from src/lib/storage.ts —
- * not a copy of its rules — so the day the two formats drift, this fails.
+ * assumed forever. It ran against the live web parser until the web build was
+ * retired on 2026-09-20; it now runs against `ios/Tools/web-format.mjs`, a
+ * frozen copy of the same function. Read that file's header before touching it.
  *
  * It asserts more than "did not throw": every record must survive, and survive
  * UNCHANGED. parseData is lenient by design and silently drops malformed
@@ -13,11 +14,11 @@
  * the failure this is looking for.
  */
 import fs from "node:fs";
-import { parseData } from "@/lib/storage";
+import { parseData } from "../ios/Tools/web-format.mjs";
 
 const path = process.argv[2];
 if (!path) {
-  console.error("usage: verify-export.ts <export.json>");
+  console.error("usage: verify-export.mjs <export.json>");
   process.exit(2);
 }
 
@@ -33,7 +34,7 @@ const given = Array.isArray(raw.history) ? raw.history.length : 0;
 const kept = parsed.history.length;
 let failures = 0;
 
-const fail = (message: string) => {
+const fail = (message) => {
   console.error(`FAIL  ${message}`);
   failures++;
 };
@@ -75,7 +76,7 @@ if (raw.lastBackup !== undefined && raw.lastBackup !== parsed.lastBackup) {
   fail(`lastBackup ${raw.lastBackup} -> ${parsed.lastBackup}`);
 }
 for (const [key, kg] of Object.entries(raw.loads ?? {})) {
-  if (parsed.loads?.[key as "A" | "B"] !== kg) fail(`loads.${key} ${kg} -> ${parsed.loads?.[key as "A" | "B"]}`);
+  if (parsed.loads?.[key] !== kg) fail(`loads.${key} ${kg} -> ${parsed.loads?.[key]}`);
 }
 
 if (failures > 0) {

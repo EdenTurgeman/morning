@@ -78,15 +78,17 @@ Settings → General → VPN & Device Management.
 | `ios-port/` | The eight-document brief the port was built from. Historical, still binding on intent |
 | `plans/` | Numbered plans, opened and closed |
 | `scripts/` | Verification, screenshots, device install |
-| `src/`, `prototype/`, `public/` | **The retired web build.** See [`WEB-BUILD.md`](WEB-BUILD.md) |
+| `ios/Tools/` | Deck checks, seed and icon generation, and the frozen storage format |
 
-### The web build is not gone yet, on purpose
+### The web build is gone
 
-`src/` is the PWA this replaced. It is still deployed, and
-`scripts/verify-export.ts` still imports its parser to prove that the JSON the
-iOS app writes can be read by the thing that held the history. Retiring it is
-sequenced in [`plans/014`](plans/014-the-ios-app-takes-the-repo.md) and taking
-the deployment down is a decision, not a chore.
+`src/` was the PWA this replaced. It was deleted on 2026-09-20 once the iOS app
+had a month of real sessions on it — [`plans/014`](plans/014-the-ios-app-takes-the-repo.md)
+sequenced it and [`WEB-BUILD.md`](WEB-BUILD.md) says what happened to what.
+
+Two things outlived it: `ios/Tools/web-format.mjs`, a frozen copy of the storage
+parser that still proves the iOS export has not drifted, and the deployment
+itself, which is a GitHub Pages setting rather than a file here.
 
 ---
 
